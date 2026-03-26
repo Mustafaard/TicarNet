@@ -1,0 +1,133 @@
+﻿.app-stage {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: stretch center;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 14% 12%, rgba(117, 176, 255, 0.14), transparent 34%),
+    radial-gradient(circle at 86% 16%, rgba(84, 142, 230, 0.12), transparent 36%),
+    linear-gradient(180deg, #060912 0%, #070e1b 100%);
+}
+
+.app-stage::before,
+.app-stage::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.app-stage::before {
+  background:
+    radial-gradient(circle at 8% 20%, rgba(148, 201, 255, 0.09), transparent 52%),
+    radial-gradient(circle at 92% 82%, rgba(116, 182, 255, 0.1), transparent 48%);
+}
+
+.app-stage::after {
+  background: repeating-linear-gradient(
+    130deg,
+    transparent 0 54px,
+    rgba(214, 228, 255, 0.018) 54px 55px
+  );
+}
+
+.app-desktop-glow {
+  display: none;
+}
+
+.app-route-loader {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+  color: rgba(224, 236, 255, 0.92);
+  background:
+    radial-gradient(circle at center, rgba(71, 132, 219, 0.14), transparent 44%),
+    linear-gradient(180deg, rgba(7, 14, 27, 0.96), rgba(5, 13, 29, 0.98));
+}
+
+.app-route-loader p {
+  margin: 0;
+  font-size: 0.98rem;
+  letter-spacing: 0.02em;
+}
+
+.app-route-loader-orb {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 35% 35%, rgba(255, 255, 255, 0.94), rgba(120, 185, 255, 0.88) 28%, rgba(34, 93, 173, 0.12) 70%),
+    linear-gradient(135deg, rgba(145, 197, 255, 0.2), rgba(18, 52, 110, 0.68));
+  box-shadow:
+    0 0 0 1px rgba(146, 198, 255, 0.24),
+    0 0 40px rgba(71, 132, 219, 0.38);
+  animation: app-route-loader-pulse 1.15s ease-in-out infinite;
+}
+
+@keyframes app-route-loader-pulse {
+  0%,
+  100% {
+    transform: scale(0.94);
+    opacity: 0.82;
+  }
+
+  50% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Ana içerik: telefon uyumlu genişlik, PC'de ortalanmış şerit */
+.app-mobile-root {
+  width: 100%;
+  max-width: var(--app-max-content-width);
+  min-height: 100vh;
+  min-height: 100dvh;
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  transform: translateZ(0);
+  margin: 0 auto;
+  overflow-x: hidden;
+  background: #050d1d;
+  box-shadow: 0 0 0 1px rgba(112, 170, 255, 0.08);
+}
+
+/* Tüm ekranlarda dar, ortalanmış şerit */
+@media (min-width: 481px) {
+  .app-stage {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-stage {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+@media (min-width: 768px) {
+  .app-desktop-glow {
+    display: none;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .app-mobile-root {
+    border-color: rgba(170, 216, 255, 0.68);
+    box-shadow:
+      0 24px 48px rgba(0, 0, 0, 0.56),
+      0 0 0 2px rgba(160, 213, 255, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  }
+}

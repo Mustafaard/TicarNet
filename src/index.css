@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+:root {
+  font-family: 'Manrope', 'Segoe UI', sans-serif;
+  line-height: 1.45;
+  font-weight: 400;
+  color-scheme: dark;
+  --app-max-content-width: min(100vw, 480px);
+  --font-display: 'Sora', 'Manrope', sans-serif;
+  --font-body: 'Manrope', 'Segoe UI', sans-serif;
+  --app-bg-solid: #060912;
+  --app-text-main: #edf2ff;
+  --app-text-muted: #bcc6db;
+  --page-padding: clamp(14px, 4vw, 24px);
+  --card-radius: clamp(14px, 3vw, 18px);
+  --card-padding: clamp(16px, 4.5vw, 28px);
+  --ui-space-1: 4px;
+  --ui-space-2: 6px;
+  --ui-space-3: 8px;
+  --ui-space-4: 10px;
+  --ui-space-5: 12px;
+  --ui-space-6: 16px;
+  --ui-radius-sm: 10px;
+  --ui-radius-md: 12px;
+  --ui-radius-lg: 16px;
+  --ui-font-display: clamp(32px, 8vw, 40px);
+  --ui-font-title: clamp(17px, 4.8vw, 20px);
+  --ui-font-subtitle: clamp(14px, 4vw, 16px);
+  --ui-font-body: clamp(13px, 3.6vw, 15px);
+  --ui-font-meta: clamp(12px, 3.2vw, 13px);
+  --ui-font-tiny: clamp(11px, 3vw, 12px);
+  --ui-icon-sm: 18px;
+  --ui-icon-md: 22px;
+  --ui-icon-lg: 38px;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  width: 100%;
+  min-height: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0 !important;
+  padding: 0;
+  width: 100%;
+  min-width: 320px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overscroll-behavior-y: none;
+  touch-action: manipulation;
+  font-size: 16px;
+  background: var(--app-bg-solid);
+  color: var(--app-text-main);
+  font-family: var(--font-body);
+  -webkit-tap-highlight-color: transparent;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: block;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+}
+
+:where(button, a, input, select, textarea, [role='button']):focus-visible {
+  outline: 3px solid #8fd2ff;
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(120, 190, 255, 0.3);
+  color: #f8fbff;
+}
+
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+@media (max-width: 420px) {
+  :root {
+    line-height: 1.35;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Mobil öncelikli: tüm tıklanabilir öğeler en az 44px dokunma alanı */
+@media (pointer: coarse) {
+  button,
+  a[role='button'],
+  .btn,
+  [role='tab'],
+  .mobile-nav button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Elmas marketi SATIN AL butonları Premium ekran buton boyutu ile aynı kalsın. */
+  .diamond-market-screen .diamond-pack .btn.full.premium-gold-btn {
+    min-height: 28px !important;
+    height: 28px;
+    padding-top: 0;
+    padding-bottom: 0;
+    font-size: 11px;
+  }
+}
+
+@media (prefers-contrast: more) {
+  :root {
+    --app-text-main: #ffffff;
+    --app-text-muted: #e5eeff;
+  }
+}

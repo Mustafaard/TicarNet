@@ -1,0 +1,27 @@
+MADEN KARTI GÖRSELLERİ – CHATGPT / DALL·E İÇİN
+
+1) PNG'LERİ NEREYE KOYACAKSIN?
+   Klasör: public/home/icons/mines/
+   Bu dosyanın bulunduğu klasör. Aşağıdaki isimlerle kaydet:
+
+   - altınmaden.png  (Altın Madeni)
+   - demirmaden.png  (Demir Madeni)
+   - bakırmaden.png  (Bakır Madeni)
+   - kömürmaden.png  (Kömür Madeni)
+
+2) ÖLÇÜ (CHATGPT'YE SÖYLE)
+   Fabrika kartlarıyla aynı oran ve boyut:
+   - Genişlik x Yükseklik: 280 x 200 piksel (veya 320 x 180 – 16:9)
+   - Oran: Yatay (landscape), yaklaşık 1.4:1 veya 16:9
+   - Format: PNG, şeffaf arka plan zorunlu değil
+
+3) CHATGPT / DALL·E PROMPT (Türkçe)
+   "Oyun kartı için [ALTIN / DEMİR / BAKIR / KÖMÜR] madeni görseli. Endüstriyel maden ocağı veya kuyu girişi, kazı ekipmanı, kayaç veya cevher yığını. Fabrika kartlarındaki gibi modern, temiz, oyun tarzı illüstrasyon. Mavi gökyüzü, hafif bulut. Yatay kompozisyon, bina/tesis ön cephesi tam görünsün. 280x200 piksel veya 16:9 oran, PNG."
+
+4) İngilizce alternatif (DALL·E)
+   "Game card image for [GOLD / IRON / COPPER / COAL] mine. Industrial mine entrance or quarry with equipment, rocks and ore. Modern, clean game-style illustration like factory cards. Blue sky, slight clouds. Landscape composition, front view. 280x200 pixels or 16:9, PNG."
+
+5) Sırayla oluştur
+   Önce altınmaden.png, sonra demirmaden.png, bakırmaden.png, kömürmaden.png.
+   Her birini yukarıdaki isimle bu klasöre (public/home/icons/mines/) kaydet.
+   Kaydettikten sonra uygulama otomatik kullanacak; ek kod gerekmez.

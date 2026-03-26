@@ -1,0 +1,10 @@
+root = true
+
+[*.{js,jsx,ts,tsx,mjs,cjs,json,md,txt,html,css,scss,sass,less,yml,yaml,xml,env,properties,conf,ini,sql,sh,ps1,bat,cmd,vue,svelte,toml}]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.md]
+trim_trailing_whitespace = false

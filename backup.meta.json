@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-03-17T21:14:13.073Z",
+  "trigger": "npm:native:build",
+  "note": "",
+  "keepCount": 2,
+  "include": [
+    "src",
+    "public",
+    "scripts",
+    "docs",
+    "server/src",
+    "server/data (hesap verisi hariç, sanitize edilmiş)",
+    "root config dosyaları"
+  ],
+  "exclude": [
+    "node_modules",
+    ".git",
+    "dist",
+    "project backups klasörü",
+    "kullanıcı hesap verileri",
+    "kullanıcı mesajları",
+    "kimlik doğrulama tokenları"
+  ]
+}

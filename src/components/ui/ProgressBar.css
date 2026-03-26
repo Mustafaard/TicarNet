@@ -1,0 +1,75 @@
+.progress-wrapper {
+  width: 100%;
+}
+
+.progress-track {
+  position: relative;
+  width: 100%;
+  height: clamp(18px, 4.8vw, 24px);
+  background: url('/splash/ui/loading-track.webp') center/100% 100% no-repeat;
+  border-radius: 999px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.progress-fill {
+  position: relative;
+  height: 100%;
+  background: url('/splash/ui/loading-fill.webp') center/100% 100% no-repeat;
+  border-radius: 999px;
+  transition: width 0.08s linear;
+  filter: saturate(1.05) brightness(1.02);
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.32), transparent);
+  transform: translateX(-120%);
+  animation: fill-shine 1.9s ease-in-out infinite;
+}
+
+.progress-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: url('/splash/ui/loading-glow.webp') center/100% 100% no-repeat;
+  opacity: 0.75;
+  pointer-events: none;
+  mix-blend-mode: screen;
+  animation: glow-pulse 2.2s ease-in-out infinite;
+}
+
+.progress-label {
+  margin: clamp(8px, 3vw, 10px) 0 0;
+  text-align: center;
+  color: #ecf6ff;
+  font-size: clamp(13px, 3.6vw, 16px);
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes fill-shine {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0.35;
+  }
+  100% {
+    transform: translateX(140%);
+    opacity: 0.85;
+  }
+}
+
+@keyframes glow-pulse {
+  0% {
+    opacity: 0.52;
+  }
+  50% {
+    opacity: 0.82;
+  }
+  100% {
+    opacity: 0.52;
+  }
+}

@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.tools/
+backups/
+android_backup_*/
+release/
+server/data/
+android/.gradle*/
+android/.idea*/
+.env
+server/.env
+*.log
+ticarnet-deploy.tgz
+ticarnet-part-*
