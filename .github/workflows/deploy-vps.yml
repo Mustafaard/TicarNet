@@ -18,9 +18,22 @@ jobs:
     steps:
       - name: Validate required secrets
         run: |
-          test -n "${{ secrets.VPS_HOST }}"
-          test -n "${{ secrets.VPS_SSH_USER }}"
-          test -n "${{ secrets.VPS_SSH_KEY }}"
+          fail=0
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "::error::Missing secret: VPS_HOST"
+            fail=1
+          fi
+          if [ -z "${{ secrets.VPS_SSH_USER }}" ]; then
+            echo "::error::Missing secret: VPS_SSH_USER"
+            fail=1
+          fi
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "::error::Missing secret: VPS_SSH_KEY"
+            fail=1
+          fi
+          if [ "$fail" -ne 0 ]; then
+            exit 1
+          fi
 
       - name: Prepare SSH connection variables
         run: |
@@ -29,6 +42,16 @@ jobs:
             PORT="22"
           fi
           echo "VPS_PORT=$PORT" >> "$GITHUB_ENV"
+
+      - name: Probe SSH port from GitHub runner
+        run: |
+          HOST="${{ secrets.VPS_HOST }}"
+          if timeout 8 bash -lc "</dev/tcp/$HOST/$VPS_PORT"; then
+            echo "SSH port reachable: $HOST:$VPS_PORT"
+          else
+            echo "::error::SSH port unreachable from GitHub runner ($HOST:$VPS_PORT). Check provider firewall/security group."
+            exit 1
+          fi
 
       - name: Configure SSH key
         run: |
