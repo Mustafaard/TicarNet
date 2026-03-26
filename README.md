@@ -33,6 +33,7 @@ Varsayilan adresler:
 - `npm run api:dev`: sadece API
 - `npm run build`: production web build
 - `npm run verify`: lint + build kontrolu
+- `npm run ship`: tek komutla `git add + commit + push` (sunucu deploy tetikleme)
 
 ### Android (Bundled)
 
@@ -70,6 +71,7 @@ Detayli kurulum:
 - `docs/DEPLOYMENT_TR.md`
 - `docs/DIGITALOCEAN_PROD_TR.md`
 - `docs/GITHUB_AUTO_DEPLOY_TR.md` (push yapinca otomatik VPS deploy)
+- `docs/VSC_SSH_DIREKT_DEPLOY_TR.md` (GitHub olmadan VS Code -> SSH direkt deploy)
 - `docs/nginx.ticarnet.conf.example`
 
 Tek komut deploy scripti:
@@ -88,6 +90,18 @@ GitHub kullanmadan (sunucuda VS Code Remote-SSH ile duzenleme):
 
 ```bash
 bash scripts/vps-deploy.sh --skip-pull --run-lint
+```
+
+GitHub kullanmadan (lokal VS Code'dan SSH ile tek komut upload + deploy):
+
+```powershell
+npm run deploy:vps:ssh
+```
+
+GitHub + otomatik deploy tetikleme (tek komut):
+
+```powershell
+npm run ship
 ```
 
 DigitalOcean ilk kurulum otomasyonu:
