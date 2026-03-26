@@ -97,21 +97,21 @@ const NAV = [
   {
     id: 'nav-profile',
     label: 'Premium',
-    icon: '/home/icons/depot/premium.png',
+    icon: '/home/icons/depot/premium.webp',
     fallbackIcon: '/home/icons/v2/settings.png',
     target: { tab: 'profile', profileTab: 'premium' },
   },
   {
     id: 'nav-leaderboard',
     label: 'Liderlik',
-    icon: '/home/icons/liderlik.png',
+    icon: '/home/icons/liderlik.webp',
     fallbackIcon: '/home/icons/v2/clan.png',
     target: { tab: 'profile', profileTab: 'leaderboard' },
   },
   {
     id: 'nav-home',
     label: 'Şehir',
-    icon: '/home/icons/sehir.png',
+    icon: '/home/icons/sehir.webp',
     fallbackIcon: '/home/icons/v2/nav-home.png',
     center: true,
     target: { tab: 'home' },
@@ -119,7 +119,7 @@ const NAV = [
   {
     id: 'nav-chat-trade',
     label: 'Mesajlar',
-    icon: '/home/icons/mesajlar.png',
+    icon: '/home/icons/mesajlar.webp',
     fallbackIcon: '/home/icons/v2/nav-message.png',
     target: { tab: 'messages', messageFilter: 'all' },
   },
@@ -299,18 +299,18 @@ const FOREX_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/ticarnet-doviz-menu.webp
 const FOREX_MENU_ICON_FALLBACK_SRC = '/home/icons/depot/cash.png'
 const FOREX_HEADER_ICON_PRIMARY_SRC = '/home/icons/custom/ticarnet-doviz-header.webp'
 const FOREX_HEADER_ICON_FALLBACK_SRC = '/home/icons/depot/cash.png'
-const BANK_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/ticarnet-bank-menu.png'
+const BANK_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/ticarnet-bank-menu.webp'
 const BANK_MENU_ICON_FALLBACK_SRC = '/home/icons/depot/cash.webp'
-const BANK_HEADER_ICON_PRIMARY_SRC = '/home/icons/custom/ticarnet-bank-menu.png'
+const BANK_HEADER_ICON_PRIMARY_SRC = '/home/icons/custom/ticarnet-bank-menu.webp'
 const BANK_HEADER_ICON_FALLBACK_SRC = '/home/icons/depot/cash.webp'
-const EVENTS_MENU_ICON_PRIMARY_SRC = '/home/icons/etkinlikler.png'
+const EVENTS_MENU_ICON_PRIMARY_SRC = '/home/icons/etkinlikler.webp'
 const EVENTS_MENU_ICON_FALLBACK_SRC = '/home/icons/v2/nav-missions.png'
 const ANNOUNCEMENTS_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/duyuruu.webp'
 const ANNOUNCEMENTS_MENU_ICON_FALLBACK_SRC = '/home/icons/messages/icon-duyuru.webp'
 const DIAMOND_MARKET_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/elmasmarket.webp'
 const DIAMOND_MARKET_MENU_ICON_FALLBACK_SRC = '/home/icons/depot/diamond.webp'
 const SEASON_CHESTS_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/sandiklarim.webp'
-const SEASON_CHESTS_MENU_ICON_FALLBACK_SRC = '/home/icons/leaderboard/chest-gold.png'
+const SEASON_CHESTS_MENU_ICON_FALLBACK_SRC = '/home/icons/leaderboard/chest-gold.webp'
 const RULES_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/kurallarim.webp'
 const RULES_MENU_ICON_FALLBACK_SRC = '/home/icons/v2/nav-uyari.png'
 const ANNOUNCEMENT_TYPE_ANNOUNCEMENT = 'announcement'
@@ -319,7 +319,7 @@ const TUTORIAL_PENDING_KEY = 'ticarnet_tutorial_pending'
 const TUTORIAL_COMPLETED_KEY = 'ticarnet_tutorial_completed'
 const TUTORIAL_STEP_KEY = 'ticarnet_tutorial_step'
 const TUTORIAL_TASKS_KEY = 'ticarnet_tutorial_tasks'
-const TUTORIAL_ASSISTANT_IMAGE_SRC = '/home/tutorial/asistan.png'
+const TUTORIAL_ASSISTANT_IMAGE_SRC = '/home/tutorial/asistan.webp'
 const TUTORIAL_SPOTLIGHT_CLASS = 'tutorial-target-spotlight'
 const TUTORIAL_STEPS = [
   {
@@ -519,18 +519,18 @@ const TUTORIAL_STEPS = [
 ]
 
 const TUTORIAL_STEP_IMAGE_BY_ID = {
-  welcome: '/home/tutorial/asistan.png',
-  depot: '/home/icons/depom.png',
-  businesses: '/home/icons/isletmeler.png',
-  factories: '/home/icons/businesses/fabrikam.png',
-  mines: '/home/icons/madenler.png',
-  market: '/home/icons/pazaryeri.png',
-  bank: '/home/icons/custom/ticarnet-bank-menu.png',
+  welcome: '/home/tutorial/asistan.webp',
+  depot: '/home/icons/depom.webp',
+  businesses: '/home/icons/isletmeler.webp',
+  factories: '/home/icons/businesses/fabrikam.webp',
+  mines: '/home/icons/madenler.webp',
+  market: '/home/icons/pazaryeri.webp',
+  bank: '/home/icons/custom/ticarnet-bank-menu.webp',
   missions: '/home/icons/v2/nav-missions.png',
   announcements: '/home/icons/custom/duyuruu.webp',
   rewards: '/home/icons/custom/sandiklarim.webp',
-  social: '/home/icons/mesajlar.png',
-  profile: '/home/icons/ayarlar.png',
+  social: '/home/icons/mesajlar.webp',
+  profile: '/home/icons/ayarlar.webp',
 }
 
 const CITY_RULES_GUIDE = {
@@ -693,7 +693,7 @@ const FLEET_CARD_META = {
     ownedTitle: 'Arabalarım',
   },
   'property-rental': {
-    icon: '/home/icons/businesses/mulkum.png',
+    icon: '/home/icons/businesses/mulkum.webp',
     fallback: 'MLK',
     label: 'Mülk Kiralama',
     unitLabel: 'Mülk',
@@ -707,10 +707,10 @@ const FLEET_CARD_META = {
 }
 
 const BUSINESS_UNLOCK_ICON_BY_KEY = {
-  'moto-rental': '/home/icons/businesses/moto-kiralama.png',
-  'auto-rental': '/home/icons/businesses/oto-kiralama.png',
-  'property-rental': '/home/icons/businesses/mulkum.png',
-  logistics: '/home/icons/businesses/lojistik-kiralama.png',
+  'moto-rental': '/home/icons/businesses/moto-kiralama.webp',
+  'auto-rental': '/home/icons/businesses/oto-kiralama.webp',
+  'property-rental': '/home/icons/businesses/mulkum.webp',
+  logistics: '/home/icons/businesses/lojistik-kiralama.webp',
 }
 
 const BUSINESS_UNLOCK_LABEL_BY_KEY = {
@@ -730,17 +730,17 @@ const FACTORY_CARD_ORDER = [
   'oil-refinery',
 ]
 const FACTORY_SHOP_IMAGE_BY_ID = {
-  'engine-factory': '/home/icons/businesses/motorfab.png',
-  'spare-parts-factory': '/home/icons/businesses/yedekfab.png',
-  'timber-factory': '/home/icons/businesses/kerestefab.png',
-  'cement-factory': '/home/icons/businesses/cimentofab.png',
-  'brick-factory': '/home/icons/businesses/tuglafab.png',
-  'energy-factory': '/home/icons/businesses/enerjifab.png',
-  'oil-refinery': '/home/icons/businesses/petrolfab.png',
+  'engine-factory': '/home/icons/businesses/motorfab.webp',
+  'spare-parts-factory': '/home/icons/businesses/yedekfab.webp',
+  'timber-factory': '/home/icons/businesses/kerestefab.webp',
+  'cement-factory': '/home/icons/businesses/cimentofab.webp',
+  'brick-factory': '/home/icons/businesses/tuglafab.webp',
+  'energy-factory': '/home/icons/businesses/enerjifab.webp',
+  'oil-refinery': '/home/icons/businesses/petrolfab.webp',
 }
 const FACTORY_ITEM_META = {
   'engine-kit': { label: 'Motor', icon: '/home/icons/depot/spare-parts.webp' },
-  'spare-parts': { label: 'Yedek Parça', icon: '/home/icons/depot/yedekparca.png' },
+  'spare-parts': { label: 'Yedek Parça', icon: '/home/icons/depot/yedekparca.webp' },
   timber: { label: 'Kereste', icon: '/home/icons/depot/timber.webp' },
   cement: { label: 'Çimento', icon: '/home/icons/depot/cement.webp' },
   brick: { label: 'Tuğla', icon: '/home/icons/depot/brick.webp' },
@@ -755,7 +755,7 @@ const FACTORY_ITEM_META = {
 /** Maden kartı görselleri: public/home/icons/mines/ — altınmaden.png, demirmaden.png, bakırmaden.png, kömürmaden.png */
 const MINE_IMAGE_BY_ID = {
   'gold-mine': '/home/icons/mines/altınmaden.png',
-  'steel-mine': '/home/icons/mines/demirmaden.png',
+  'steel-mine': '/home/icons/mines/demirmaden.webp',
   'copper-mine': '/home/icons/mines/bakırmaden.png',
   'coal-mine': '/home/icons/mines/kömürmaden.png',
 }
@@ -780,15 +780,15 @@ const resolveFactoryShopImage = (factory) => {
   const safeId = String(factory?.id || '').trim()
   if (FACTORY_SHOP_IMAGE_BY_ID[safeId]) return FACTORY_SHOP_IMAGE_BY_ID[safeId]
   const rawImage = String(factory?.image || '').trim()
-  if (rawImage.includes('motorfab')) return '/home/icons/businesses/motorfab.png'
-  if (rawImage.includes('yedekfab')) return '/home/icons/businesses/yedekfab.png'
-  if (rawImage.includes('kerestefab')) return '/home/icons/businesses/kerestefab.png'
-  if (rawImage.includes('cimentofab') || rawImage.includes('cement')) return '/home/icons/businesses/cimentofab.png'
-  if (rawImage.includes('tuglafab') || rawImage.includes('brick')) return '/home/icons/businesses/tuglafab.png'
-  if (rawImage.includes('enerjifab')) return '/home/icons/businesses/enerjifab.png'
-  if (rawImage.includes('petrolfab')) return '/home/icons/businesses/petrolfab.png'
-  if (rawImage.includes('fabrikam')) return '/home/icons/businesses/fabrikam-shop.png?v=20260314b'
-  return rawImage || String(factory?.icon || '').trim() || '/home/icons/businesses/fabrikam-shop.png?v=20260314b'
+  if (rawImage.includes('motorfab')) return '/home/icons/businesses/motorfab.webp'
+  if (rawImage.includes('yedekfab')) return '/home/icons/businesses/yedekfab.webp'
+  if (rawImage.includes('kerestefab')) return '/home/icons/businesses/kerestefab.webp'
+  if (rawImage.includes('cimentofab') || rawImage.includes('cement')) return '/home/icons/businesses/cimentofab.webp'
+  if (rawImage.includes('tuglafab') || rawImage.includes('brick')) return '/home/icons/businesses/tuglafab.webp'
+  if (rawImage.includes('enerjifab')) return '/home/icons/businesses/enerjifab.webp'
+  if (rawImage.includes('petrolfab')) return '/home/icons/businesses/petrolfab.webp'
+  if (rawImage.includes('fabrikam')) return '/home/icons/businesses/fabrikam-shop.webp?v=20260314b'
+  return rawImage || String(factory?.icon || '').trim() || '/home/icons/businesses/fabrikam-shop.webp?v=20260314b'
 }
 
 const factoryPurchaseRowsFromFactory = (factory) => {
@@ -878,7 +878,7 @@ const DEPOT_CATALOG = [
     id: 'spare-parts',
     label: 'Yedek Parça',
     icon: 'YDK',
-    png: '/home/icons/depot/yedekparca.png',
+    png: '/home/icons/depot/yedekparca.webp',
     category: 'Sanayi',
     quality: 'premium',
     sourceIds: ['spare-parts'],
@@ -920,26 +920,26 @@ const DAILY_LOGIN_STATE_SEED = {
 }
 
 const MOTO_LEVEL_IMAGE_BY_LEVEL = {
-  1: '/home/vehicles/moto/levels/motor1level.png',
-  4: '/home/vehicles/moto/levels/motor4level.png',
-  7: '/home/vehicles/moto/levels/motor7level.png',
-  10: '/home/vehicles/moto/levels/motor10level.png',
-  14: '/home/vehicles/moto/levels/motor14level.png',
-  18: '/home/vehicles/moto/levels/motor18level.png',
-  22: '/home/vehicles/moto/levels/motor22level.png',
-  26: '/home/vehicles/moto/levels/motor26level.png',
-  31: '/home/vehicles/moto/levels/motor31level.png',
-  36: '/home/vehicles/moto/levels/motor36level.png',
-  42: '/home/vehicles/moto/levels/motor42level.png',
-  48: '/home/vehicles/moto/levels/motor48level.png',
-  55: '/home/vehicles/moto/levels/motor55level.png',
-  62: '/home/vehicles/moto/levels/motor62level.png',
-  69: '/home/vehicles/moto/levels/motor69level.png',
-  76: '/home/vehicles/moto/levels/motor76level.png',
-  83: '/home/vehicles/moto/levels/motor83level.png',
-  89: '/home/vehicles/moto/levels/motor89level.png',
-  95: '/home/vehicles/moto/levels/motor95level.png',
-  100: '/home/vehicles/moto/levels/motor100level.png',
+  1: '/home/vehicles/moto/levels/motor1level.webp',
+  4: '/home/vehicles/moto/levels/motor4level.webp',
+  7: '/home/vehicles/moto/levels/motor7level.webp',
+  10: '/home/vehicles/moto/levels/motor10level.webp',
+  14: '/home/vehicles/moto/levels/motor14level.webp',
+  18: '/home/vehicles/moto/levels/motor18level.webp',
+  22: '/home/vehicles/moto/levels/motor22level.webp',
+  26: '/home/vehicles/moto/levels/motor26level.webp',
+  31: '/home/vehicles/moto/levels/motor31level.webp',
+  36: '/home/vehicles/moto/levels/motor36level.webp',
+  42: '/home/vehicles/moto/levels/motor42level.webp',
+  48: '/home/vehicles/moto/levels/motor48level.webp',
+  55: '/home/vehicles/moto/levels/motor55level.webp',
+  62: '/home/vehicles/moto/levels/motor62level.webp',
+  69: '/home/vehicles/moto/levels/motor69level.webp',
+  76: '/home/vehicles/moto/levels/motor76level.webp',
+  83: '/home/vehicles/moto/levels/motor83level.webp',
+  89: '/home/vehicles/moto/levels/motor89level.webp',
+  95: '/home/vehicles/moto/levels/motor95level.webp',
+  100: '/home/vehicles/moto/levels/motor100level.webp',
 }
 const MOTO_LEVEL_KEYS = Object.keys(MOTO_LEVEL_IMAGE_BY_LEVEL)
   .map((key) => Math.max(1, Math.trunc(Number(key) || 1)))
@@ -1097,17 +1097,17 @@ const resolveVehicleImage = (entry, templateId = '') => {
       }
       break
     }
-    return MOTO_LEVEL_IMAGE_BY_LEVEL[targetLevel] || directImage || '/home/icons/businesses/moto-kiralama.png'
+    return MOTO_LEVEL_IMAGE_BY_LEVEL[targetLevel] || directImage || '/home/icons/businesses/moto-kiralama.webp'
   }
   if (safeTemplateId === 'auto-rental') {
-    return directImage || '/home/icons/businesses/oto-kiralama.png'
+    return directImage || '/home/icons/businesses/oto-kiralama.webp'
   }
   if (safeTemplateId === 'property-rental') {
-    return directImage || '/home/icons/businesses/mulkum.png'
+    return directImage || '/home/icons/businesses/mulkum.webp'
   }
   if (safeTemplateId === 'logistics') {
     const mappedTruckImage = resolveTruckImage(entry)
-    return mappedTruckImage || directImage || '/home/icons/businesses/lojistik-kiralama.png'
+    return mappedTruckImage || directImage || '/home/icons/businesses/lojistik-kiralama.webp'
   }
   return directImage
 }
@@ -1154,7 +1154,7 @@ const DAILY_LOGIN_ICON_BY_ITEM_ID = {
   cash: '/home/icons/depot/cash.png',
   oil: '/home/icons/depot/oil.png',
   energy: '/home/icons/depot/enerji.png',
-  'spare-parts': '/home/icons/depot/yedekparca.png',
+  'spare-parts': '/home/icons/depot/yedekparca.webp',
   'engine-kit': '/home/icons/depot/spare-parts.png',
 }
 
@@ -1695,7 +1695,7 @@ function roleBadgeMeta(role, isPremium = false, fallbackLabel = '', seasonBadge 
     text: isPremium ? 'Premium \u00dcye' : 'Standart \u00dcye',
     fullText: isPremium ? 'Premium \u00dcye' : 'Standart \u00dcye',
     roleLabel: roleLabelFromValue(safeRole, fallbackLabel),
-    icon: isPremium ? '/home/icons/depot/premium.png' : '',
+    icon: isPremium ? '/home/icons/depot/premium.webp' : '',
     isStaff: false,
   }
 }
@@ -2321,7 +2321,7 @@ function fleetOrderCostRows(vehicle, walletNow, inventoryById = {}) {
   if (sparePartsRequired > 0) {
     rows.push(createCostAvailabilityRow({
       label: 'Yedek Parça Maliyeti',
-      icon: '/home/icons/depot/yedekparca.png',
+      icon: '/home/icons/depot/yedekparca.webp',
       required: sparePartsRequired,
       available: inventoryById['spare-parts'] || 0,
     }))
@@ -2376,7 +2376,7 @@ function logisticsOrderCostRows(truck, walletNow, inventoryById = {}) {
     }),
     createCostAvailabilityRow({
       label: 'Yedek Parça Maliyeti',
-      icon: '/home/icons/depot/yedekparca.png',
+      icon: '/home/icons/depot/yedekparca.webp',
       required: truck?.spareParts || 0,
       available: inventoryById['spare-parts'] || 0,
     }),
@@ -3161,7 +3161,7 @@ function HomePage({ user, onLogout }) {
           handleForcedLogout(SESSION_REPLACED_NOTICE)
         }
       })()
-    }, 7000)
+    }, 12000)
 
     return () => window.clearInterval(intervalId)
   }, [handleForcedLogout])
@@ -3926,15 +3926,9 @@ function HomePage({ user, onLogout }) {
   }, [chatFirstUnreadId, tab])
 
   useEffect(() => {
-    const FAST_TABS = new Set(['chat', 'home', 'events', 'business', 'factories'])
-    const MEDIUM_TABS = new Set(['profile', 'mines'])
-    const intervalMs = tab === 'bank'
-      ? 12000
-      : FAST_TABS.has(tab)
-        ? 1500
-        : MEDIUM_TABS.has(tab)
-          ? 3000
-          : 5000
+    const FAST_TABS = new Set(['chat', 'messages'])
+    const MEDIUM_TABS = new Set(['missions', 'home', 'events', 'businesses', 'factories', 'mines'])
+    const intervalMs = tab === 'bank' ? 9000 : FAST_TABS.has(tab) ? 1000 : MEDIUM_TABS.has(tab) ? 2500 : 5000
     const timer = window.setInterval(() => {
       if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return
       setChatClockMs(Date.now())
@@ -3989,10 +3983,12 @@ function HomePage({ user, onLogout }) {
     }
     setTab(next)
     setError('')
-    if (pageScrollRef.current?.scrollTo) {
-      pageScrollRef.current.scrollTo({ top: 0, behavior: 'auto' })
-    } else {
-      window.scrollTo({ top: 0, behavior: 'auto' })
+    if (next !== tab || options.forceTop === true) {
+      if (pageScrollRef.current?.scrollTo) {
+        pageScrollRef.current.scrollTo({ top: 0, behavior: 'auto' })
+      } else {
+        window.scrollTo({ top: 0, behavior: 'auto' })
+      }
     }
     if (options.marketTab) setMarketTab(options.marketTab)
     if (options.profileTab) setProfileTab(options.profileTab)
@@ -4047,6 +4043,17 @@ function HomePage({ user, onLogout }) {
   useEffect(() => {
     openTabRef.current = openTab
   }, [openTab])
+
+  useEffect(() => {
+    if (pageScrollRef.current?.scrollTo) {
+      const frameId = window.requestAnimationFrame(() => {
+        pageScrollRef.current?.scrollTo({ top: 0, behavior: 'auto' })
+      })
+      return () => window.cancelAnimationFrame(frameId)
+    }
+    window.scrollTo({ top: 0, behavior: 'auto' })
+    return undefined
+  }, [tab])
 
   useEffect(() => {
     if (tutorialActive || tutorialCompleted || !tutorialEnabled) return
@@ -6882,7 +6889,7 @@ function HomePage({ user, onLogout }) {
       kind: 'logistics',
       templateId: 'logistics',
       name: 'Tır Kiralama',
-      image: '/home/icons/businesses/lojistik-kiralama.png',
+      image: '/home/icons/businesses/lojistik-kiralama.webp',
       icon: 'TIR',
       actionLabel: 'Giriş',
       timerLabel: logisticsTruckCount > 0 ? `Tahsilat: ${logisticsCollectCountdown}` : '',
@@ -7929,8 +7936,8 @@ function HomePage({ user, onLogout }) {
             tier: 'gold',
             chestLabel: 'Altın Sandık',
             badgeLabel: 'Sezon Şampiyonu',
-            badgeIcon: '/home/icons/leaderboard/badge-season-1.png',
-            chestIcon: '/home/icons/leaderboard/chest-gold.png',
+            badgeIcon: '/home/icons/leaderboard/badge-season-1.webp',
+            chestIcon: '/home/icons/leaderboard/chest-gold.webp',
             cashAmount: 10000000,
             resourceAmount: 750000,
             rewardMultiplier: 1,
@@ -7941,8 +7948,8 @@ function HomePage({ user, onLogout }) {
             tier: 'silver',
             chestLabel: 'Gümüş Sandık',
             badgeLabel: 'Sezon İkincisi',
-            badgeIcon: '/home/icons/leaderboard/badge-season-2.png',
-            chestIcon: '/home/icons/leaderboard/chest-silver.png',
+            badgeIcon: '/home/icons/leaderboard/badge-season-2.webp',
+            chestIcon: '/home/icons/leaderboard/chest-silver.webp',
             cashAmount: 5000000,
             resourceAmount: 375000,
             rewardMultiplier: 1,
@@ -7953,8 +7960,8 @@ function HomePage({ user, onLogout }) {
             tier: 'bronze',
             chestLabel: 'Bronz Sandık',
             badgeLabel: 'Sezon Üçüncüsü',
-            badgeIcon: '/home/icons/leaderboard/badge-season-3.png',
-            chestIcon: '/home/icons/leaderboard/chest-bronze.png',
+            badgeIcon: '/home/icons/leaderboard/badge-season-3.webp',
+            chestIcon: '/home/icons/leaderboard/chest-bronze.webp',
             cashAmount: 2500000,
             resourceAmount: 187500,
             rewardMultiplier: 1,
@@ -7966,7 +7973,7 @@ function HomePage({ user, onLogout }) {
             rankMax: 25,
             tier: 'common',
             chestLabel: 'Sıradan Sandık',
-            chestIcon: '/home/icons/leaderboard/chestsiradan.png',
+            chestIcon: '/home/icons/leaderboard/chestsiradan.webp',
             cashAmount: 1000000,
             resourceAmount: 50000,
             rewardMultiplier: 1,
@@ -9296,7 +9303,7 @@ function HomePage({ user, onLogout }) {
       <article className="card marketplace-panel marketplace-panel-glass">
         <div className="marketplace-top">
           <div className="marketplace-top-left">
-            <img src="/home/icons/pazaryeri.png" alt="" className="marketplace-title-icon" onError={(e) => { e.target.style.display = 'none' }} />
+            <img src="/home/icons/pazaryeri.webp" alt="" className="marketplace-title-icon" onError={(e) => { e.target.style.display = 'none' }} />
             <div>
               <h3 className="marketplace-title">Pazar Yeri</h3>
               <p className="marketplace-subtitle">Ürün Pazarı · Vergi: %10</p>
@@ -10471,7 +10478,7 @@ function HomePage({ user, onLogout }) {
             disabled={Boolean(busy)}
           >
             <span className="module-icon">
-              <img src="/home/icons/depom.png" alt="Depom" />
+              <img src="/home/icons/depom.webp" alt="Depom" />
             </span>
             <span className="module-copy">
               <span className="module-label">Depom</span>
@@ -10490,7 +10497,7 @@ function HomePage({ user, onLogout }) {
             disabled={Boolean(busy)}
           >
             <span className="module-icon">
-              <img src="/home/icons/isletmeler.png" alt="İşletmeler" />
+              <img src="/home/icons/isletmeler.webp" alt="İşletmeler" />
             </span>
             <span className="module-copy">
               <span className="module-label">İşletmeler</span>
@@ -10503,7 +10510,7 @@ function HomePage({ user, onLogout }) {
             disabled={Boolean(busy)}
           >
             <span className="module-icon">
-              <img src="/home/icons/businesses/fabrikam.png" alt="Fabrikalar" />
+              <img src="/home/icons/businesses/fabrikam.webp" alt="Fabrikalar" />
             </span>
             <span className="module-copy">
               <span className="module-label">Fabrikalar</span>
@@ -10517,7 +10524,7 @@ function HomePage({ user, onLogout }) {
             disabled={Boolean(busy)}
           >
             <span className="module-icon">
-              <img src="/home/icons/madenler.png" alt="Madenler" />
+              <img src="/home/icons/madenler.webp" alt="Madenler" />
             </span>
             <span className="module-copy">
               <span className="module-label">Madenler</span>
@@ -10551,7 +10558,7 @@ function HomePage({ user, onLogout }) {
             disabled={Boolean(busy)}
           >
             <span className="module-icon">
-              <img src="/home/icons/pazaryeri.png" alt="Pazar Yeri" onError={(e) => { e.target.style.display = 'none'; const next = e.target.nextElementSibling; if (next) next.style.display = 'inline-block'; }} />
+              <img src="/home/icons/pazaryeri.webp" alt="Pazar Yeri" onError={(e) => { e.target.style.display = 'none'; const next = e.target.nextElementSibling; if (next) next.style.display = 'inline-block'; }} />
               <span className="module-icon-fallback" style={{ display: 'none' }} aria-hidden>🏪</span>
             </span>
             <span className="module-copy">
@@ -10725,7 +10732,7 @@ function HomePage({ user, onLogout }) {
             disabled={Boolean(busy)}
           >
             <span className="module-icon">
-              <img src="/home/icons/ayarlar.png" alt="Ayarlar" />
+              <img src="/home/icons/ayarlar.webp" alt="Ayarlar" />
             </span>
             <span className="module-copy">
               <span className="module-label">Ayarlar</span>
@@ -11064,7 +11071,7 @@ function HomePage({ user, onLogout }) {
         <div className="factory-card-head">
           <span className="factory-card-icon" data-broken="0">
             <img
-              src={factory.icon || '/home/icons/businesses/fabrikam.png'}
+              src={factory.icon || '/home/icons/businesses/fabrikam.webp'}
               alt={factory.name}
               loading="lazy"
               onError={(event) => {
@@ -11851,7 +11858,7 @@ function HomePage({ user, onLogout }) {
               <div className="fleet-company-main">
                 <span className="fleet-hero-media" data-broken="0">
                 <img
-                  src="/home/icons/isletmeler.png"
+                  src="/home/icons/isletmeler.webp"
                   alt={companyLegalLabel}
                   loading="lazy"
                   onError={(event) => {
@@ -12226,7 +12233,7 @@ function HomePage({ user, onLogout }) {
                           +{fmt(vehicle.xp || 0)} XP
                         </span>
                         <span className={`fleet-compact-metric is-lifetime${lifetime.expired ? ' is-expired' : ''}`}>
-                          <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" />
+                          <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" />
                           Ömür {formatLifetimeWithTotal(lifetime)}
                         </span>
                       </div>
@@ -12342,7 +12349,7 @@ function HomePage({ user, onLogout }) {
                     </div>
                     <div className="fleet-order-summary-item moto-order-summary-item is-lifetime">
                       <span className="fleet-order-summary-label">
-                        <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" loading="lazy" />
+                        <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" loading="lazy" />
                         Toplam Ömür
                       </span>
                       <span className="fleet-order-summary-value">{VEHICLE_LIFETIME_MONTHS_TOTAL} Ay</span>
@@ -12466,7 +12473,7 @@ function HomePage({ user, onLogout }) {
                     </div>
                     <div className="fleet-order-summary-item auto-order-summary-item is-lifetime">
                       <span className="fleet-order-summary-label">
-                        <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" loading="lazy" />
+                        <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" loading="lazy" />
                         Toplam Ömür
                       </span>
                       <span className="fleet-order-summary-value">{VEHICLE_LIFETIME_MONTHS_TOTAL} Ay</span>
@@ -12617,7 +12624,7 @@ function HomePage({ user, onLogout }) {
             <div className="fleet-detail-hero">
               <span className="fleet-hero-media" data-broken="0">
                 <img
-                  src="/home/icons/businesses/lojistik-kiralama.png"
+                  src="/home/icons/businesses/lojistik-kiralama.webp"
                   alt="Tır Kiralama"
                   loading="lazy"
                   onError={(event) => {
@@ -12774,7 +12781,7 @@ function HomePage({ user, onLogout }) {
                         </div>
                         <div className="fleet-order-summary-item truck-order-summary-item is-lifetime">
                           <span className="fleet-order-summary-label">
-                            <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" loading="lazy" />
+                            <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" loading="lazy" />
                             Toplam Ömür
                           </span>
                           <span className="fleet-order-summary-value">{VEHICLE_LIFETIME_MONTHS_TOTAL} Ay</span>
@@ -12884,7 +12891,7 @@ function HomePage({ user, onLogout }) {
                                 +{fmt(truck.xpPerRun || truck.xp || 0)} XP
                               </span>
                               <span className={`fleet-compact-metric is-lifetime${lifetime.expired ? ' is-expired' : ''}`}>
-                                <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" />
+                                <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" />
                                 Ömür {formatLifetimeWithTotal(lifetime)}
                               </span>
                             </div>
@@ -13145,7 +13152,7 @@ function HomePage({ user, onLogout }) {
                   </p>
                   <p className="fleet-listing-stat-item is-wide">
                     <span className="fleet-listing-stat-label">
-                      <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" />
+                      <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" />
                       Kalan Ömür
                     </span>
                     <strong>{formatLifetimeWithTotal(marketDetailLiveLifetime)}</strong>
@@ -13163,7 +13170,7 @@ function HomePage({ user, onLogout }) {
               </p>
               <p className="fleet-listing-range-line">
                 <span className="fleet-listing-range-label">
-                  <img src="/home/icons/depot/vergi.png" alt="" aria-hidden="true" />
+                  <img src="/home/icons/depot/vergi.webp" alt="" aria-hidden="true" />
                   Komisyon (%{fmt(Math.round(marketDetailCommissionRate * 100))})
                 </span>
                 <strong>- {fmt(marketDetailCommissionAmount)}</strong>
@@ -13340,7 +13347,7 @@ function HomePage({ user, onLogout }) {
                   ) : null}
                   <p className="fleet-listing-stat-item is-wide">
                     <span className="fleet-listing-stat-label">
-                      <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" />
+                      <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" />
                       Ömür
                     </span>
                     <strong>{formatLifetimeWithTotal(listingDraftLiveLifetime)}</strong>
@@ -13354,7 +13361,7 @@ function HomePage({ user, onLogout }) {
                   İlan tarihi: <strong>{formatDateTime(listingDraft?.listedAt || '')}</strong>
                 </p>
                 <p className="fleet-scrap-title">
-                  <img src="/home/icons/depot/vergi.png" alt="" aria-hidden="true" />
+                  <img src="/home/icons/depot/vergi.webp" alt="" aria-hidden="true" />
                   Komisyon (%{VEHICLE_MARKET_COMMISSION_PERCENT}):
                   {' '}
                   <strong>-{fmt(listingDraft?.commissionAmount || 0)}</strong>
@@ -13486,7 +13493,7 @@ function HomePage({ user, onLogout }) {
                   ) : null}
                   <p className="fleet-listing-stat-item is-wide">
                     <span className="fleet-listing-stat-label">
-                      <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" />
+                      <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" />
                       Ömür
                     </span>
                     <strong>{formatLifetimeWithTotal(listingDraftLiveLifetime)}</strong>
@@ -13624,7 +13631,7 @@ function HomePage({ user, onLogout }) {
                   <small>Toplam maliyet: {fmt(listingDraft.engineKits || 0)}</small>
                 </p>
                 <p>
-                  <img src="/home/icons/depot/yedekparca.png" alt="" aria-hidden="true" />
+                  <img src="/home/icons/depot/yedekparca.webp" alt="" aria-hidden="true" />
                   Yedek Parça İadesi: <strong>{fmt(listingDraft.scrapSpareParts || 0)}</strong>
                   <small>Toplam maliyet: {fmt(listingDraft.spareParts || 0)}</small>
                 </p>
@@ -13704,7 +13711,7 @@ function HomePage({ user, onLogout }) {
                 - {fmt(collectModalPreview.fuelConsumed)} {collectModalPreview.fuelItemName}
               </p>
               <p className="fleet-summary-line negative">
-                <img src="/home/icons/depot/vergi.png" alt="" aria-hidden="true" />
+                <img src="/home/icons/depot/vergi.webp" alt="" aria-hidden="true" />
                 Vergi - {fmt(collectModalPreview.taxAmount)} (%{COLLECTION_TAX_PERCENT})
               </p>
               <p className="fleet-net-row fleet-summary-line net">
@@ -13783,7 +13790,7 @@ function HomePage({ user, onLogout }) {
                 - {fmt(logisticsPreviewActive.fuelConsumed || 0)} {String(logisticsPreviewActive.fuelItemName || 'Petrol')}
               </p>
               <p className="fleet-summary-line negative">
-                <img src="/home/icons/depot/vergi.png" alt="" aria-hidden="true" />
+                <img src="/home/icons/depot/vergi.webp" alt="" aria-hidden="true" />
                 Vergi - {fmt(logisticsPreviewActive.taxAmount || 0)} (%{COLLECTION_TAX_PERCENT})
               </p>
               <p className="fleet-net-row fleet-summary-line net">
@@ -14096,7 +14103,7 @@ function HomePage({ user, onLogout }) {
                 </p>
               ) : null}
               <p className="fleet-summary-line negative">
-                <img src="/home/icons/depot/vergi.png" alt="" aria-hidden="true" />
+                <img src="/home/icons/depot/vergi.webp" alt="" aria-hidden="true" />
                 - {fmt(totalBulkTax)} Vergi (%{COLLECTION_TAX_PERCENT})
               </p>
               <p className="fleet-net-row fleet-summary-line net">
@@ -14568,7 +14575,7 @@ function HomePage({ user, onLogout }) {
     if (t === 'mine') return 'Madenler'
     return 'BİLDİRİM'
   }
-  const messageItemIcon = () => '/home/icons/messages/bildirim.png'
+  const messageItemIcon = () => '/home/icons/messages/bildirim.webp'
   const dmRelationship = messageReplyTarget?.relationship || null
   const dmBlockedByMe = Boolean(dmRelationship?.blockedByMe)
   const dmBlockedMe = Boolean(dmRelationship?.blockedMe)
@@ -14603,7 +14610,7 @@ function HomePage({ user, onLogout }) {
         <header className="message-gold-header message-gold-header-clean">
           <h2 className="message-gold-title">
             <span className="message-gold-title-icon" aria-hidden>
-              <img src="/home/icons/messages/bildirim.png" alt="" onError={(e) => { e.target.style.display = 'none' }} />
+              <img src="/home/icons/messages/bildirim.webp" alt="" onError={(e) => { e.target.style.display = 'none' }} />
             </span>
             İLETİŞİM
           </h2>
@@ -14631,7 +14638,7 @@ function HomePage({ user, onLogout }) {
             }}
           >
             <span className="message-gold-tab-icon" aria-hidden>
-              <img src="/home/icons/messages/bildirim.png" alt="" onError={(e) => { e.target.style.display = 'none' }} />
+              <img src="/home/icons/messages/bildirim.webp" alt="" onError={(e) => { e.target.style.display = 'none' }} />
             </span>
             BİLDİRİMLER
           </button>
@@ -15036,7 +15043,7 @@ function HomePage({ user, onLogout }) {
             <div className="message-gold-list">
               {_messageItems.filter((item) => !(item?.source === 'direct' || item?.filter === 'message')).length === 0 ? (
                 <div className="message-gold-empty">
-                  <img src="/home/icons/messages/bildirim.png" alt="" className="message-gold-empty-icon" onError={(e) => { e.target.style.display = 'none' }} />
+                  <img src="/home/icons/messages/bildirim.webp" alt="" className="message-gold-empty-icon" onError={(e) => { e.target.style.display = 'none' }} />
                   <p className="message-gold-empty-text">Bildirimler burada listelenir.</p>
                   <p className="message-gold-empty-muted">Şu anda bildirim yok.</p>
                 </div>
@@ -15168,7 +15175,7 @@ function HomePage({ user, onLogout }) {
 
           <div className={`premium-status ${premiumActive ? 'on' : 'off'}`}>
             <span className="premium-status-mark" aria-hidden>
-              <img src="/home/icons/depot/premium.png" alt="" />
+              <img src="/home/icons/depot/premium.webp" alt="" />
             </span>
             <div className="premium-status-copy">
               <span className="premium-status-title">
@@ -15752,9 +15759,9 @@ function HomePage({ user, onLogout }) {
                     const rank = Math.max(1, Math.trunc(num(entry.rank || 1)))
                     const rankToneClass = rank === 1 ? ' is-rank-1' : rank === 2 ? ' is-rank-2' : rank === 3 ? ' is-rank-3' : ''
                     const rankIconSrc =
-                      rank === 1 ? '/home/icons/leaderboard/rank-1.png'
-                      : rank === 2 ? '/home/icons/leaderboard/rank-2.png'
-                      : rank === 3 ? '/home/icons/leaderboard/rank-3.png'
+                      rank === 1 ? '/home/icons/leaderboard/rank-1.webp'
+                      : rank === 2 ? '/home/icons/leaderboard/rank-2.webp'
+                      : rank === 3 ? '/home/icons/leaderboard/rank-3.webp'
                       : ''
                     return (
                       <li
@@ -16082,7 +16089,7 @@ function HomePage({ user, onLogout }) {
                   </p>
                   <p className="fleet-listing-stat-item is-wide">
                     <span className="fleet-listing-stat-label">
-                      <img src="/home/icons/depot/zamanlayici.png" alt="" aria-hidden="true" />
+                      <img src="/home/icons/depot/zamanlayici.webp" alt="" aria-hidden="true" />
                       Kalan Ömür
                     </span>
                     <strong>{formatLifetimeWithTotal(marketDetailLiveLifetime)}</strong>
@@ -16100,7 +16107,7 @@ function HomePage({ user, onLogout }) {
               </p>
               <p className="fleet-listing-range-line">
                 <span className="fleet-listing-range-label">
-                  <img src="/home/icons/depot/vergi.png" alt="" aria-hidden="true" />
+                  <img src="/home/icons/depot/vergi.webp" alt="" aria-hidden="true" />
                   Komisyon (%{fmt(Math.round(marketDetailCommissionRate * 100))})
                 </span>
                 <strong>- {fmt(marketDetailCommissionAmount)}</strong>
@@ -16263,6 +16270,7 @@ function HomePage({ user, onLogout }) {
   }
   const homePageClassName = [
     'home-page',
+    tab === 'home' ? 'home-tab-active' : '',
     tab === 'bank' ? 'bank-tab-active' : '',
     tab === 'chat' || (tab === 'messages' && Boolean(messageReplyTarget)) ? 'chat-tab-active' : '',
     tab === 'messages' && Boolean(messageReplyTarget) ? 'dm-fullscreen-active' : '',
@@ -16317,19 +16325,19 @@ function HomePage({ user, onLogout }) {
   )
 
   const seasonRankIconByRank = {
-    1: '/home/icons/leaderboard/rank-1.png',
-    2: '/home/icons/leaderboard/rank-2.png',
-    3: '/home/icons/leaderboard/rank-3.png',
+    1: '/home/icons/leaderboard/rank-1.webp',
+    2: '/home/icons/leaderboard/rank-2.webp',
+    3: '/home/icons/leaderboard/rank-3.webp',
   }
   const seasonChestIconByRank = {
-    1: '/home/icons/leaderboard/chest-gold.png',
-    2: '/home/icons/leaderboard/chest-silver.png',
-    3: '/home/icons/leaderboard/chest-bronze.png',
+    1: '/home/icons/leaderboard/chest-gold.webp',
+    2: '/home/icons/leaderboard/chest-silver.webp',
+    3: '/home/icons/leaderboard/chest-bronze.webp',
   }
   const seasonBadgeIconByRank = {
-    1: '/home/icons/leaderboard/badge-season-1.png',
-    2: '/home/icons/leaderboard/badge-season-2.png',
-    3: '/home/icons/leaderboard/badge-season-3.png',
+    1: '/home/icons/leaderboard/badge-season-1.webp',
+    2: '/home/icons/leaderboard/badge-season-2.webp',
+    3: '/home/icons/leaderboard/badge-season-3.webp',
   }
   const seasonBadgeLabelByRank = {
     1: 'Sezon Şampiyonu',
@@ -16368,10 +16376,10 @@ function HomePage({ user, onLogout }) {
             )
             const rankIcon = rankForVisual <= 3 ? (seasonRankIconByRank[rankForVisual] || '') : ''
             const chestIcon = isCommonTier
-              ? '/home/icons/leaderboard/chestsiradan.png'
+              ? '/home/icons/leaderboard/chestsiradan.webp'
               : (
-                String(seasonChestIconByRank[rankForVisual] || entry.chestIcon || '/home/icons/leaderboard/chest-gold.png').trim() ||
-                '/home/icons/leaderboard/chest-gold.png'
+                String(seasonChestIconByRank[rankForVisual] || entry.chestIcon || '/home/icons/leaderboard/chest-gold.webp').trim() ||
+                '/home/icons/leaderboard/chest-gold.webp'
               )
             const badgeIcon = isTopRankBadge
               ? (
@@ -16487,14 +16495,14 @@ function HomePage({ user, onLogout }) {
               )
               const rankIcon = rank <= 3 ? (seasonRankIconByRank[rank] || '') : ''
               const chestIcon = isCommonTier
-                ? '/home/icons/leaderboard/chestsiradan.png'
+                ? '/home/icons/leaderboard/chestsiradan.webp'
                 : (
                   String(
                     seasonChestIconByRank[rank] ||
                     chest.chestIcon ||
                     rewardMeta?.chestIcon ||
-                    '/home/icons/leaderboard/chest-gold.png',
-                  ).trim() || '/home/icons/leaderboard/chest-gold.png'
+                    '/home/icons/leaderboard/chest-gold.webp',
+                  ).trim() || '/home/icons/leaderboard/chest-gold.webp'
                 )
               const badgeIcon = isTopRankBadge
                 ? (
@@ -16588,10 +16596,10 @@ function HomePage({ user, onLogout }) {
               )
               const rankIcon = rank <= 3 ? (seasonRankIconByRank[rank] || '') : ''
               const chestIcon = isCommonTier
-                ? '/home/icons/leaderboard/chestsiradan.png'
+                ? '/home/icons/leaderboard/chestsiradan.webp'
                 : (
-                  String(seasonChestIconByRank[rank] || chest.chestIcon || rewardMeta?.chestIcon || '/home/icons/leaderboard/chest-gold.png').trim() ||
-                  '/home/icons/leaderboard/chest-gold.png'
+                  String(seasonChestIconByRank[rank] || chest.chestIcon || rewardMeta?.chestIcon || '/home/icons/leaderboard/chest-gold.webp').trim() ||
+                  '/home/icons/leaderboard/chest-gold.webp'
                 )
               const badgeIcon = isTopRankBadge
                 ? (
@@ -17204,7 +17212,7 @@ function HomePage({ user, onLogout }) {
                         </span>
                       ) : (
                         <span className="hero-premium-icon">
-                          <img src="/home/icons/depot/premium.png" alt="" aria-hidden="true" />
+                          <img src="/home/icons/depot/premium.webp" alt="" aria-hidden="true" />
                         </span>
                       )}
                       <span className="hero-premium-status">
@@ -17632,7 +17640,7 @@ function HomePage({ user, onLogout }) {
                             onClick={openLogisticsPanel}
                           >
                             <span className="player-profile-business-card-img-wrap">
-                              <img src="/home/icons/businesses/lojistik-kiralama.png" alt="" onError={(e) => { e.target.src = '/splash/logo.png' }} />
+                              <img src="/home/icons/businesses/lojistik-kiralama.webp" alt="" onError={(e) => { e.target.src = '/splash/logo.png' }} />
                             </span>
                             <span className="player-profile-business-card-name">
                               Tır Kiralama
@@ -17644,7 +17652,7 @@ function HomePage({ user, onLogout }) {
                       const b = allBusinesses.find((x) => x.templateId === templateId)
                       if (!b) return []
 
-                      const img = b.heroImage || '/home/icons/businesses/moto-kiralama.png'
+                      const img = b.heroImage || '/home/icons/businesses/moto-kiralama.webp'
                       const vehicles = b?.vehicles || []
                       const businessTemplateId = String(b?.templateId || '').trim()
                       const assetTypeLabel = businessTemplateId === 'moto-rental'
@@ -17746,7 +17754,7 @@ function HomePage({ user, onLogout }) {
                           <div key={factory.id} className="player-profile-factory-card">
                             <span className="player-profile-factory-img-wrap factory-shop-hero-wrap">
                               <img
-                                src={resolveFactoryShopImage(factory) || factory.icon || '/home/icons/businesses/fabrikam.png'}
+                                src={resolveFactoryShopImage(factory) || factory.icon || '/home/icons/businesses/fabrikam.webp'}
                                 alt={factory.name || factory.id}
                                 loading="lazy"
                                 onError={(e) => { e.currentTarget.src = '/splash/logo.png' }}
@@ -18640,7 +18648,7 @@ function HomePage({ user, onLogout }) {
                   <span className="starter-detail-value">3.000</span>
                 </li>
                 <li>
-                  <img src="/home/icons/depot/yedekparca.png" alt="" aria-hidden="true" />
+                  <img src="/home/icons/depot/yedekparca.webp" alt="" aria-hidden="true" />
                   <span className="starter-detail-label">Yedek Parça</span>
                   <span className="starter-detail-value">3.000</span>
                 </li>

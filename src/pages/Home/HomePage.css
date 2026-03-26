@@ -202,11 +202,17 @@
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;
+  overflow-anchor: none;
   scrollbar-gutter: stable;
   scroll-padding-top: calc(var(--top-dock-height) + 10px + env(safe-area-inset-top));
   scroll-padding-bottom: calc(var(--bottom-dock-height) + 12px + env(safe-area-inset-bottom));
   overscroll-behavior-y: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+.home-page.home-tab-active {
+  padding-top: calc(var(--top-dock-height) - 16px + env(safe-area-inset-top));
+  scroll-padding-top: calc(var(--top-dock-height) + 4px + env(safe-area-inset-top));
 }
 
 /* Leaderboard tab: clearer background + glass surfaces (MENÜ look) */
@@ -749,7 +755,7 @@
   border: 1px solid var(--theme-hero-border);
   background:
     linear-gradient(180deg, var(--theme-hero-overlay-top), var(--theme-hero-overlay-bottom)),
-    url('/home/backgrounds/ardf.png') center / cover no-repeat,
+    url('/home/backgrounds/ardf.webp') center / cover no-repeat,
     rgba(5, 11, 24, 0.42);
   background-position: center, 50% 52%, center;
   background-size: 100% 100%, 138% 138%, auto;
@@ -6721,7 +6727,7 @@
   border: 1px solid rgba(107, 182, 255, 0.3);
   background:
     linear-gradient(180deg, rgba(10, 18, 35, 0.62), rgba(10, 18, 35, 0.92)),
-    url('/home/icons/isletmeler.png') center/cover no-repeat;
+    url('/home/icons/isletmeler.webp') center/cover no-repeat;
   padding: 12px;
   display: grid;
   gap: 10px;
@@ -14641,7 +14647,7 @@ select {
 }
 
 .premium-hero {
-  --premium-hero-bg-image: url('/home/backgrounds/pdrum.png');
+  --premium-hero-bg-image: url('/home/backgrounds/pdrum.webp');
   position: relative;
   overflow: hidden;
   border-radius: 18px;
@@ -17057,8 +17063,8 @@ select {
   border: 1px solid var(--profile-border-strong);
   background:
     linear-gradient(180deg, rgba(34, 83, 144, 0.9), rgba(7, 17, 35, 0.94)),
-    url('/home/backgrounds/profile-pro-card.png') center/cover no-repeat,
-    url('/home/backgrounds/pdrum.png') center/cover no-repeat;
+    url('/home/backgrounds/profile-pro-card.webp') center/cover no-repeat,
+    url('/home/backgrounds/pdrum.webp') center/cover no-repeat;
   box-shadow:
     0 18px 36px rgba(0, 0, 0, 0.45),
     inset 0 1px 0 rgba(255, 255, 255, 0.12);

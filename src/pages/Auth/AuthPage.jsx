@@ -5,6 +5,7 @@ import AuthButton from '../../components/auth/AuthButton.jsx'
 import {
   consumeAuthNotice,
   getApiHealth,
+  hasRegisteredUsers,
   loginUser,
   refreshPublicIpCache,
   requestRegisterCode,
@@ -130,7 +131,7 @@ function getInitialRegisterFlowState({ resetTokenFromUrl, initialMode }) {
       ...fallback,
       mode: AUTH_MODE.REGISTER,
       registerForm: safeForm,
-    notice: 'Yeni hesap oluşturmak için bilgilerinizi girin.',
+      notice: 'Yeni hesap oluşturmak için bilgilerinizi girin.',
     }
   }
 
@@ -346,16 +347,35 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
       setErrors(result.errors || {})
 
       if (result.reason === 'invalid_credentials') {
+        const safeIdentifier = String(loginForm.identifier || '').trim().toLowerCase()
+        let registeredUsersExist = true
+        try {
+          registeredUsersExist = await hasRegisteredUsers()
+        } catch {
+          registeredUsersExist = true
+        }
+
         setLoginForm((prev) => ({
           ...prev,
           password: '',
         }))
+
+        if (!registeredUsersExist) {
+          setErrors({
+            global: 'Sistemde kayıtlı hesap bulunmadı. Kayıt ekranına yönlendirildiniz.',
+          })
+          setMode(AUTH_MODE.REGISTER)
+          return
+        }
+
+        if (emailRegex.test(safeIdentifier)) {
+          setForgotForm((prev) => ({ ...prev, email: safeIdentifier }))
+        }
         setErrors({
-          global: 'Giriş bilgileri hatalı.',
+          global: 'Şifreyi yanlış girdiniz. Şifremi Unuttum ekranına yönlendirildiniz.',
         })
-        setNotice(
-          'Kullanıcı adı veya e-posta ile giriş yapabilirsiniz. Şifrenizi unuttuysanız e-posta ile sıfırlayabilirsiniz.',
-        )
+        setNotice('E-posta adresinizle şifrenizi sıfırlayıp tekrar giriş yapabilirsiniz.')
+        setMode(AUTH_MODE.FORGOT)
       }
 
       return
@@ -481,7 +501,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
         aria-hidden
       />
       <div
-        className="relative z-10 flex min-h-screen min-h-dvh flex-col items-center justify-center p-4 sm:p-6 w-full box-border"
+        className="relative z-10 flex min-h-screen min-h-dvh flex-col items-center justify-start sm:justify-center p-4 sm:p-6 w-full box-border"
         style={{
           paddingTop: 'max(1rem, env(safe-area-inset-top))',
           paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
@@ -580,10 +600,6 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
               <AuthButton type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Giriş yapılıyor...' : 'Giriş Yap'}
               </AuthButton>
-              <p className="text-[11px] sm:text-xs text-slate-300/85 text-center mt-1">
-                Bu oyun yalnızca Türkiye içinden oynanabilir. Aynı IP ve cihaz üzerinden en fazla
-                2 hesap kullanılabilir.
-              </p>
             </form>
           ) : null}
 
@@ -639,15 +655,6 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 autoComplete="new-password"
               />
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-300/85 -mt-1 mb-1">
-                Şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.
-              </p>
-              <p className="text-xs text-slate-500 -mt-0.5 mb-1">
-                {'Cihaz ve IP hesap limiti, sunucu ayarlarına göre uygulanır.'}
-              </p>
-              <p className="text-[11px] sm:text-xs text-slate-300/85 -mt-1 mb-1">
-                Bilgileri girdikten sonra hesabınız anında oluşturulur ve oyuna giriş yapılır.
-              </p>
               <AuthButton type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Kayıt oluşturuluyor...' : 'Kayıt Ol'}
               </AuthButton>
