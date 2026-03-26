@@ -7,10 +7,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 function Run-Git {
-  param(
-    [Parameter(ValueFromRemainingArguments = $true)]
-    [string[]]$GitArgs
-  )
+  param([string[]]$GitArgs)
   & git @GitArgs
   if ($LASTEXITCODE -ne 0) {
     throw "[ship] Git komutu basarisiz: git $($GitArgs -join ' ')"
@@ -36,8 +33,8 @@ if ([string]::IsNullOrWhiteSpace($Message)) {
   $Message = "guncelleme $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')"
 }
 
-Run-Git @('rev-parse', '--is-inside-work-tree')
-Run-Git @('add', '-A')
+Run-Git -GitArgs @('rev-parse', '--is-inside-work-tree')
+Run-Git -GitArgs @('add', '-A')
 
 $pending = (& git status --porcelain)
 if ($LASTEXITCODE -ne 0) {
@@ -52,15 +49,15 @@ if ($pending) {
 }
 
 if ($hasChanges) {
-  Run-Git @('commit', '-m', $Message)
+  Run-Git -GitArgs @('commit', '-m', $Message)
 } elseif ($AllowEmpty) {
-  Run-Git @('commit', '--allow-empty', '-m', $Message)
+  Run-Git -GitArgs @('commit', '--allow-empty', '-m', $Message)
 } else {
   Write-Host "[ship] Degisiklik yok. Empty trigger icin: npm run ship:empty"
   exit 0
 }
 
-Run-Git @('push', 'origin', $Branch)
+Run-Git -GitArgs @('push', 'origin', $Branch)
 Write-Host "[ship] Push tamam. Branch: $Branch"
 
 $actionsUrl = Get-ActionsUrl
