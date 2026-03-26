@@ -42,6 +42,15 @@ npm run android:install
 npm run android:launch
 ```
 
+Tek komutla demo APK dosyasi uret:
+
+```bash
+npm run apk:build:demo
+```
+
+Uretilen dosya:
+- `release/ticarnet-demo-debug.apk`
+
 ### Live APK demo akis
 
 ```bash

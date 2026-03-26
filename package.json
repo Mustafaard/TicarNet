@@ -32,6 +32,7 @@
     "android:deploy:live": "npm run android:sync:live && npm run android:install && npm run android:launch",
     "android:release:apk": "npm run android:sync && cd android && gradlew.bat assembleRelease",
     "android:release:aab": "npm run android:sync && cd android && gradlew.bat bundleRelease",
+    "apk:build:demo": "node scripts/build-demo-apk.mjs",
     "android:auto": "node scripts/android-auto.mjs",
     "data:reset": "node scripts/reset-all-data.mjs",
     "data:restore": "node scripts/restore-db.mjs",

@@ -129,3 +129,48 @@ Bu akista deploy oncesi DB yedegi alinmaya devam eder.
 - Farkli IP/subnet login engeli kapali: `ENFORCE_REGISTER_IP_ON_LOGIN=false`, `ENFORCE_REGISTER_SUBNET_ON_LOGIN=false`.
 - DB dosyasi proje disinda kalici dizinde oldugu icin guncellemede hesaplar silinmez.
 
+## 9) Demo APK Uret ve Linkten Dagit
+
+### 9.1 Localde APK uret (Windows)
+
+```powershell
+cd C:\Users\user\OneDrive\Desktop\TicarNet
+npm run apk:build:demo
+```
+
+Uretilen dosya:
+- `release/ticarnet-demo-debug.apk`
+
+### 9.2 APK'yi VPS'e yukle
+
+SSH 22 aciksa:
+
+```powershell
+scp C:\Users\user\OneDrive\Desktop\TicarNet\release\ticarnet-demo-debug.apk root@VPS_IP:/var/www/ticarnet/current/release/
+```
+
+SSH kapaliysa Hosting panel dosya yoneticisinden ayni yola yukle:
+- `/var/www/ticarnet/current/release/ticarnet-demo-debug.apk`
+
+### 9.3 APK indirme linkini tek komutla ac
+
+VPS'te:
+
+```bash
+cd /var/www/ticarnet/current
+sudo bash scripts/vps-publish-apk.sh \
+  --domain apk.ticarnet.online \
+  --apk-source /var/www/ticarnet/current/release/ticarnet-demo-debug.apk \
+  --apk-name ticarnet.apk
+```
+
+Calisan link:
+- `http://apk.ticarnet.online/ticarnet.apk`
+
+### 9.4 DNS zorunlu
+
+Domain panelinde A kaydi:
+- Host: `apk`
+- Type: `A`
+- Value: `VPS_IP`
+
