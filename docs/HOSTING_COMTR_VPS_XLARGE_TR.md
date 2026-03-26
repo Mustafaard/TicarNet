@@ -161,11 +161,18 @@ cd /var/www/ticarnet/current
 sudo bash scripts/vps-publish-apk.sh \
   --domain apk.ticarnet.online \
   --apk-source /var/www/ticarnet/current/release/ticarnet-demo-debug.apk \
-  --apk-name ticarnet.apk
+  --apk-name ticarnet.apk \
+  --brand-name "TicarNet Online" \
+  --enable-ssl --email admin@ticarnet.online
 ```
 
 Calisan link:
-- `http://apk.ticarnet.online/ticarnet.apk`
+- `https://apk.ticarnet.online/` (logo + butonlu indirme sayfasi)
+- `https://apk.ticarnet.online/ticarnet.apk` (direkt APK)
+
+Not:
+- Dosya ayni anda web dist altina da kopyalandigi icin ana domainde de calisir:
+  - `https://play.ticarnet.com/download/ticarnet.apk`
 
 ### 9.4 DNS zorunlu
 
