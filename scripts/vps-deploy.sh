@@ -7,6 +7,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
 BRANCH="${DEPLOY_BRANCH:-main}"
 SKIP_PULL="${DEPLOY_SKIP_PULL:-0}"
 RUN_LINT="${DEPLOY_RUN_LINT:-0}"
+FORCE_CLEAN="${DEPLOY_FORCE_CLEAN:-0}"
 ENV_FILE="${ENV_FILE:-${PROJECT_ROOT}/server/.env}"
 PM2_APP_NAME="${PM2_APP_NAME:-ticarnet-api}"
 DB_BACKUP_DIR="${DB_BACKUP_DIR:-/var/backups/ticarnet}"
@@ -14,12 +15,13 @@ DB_BACKUP_DIR="${DB_BACKUP_DIR:-/var/backups/ticarnet}"
 usage() {
   cat <<'EOF'
 Kullanim:
-  bash scripts/vps-deploy.sh [--branch BRANCH] [--skip-pull] [--run-lint]
+  bash scripts/vps-deploy.sh [--branch BRANCH] [--skip-pull] [--run-lint] [--force-clean]
 
 Opsiyonlar:
   --branch BRANCH   Deploy branch'i (varsayilan: main)
   --skip-pull       Git pull adimini atla
   --run-lint        Build oncesi npm run lint calistir
+  --force-clean     Sunucudaki lokal kod degisikliklerini silip origin/BRANCH'e birebir resetle
   -h, --help        Yardim metnini goster
 
 Ornek:
@@ -39,6 +41,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --run-lint)
       RUN_LINT=1
+      shift
+      ;;
+    --force-clean)
+      FORCE_CLEAN=1
       shift
       ;;
     -h|--help)
@@ -145,11 +151,18 @@ backup_db_if_exists "$DB_FILE_PATH"
 if [[ "$SKIP_PULL" != "1" ]]; then
   echo "[deploy] Git guncellemesi aliniyor (branch: $BRANCH)"
   git fetch --all --prune
-  current_branch="$(git rev-parse --abbrev-ref HEAD)"
-  if [[ "$current_branch" != "$BRANCH" ]]; then
-    git checkout "$BRANCH"
+  if [[ "$FORCE_CLEAN" == "1" ]]; then
+    echo "[deploy] Force clean aktif: sunucu kodu origin/$BRANCH ile birebir esleniyor"
+    git checkout -B "$BRANCH" "origin/$BRANCH"
+    git reset --hard "origin/$BRANCH"
+    git clean -fd
+  else
+    current_branch="$(git rev-parse --abbrev-ref HEAD)"
+    if [[ "$current_branch" != "$BRANCH" ]]; then
+      git checkout "$BRANCH"
+    fi
+    git pull --ff-only origin "$BRANCH"
   fi
-  git pull --ff-only origin "$BRANCH"
 fi
 
 echo "[deploy] NPM bagimliliklari yukleniyor"
