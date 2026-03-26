@@ -34,6 +34,7 @@ Varsayilan adresler:
 - `npm run build`: production web build
 - `npm run verify`: lint + build kontrolu
 - `npm run ship`: tek komutla `git add + commit + push` (sunucu deploy tetikleme)
+- `npm run ship:mobile`: demo APK build + `/download/ticarnet.apk` hazirlama + `git push`
 
 ### Android (Bundled)
 
@@ -70,7 +71,7 @@ Bu yollar proje disinda oldugunda deploy sirasinda hesaplar korunur.
 Detayli kurulum:
 - `docs/DEPLOYMENT_TR.md`
 - `docs/DIGITALOCEAN_PROD_TR.md`
-- `docs/GITHUB_AUTO_DEPLOY_TR.md` (push yapinca otomatik VPS deploy)
+- `docs/GITHUB_AUTO_DEPLOY_TR.md` (self-hosted runner ile push yapinca otomatik VPS deploy)
 - `docs/VSC_SSH_DIREKT_DEPLOY_TR.md` (GitHub olmadan VS Code -> SSH direkt deploy)
 - `docs/nginx.ticarnet.conf.example`
 
@@ -103,6 +104,15 @@ GitHub + otomatik deploy tetikleme (tek komut):
 ```powershell
 npm run ship
 ```
+
+Telefon indirme APK dosyasini da ayni anda guncellemek icin:
+
+```powershell
+npm run ship:mobile
+```
+
+Bu komut sonunda dosya su adrese duser:
+- `http://SUNUCU_IP/download/ticarnet.apk`
 
 DigitalOcean ilk kurulum otomasyonu:
 

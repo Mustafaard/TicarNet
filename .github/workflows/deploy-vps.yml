@@ -12,60 +12,53 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, linux, x64, ticarnet-vps]
     timeout-minutes: 20
 
     steps:
-      - name: Validate required secrets
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync repo to /var/www/ticarnet/current
         run: |
-          fail=0
-          if [ -z "${{ secrets.VPS_HOST }}" ]; then
-            echo "::error::Missing secret: VPS_HOST"
-            fail=1
-          fi
-          if [ -z "${{ secrets.VPS_SSH_USER }}" ]; then
-            echo "::error::Missing secret: VPS_SSH_USER"
-            fail=1
-          fi
-          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
-            echo "::error::Missing secret: VPS_SSH_KEY"
-            fail=1
-          fi
-          if [ "$fail" -ne 0 ]; then
-            exit 1
+          set -Eeuo pipefail
+          APP_DIR="/var/www/ticarnet/current"
+          TMP_ENV="/tmp/ticarnet-server.env"
+
+          rm -f "$TMP_ENV"
+          if [ -f "$APP_DIR/server/.env" ]; then
+            cp "$APP_DIR/server/.env" "$TMP_ENV"
           fi
 
-      - name: Prepare SSH connection variables
-        run: |
-          PORT="${{ secrets.VPS_SSH_PORT }}"
-          if [ -z "$PORT" ]; then
-            PORT="22"
-          fi
-          echo "VPS_PORT=$PORT" >> "$GITHUB_ENV"
+          mkdir -p "$APP_DIR"
+          shopt -s dotglob nullglob
+          rm -rf "${APP_DIR:?}/"*
+          cp -a "$GITHUB_WORKSPACE"/. "$APP_DIR"/
+          rm -rf "$APP_DIR/.git"
 
-      - name: Probe SSH port from GitHub runner
+          if [ -f "$TMP_ENV" ]; then
+            mkdir -p "$APP_DIR/server"
+            mv "$TMP_ENV" "$APP_DIR/server/.env"
+          fi
+
+      - name: Deploy on VPS local runner
         run: |
-          HOST="${{ secrets.VPS_HOST }}"
-          if timeout 8 bash -lc "</dev/tcp/$HOST/$VPS_PORT"; then
-            echo "SSH port reachable: $HOST:$VPS_PORT"
+          set -Eeuo pipefail
+          APP_DIR="/var/www/ticarnet/current"
+          if id deploy >/dev/null 2>&1; then
+            if command -v sudo >/dev/null 2>&1; then
+              sudo -u deploy -H bash -lc "cd '$APP_DIR' && bash scripts/vps-deploy.sh --skip-pull"
+            else
+              cd "$APP_DIR"
+              bash scripts/vps-deploy.sh --skip-pull
+            fi
           else
-            echo "::error::SSH port unreachable from GitHub runner ($HOST:$VPS_PORT). Check provider firewall/security group."
-            exit 1
+            cd "$APP_DIR"
+            bash scripts/vps-deploy.sh --skip-pull
           fi
 
-      - name: Configure SSH key
+      - name: Health check
         run: |
-          install -m 700 -d ~/.ssh
-          printf '%s\n' "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
-
-      - name: Add VPS to known_hosts
-        run: |
-          ssh-keyscan -p "$VPS_PORT" -H "${{ secrets.VPS_HOST }}" >> ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/known_hosts
-
-      - name: Run deploy script on VPS
-        run: |
-          ssh -i ~/.ssh/id_ed25519 -p "$VPS_PORT" \
-            "${{ secrets.VPS_SSH_USER }}@${{ secrets.VPS_HOST }}" \
-            "cd /var/www/ticarnet/current && bash scripts/vps-deploy.sh --branch main --force-clean && echo \"[deploy] current commit: \$(git rev-parse --short HEAD)\" && curl -fsS http://127.0.0.1:8787/api/health"
+          set -Eeuo pipefail
+          curl -fsS http://127.0.0.1:8787/api/health
+          echo "[deploy] commit: ${GITHUB_SHA}"

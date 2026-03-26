@@ -1,101 +1,71 @@
-# GitHub'dan VPS'e Otomatik Deploy (Tek Seferlik Kurulum)
+# GitHub Push ile Otomatik VPS Deploy (SSH Portu Acik Olmadan)
 
-Bu kurulumdan sonra `main` branch'e her `git push` yaptığında sunucu otomatik güncellenir.
+Bu yontem `GitHub hosted runner -> VPS SSH` baglantisina ihtiyac duymaz.  
+Runner dogrudan VPS icinde calisir (self-hosted), bu nedenle `22` portu disariya acik olmasa da deploy olur.
 
-## 1) Repo görünürlüğünü private yap
+## 1) VPS tarafinda tek seferlik runner kurulumu
 
-Web arayüz:
-- GitHub repo -> `Settings` -> `General` -> `Danger Zone` -> `Change repository visibility` -> `Make private`
+GitHub:
+1. Repo -> `Settings` -> `Actions` -> `Runners` -> `New self-hosted runner`
+2. `Linux` + `x64` sec
+3. `Registration token` degerini kopyala
 
-Terminal (opsiyonel, `gh` yüklüyse):
-```bash
-gh repo edit Mustafaard/TicarNet --visibility private
-```
+VPS terminalinde:
 
-Not:
-- Sonradan tekrar public yapabilirsin.
-- Private olduğunda sadece sen ve izin verdiğin kişiler görebilir.
-
-## 2) Sunucudaki repo erişimini private repo için hazırla
-
-Sunucuda (`root` veya yetkili kullanıcı):
-```bash
-sudo -u deploy mkdir -p /home/deploy/.ssh
-sudo -u deploy chmod 700 /home/deploy/.ssh
-sudo -u deploy ssh-keygen -t ed25519 -f /home/deploy/.ssh/id_ed25519_github -N "" -C "ticarnet-vps-git"
-sudo -u deploy cat /home/deploy/.ssh/id_ed25519_github.pub
-```
-
-Çıkan `*.pub` anahtarını GitHub'da ekle:
-- Repo -> `Settings` -> `Deploy keys` -> `Add deploy key`
-- `Allow write access` kapalı kalsın (read-only yeterli)
-
-Repo remote'u SSH'e çevir:
 ```bash
 cd /var/www/ticarnet/current
-sudo -u deploy git remote set-url origin git@github.com:Mustafaard/TicarNet.git
-sudo -u deploy bash -lc 'ssh -i /home/deploy/.ssh/id_ed25519_github -o StrictHostKeyChecking=accept-new -T git@github.com || true'
+sudo bash scripts/vps-setup-gh-runner.sh \
+  --repo Mustafaard/TicarNet \
+  --token BURAYA_GITHUB_RUNNER_TOKEN
 ```
 
-Deploy script `git pull` yaparken bu anahtarı kullanması için:
-```bash
-sudo -u deploy bash -lc 'cat > /home/deploy/.ssh/config << "EOF"
-Host github.com
-  HostName github.com
-  User git
-  IdentityFile /home/deploy/.ssh/id_ed25519_github
-  IdentitiesOnly yes
-EOF'
-sudo -u deploy chmod 600 /home/deploy/.ssh/config
-```
+Kurulum tamamlaninca GitHub `Actions -> Runners` ekraninda `ticarnet-vps` gorunmelidir.
 
-## 3) GitHub Actions'ın sunucuya SSH ile bağlanması için key oluştur
+## 2) Otomatik deploy akisi
 
-Kendi bilgisayarında:
-```bash
-ssh-keygen -t ed25519 -f ~/.ssh/ticarnet_actions -N "" -C "ticarnet-actions"
-```
+Bu repodaki `.github/workflows/deploy-vps.yml` artik self-hosted runner ile calisir.
 
-Public key'i sunucuya ekle:
-```bash
-cat ~/.ssh/ticarnet_actions.pub | ssh deploy@SUNUCU_IP "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
-```
+`main` branch'e her push'ta:
+1. Kod `/var/www/ticarnet/current` altina senkronlanir.
+2. Eski `server/.env` korunur.
+3. `bash scripts/vps-deploy.sh --skip-pull` calisir.
+4. API health kontrol edilir.
 
-Windows PowerShell için:
+## 3) Gelistirme akisi (VS Code)
+
+Kod degisikligini pushlamak icin:
+
 ```powershell
-type $env:USERPROFILE\.ssh\ticarnet_actions.pub | ssh deploy@SUNUCU_IP "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+npm run ship
 ```
 
-## 4) GitHub Secrets gir
+Bu komut:
+- `git add -A`
+- `git commit`
+- `git push origin main`
 
-Repo -> `Settings` -> `Secrets and variables` -> `Actions` -> `New repository secret`
+ve workflow otomatik deploy eder.
 
-Gerekli secret'lar:
-- `VPS_HOST` = sunucu IP (ör: `178.210.161.210`)
-- `VPS_SSH_USER` = `deploy`
-- `VPS_SSH_KEY` = `~/.ssh/ticarnet_actions` private key içeriği
-- `VPS_SSH_PORT` = `22` (opsiyonel, farklı portsa gir)
+## 4) APK'yi telefon indirme linkine koymak
 
-## 5) Test et
+Demo APK build + web indirme dosyasini guncelle + push:
 
-Lokalden küçük bir commit at:
-```bash
-git add .
-git commit -m "test auto deploy"
-git push origin main
+```powershell
+npm run ship:mobile
 ```
 
-GitHub -> `Actions` -> `Deploy VPS` işini kontrol et.
+Deploy sonrasi APK linki:
+- `http://SUNUCU_IP/download/ticarnet.apk`
 
-Sunucuda doğrulama:
+## 5) Kontrol komutlari
+
+VPS:
+
 ```bash
-sudo -u deploy pm2 status
+cd /var/www/ticarnet/current
 curl -s http://127.0.0.1:8787/api/health
+sudo -u deploy pm2 status
 ```
 
----
-
-Bu kurulumdan sonra normal geliştirme akışı:
-1. Kodu düzenle
-2. `git push origin main`
-3. Sunucu otomatik deploy olur
+GitHub:
+- `Actions` sekmesinde son calisma `green` olmali.

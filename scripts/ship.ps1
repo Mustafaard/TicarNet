@@ -7,7 +7,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 function Run-Git {
-  param([string[]]$GitArgs)
+  param(
+    [Parameter(ValueFromRemainingArguments = $true)]
+    [string[]]$GitArgs
+  )
   & git @GitArgs
   if ($LASTEXITCODE -ne 0) {
     throw "[ship] Git komutu basarisiz: git $($GitArgs -join ' ')"

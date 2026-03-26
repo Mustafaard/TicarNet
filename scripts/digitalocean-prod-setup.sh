@@ -348,6 +348,17 @@ server {
     try_files \$uri =404;
   }
 
+  location = /download/ticarnet.apk {
+    default_type application/vnd.android.package-archive;
+    add_header Content-Disposition 'attachment; filename="ticarnet.apk"' always;
+    add_header Cache-Control "no-store";
+    try_files \$uri =404;
+  }
+
+  location /download/ {
+    try_files \$uri \$uri/ =404;
+  }
+
   location ~ ^/api/auth/(login|register|request-password-reset|validate-reset-token|reset-password)$ {
     limit_req zone=ticarnet_auth_rate burst=20 nodelay;
     limit_conn ticarnet_conn_limit ${NGINX_LIMIT_CONN_PER_IP};
