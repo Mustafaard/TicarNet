@@ -11,6 +11,7 @@ FORCE_CLEAN="${DEPLOY_FORCE_CLEAN:-0}"
 ENV_FILE="${ENV_FILE:-${PROJECT_ROOT}/server/.env}"
 PM2_APP_NAME="${PM2_APP_NAME:-ticarnet-api}"
 DB_BACKUP_DIR="${DB_BACKUP_DIR:-/var/backups/ticarnet}"
+DEFAULT_DATA_ROOT_CANDIDATE="${DEFAULT_DATA_ROOT_CANDIDATE:-/var/lib/ticarnet}"
 
 usage() {
   cat <<'EOF'
@@ -66,6 +67,10 @@ require_cmd() {
   fi
 }
 
+escape_sed_replacement() {
+  printf '%s' "$1" | sed -e 's/[\/&#]/\\&/g'
+}
+
 trim_quotes() {
   local value="${1:-}"
   value="${value%\"}"
@@ -90,6 +95,99 @@ read_env_value() {
   local value="${line#*=}"
   value="$(trim_quotes "$value")"
   printf '%s' "$value"
+}
+
+upsert_env() {
+  local key="$1"
+  local value="$2"
+  local file="${3:-$ENV_FILE}"
+  local escaped
+  escaped="$(escape_sed_replacement "$value")"
+
+  if grep -qE "^${key}=" "$file"; then
+    sed -i "s#^${key}=.*#${key}=${escaped}#g" "$file"
+  else
+    printf '%s=%s\n' "$key" "$value" >> "$file"
+  fi
+}
+
+is_placeholder_value() {
+  local value
+  value="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
+  [[ -z "$value" ]] && return 0
+  [[ "$value" == "change_me" ]] && return 0
+  [[ "$value" == *"buraya_"* ]] && return 0
+  [[ "$value" == *"uzun_"* ]] && return 0
+  [[ "$value" == *"your_"* ]] && return 0
+  [[ "$value" == *"example"* ]] && return 0
+  return 1
+}
+
+set_secret_if_missing() {
+  local key="$1"
+  local current
+  current="$(read_env_value "$key" || true)"
+  if is_placeholder_value "$current"; then
+    upsert_env "$key" "$(openssl rand -hex 48)"
+  fi
+}
+
+set_env_if_missing() {
+  local key="$1"
+  local value="$2"
+  local current
+  current="$(read_env_value "$key" || true)"
+  if is_placeholder_value "$current"; then
+    upsert_env "$key" "$value"
+  fi
+}
+
+ensure_env_file() {
+  if [[ -f "$ENV_FILE" ]]; then
+    return 0
+  fi
+
+  mkdir -p "$(dirname "$ENV_FILE")"
+  if [[ -f "$PROJECT_ROOT/server/.env.example" ]]; then
+    cp "$PROJECT_ROOT/server/.env.example" "$ENV_FILE"
+    echo "[deploy] $ENV_FILE yoktu, .env.example'dan olusturuldu."
+  else
+    : > "$ENV_FILE"
+    echo "[deploy] $ENV_FILE bos olarak olusturuldu."
+  fi
+}
+
+choose_data_root() {
+  local candidate=""
+
+  for candidate in "$DEFAULT_DATA_ROOT_CANDIDATE" "$PROJECT_ROOT/server/data"; do
+    if mkdir -p "$candidate" >/dev/null 2>&1; then
+      printf '%s' "$candidate"
+      return 0
+    fi
+  done
+
+  printf '%s' "$PROJECT_ROOT/server/data"
+}
+
+ensure_env_defaults() {
+  local data_root="$1"
+
+  set_env_if_missing "NODE_ENV" "production"
+  set_env_if_missing "API_HOST" "127.0.0.1"
+  set_env_if_missing "API_PORT" "8787"
+  set_env_if_missing "CORS_ALLOW_NO_ORIGIN" "true"
+  set_env_if_missing "MAX_ACCOUNTS_PER_SCOPE" "2"
+  set_env_if_missing "ENFORCE_REGISTER_IP_ON_LOGIN" "false"
+  set_env_if_missing "ENFORCE_REGISTER_SUBNET_ON_LOGIN" "false"
+  set_env_if_missing "DB_FILE_PATH" "${data_root}/db.json"
+  set_env_if_missing "UPLOAD_ROOT_DIR" "${data_root}/uploads"
+  set_env_if_missing "AVATAR_UPLOAD_DIR" "${data_root}/uploads/avatars"
+  set_env_if_missing "DB_ROLLING_BACKUP_FILE_PATH" "${data_root}/backups/db-rolling.json"
+  set_env_if_missing "DB_BACKUP_RETENTION_DAYS" "0"
+
+  set_secret_if_missing "JWT_SECRET"
+  set_secret_if_missing "HEALTHCHECK_TOKEN"
 }
 
 ensure_parent_dir() {
@@ -130,9 +228,11 @@ if [[ "$SKIP_PULL" != "1" && "$(id -u)" -eq 0 ]]; then
   git config --global --add safe.directory "$PROJECT_ROOT" >/dev/null 2>&1 || true
 fi
 
-if [[ ! -f "$ENV_FILE" ]]; then
-  echo "[deploy] Uyari: $ENV_FILE bulunamadi. server/.env olmadan production baslatilamaz." >&2
-fi
+require_cmd openssl
+ensure_env_file
+
+DATA_ROOT="$(choose_data_root)"
+ensure_env_defaults "$DATA_ROOT"
 
 DB_FILE_PATH="$(read_env_value DB_FILE_PATH || true)"
 UPLOAD_ROOT_DIR="$(read_env_value UPLOAD_ROOT_DIR || true)"
@@ -150,6 +250,8 @@ fi
 if [[ -n "$AVATAR_UPLOAD_DIR" ]]; then
   mkdir -p "$AVATAR_UPLOAD_DIR"
 fi
+
+mkdir -p "$DB_BACKUP_DIR"
 
 backup_db_if_exists "$DB_FILE_PATH"
 

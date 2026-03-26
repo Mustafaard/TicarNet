@@ -90,7 +90,8 @@
     "preandroid:deploy:live": "npm run backup:project -- --trigger npm:android:deploy:live",
     "predeploy:vps": "npm run backup:project -- --trigger npm:deploy:vps",
     "setup:digitalocean:prod": "bash scripts/digitalocean-prod-setup.sh",
-    "setup:vps:prod": "bash scripts/vps-prod-setup.sh"
+    "setup:vps:prod": "bash scripts/vps-prod-setup.sh",
+    "setup:vps:fresh": "bash scripts/vps-fresh-install.sh"
   },
   "dependencies": {
     "@capacitor/android": "^8.1.0",

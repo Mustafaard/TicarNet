@@ -75,6 +75,18 @@ Detayli kurulum:
 - `docs/VSC_SSH_DIREKT_DEPLOY_TR.md` (GitHub olmadan VS Code -> SSH direkt deploy)
 - `docs/nginx.ticarnet.conf.example`
 
+Sifirdan kurulum (server klasorleri silinse bile tekrar kurar):
+
+```bash
+sudo bash scripts/vps-fresh-install.sh --domain 178.210.161.210
+```
+
+Domain + SSL ile:
+
+```bash
+sudo bash scripts/vps-fresh-install.sh --domain ticarnet.online --enable-ssl --email admin@ticarnet.online
+```
+
 Tek komut deploy scripti:
 
 ```bash
@@ -113,6 +125,13 @@ npm run ship:mobile
 
 Bu komut sonunda dosya su adrese duser:
 - `http://SUNUCU_IP/download/ticarnet.apk`
+
+PowerShell'de kontrol icin `curl` yerine `curl.exe` kullan:
+
+```powershell
+curl.exe -s "http://SUNUCU_IP/api/health"
+curl.exe -I "http://SUNUCU_IP/download/ticarnet.apk"
+```
 
 DigitalOcean ilk kurulum otomasyonu:
 

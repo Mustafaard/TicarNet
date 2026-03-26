@@ -1,7 +1,20 @@
-# GitHub Push ile Otomatik VPS Deploy (SSH Portu Acik Olmadan)
+# GitHub Push ile Otomatik VPS Deploy (SSH Portu Disariya Acik Olmadan)
 
 Bu yontem `GitHub hosted runner -> VPS SSH` baglantisina ihtiyac duymaz.  
 Runner dogrudan VPS icinde calisir (self-hosted), bu nedenle `22` portu disariya acik olmasa da deploy olur.
+
+## 0) VPS'i sifirdan kur (opsiyonel ama onerilen)
+
+Server klasorleri silindiyse once su komut:
+
+```bash
+sudo bash scripts/vps-fresh-install.sh --domain 178.210.161.210
+```
+
+Bu adim:
+- `/var/www/ticarnet/current` kodunu yeniden kurar
+- `server/.env` dosyasini olusturur
+- PM2 + Nginx + API + `/download/ticarnet.apk` rotasini ayaga kaldirir
 
 ## 1) VPS tarafinda tek seferlik runner kurulumu
 
@@ -14,10 +27,13 @@ VPS terminalinde:
 
 ```bash
 cd /var/www/ticarnet/current
+git fetch --all --prune && git checkout main && git reset --hard origin/main
 sudo bash scripts/vps-setup-gh-runner.sh \
   --repo Mustafaard/TicarNet \
   --token BURAYA_GITHUB_RUNNER_TOKEN
 ```
+
+`No such file or directory` hatasi alirsan sebep eski koddur. Yukaridaki `git fetch ... reset --hard` satirini calistir.
 
 Kurulum tamamlaninca GitHub `Actions -> Runners` ekraninda `ticarnet-vps` gorunmelidir.
 
@@ -69,3 +85,10 @@ sudo -u deploy pm2 status
 
 GitHub:
 - `Actions` sekmesinde son calisma `green` olmali.
+
+Windows PowerShell'de kontrol komutlari:
+
+```powershell
+curl.exe -s "http://SUNUCU_IP/api/health"
+curl.exe -I "http://SUNUCU_IP/download/ticarnet.apk"
+```
