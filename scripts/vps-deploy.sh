@@ -125,6 +125,11 @@ if [[ "$SKIP_PULL" != "1" ]]; then
   require_cmd git
 fi
 
+if [[ "$SKIP_PULL" != "1" && "$(id -u)" -eq 0 ]]; then
+  # Root ile deploy senaryosunda Git "dubious ownership" hatasini engelle.
+  git config --global --add safe.directory "$PROJECT_ROOT" >/dev/null 2>&1 || true
+fi
+
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "[deploy] Uyari: $ENV_FILE bulunamadi. server/.env olmadan production baslatilamaz." >&2
 fi
