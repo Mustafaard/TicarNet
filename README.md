@@ -69,6 +69,7 @@ Bu yollar proje disinda oldugunda deploy sirasinda hesaplar korunur.
 Detayli kurulum:
 - `docs/DEPLOYMENT_TR.md`
 - `docs/DIGITALOCEAN_PROD_TR.md`
+- `docs/GITHUB_AUTO_DEPLOY_TR.md` (push yapinca otomatik VPS deploy)
 - `docs/nginx.ticarnet.conf.example`
 
 Tek komut deploy scripti:
