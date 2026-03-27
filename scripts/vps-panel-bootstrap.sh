@@ -43,13 +43,16 @@ SMTP_USER="$(ask "SMTP user" "${DEFAULT_SMTP_USER}")"
 SUPPORT_INBOX="$(ask "Support inbox e-mail" "${DEFAULT_SUPPORT_INBOX}")"
 MAIL_FROM="$(ask "MAIL_FROM" "${DEFAULT_MAIL_FROM}")"
 
-echo
-echo "SMTP App Password gir (yazarken ekranda gorunmez):"
-read -r -s SMTP_APP_PASSWORD
-echo
+if [[ -z "${SMTP_APP_PASSWORD:-}" ]]; then
+  echo
+  echo "SMTP App Password gir (yazarken ekranda gorunmez):"
+  read -r -s SMTP_APP_PASSWORD
+  echo
+fi
 
-if [[ -z "${SMTP_APP_PASSWORD}" ]]; then
+if [[ -z "${SMTP_APP_PASSWORD:-}" ]]; then
   echo "[panel-bootstrap] SMTP app password bos olamaz." >&2
+  echo "[panel-bootstrap] Alternatif: SMTP_APP_PASSWORD='xxxxx' bash scripts/vps-panel-bootstrap.sh" >&2
   exit 1
 fi
 
