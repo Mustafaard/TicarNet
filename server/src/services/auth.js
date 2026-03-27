@@ -8,7 +8,7 @@ import {
   emailRegex,
   generateSecureToken,
   hashToken,
-  isGmailAddress,
+  isAllowedAuthEmailAddress,
   normalize,
   publicUser,
 } from '../utils.js'
@@ -166,8 +166,8 @@ function validateRegisterPayload(payload) {
     errors.email = 'E-posta zorunludur.'
   } else if (!emailRegex.test(email)) {
     errors.email = 'Geçerli bir e-posta adresi girin.'
-  } else if (!isGmailAddress(email)) {
-    errors.email = 'Yalnızca Gmail adresleri kullanılabilir.'
+  } else if (!isAllowedAuthEmailAddress(email)) {
+    errors.email = 'Yalnızca Gmail, Outlook veya Hotmail adresleri kullanılabilir.'
   }
 
   if (!password) {
@@ -204,8 +204,8 @@ function validatePasswordResetRequestPayload(payload) {
     errors.email = 'E-posta zorunludur.'
   } else if (!emailRegex.test(email)) {
     errors.email = 'Geçerli bir e-posta adresi girin.'
-  } else if (!isGmailAddress(email)) {
-    errors.email = 'Yalnızca Gmail adresleri kullanılabilir.'
+  } else if (!isAllowedAuthEmailAddress(email)) {
+    errors.email = 'Yalnızca Gmail, Outlook veya Hotmail adresleri kullanılabilir.'
   }
 
   return errors

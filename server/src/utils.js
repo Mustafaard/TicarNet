@@ -1,13 +1,35 @@
 import crypto from 'node:crypto'
 
 export const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+export const AUTH_EMAIL_ALLOWED_DOMAINS = Object.freeze([
+  'gmail.com',
+  'outlook.com',
+  'hotmail.com',
+])
 
 export function normalize(value) {
   return value?.trim().toLowerCase() || ''
 }
 
+function resolveEmailDomain(email) {
+  const safe = normalize(email)
+  if (!safe || !safe.includes('@')) return ''
+  return safe.split('@').pop() || ''
+}
+
+export function isAllowedAuthEmailAddress(email) {
+  const domain = resolveEmailDomain(email)
+  if (!domain) return false
+  return AUTH_EMAIL_ALLOWED_DOMAINS.includes(domain)
+}
+
+export function getAllowedAuthEmailLabel() {
+  return 'Gmail, Outlook veya Hotmail'
+}
+
+// Geriye dönük uyumluluk için eski isim korunur.
 export function isGmailAddress(email) {
-  return normalize(email).endsWith('@gmail.com')
+  return isAllowedAuthEmailAddress(email)
 }
 
 export function hashToken(rawToken) {

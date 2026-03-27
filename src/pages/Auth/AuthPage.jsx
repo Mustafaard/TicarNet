@@ -44,7 +44,7 @@ const initialResetForm = {
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const gmailPattern = '^[^\\s@]+@gmail\\.com$'
+const authEmailPattern = '^[^\\s@]+@(gmail\\.com|outlook\\.com|hotmail\\.com)$'
 const REGISTER_FLOW_DRAFT_KEY = 'ticarnet_register_flow_draft'
 const REGISTER_FORM_DRAFT_TTL_MS = 30 * 60 * 1000
 const TUTORIAL_PENDING_KEY = 'ticarnet_tutorial_pending'
@@ -660,18 +660,18 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 id="register-email"
                 name="email"
                 type="email"
-                label="E-posta (Gmail)"
+                label="E-posta (Gmail / Outlook / Hotmail)"
                 value={registerForm.email}
                 onChange={handleRegisterChange}
-                placeholder="Gmail adresinizi girin"
+                placeholder="E-posta adresinizi girin"
                 error={errors.email}
                 autoComplete="email"
                 inputMode="email"
                 autoCapitalize="none"
                 spellCheck={false}
-                pattern={gmailPattern}
+                pattern={authEmailPattern}
                 maxLength={80}
-                title="Yalnızca geçerli bir Gmail adresi girin (ornek@gmail.com)."
+                title="Yalnızca Gmail, Outlook veya Hotmail adresi kullanabilirsiniz."
               />
               <AuthPasswordField
                 id="register-password"
@@ -805,7 +805,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 inputMode="email"
                 autoCapitalize="none"
                 spellCheck={false}
-                pattern={gmailPattern}
+                pattern={authEmailPattern}
                 maxLength={80}
                 title="Geçerli bir e-posta adresi girin."
               />

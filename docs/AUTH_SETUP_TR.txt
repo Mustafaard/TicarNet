@@ -29,7 +29,7 @@
 - Oyuncu yeni şifresini belirler ve backend token doğrulamasını tamamlayarak şifreyi günceller.
 
 5) Güvenlik kuralları
-- Yalnızca Gmail adresi kabul edilir.
+- Yalnızca Gmail, Outlook veya Hotmail adresleri kabul edilir.
 - Aynı cihaz, yerel ağ (Wi-Fi alt ağı), istemci public IP ve sunucunun gördüğü IP kapsamında en fazla 2 hesap oluşturulabilir.
 - Şifreler backend tarafında hashlenir.
 - Sıfırlama token'ları tek kullanımlıktır ve süre sınırlıdır.
