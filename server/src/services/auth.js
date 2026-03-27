@@ -26,6 +26,7 @@ const ACCOUNT_DELETION_GRACE_MS = ACCOUNT_DELETION_GRACE_DAYS * 24 * 60 * 60 * 1
 const ACCOUNT_DELETION_ENABLED = Boolean(config.accountDeletionEnabled)
 const PASSWORD_HASH_ROUNDS = 12
 const INVALID_CREDENTIALS_MESSAGE = 'Giriş bilgileri hatalı.'
+const ACCOUNT_NOT_FOUND_MESSAGE = 'Bu kullanıcı adı veya e-posta ile kayıtlı hesap bulunamadı.'
 const DUMMY_PASSWORD_HASH = '$2b$12$5NEy4idmNHMDcrtmjflX5OBzHGRpdWtRG8koWC/ZSQLLiXbQs/pWi'
 
 function isBootstrapAdminEmail(email) {
@@ -706,11 +707,27 @@ export async function loginUser(payload, meta = {}) {
       normalize(user.username) === identifier || normalize(user.email) === identifier,
   )
 
+  if (!matchedUser) {
+    await comparePasswordSafe(
+      payload.password,
+      resolvePasswordHashForCompare(''),
+    )
+    return {
+      success: false,
+      errors: {
+        identifier: ACCOUNT_NOT_FOUND_MESSAGE,
+        global: ACCOUNT_NOT_FOUND_MESSAGE,
+      },
+      user: null,
+      reason: 'account_not_found',
+    }
+  }
+
   const passwordOk = await comparePasswordSafe(
     payload.password,
     resolvePasswordHashForCompare(matchedUser?.passwordHash),
   )
-  if (!matchedUser || !passwordOk) {
+  if (!passwordOk) {
     return {
       success: false,
       errors: {

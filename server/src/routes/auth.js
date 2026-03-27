@@ -67,6 +67,8 @@ authRouter.post('/login', authLoginRateLimit, requireTurkeyAccess, async (req, r
       const status =
         result.reason === 'validation'
             ? 400
+            : result.reason === 'account_not_found'
+              ? 404
             : result.reason === 'blocked'
                 || result.reason === 'temp_ban'
                 || result.reason === 'network_restricted'

@@ -346,6 +346,30 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
     if (!result.success) {
       setErrors(result.errors || {})
 
+      if (result.reason === 'account_not_found') {
+        const safeIdentifier = String(loginForm.identifier || '').trim().toLowerCase()
+
+        setLoginForm((prev) => ({
+          ...prev,
+          password: '',
+        }))
+
+        if (emailRegex.test(safeIdentifier)) {
+          setRegisterForm((prev) => ({
+            ...prev,
+            email: String(prev.email || '').trim() || safeIdentifier,
+          }))
+          setForgotForm((prev) => ({ ...prev, email: safeIdentifier }))
+        }
+
+        setErrors({
+          global: 'Bu hesap bulunamadı. Kayıt ekranına yönlendirildiniz.',
+        })
+        setNotice('Henüz hesabınız yoksa Kayıt Ol formunu doldurarak yeni hesap açabilirsiniz.')
+        setMode(AUTH_MODE.REGISTER)
+        return
+      }
+
       if (result.reason === 'invalid_credentials') {
         const safeIdentifier = String(loginForm.identifier || '').trim().toLowerCase()
         let registeredUsersExist = true
@@ -453,6 +477,21 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
     setIsSubmitting(false)
 
     if (!result.success) {
+      if (result.reason === 'not_found') {
+        const safeEmail = String(forgotForm.email || '').trim().toLowerCase()
+        if (safeEmail) {
+          setRegisterForm((prev) => ({
+            ...prev,
+            email: String(prev.email || '').trim() || safeEmail,
+          }))
+        }
+        setErrors({
+          global: 'Bu e-posta ile kayıtlı hesap bulunamadı. Kayıt ekranına yönlendirildiniz.',
+        })
+        setNotice('Hesabınız yoksa Kayıt Ol ekranından yeni hesap oluşturabilirsiniz.')
+        setMode(AUTH_MODE.REGISTER)
+        return
+      }
       setErrors(result.errors || {})
       return
     }
