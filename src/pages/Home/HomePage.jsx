@@ -16492,10 +16492,17 @@ function HomePage({ user, onLogout }) {
   const seasonRewardsModal = seasonRewardsOpen && createPortal(
     <section className="warehouse-overlay season-rewards-overlay" onClick={() => setSeasonRewardsOpen(false)}>
       <article className="warehouse-modal season-rewards-modal" onClick={(e) => e.stopPropagation()}>
-        <h3>Sezon Ödülleri</h3>
-        <p className="season-rewards-sub">
-          Sezon sonunda ilk 3 oyuncu özel sandık ve sezon rozeti kazanır. 4-25 sıralaması Sıradan Sandık alır. Sandıklarını sınırsız biriktirip istediğin zaman tek tek açabilirsin.
-        </p>
+        <header className="season-modal-head">
+          <div className="season-modal-head-copy">
+            <h3>Sezon Ödülleri</h3>
+            <p className="season-rewards-sub">
+              Sezon sonunda ilk 3 oyuncu özel sandık ve sezon rozeti kazanır. 4-25 sıralaması Sıradan Sandık alır. Sandıklarını sınırsız biriktirip istediğin zaman tek tek açabilirsin.
+            </p>
+          </div>
+          <button type="button" className="btn btn-ghost season-modal-close" onClick={() => setSeasonRewardsOpen(false)}>
+            Kapat
+          </button>
+        </header>
         <div className="season-rewards-grid">
           {leagueSeasonRewardCatalogResolved.map((entry) => {
             const rankMin = Math.max(1, Math.trunc(num(entry?.rankMin ?? entry?.rank ?? 1)))
@@ -16584,11 +16591,6 @@ function HomePage({ user, onLogout }) {
               </article>
             )
           })}
-        </div>
-        <div className="leaderboard-search-actions">
-          <button type="button" className="btn btn-ghost full" onClick={() => setSeasonRewardsOpen(false)}>
-            Kapat
-          </button>
         </div>
       </article>
     </section>,
@@ -16811,11 +16813,6 @@ function HomePage({ user, onLogout }) {
           </div>
         ) : null}
 
-        <div className="leaderboard-search-actions">
-          <button type="button" className="btn btn-ghost full" onClick={() => setSeasonChestsOpen(false)}>
-            Kapat
-          </button>
-        </div>
       </article>
     </section>,
     document.body,
