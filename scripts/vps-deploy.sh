@@ -210,6 +210,28 @@ ensure_parent_dir() {
   mkdir -p "$(dirname "$file_path")"
 }
 
+ensure_apk_public_artifacts() {
+  local public_download_dir="$PROJECT_ROOT/public/download"
+  local dist_download_dir="$PROJECT_ROOT/dist/download"
+  local apk_path="$public_download_dir/ticarnet.apk"
+
+  if [[ ! -f "$apk_path" ]]; then
+    echo "[deploy] Uyari: $apk_path bulunamadi. /download/ticarnet.apk 404 donebilir." >&2
+    return 0
+  fi
+
+  mkdir -p "$dist_download_dir"
+  cp -f "$apk_path" "$dist_download_dir/ticarnet.apk"
+
+  for extra in "ticarnet.apk.sha256" "latest.json" "index.html"; do
+    if [[ -f "$public_download_dir/$extra" ]]; then
+      cp -f "$public_download_dir/$extra" "$dist_download_dir/$extra"
+    fi
+  done
+
+  echo "[deploy] APK public dosyalari senkronlandi: $dist_download_dir"
+}
+
 backup_db_if_exists() {
   local db_file="${1:-}"
   if [[ -z "$db_file" || ! -f "$db_file" ]]; then
@@ -297,6 +319,7 @@ npm run check:production-env
 
 echo "[deploy] Web build"
 npm run build
+ensure_apk_public_artifacts
 
 echo "[deploy] PM2 reload"
 pm2 startOrReload "$PROJECT_ROOT/ecosystem.config.cjs" --update-env

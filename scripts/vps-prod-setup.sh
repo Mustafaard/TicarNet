@@ -34,6 +34,7 @@ SMTP_USER="${SMTP_USER:-}"
 SMTP_APP_PASSWORD="${SMTP_APP_PASSWORD:-}"
 MAIL_FROM_VALUE="${MAIL_FROM_VALUE:-}"
 SUPPORT_INBOX_EMAIL="${SUPPORT_INBOX_EMAIL:-mustafaard76@gmail.com}"
+PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-}"
 
 usage() {
   cat <<'EOF'
@@ -47,6 +48,7 @@ Opsiyonlar:
   --domain DOMAIN             Domain/hostname (varsayilan: tr-159ae5.hosting.net.tr)
   --email EMAIL              Let's Encrypt e-posta (SSL aciksa zorunlu)
   --repo-url URL             Git repo URL (opsiyonel, ilk clone icin)
+  --public-base-url URL      CLIENT_URL/RESET_LINK_BASE_URL/CORS_ALLOWED_ORIGINS icin temel URL
   --branch BRANCH            Deploy branch (varsayilan: main)
   --app-user USER            Linux kullanicisi (varsayilan: deploy)
   --app-group GROUP          Linux grubu (varsayilan: app-user)
@@ -94,6 +96,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --repo-url)
       REPO_URL="${2:-}"
+      shift 2
+      ;;
+    --public-base-url)
+      PUBLIC_BASE_URL="${2:-}"
       shift 2
       ;;
     --branch)
@@ -216,6 +222,15 @@ fi
 
 if [[ "$ENABLE_SSL" == "1" && -z "$LETSENCRYPT_EMAIL" ]]; then
   echo "[vps-setup] SSL acik oldugu icin --email zorunlu." >&2
+  exit 1
+fi
+
+if [[ -z "$PUBLIC_BASE_URL" ]]; then
+  PUBLIC_BASE_URL="https://${DOMAIN}"
+fi
+
+if [[ "$PUBLIC_BASE_URL" != https://* ]]; then
+  echo "[vps-setup] --public-base-url https:// ile baslamali. Mevcut: $PUBLIC_BASE_URL" >&2
   exit 1
 fi
 
@@ -482,11 +497,7 @@ sync_code() {
 }
 
 configure_env() {
-  local public_scheme="http"
-  if [[ "$ENABLE_SSL" == "1" ]]; then
-    public_scheme="https"
-  fi
-  local public_base_url="${public_scheme}://${DOMAIN}"
+  local public_base_url="$PUBLIC_BASE_URL"
 
   if [[ ! -f "$ENV_FILE" ]]; then
     cp "${APP_DIR}/server/.env.example" "$ENV_FILE"

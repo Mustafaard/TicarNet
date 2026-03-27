@@ -3,7 +3,12 @@ param(
   [string]$PublicBaseUrl = "https://tr-159ae5.hosting.net.tr",
   [string]$User = "root",
   [int]$Port = 22,
-  [string]$KeyPath = "$env:USERPROFILE\.ssh\ticarnet_actions"
+  [string]$KeyPath = "$env:USERPROFILE\.ssh\ticarnet_actions",
+  [string]$SmtpUser = "mustafaard76@gmail.com",
+  [string]$SmtpAppPassword = "",
+  [string]$MailFrom = "TicarNet Online <mustafaard76@gmail.com>",
+  [string]$SupportInboxEmail = "mustafaard76@gmail.com",
+  [switch]$ResetGameData
 )
 
 $ErrorActionPreference = "Stop"
@@ -13,6 +18,14 @@ function Require-Command {
   if (-not (Get-Command $Name -ErrorAction SilentlyContinue)) {
     throw "[deploy-direct] Komut bulunamadi: $Name"
   }
+}
+
+function Escape-BashDoubleQuoted {
+  param([string]$Value)
+  if ($null -eq $Value) {
+    return ""
+  }
+  return $Value.Replace('\', '\\').Replace('"', '\"').Replace('$', '\$').Replace('`', '\`')
 }
 
 Require-Command "tar"
@@ -129,7 +142,7 @@ upsert_env "API_PORT" "8787" "$ENV_FILE"
 upsert_env "CLIENT_URL" "__PUBLIC_BASE_URL__" "$ENV_FILE"
 upsert_env "RESET_LINK_BASE_URL" "__PUBLIC_BASE_URL__" "$ENV_FILE"
 upsert_env "CORS_ALLOWED_ORIGINS" "__PUBLIC_BASE_URL__" "$ENV_FILE"
-upsert_env "SUPPORT_INBOX_EMAIL" "mustafaard76@gmail.com" "$ENV_FILE"
+upsert_env "SUPPORT_INBOX_EMAIL" "__SUPPORT_INBOX_EMAIL__" "$ENV_FILE"
 upsert_env "SMTP_CONNECTION_TIMEOUT_MS" "10000" "$ENV_FILE"
 upsert_env "SMTP_GREETING_TIMEOUT_MS" "10000" "$ENV_FILE"
 upsert_env "SMTP_SOCKET_TIMEOUT_MS" "15000" "$ENV_FILE"
@@ -138,6 +151,34 @@ upsert_env "MAX_ACCOUNTS_PER_SCOPE" "2" "$ENV_FILE"
 upsert_env "ENFORCE_REGISTER_IP_ON_LOGIN" "false" "$ENV_FILE"
 upsert_env "ENFORCE_REGISTER_SUBNET_ON_LOGIN" "false" "$ENV_FILE"
 
+if [ -n "__SMTP_USER__" ]; then
+  upsert_env "SMTP_USER" "__SMTP_USER__" "$ENV_FILE"
+fi
+if [ -n "__SMTP_APP_PASSWORD__" ]; then
+  upsert_env "SMTP_APP_PASSWORD" "__SMTP_APP_PASSWORD__" "$ENV_FILE"
+  upsert_env "SMTP_PASS" "__SMTP_APP_PASSWORD__" "$ENV_FILE"
+fi
+if [ -n "__MAIL_FROM__" ]; then
+  upsert_env "MAIL_FROM" "__MAIL_FROM__" "$ENV_FILE"
+fi
+
+if [ "__RESET_GAME_DATA__" = "1" ]; then
+  db_file="$(grep -E '^DB_FILE_PATH=' "$ENV_FILE" | tail -n 1 | cut -d= -f2- || true)"
+  db_file="${db_file%\"}"
+  db_file="${db_file#\"}"
+  db_file="${db_file%\'}"
+  db_file="${db_file#\'}"
+  if [ -z "$db_file" ]; then
+    db_file="/var/lib/ticarnet/db.json"
+    upsert_env "DB_FILE_PATH" "$db_file" "$ENV_FILE"
+  fi
+  db_dir="$(dirname "$db_file")"
+  rm -f "$db_file"
+  rm -f "$db_dir/backups/db-rolling.json" || true
+  rm -rf "$db_dir/uploads" || true
+  echo "[deploy-direct] Hesap verileri sifirlandi: $db_file"
+fi
+
 cd /var/www/ticarnet/current
 PUBLIC_BASE_URL="__PUBLIC_BASE_URL__" bash scripts/vps-deploy.sh --skip-pull
 
@@ -145,7 +186,12 @@ echo "[deploy-direct] Server commit: $(git rev-parse --short HEAD 2>/dev/null ||
 curl -fsS http://127.0.0.1:8787/api/health
 '@
 
-$RemoteScript = $RemoteScript.Replace("__PUBLIC_BASE_URL__", $PublicBaseUrl)
+$RemoteScript = $RemoteScript.Replace("__PUBLIC_BASE_URL__", (Escape-BashDoubleQuoted $PublicBaseUrl))
+$RemoteScript = $RemoteScript.Replace("__SMTP_USER__", (Escape-BashDoubleQuoted $SmtpUser))
+$RemoteScript = $RemoteScript.Replace("__SMTP_APP_PASSWORD__", (Escape-BashDoubleQuoted $SmtpAppPassword))
+$RemoteScript = $RemoteScript.Replace("__MAIL_FROM__", (Escape-BashDoubleQuoted $MailFrom))
+$RemoteScript = $RemoteScript.Replace("__SUPPORT_INBOX_EMAIL__", (Escape-BashDoubleQuoted $SupportInboxEmail))
+$RemoteScript = $RemoteScript.Replace("__RESET_GAME_DATA__", $(if ($ResetGameData.IsPresent) { "1" } else { "0" }))
 
 $SshArgs = @("-p", "$Port")
 if (Test-Path $KeyPath) {

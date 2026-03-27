@@ -81,6 +81,8 @@
     "prefresh:start": "npm run backup:project -- --trigger npm:fresh:start",
     "deploy:vps": "bash scripts/vps-deploy.sh",
     "deploy:vps:ssh": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-vps-direct.ps1",
+    "deploy:vps:direct:hostingtr": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-vps-direct.ps1 -VpsHost 178.210.161.210 -PublicBaseUrl https://tr-159ae5.hosting.net.tr -User root -Port 22 -SmtpUser mustafaard76@gmail.com -SupportInboxEmail mustafaard76@gmail.com -MailFrom \"TicarNet Online <mustafaard76@gmail.com>\"",
+    "deploy:vps:direct:hostingtr:reset": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/deploy-vps-direct.ps1 -VpsHost 178.210.161.210 -PublicBaseUrl https://tr-159ae5.hosting.net.tr -User root -Port 22 -SmtpUser mustafaard76@gmail.com -SupportInboxEmail mustafaard76@gmail.com -MailFrom \"TicarNet Online <mustafaard76@gmail.com>\" -ResetGameData",
     "ship": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ship.ps1",
     "ship:empty": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ship.ps1 -AllowEmpty",
     "ship:mobile": "npm run apk:build:demo && npm run apk:publish:web && npm run ship",

@@ -4,6 +4,7 @@ set -Eeuo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 DOMAIN="${DOMAIN:-178.210.161.210}"
+PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-}"
 EMAIL="${EMAIL:-}"
 ENABLE_SSL="${ENABLE_SSL:-0}"
 REPO_URL="${REPO_URL:-https://github.com/Mustafaard/TicarNet.git}"
@@ -26,6 +27,7 @@ Kullanim:
 
 Opsiyonlar:
   --domain DOMAIN             Domain veya sunucu IP (varsayilan: 178.210.161.210)
+  --public-base-url URL       CLIENT_URL/RESET/CORS icin temel URL (varsayilan: https://DOMAIN)
   --repo-url URL              Git repo (varsayilan: https://github.com/Mustafaard/TicarNet.git)
   --branch BRANCH             Branch (varsayilan: main)
   --api-port PORT             API portu (varsayilan: 8787)
@@ -59,6 +61,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --repo-url)
       REPO_URL="${2:-}"
+      shift 2
+      ;;
+    --public-base-url)
+      PUBLIC_BASE_URL="${2:-}"
       shift 2
       ;;
     --branch)
@@ -135,6 +141,15 @@ if [[ "$ENABLE_SSL" == "1" && -z "$EMAIL" ]]; then
   exit 1
 fi
 
+if [[ -z "$PUBLIC_BASE_URL" ]]; then
+  PUBLIC_BASE_URL="https://${DOMAIN}"
+fi
+
+if [[ "$PUBLIC_BASE_URL" != https://* ]]; then
+  echo "[fresh-install] --public-base-url https:// ile baslamali. Mevcut: $PUBLIC_BASE_URL" >&2
+  exit 1
+fi
+
 if ! [[ "$API_PORT" =~ ^[0-9]+$ ]]; then
   echo "[fresh-install] Gecersiz --api-port: $API_PORT" >&2
   exit 1
@@ -173,6 +188,7 @@ fi
 # shellcheck disable=SC2086
 bash "${SCRIPT_DIR}/vps-prod-setup.sh" \
   --domain "$DOMAIN" \
+  --public-base-url "$PUBLIC_BASE_URL" \
   --repo-url "$REPO_URL" \
   --branch "$BRANCH" \
   --api-port "$API_PORT" \
@@ -189,8 +205,9 @@ bash "${SCRIPT_DIR}/vps-prod-setup.sh" \
   $EMAIL_FLAG
 
 echo "[fresh-install] Kurulum bitti."
-echo "[fresh-install] Site: http://${DOMAIN}"
-echo "[fresh-install] API:  http://${DOMAIN}/api/health"
-echo "[fresh-install] APK:  http://${DOMAIN}/download/ticarnet.apk"
+echo "[fresh-install] Public Base URL: ${PUBLIC_BASE_URL}"
+echo "[fresh-install] Site (HTTP fallback): http://${DOMAIN}"
+echo "[fresh-install] API (HTTP fallback):  http://${DOMAIN}/api/health"
+echo "[fresh-install] APK (HTTP fallback):  http://${DOMAIN}/download/ticarnet.apk"
 echo "[fresh-install] Sonraki deploy: cd ${APP_BASE_DIR}/current && bash scripts/vps-deploy.sh --branch ${BRANCH} --force-clean"
 
