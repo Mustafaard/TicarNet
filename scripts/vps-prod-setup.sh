@@ -320,9 +320,10 @@ is_placeholder_value() {
 
 set_secret_if_missing() {
   local key="$1"
+  local min_length="${2:-1}"
   local current
   current="$(read_env_value "$key" "$ENV_FILE" || true)"
-  if is_placeholder_value "$current"; then
+  if is_placeholder_value "$current" || [[ ${#current} -lt "$min_length" ]]; then
     upsert_env "$key" "$(openssl rand -hex 48)" "$ENV_FILE"
   fi
 }
@@ -534,8 +535,8 @@ configure_env() {
     upsert_env "SUPPORT_INBOX_EMAIL" "$SUPPORT_INBOX_EMAIL" "$ENV_FILE"
   fi
 
-  set_secret_if_missing "JWT_SECRET"
-  set_secret_if_missing "HEALTHCHECK_TOKEN"
+  set_secret_if_missing "JWT_SECRET" "32"
+  set_secret_if_missing "HEALTHCHECK_TOKEN" "16"
 
   chown "$APP_USER":"$APP_GROUP" "$ENV_FILE"
 }

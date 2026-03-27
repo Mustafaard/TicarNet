@@ -129,9 +129,10 @@ is_placeholder_value() {
 
 set_secret_if_missing() {
   local key="$1"
+  local min_length="${2:-1}"
   local current
   current="$(read_env_value "$key" || true)"
-  if is_placeholder_value "$current"; then
+  if is_placeholder_value "$current" || [[ ${#current} -lt "$min_length" ]]; then
     upsert_env "$key" "$(openssl rand -hex 48)"
   fi
 }
@@ -197,8 +198,8 @@ ensure_env_defaults() {
   set_env_if_missing "DB_ROLLING_BACKUP_FILE_PATH" "${data_root}/backups/db-rolling.json"
   set_env_if_missing "DB_BACKUP_RETENTION_DAYS" "0"
 
-  set_secret_if_missing "JWT_SECRET"
-  set_secret_if_missing "HEALTHCHECK_TOKEN"
+  set_secret_if_missing "JWT_SECRET" "32"
+  set_secret_if_missing "HEALTHCHECK_TOKEN" "16"
 }
 
 ensure_parent_dir() {
