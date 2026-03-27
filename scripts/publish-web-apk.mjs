@@ -25,7 +25,9 @@ const targetDir = path.resolve(projectRoot, "public/download");
 const targetApkPath = path.resolve(targetDir, "ticarnet.apk");
 const targetShaPath = `${targetApkPath}.sha256`;
 const targetMetaPath = path.resolve(targetDir, "latest.json");
+const targetReleasesPath = path.resolve(targetDir, "releases.json");
 const targetLandingPath = path.resolve(targetDir, "index.html");
+const targetVersionsDir = path.resolve(targetDir, "versions");
 const publicApkUrl = "/download/ticarnet.apk";
 
 function formatBytes(bytes) {
@@ -68,16 +70,59 @@ async function main() {
   const apkBuffer = await fs.readFile(targetApkPath);
   const sha = createHash("sha256").update(apkBuffer).digest("hex");
   await fs.writeFile(targetShaPath, `${sha}  ticarnet.apk\n`, "utf8");
+  await fs.mkdir(targetVersionsDir, { recursive: true });
+
+  const versionArg = readArg("--version", "").trim();
+  const fallbackVersion = new Date().toISOString().replace(/[:.]/g, "-");
+  const version = versionArg || fallbackVersion;
+  const versionBaseName = `ticarnet-${version}`;
+  const versionApkPath = path.resolve(targetVersionsDir, `${versionBaseName}.apk`);
+  const versionShaPath = `${versionApkPath}.sha256`;
+  const versionApkUrl = `/download/versions/${versionBaseName}.apk`;
+
+  await fs.copyFile(targetApkPath, versionApkPath);
+  await fs.writeFile(versionShaPath, `${sha}  ${versionBaseName}.apk\n`, "utf8");
 
   const meta = {
     file: "ticarnet.apk",
     url: publicApkUrl,
+    version,
     bytes: stat.size,
     size: formatBytes(stat.size),
     sha256: sha,
     publishedAt: new Date().toISOString(),
   };
   await fs.writeFile(targetMetaPath, `${JSON.stringify(meta, null, 2)}\n`, "utf8");
+
+  let releases = [];
+  if (await exists(targetReleasesPath)) {
+    try {
+      const raw = await fs.readFile(targetReleasesPath, "utf8");
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        releases = parsed;
+      }
+    } catch {
+      releases = [];
+    }
+  }
+
+  const nextRelease = {
+    version,
+    file: `${versionBaseName}.apk`,
+    url: versionApkUrl,
+    bytes: stat.size,
+    size: formatBytes(stat.size),
+    sha256: sha,
+    publishedAt: meta.publishedAt,
+  };
+
+  releases = [
+    nextRelease,
+    ...releases.filter((entry) => entry?.version !== version),
+  ].slice(0, 20);
+
+  await fs.writeFile(targetReleasesPath, `${JSON.stringify(releases, null, 2)}\n`, "utf8");
 
   const landingHtml = `<!doctype html>
 <html lang="tr">
@@ -88,6 +133,7 @@ async function main() {
   <style>
     body{margin:0;min-height:100vh;display:grid;place-items:center;background:#06142b;color:#e2e8f0;font-family:Segoe UI,Tahoma,sans-serif;padding:24px}
     .card{max-width:460px;width:100%;padding:24px;border-radius:16px;background:#0b1f3f;border:1px solid #1d4f91;text-align:center}
+    .logo{width:72px;height:72px;border-radius:16px;display:block;margin:0 auto 14px;background:#0a1730;object-fit:cover}
     h1{margin:0 0 10px;font-size:30px}
     p{margin:0 0 16px;color:#cbd5e1}
     a{display:inline-block;padding:12px 18px;border-radius:10px;background:#f59e0b;color:#0f172a;font-weight:700;text-decoration:none}
@@ -96,10 +142,13 @@ async function main() {
 </head>
 <body>
   <section class="card">
+    <img class="logo" src="/splash/logo.webp" alt="TicarNet Online Logo" />
     <h1>TicarNet Online</h1>
     <p>Android uygulamasini indirmek icin tikla.</p>
     <a href="${publicApkUrl}">APK Indir</a>
-    <small>Boyut: ${meta.size} | SHA256: ${sha.slice(0, 16)}...</small>
+    <small>Surum: ${version} | Boyut: ${meta.size}</small>
+    <small>Sabit link: ${publicApkUrl}</small>
+    <small>SHA256: ${sha.slice(0, 16)}...</small>
   </section>
 </body>
 </html>
@@ -109,6 +158,8 @@ async function main() {
 
   console.log(`[apk:publish:web] Kaynak: ${sourcePath}`);
   console.log(`[apk:publish:web] Hedef: ${targetApkPath}`);
+  console.log(`[apk:publish:web] Surum: ${version}`);
+  console.log(`[apk:publish:web] Arsiv: ${versionApkPath}`);
   console.log(`[apk:publish:web] Boyut: ${meta.size}`);
   console.log(`[apk:publish:web] SHA256: ${sha}`);
   console.log(`[apk:publish:web] URL: ${publicApkUrl}`);

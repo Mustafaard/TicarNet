@@ -229,6 +229,16 @@ ensure_apk_public_artifacts() {
     fi
   done
 
+  if [[ -f "$public_download_dir/releases.json" ]]; then
+    cp -f "$public_download_dir/releases.json" "$dist_download_dir/releases.json"
+  fi
+
+  if [[ -d "$public_download_dir/versions" ]]; then
+    mkdir -p "$dist_download_dir/versions"
+    cp -f "$public_download_dir/versions/"*.apk "$dist_download_dir/versions/" 2>/dev/null || true
+    cp -f "$public_download_dir/versions/"*.sha256 "$dist_download_dir/versions/" 2>/dev/null || true
+  fi
+
   echo "[deploy] APK public dosyalari senkronlandi: $dist_download_dir"
 }
 
