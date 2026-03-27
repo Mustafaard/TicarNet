@@ -5,6 +5,16 @@ def releaseStoreFile = findProperty('TICARNET_UPLOAD_STORE_FILE')
 def releaseStorePassword = findProperty('TICARNET_UPLOAD_STORE_PASSWORD')
 def releaseKeyAlias = findProperty('TICARNET_UPLOAD_KEY_ALIAS')
 def releaseKeyPassword = findProperty('TICARNET_UPLOAD_KEY_PASSWORD')
+def resolvedVersionCode = 1
+try {
+    resolvedVersionCode = Integer.parseInt((findProperty('TICARNET_VERSION_CODE') ?: '1').toString())
+} catch (ignored) {
+    resolvedVersionCode = 1
+}
+def resolvedVersionName = (findProperty('TICARNET_VERSION_NAME') ?: '1.0').toString().trim()
+if (!resolvedVersionName) {
+    resolvedVersionName = '1.0'
+}
 def hasReleaseSigning =
         releaseStoreFile &&
         releaseStorePassword &&
@@ -18,8 +28,8 @@ android {
         applicationId "com.ticarnet.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode resolvedVersionCode
+        versionName resolvedVersionName
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
