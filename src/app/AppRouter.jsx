@@ -1,4 +1,5 @@
 import { Suspense, lazy, useCallback, useEffect, useState } from 'react'
+import { Capacitor } from '@capacitor/core'
 import SplashPage from '../pages/Splash/SplashPage.jsx'
 import {
   getLastKnownUser,
@@ -26,6 +27,7 @@ function PageLoader() {
 
 function canPrewarmHeavyScreens() {
   if (typeof window === 'undefined') return false
+  if (Capacitor.isNativePlatform()) return false
   const nav = window.navigator || {}
 
   if (nav?.connection?.saveData) return false

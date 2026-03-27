@@ -52,6 +52,11 @@ CAP_SERVER_URL=https://play.ticarnet.com npm run android:sync:live
 npm run android:install
 ```
 
+Not:
+- Native push (FCM) kullanmak istiyorsan Android projesinde `android/app/google-services.json` olmalidir.
+- Firebase hazir degilse crash engellemek icin push varsayilan olarak kapali gelir.
+- Acmak icin build oncesi: `VITE_NATIVE_PUSH_ENABLED=true`
+
 ## Hesap Verisini Korumak
 
 Production ortaminda su alanlari `server/.env` dosyanda ayarla:
