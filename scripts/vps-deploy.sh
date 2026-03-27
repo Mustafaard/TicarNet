@@ -12,6 +12,7 @@ ENV_FILE="${ENV_FILE:-${PROJECT_ROOT}/server/.env}"
 PM2_APP_NAME="${PM2_APP_NAME:-ticarnet-api}"
 DB_BACKUP_DIR="${DB_BACKUP_DIR:-/var/backups/ticarnet}"
 DEFAULT_DATA_ROOT_CANDIDATE="${DEFAULT_DATA_ROOT_CANDIDATE:-/var/lib/ticarnet}"
+PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-https://tr-159ae5.hosting.net.tr}"
 
 usage() {
   cat <<'EOF'
@@ -176,10 +177,17 @@ ensure_env_defaults() {
   set_env_if_missing "NODE_ENV" "production"
   set_env_if_missing "API_HOST" "127.0.0.1"
   set_env_if_missing "API_PORT" "8787"
+  set_env_if_missing "CLIENT_URL" "$PUBLIC_BASE_URL"
+  set_env_if_missing "RESET_LINK_BASE_URL" "$PUBLIC_BASE_URL"
+  set_env_if_missing "CORS_ALLOWED_ORIGINS" "$PUBLIC_BASE_URL"
   set_env_if_missing "CORS_ALLOW_NO_ORIGIN" "true"
   set_env_if_missing "MAX_ACCOUNTS_PER_SCOPE" "2"
   set_env_if_missing "ENFORCE_REGISTER_IP_ON_LOGIN" "false"
   set_env_if_missing "ENFORCE_REGISTER_SUBNET_ON_LOGIN" "false"
+  set_env_if_missing "SUPPORT_INBOX_EMAIL" "mustafaard76@gmail.com"
+  set_env_if_missing "SMTP_CONNECTION_TIMEOUT_MS" "10000"
+  set_env_if_missing "SMTP_GREETING_TIMEOUT_MS" "10000"
+  set_env_if_missing "SMTP_SOCKET_TIMEOUT_MS" "15000"
   set_env_if_missing "DB_FILE_PATH" "${data_root}/db.json"
   set_env_if_missing "UPLOAD_ROOT_DIR" "${data_root}/uploads"
   set_env_if_missing "AVATAR_UPLOAD_DIR" "${data_root}/uploads/avatars"
@@ -279,6 +287,9 @@ if [[ "$RUN_LINT" == "1" ]]; then
   echo "[deploy] Lint kontrolu"
   npm run lint
 fi
+
+echo "[deploy] Production env self-check"
+npm run check:production-env
 
 echo "[deploy] Web build"
 npm run build

@@ -10,7 +10,7 @@ DATA_DIR="${DATA_DIR:-/var/lib/ticarnet}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/ticarnet}"
 ENV_FILE="${APP_DIR}/server/.env"
 PM2_APP_NAME="${PM2_APP_NAME:-ticarnet-api}"
-DOMAIN="${DOMAIN:-}"
+DOMAIN="${DOMAIN:-tr-159ae5.hosting.net.tr}"
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
 REPO_URL="${REPO_URL:-}"
 BRANCH="${BRANCH:-main}"
@@ -39,12 +39,12 @@ usage() {
   cat <<'EOF'
 Kullanim:
   sudo bash scripts/vps-prod-setup.sh \
-    --domain play.ticarnet.com \
+    --domain tr-159ae5.hosting.net.tr \
     --email admin@domain.com \
     --repo-url https://github.com/<org>/<repo>.git
 
 Opsiyonlar:
-  --domain DOMAIN             Domain (zorunlu)
+  --domain DOMAIN             Domain/hostname (varsayilan: tr-159ae5.hosting.net.tr)
   --email EMAIL              Let's Encrypt e-posta (SSL aciksa zorunlu)
   --repo-url URL             Git repo URL (opsiyonel, ilk clone icin)
   --branch BRANCH            Deploy branch (varsayilan: main)

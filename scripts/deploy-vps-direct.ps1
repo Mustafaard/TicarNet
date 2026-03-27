@@ -1,5 +1,6 @@
 param(
   [string]$VpsHost = "178.210.161.210",
+  [string]$PublicBaseUrl = "https://tr-159ae5.hosting.net.tr",
   [string]$User = "root",
   [int]$Port = 22,
   [string]$KeyPath = "$env:USERPROFILE\.ssh\ticarnet_actions"
@@ -119,20 +120,32 @@ upsert_env() {
 if ! grep -q '^JWT_SECRET=' "$ENV_FILE"; then
   printf "JWT_SECRET=%s\n" "$(openssl rand -hex 48)" >> "$ENV_FILE"
 fi
+if ! grep -q '^HEALTHCHECK_TOKEN=' "$ENV_FILE"; then
+  printf "HEALTHCHECK_TOKEN=%s\n" "$(openssl rand -hex 32)" >> "$ENV_FILE"
+fi
 upsert_env "NODE_ENV" "production" "$ENV_FILE"
 upsert_env "API_HOST" "127.0.0.1" "$ENV_FILE"
 upsert_env "API_PORT" "8787" "$ENV_FILE"
+upsert_env "CLIENT_URL" "__PUBLIC_BASE_URL__" "$ENV_FILE"
+upsert_env "RESET_LINK_BASE_URL" "__PUBLIC_BASE_URL__" "$ENV_FILE"
+upsert_env "CORS_ALLOWED_ORIGINS" "__PUBLIC_BASE_URL__" "$ENV_FILE"
+upsert_env "SUPPORT_INBOX_EMAIL" "mustafaard76@gmail.com" "$ENV_FILE"
+upsert_env "SMTP_CONNECTION_TIMEOUT_MS" "10000" "$ENV_FILE"
+upsert_env "SMTP_GREETING_TIMEOUT_MS" "10000" "$ENV_FILE"
+upsert_env "SMTP_SOCKET_TIMEOUT_MS" "15000" "$ENV_FILE"
 upsert_env "CORS_ALLOW_NO_ORIGIN" "true" "$ENV_FILE"
 upsert_env "MAX_ACCOUNTS_PER_SCOPE" "2" "$ENV_FILE"
 upsert_env "ENFORCE_REGISTER_IP_ON_LOGIN" "false" "$ENV_FILE"
 upsert_env "ENFORCE_REGISTER_SUBNET_ON_LOGIN" "false" "$ENV_FILE"
 
 cd /var/www/ticarnet/current
-bash scripts/vps-deploy.sh --skip-pull
+PUBLIC_BASE_URL="__PUBLIC_BASE_URL__" bash scripts/vps-deploy.sh --skip-pull
 
 echo "[deploy-direct] Server commit: $(git rev-parse --short HEAD 2>/dev/null || echo no-git)"
 curl -fsS http://127.0.0.1:8787/api/health
 '@
+
+$RemoteScript = $RemoteScript.Replace("__PUBLIC_BASE_URL__", $PublicBaseUrl)
 
 $SshArgs = @("-p", "$Port")
 if (Test-Path $KeyPath) {

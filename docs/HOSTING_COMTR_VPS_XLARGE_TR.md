@@ -1,4 +1,4 @@
-﻿# Hosting.com.tr VPS XLarge Kurulum (Web + APK)
+# Hosting.com.tr VPS XLarge Kurulum (Web + APK)
 
 Bu akis, `TicarNet` oyununu ayni backend ile:
 - web (tarayici)
@@ -18,7 +18,7 @@ Hosting.com.tr panelde:
 3. Lokasyon: Turkiye (oyuncu kitlen TR ise)
 4. Root erisimi aktif
 
-Domain gerekiyorsa ornek: `play.ticarnet.com`
+Domain gerekiyorsa ornek: `tr-159ae5.hosting.net.tr`
 
 ## 2) DNS Ayari
 
@@ -54,7 +54,7 @@ Sunucuda:
 cd /var/www/ticarnet/current
 chmod +x scripts/vps-prod-setup.sh scripts/db-backup.sh scripts/vps-deploy.sh
 sudo bash scripts/vps-prod-setup.sh \
-  --domain play.ticarnet.com \
+  --domain tr-159ae5.hosting.net.tr \
   --email admin@senindomain.com
 ```
 
@@ -81,7 +81,7 @@ sudo bash scripts/vps-apply-account-policy.sh \
 ```bash
 sudo -u deploy pm2 status
 curl -s http://127.0.0.1:8787/api/health
-curl -I https://play.ticarnet.com
+curl -I https://tr-159ae5.hosting.net.tr
 sudo fail2ban-client status
 ```
 
@@ -89,7 +89,7 @@ sudo fail2ban-client status
 
 ### 6.1 Web
 Kullanicilar direkt:
-- `https://play.ticarnet.com`
+- `https://tr-159ae5.hosting.net.tr`
 
 ### 6.2 APK (Canli Sunucuya Bagli)
 Bu modda web deploy ettiginde APK otomatik yeni surumu gorur.
@@ -97,7 +97,7 @@ Bu modda web deploy ettiginde APK otomatik yeni surumu gorur.
 Local bilgisayarinda proje klasorunde:
 
 ```bash
-CAP_SERVER_URL=https://play.ticarnet.com npm run android:deploy:live
+CAP_SERVER_URL=https://tr-159ae5.hosting.net.tr npm run android:deploy:live
 ```
 
 ### 6.3 APK (Bundled)
@@ -172,7 +172,7 @@ Calisan link:
 
 Not:
 - Dosya ayni anda web dist altina da kopyalandigi icin ana domainde de calisir:
-  - `https://play.ticarnet.com/download/ticarnet.apk`
+  - `https://tr-159ae5.hosting.net.tr/download/ticarnet.apk`
 
 ### 9.4 DNS zorunlu
 
@@ -180,4 +180,5 @@ Domain panelinde A kaydi:
 - Host: `apk`
 - Type: `A`
 - Value: `VPS_IP`
+
 

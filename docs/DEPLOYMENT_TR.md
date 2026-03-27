@@ -66,9 +66,9 @@ sudo chown -R $USER:$USER /var/lib/ticarnet
 
 ```env
 NODE_ENV=production
-CLIENT_URL=https://play.ticarnet.com
-RESET_LINK_BASE_URL=https://play.ticarnet.com
-CORS_ALLOWED_ORIGINS=https://play.ticarnet.com
+CLIENT_URL=https://tr-159ae5.hosting.net.tr
+RESET_LINK_BASE_URL=https://tr-159ae5.hosting.net.tr
+CORS_ALLOWED_ORIGINS=https://tr-159ae5.hosting.net.tr
 CORS_ALLOW_NO_ORIGIN=true
 HEALTHCHECK_TOKEN=UZUN_VE_GIZLI_BIR_TOKEN
 WS_ALLOW_QUERY_TOKEN=false
@@ -117,7 +117,7 @@ curl http://127.0.0.1:8787/api/health/backup
 curl http://127.0.0.1:8787/api/health/system
 sudo fail2ban-client status
 sudo fail2ban-client status ticarnet-auth-abuse
-bash scripts/vps-load-smoke.sh --url https://play.ticarnet.com/api/health --connections 60 --duration 25
+bash scripts/vps-load-smoke.sh --url https://tr-159ae5.hosting.net.tr/api/health --connections 60 --duration 25
 ```
 
 ## 5) VS Code ile Guncelleme (Hesaplar Korunarak)
@@ -167,7 +167,7 @@ npm run android:install
 Bu modda APK uzaktaki siteyi acar. Web deploy ettiginde APK hemen yeni surumu gorur.
 
 ```bash
-CAP_SERVER_URL=https://play.ticarnet.com npm run android:sync:live
+CAP_SERVER_URL=https://tr-159ae5.hosting.net.tr npm run android:sync:live
 npm run android:install
 ```
 
@@ -189,5 +189,6 @@ Geri yukleme (sadece zorunlu durumda):
 ```bash
 npm run data:restore -- --confirm=RESTORE_TICARNET_DB --i-understand-overwrite
 ```
+
 
 

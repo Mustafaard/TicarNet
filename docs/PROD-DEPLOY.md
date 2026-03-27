@@ -1,10 +1,14 @@
 # TicarNet Production Deploy (Hosting.com.tr VPS)
 
-Bu dokuman, Hosting.com.tr uzerindeki Ubuntu VPS icin TicarNet production kurulumunu ozetler.
+Bu dokuman, Hosting.com.tr uzerindeki su an aktif VPS icin TicarNet production kurulumunu ozetler:
+
+- Hostname: `tr-159ae5.hosting.net.tr`
+- IP: `178.210.161.210`
+- Isletim sistemi: Ubuntu 20.04
 
 ## 1) On Kosullar
 
-- Ubuntu 22.04 LTS veya 24.04 LTS
+- Ubuntu 20.04 / 22.04 / 24.04
 - Root veya sudo yetkili bir kullanici
 - Domain DNS A kaydi sunucu IP'sine yonlenmis olmali
 - GitHub repository erisimi
@@ -20,7 +24,7 @@ Proje klasorunde calistir:
 
 ```bash
 sudo bash scripts/vps-prod-setup.sh \
-  --domain ALANADI \
+  --domain tr-159ae5.hosting.net.tr \
   --email MAIL@ALANADI \
   --repo-url https://github.com/<org>/<repo>.git \
   --branch main \
@@ -62,6 +66,14 @@ SMTP_APP_PASSWORD=<gmail-app-password>
 MAIL_FROM="TicarNet Online <mustafaard76@gmail.com>"
 
 SUPPORT_INBOX_EMAIL=mustafaard76@gmail.com
+```
+
+Hostname ile hizli baslangic:
+
+```env
+CLIENT_URL=https://tr-159ae5.hosting.net.tr
+RESET_LINK_BASE_URL=https://tr-159ae5.hosting.net.tr
+CORS_ALLOWED_ORIGINS=https://tr-159ae5.hosting.net.tr
 ```
 
 ## 4) E-posta akislari

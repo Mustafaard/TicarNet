@@ -63,7 +63,7 @@ function buildNextConfig(current, mode, liveUrl) {
   }
 
   if (!liveUrl) {
-    fail('Live mod icin URL zorunlu. Ornek: CAP_SERVER_URL=https://play.ticarnet.com')
+    fail('Live mod icin URL zorunlu. Ornek: CAP_SERVER_URL=https://tr-159ae5.hosting.net.tr')
   }
 
   const parsed = new URL(liveUrl)
@@ -96,3 +96,4 @@ async function main() {
 main().catch((error) => {
   fail(`Beklenmeyen hata: ${error.message}`)
 })
+

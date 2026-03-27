@@ -71,7 +71,7 @@ npm run ship:mobile
 ```
 
 Deploy sonrasi APK linki:
-- `http://SUNUCU_IP/download/ticarnet.apk`
+- `http://178.210.161.210/download/ticarnet.apk`
 
 ## 5) Kontrol komutlari
 
@@ -89,6 +89,7 @@ GitHub:
 Windows PowerShell'de kontrol komutlari:
 
 ```powershell
-curl.exe -s "http://SUNUCU_IP/api/health"
-curl.exe -I "http://SUNUCU_IP/download/ticarnet.apk"
+curl.exe -s "http://178.210.161.210/api/health"
+curl.exe -I "http://178.210.161.210/download/ticarnet.apk"
 ```
+
