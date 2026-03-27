@@ -769,7 +769,8 @@ function mineCooldownMs(template) {
 }
 
 function mineCostCash(template) {
-  return Math.max(0, asInt(template?.costCash, 0))
+  const baseCost = Math.max(0, asInt(template?.costCash, 0))
+  return Math.max(0, baseCost * 3)
 }
 
 function mineRandomOutput(profile, template, timestamp) {
@@ -779,6 +780,7 @@ function mineRandomOutput(profile, template, timestamp) {
   if (isPremiumActive(profile, timestamp)) {
     amount = Math.floor(amount * MINE_PREMIUM_MULTIPLIER)
   }
+  amount = Math.floor(amount / 2)
   return Math.max(1, amount)
 }
 

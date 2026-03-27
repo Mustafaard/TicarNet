@@ -14,10 +14,12 @@ import {
   getModerationQueues,
   grantAdminCash,
   grantAdminDiamonds,
+  grantAdminResource,
   resolveAdminUser,
   restoreAdminAnnouncement,
   revokeAdminCash,
   revokeAdminDiamonds,
+  revokeAdminResource,
   searchAdminUsers,
   setAdminChatBlock,
   setAdminMute,
@@ -135,6 +137,11 @@ function AdminPage({ user, onLogout }) {
   const [diaAddReason, setDiaAddReason] = useState('')
   const [diaSub, setDiaSub] = useState('')
   const [diaSubReason, setDiaSubReason] = useState('')
+  const [resourceItemId, setResourceItemId] = useState('')
+  const [resourceAddAmount, setResourceAddAmount] = useState('')
+  const [resourceAddReason, setResourceAddReason] = useState('')
+  const [resourceSubAmount, setResourceSubAmount] = useState('')
+  const [resourceSubReason, setResourceSubReason] = useState('')
 
   const [chatHours, setChatHours] = useState('1')
   const [chatReason, setChatReason] = useState('')
@@ -187,9 +194,15 @@ function AdminPage({ user, onLogout }) {
   const canDiaGrant = perms.has('diamond_grant') && Boolean(cap?.flags?.diamondGrantEnabled)
   const canCashRevoke = perms.has('cash_revoke')
   const canDiaRevoke = perms.has('diamond_revoke')
+  const canResourceGrant = perms.has('resource_grant')
+  const canResourceRevoke = perms.has('resource_revoke')
   const canCredentialManage = perms.has('user_credentials_manage')
   const canRoleManage = perms.has('role_manage')
   const canAnnouncementManage = perms.has('announcement_manage')
+  const resourceCatalog = useMemo(
+    () => (Array.isArray(cap?.resourceCatalog) ? cap.resourceCatalog : []),
+    [cap],
+  )
 
   const normalizedQuery = String(searchQuery || '').trim()
   const effectiveLogRole = isAdmin ? String(logActorRole || '').trim().toLowerCase() : ''
@@ -453,6 +466,17 @@ function AdminPage({ user, onLogout }) {
     setPasswordReason('')
   }, [selected?.id, selected?.email])
 
+  useEffect(() => {
+    if (!resourceCatalog.length) {
+      setResourceItemId('')
+      return
+    }
+    const exists = resourceCatalog.some((entry) => String(entry?.id || '').trim() === resourceItemId)
+    if (!exists) {
+      setResourceItemId(String(resourceCatalog[0]?.id || '').trim())
+    }
+  }, [resourceCatalog, resourceItemId])
+
   const selectUser = async (entry) => {
     if (!entry) return
     clearFeedback()
@@ -513,6 +537,52 @@ function AdminPage({ user, onLogout }) {
     }
 
     setNotice(res.message || 'İşlem tamamlandı.')
+    await reloadAll()
+  }
+
+  const runResourceInventory = async (mode) => {
+    if (!selected || busy) return
+    clearFeedback()
+
+    const isGrant = mode === 'grant'
+    const amountRaw = isGrant ? resourceAddAmount : resourceSubAmount
+    const reasonRaw = isGrant ? resourceAddReason : resourceSubReason
+    const amount = toInt(amountRaw, 0)
+    const reason = String(reasonRaw || '').trim()
+    const itemId = String(resourceItemId || '').trim()
+    const itemName = String(
+      resourceCatalog.find((entry) => String(entry?.id || '').trim() === itemId)?.name || itemId || 'kaynak',
+    ).trim()
+
+    if (!itemId) return void setError('Önce bir kaynak seçmelisin.')
+    if (amount <= 0) return void setError('Miktar sıfırdan büyük olmalı.')
+    if (reason.length < 3) return void setError('Neden en az 3 karakter olmalı.')
+
+    const confirmText = isGrant
+      ? `${selected.username} deposuna ${amount} ${itemName} eklensin mi?`
+      : `${selected.username} deposundan ${amount} ${itemName} düşürülsün mü?`
+    if (!window.confirm(confirmText)) return
+
+    const fn = isGrant ? grantAdminResource : revokeAdminResource
+    const busyKey = isGrant ? 'resource-grant' : 'resource-revoke'
+    setBusy(busyKey)
+    const res = await fn(selected.username, selected.id, itemId, amount, reason)
+    setBusy('')
+
+    if (!res?.success) {
+      if (!handleAccessLoss(res, 'Depo işlemi başarısız.')) setError(msgText(res, 'Depo işlemi başarısız.'))
+      return
+    }
+
+    if (isGrant) {
+      setResourceAddAmount('')
+      setResourceAddReason('')
+    } else {
+      setResourceSubAmount('')
+      setResourceSubReason('')
+    }
+
+    setNotice(res.message || 'Depo işlemi tamamlandı.')
     await reloadAll()
   }
 
@@ -1078,7 +1148,7 @@ function AdminPage({ user, onLogout }) {
         </section>
       ) : null}
 
-      {isAdmin && (canCashGrant || canDiaGrant || canCashRevoke || canDiaRevoke) ? (
+      {isAdmin && (canCashGrant || canDiaGrant || canCashRevoke || canDiaRevoke || canResourceGrant || canResourceRevoke) ? (
         <section className="admin-card">
           <h2>3) Ekonomi İşlemleri</h2>
           <div className="admin-economy-grid">
@@ -1119,6 +1189,46 @@ function AdminPage({ user, onLogout }) {
                     <button type="button" className="btn-danger" disabled={!selected || busy === 'dia-revoke'} onClick={() => void runEconomy('revoke', 'diamond')}>{busy === 'dia-revoke' ? 'İşleniyor...' : 'Elmas Düş'}</button>
                   </div>
                 ) : null}
+              </article>
+            ) : null}
+
+            {(canResourceGrant || canResourceRevoke) ? (
+              <article className="admin-economy-card">
+                <div className="admin-economy-head"><img className="admin-economy-icon" src="/home/icons/depot/capacity.png" alt="" /><h3>Depo Kaynakları</h3></div>
+                {resourceCatalog.length ? (
+                  <>
+                    <div className="admin-resource-row">
+                      <label htmlFor="admin-resource-item">Kaynak Seçimi</label>
+                      <select
+                        id="admin-resource-item"
+                        value={resourceItemId}
+                        onChange={(event) => setResourceItemId(event.target.value)}
+                      >
+                        {resourceCatalog.map((entry) => (
+                          <option key={entry.id} value={entry.id}>{entry.name} ({entry.id})</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {canResourceGrant ? (
+                      <div className="admin-row admin-row-compact">
+                        <input type="number" value={resourceAddAmount} onChange={(e) => setResourceAddAmount(e.target.value)} placeholder="Eklenecek miktar" />
+                        <input type="text" value={resourceAddReason} onChange={(e) => setResourceAddReason(e.target.value)} placeholder="Neden" maxLength={160} />
+                        <button type="button" disabled={!selected || busy === 'resource-grant'} onClick={() => void runResourceInventory('grant')}>{busy === 'resource-grant' ? 'İşleniyor...' : 'Kaynak Ekle'}</button>
+                      </div>
+                    ) : null}
+
+                    {canResourceRevoke ? (
+                      <div className="admin-row admin-row-compact">
+                        <input type="number" value={resourceSubAmount} onChange={(e) => setResourceSubAmount(e.target.value)} placeholder="Düşülecek miktar" />
+                        <input type="text" value={resourceSubReason} onChange={(e) => setResourceSubReason(e.target.value)} placeholder="Neden" maxLength={160} />
+                        <button type="button" className="btn-danger" disabled={!selected || busy === 'resource-revoke'} onClick={() => void runResourceInventory('revoke')}>{busy === 'resource-revoke' ? 'İşleniyor...' : 'Kaynak Düş'}</button>
+                      </div>
+                    ) : null}
+                  </>
+                ) : (
+                  <p className="admin-inline-note">Kaynak kataloğu yüklenemedi.</p>
+                )}
               </article>
             ) : null}
           </div>

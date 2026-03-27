@@ -40,6 +40,9 @@ const AUTO_BACKUP_SUFFIX = '.json'
 let writeQueue = Promise.resolve()
 let autoBackupQueue = Promise.resolve()
 let backupPolicyReady = false
+let readDbInFlight = null
+let cachedDbSnapshot = null
+let cachedDbSnapshotAtMs = 0
 export const NO_DB_WRITE = Symbol('NO_DB_WRITE')
 const RETRIABLE_FS_ERROR_CODES = new Set([
   'EBUSY',
@@ -54,8 +57,31 @@ const DB_IO_MAX_RETRIES = 12
 const DB_IO_RETRY_BASE_MS = 60
 const DB_IO_RETRY_MAX_MS = 1500
 
+function cloneDbShape(value) {
+  if (typeof structuredClone === 'function') {
+    return structuredClone(value)
+  }
+  return JSON.parse(JSON.stringify(value))
+}
+
+function invalidateReadCache() {
+  cachedDbSnapshot = null
+  cachedDbSnapshotAtMs = 0
+}
+
+function updateReadCache(nextDb) {
+  const normalized = normalizeDbShape(nextDb)
+  cachedDbSnapshot = cloneDbShape(normalized)
+  cachedDbSnapshotAtMs = Date.now()
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
+function asInt(value, fallback = 0) {
+  const n = Number(value)
+  return Number.isFinite(n) ? Math.trunc(n) : fallback
 }
 
 function stripUtf8Bom(value) {
@@ -495,8 +521,7 @@ function normalizeDbShape(raw) {
   return normalized
 }
 
-export async function readDb() {
-  await ensureDbFile()
+async function readDbFromDisk() {
   const raw = await withDbIoRetry(
     () => fs.readFile(config.dbFilePath, 'utf8'),
     'read-db',
@@ -556,6 +581,37 @@ export async function readDb() {
   }
 }
 
+export async function readDb() {
+  await ensureDbFile()
+
+  const ttlMs = Math.max(0, asInt(config.dbReadCacheTtlMs, 0))
+  const nowMs = Date.now()
+  if (
+    ttlMs > 0 &&
+    cachedDbSnapshot &&
+    cachedDbSnapshotAtMs > 0 &&
+    nowMs - cachedDbSnapshotAtMs <= ttlMs
+  ) {
+    return cloneDbShape(cachedDbSnapshot)
+  }
+
+  if (!readDbInFlight) {
+    readDbInFlight = readDbFromDisk()
+  }
+
+  try {
+    const nextDb = await readDbInFlight
+    if (ttlMs > 0) {
+      updateReadCache(nextDb)
+    } else {
+      invalidateReadCache()
+    }
+    return cloneDbShape(nextDb)
+  } finally {
+    readDbInFlight = null
+  }
+}
+
 function dbStateCounters(db) {
   return {
     users: Array.isArray(db?.users) ? db.users.length : 0,
@@ -593,10 +649,12 @@ function shouldBlockEmptyUserStateWrite(previousDb, nextDb) {
 
 export async function writeDb(nextDb) {
   await ensureDbFile()
-  const payload = JSON.stringify(normalizeDbShape(nextDb), null, 2)
+  const normalized = normalizeDbShape(nextDb)
+  const payload = JSON.stringify(normalized, null, 2)
   await writeFileAtomic(config.dbFilePath, payload, 'write-db')
   await writeSnapshot(payload)
   await writeRollingBackup(payload)
+  updateReadCache(normalized)
 }
 
 async function createDbAutoBackupInternal() {

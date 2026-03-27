@@ -18,8 +18,10 @@ import {
   listAdminUsers,
   grantAdminCash,
   grantAdminDiamonds,
+  grantAdminResource,
   revokeAdminCash,
   revokeAdminDiamonds,
+  revokeAdminResource,
   restoreAdminAnnouncement,
   resolveAdminUser,
   searchAdminUsers,
@@ -159,6 +161,24 @@ adminRouter.post('/economy/cash/revoke', async (req, res, next) => {
 adminRouter.post('/economy/diamond/revoke', async (req, res, next) => {
   try {
     const result = await revokeAdminDiamonds(req.auth.userId, req.body || {})
+    sendResult(res, result)
+  } catch (error) {
+    next(error)
+  }
+})
+
+adminRouter.post('/economy/resource/grant', async (req, res, next) => {
+  try {
+    const result = await grantAdminResource(req.auth.userId, req.body || {})
+    sendResult(res, result)
+  } catch (error) {
+    next(error)
+  }
+})
+
+adminRouter.post('/economy/resource/revoke', async (req, res, next) => {
+  try {
+    const result = await revokeAdminResource(req.auth.userId, req.body || {})
     sendResult(res, result)
   } catch (error) {
     next(error)

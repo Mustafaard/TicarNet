@@ -194,6 +194,7 @@ export const config = {
   dbAutoBackupKeepCount: toNonNegativeInt(process.env.DB_AUTO_BACKUP_KEEP_COUNT, 1),
   dbSingleBackupMode: toBoolean(process.env.DB_SINGLE_BACKUP_MODE, true),
   dbRollingBackupEnabled: toBoolean(process.env.DB_ROLLING_BACKUP_ENABLED, true),
+  dbReadCacheTtlMs: toNonNegativeInt(process.env.DB_READ_CACHE_TTL_MS, 350, 60_000),
   dbRollingBackupFilePath:
     process.env.DB_ROLLING_BACKUP_FILE_PATH ||
     path.resolve(resolvedDbRootDir, 'backups', 'db-rolling.json'),

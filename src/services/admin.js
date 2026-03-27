@@ -191,6 +191,36 @@ export async function revokeAdminDiamonds(targetLookup, targetUserId, amount, re
   })
 }
 
+export async function grantAdminResource(targetLookup, targetUserId, itemId, amount, reason) {
+  return adminRequest('/admin/economy/resource/grant', {
+    method: 'POST',
+    body: {
+      requestId: createRequestId(),
+      targetLookup,
+      targetUsername: targetLookup,
+      targetUserId,
+      itemId,
+      amount,
+      reason,
+    },
+  })
+}
+
+export async function revokeAdminResource(targetLookup, targetUserId, itemId, amount, reason) {
+  return adminRequest('/admin/economy/resource/revoke', {
+    method: 'POST',
+    body: {
+      requestId: createRequestId(),
+      targetLookup,
+      targetUsername: targetLookup,
+      targetUserId,
+      itemId,
+      amount,
+      reason,
+    },
+  })
+}
+
 export async function setAdminChatBlock(targetLookup, targetUserId, durationMinutes, reason) {
   return adminRequest('/admin/moderation/chat-block', {
     method: 'POST',

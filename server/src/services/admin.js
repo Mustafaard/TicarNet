@@ -7,6 +7,7 @@ import { getGameOverview } from '../game/service.js'
 import { getRequestMetricsSummary } from '../middleware/requestMetrics.js'
 import { getBackupHealthSummary, getProcessHealthSummary } from './systemHealth.js'
 import {
+  ITEM_CATALOG,
   MAX_NOTIFICATION_HISTORY,
   MAX_PUSH_HISTORY,
 } from '../game/constants.js'
@@ -65,6 +66,8 @@ const PERM = Object.freeze({
   DIAMOND_GRANT: 'diamond_grant',
   CASH_REVOKE: 'cash_revoke',
   DIAMOND_REVOKE: 'diamond_revoke',
+  RESOURCE_GRANT: 'resource_grant',
+  RESOURCE_REVOKE: 'resource_revoke',
   USER_CREDENTIALS_MANAGE: 'user_credentials_manage',
   ROLE_MANAGE: 'role_manage',
   ANNOUNCEMENT_MANAGE: 'announcement_manage',
@@ -87,10 +90,23 @@ const ADMIN_PERMS = new Set([
   PERM.DIAMOND_GRANT,
   PERM.CASH_REVOKE,
   PERM.DIAMOND_REVOKE,
+  PERM.RESOURCE_GRANT,
+  PERM.RESOURCE_REVOKE,
   PERM.USER_CREDENTIALS_MANAGE,
   PERM.ROLE_MANAGE,
   PERM.ANNOUNCEMENT_MANAGE,
 ])
+
+const RESOURCE_CATALOG = Object.freeze(
+  ITEM_CATALOG
+    .filter((entry) => entry && typeof entry === 'object')
+    .map((entry) => ({
+      id: String(entry.id || '').trim(),
+      name: String(entry.name || entry.id || '').trim() || String(entry.id || '').trim(),
+    }))
+    .filter((entry) => entry.id),
+)
+const RESOURCE_NAME_BY_ID = new Map(RESOURCE_CATALOG.map((entry) => [entry.id, entry.name]))
 
 function nowIso() {
   return new Date().toISOString()
@@ -302,6 +318,21 @@ function validateAmount(value) {
   return { ok: true, value: amount }
 }
 
+function normalizeItemId(value) {
+  return String(value || '').trim().toLowerCase()
+}
+
+function validateResourceItemId(value) {
+  const itemId = normalizeItemId(value)
+  if (!itemId) {
+    return { ok: false, result: fail('validation', 'Kaynak seçimi zorunlu.') }
+  }
+  if (!RESOURCE_NAME_BY_ID.has(itemId)) {
+    return { ok: false, result: fail('validation', 'Geçersiz kaynak seçildi.') }
+  }
+  return { ok: true, value: itemId }
+}
+
 function parseFuture(value, nowMs = Date.now()) {
   const iso = String(value || '').trim()
   if (!iso) return ''
@@ -424,6 +455,47 @@ function findProfileByUserId(db, userId) {
   return (db.gameProfiles || []).find((entry) => String(entry?.userId || '').trim() === uid) || null
 }
 
+function ensureProfileInventory(profile) {
+  if (!profile || typeof profile !== 'object') return
+  if (!Array.isArray(profile.inventory)) profile.inventory = []
+}
+
+function getInventoryQuantity(profile, itemId) {
+  ensureProfileInventory(profile)
+  const safeItemId = normalizeItemId(itemId)
+  if (!safeItemId) return 0
+  const entry = profile.inventory.find((item) => normalizeItemId(item?.itemId) === safeItemId)
+  return Math.max(0, asInt(entry?.quantity, 0))
+}
+
+function addInventoryItem(profile, itemId, quantity) {
+  ensureProfileInventory(profile)
+  const safeItemId = normalizeItemId(itemId)
+  const safeQuantity = Math.max(0, asInt(quantity, 0))
+  if (!safeItemId || safeQuantity <= 0) return
+  const entry = profile.inventory.find((item) => normalizeItemId(item?.itemId) === safeItemId)
+  if (!entry) {
+    profile.inventory.push({ itemId: safeItemId, quantity: safeQuantity })
+    return
+  }
+  entry.quantity = Math.max(0, asInt(entry.quantity, 0)) + safeQuantity
+}
+
+function removeInventoryItem(profile, itemId, quantity) {
+  ensureProfileInventory(profile)
+  const safeItemId = normalizeItemId(itemId)
+  const safeQuantity = Math.max(0, asInt(quantity, 0))
+  if (!safeItemId || safeQuantity <= 0) return true
+  const entry = profile.inventory.find((item) => normalizeItemId(item?.itemId) === safeItemId)
+  const current = Math.max(0, asInt(entry?.quantity, 0))
+  if (!entry || current < safeQuantity) return false
+  entry.quantity = Math.max(0, current - safeQuantity)
+  if (entry.quantity <= 0) {
+    profile.inventory = profile.inventory.filter((item) => normalizeItemId(item?.itemId) !== safeItemId)
+  }
+  return true
+}
+
 function ensureProfileMessages(profile) {
   if (!profile || typeof profile !== 'object') return
   if (!Array.isArray(profile.notifications)) profile.notifications = []
@@ -439,6 +511,13 @@ function buildEconomyNotice(kind, mode, amount, reason, actorName) {
     return `Yönetim işlemi: hesabından ${amount} ${unit} düşürüldü. Neden: ${reason}. İşlem: ${actorName}.`
   }
   return `Yönetim işlemi: hesabına ${amount} ${unit} eklendi. Neden: ${reason}. İşlem: ${actorName}.`
+}
+
+function buildResourceNotice(itemName, mode, amount, reason, actorName) {
+  if (mode === 'revoke') {
+    return `Yönetim işlemi: depodan ${amount} ${itemName} düşürüldü. Neden: ${reason}. İşlem: ${actorName}.`
+  }
+  return `Yönetim işlemi: depoya ${amount} ${itemName} eklendi. Neden: ${reason}. İşlem: ${actorName}.`
 }
 
 function formatPenaltyDuration(minutesValue) {
@@ -668,6 +747,7 @@ export async function getAdminCapabilities(actorUserId) {
     actor: { id: actor.actor.id, username: actor.actor.username, email: actor.actor.email, role: actor.role },
     permissions: Array.from(actor.role === USER_ROLES.ADMIN ? ADMIN_PERMS : MOD_PERMS),
     flags: { diamondGrantEnabled: Boolean(config.adminDiamondGrantEnabled) },
+    resourceCatalog: RESOURCE_CATALOG,
   }
 }
 
@@ -1593,6 +1673,204 @@ export async function revokeAdminCash(actorUserId, payload = {}) {
 }
 export async function revokeAdminDiamonds(actorUserId, payload = {}) {
   return adjustEconomy(actorUserId, payload, 'diamond', 'revoke')
+}
+
+async function adjustResourceInventory(actorUserId, payload, mode = 'grant') {
+  const amountCheck = validateAmount(payload?.amount)
+  if (!amountCheck.ok) return amountCheck.result
+  const reasonCheck = validateReason(payload?.reason)
+  if (!reasonCheck.ok) return reasonCheck.result
+  const itemCheck = validateResourceItemId(payload?.itemId)
+  if (!itemCheck.ok) return itemCheck.result
+
+  const targetLookup = String(payload?.targetLookup || payload?.targetIdentifier || payload?.targetUsername || payload?.targetEmail || '').trim()
+  const targetUserId = String(payload?.targetUserId || '').trim()
+  const requestId = String(payload?.requestId || '').trim()
+  const itemId = itemCheck.value
+  const itemName = RESOURCE_NAME_BY_ID.get(itemId) || itemId
+
+  const preDb = await readDb()
+  const preTarget = resolveTarget(preDb, payload)
+  if (!preTarget.ok) return preTarget.result
+  if (!(await getGameOverview(preTarget.target.id))?.success) {
+    return fail('not_found', 'Hedef oyuncu profili bulunamadı.')
+  }
+
+  let result
+  await updateDb((db) => {
+    const actor = actorPayload(db, actorUserId)
+    if (!actor.ok) { result = actor.result; return db }
+
+    const isRevoke = mode === 'revoke'
+    const perm = isRevoke ? PERM.RESOURCE_REVOKE : PERM.RESOURCE_GRANT
+    const action = `resource_${isRevoke ? 'revoke' : 'grant'}`
+    const baseMeta = {
+      requestId,
+      targetLookup,
+      targetUserId,
+      itemId,
+      itemName,
+      amount: amountCheck.value,
+      reason: reasonCheck.value,
+      mode: isRevoke ? 'revoke' : 'grant',
+    }
+
+    const permErr = can(actor.role, perm)
+    if (permErr) {
+      result = permErr
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: permErr.errors.global, meta: baseMeta })
+      return db
+    }
+
+    const req = consumeRequestId(db, actor.actor.id, action, requestId)
+    if (!req.ok) {
+      result = fail(req.reason, req.message)
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: result.errors.global, meta: baseMeta })
+      return db
+    }
+
+    const target = resolveTarget(db, payload)
+    if (!target.ok) {
+      result = target.result
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: result.errors.global, meta: baseMeta })
+      return db
+    }
+
+    if (roleOf(target.target) !== USER_ROLES.PLAYER) {
+      result = fail('forbidden', 'Depo kaynak işlemleri sadece normal oyunculara uygulanabilir.')
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: result.errors.global,
+        targetUserId: target.target.id,
+        targetUsername: target.target.username,
+        targetEmail: target.target.email,
+        meta: baseMeta,
+      })
+      return db
+    }
+
+    const profile = findProfileByUserId(db, target.target.id)
+    if (!profile) {
+      result = fail('not_found', 'Hedef oyuncu profili bulunamadı.')
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: result.errors.global,
+        targetUserId: target.target.id,
+        targetUsername: target.target.username,
+        targetEmail: target.target.email,
+        meta: baseMeta,
+      })
+      return db
+    }
+
+    const before = getInventoryQuantity(profile, itemId)
+    if (isRevoke && before < amountCheck.value) {
+      result = fail('validation', `Hedef oyuncunun deposunda yeterli ${itemName} yok.`)
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: result.errors.global,
+        targetUserId: target.target.id,
+        targetUsername: target.target.username,
+        targetEmail: target.target.email,
+        meta: {
+          ...baseMeta,
+          before,
+        },
+      })
+      return db
+    }
+
+    if (isRevoke) {
+      removeInventoryItem(profile, itemId, amountCheck.value)
+    } else {
+      addInventoryItem(profile, itemId, amountCheck.value)
+    }
+    profile.updatedAt = nowIso()
+
+    const after = getInventoryQuantity(profile, itemId)
+    const actorName = String(actor.actor?.username || actor.actor?.email || 'Yönetim').trim()
+    const notice = sendAdminNotice(db, target.target, {
+      title: 'Yönetim Depo İşlemi',
+      message: buildResourceNotice(itemName, mode, amountCheck.value, reasonCheck.value, actorName),
+      refreshReason: 'admin_resource',
+      meta: {
+        source: 'admin_panel',
+        action,
+        requestId,
+        itemId,
+        itemName,
+        amount: amountCheck.value,
+        reason: reasonCheck.value,
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+      },
+    })
+
+    result = {
+      success: true,
+      message: isRevoke
+        ? `${target.target.username} kullanıcısının deposundan ${amountCheck.value} ${itemName} düşürüldü.`
+        : `${target.target.username} kullanıcısının deposuna ${amountCheck.value} ${itemName} eklendi.`,
+      itemId,
+      itemName,
+      amount: amountCheck.value,
+      before,
+      after,
+      targetUser: { id: target.target.id, username: target.target.username, email: target.target.email },
+      notification: {
+        sent: notice.sent,
+        timestamp: notice.timestamp,
+      },
+    }
+
+    addLog(db, {
+      actorUserId: actor.actor.id,
+      actorUsername: actor.actor.username,
+      actorEmail: actor.actor.email,
+      actorRole: actor.role,
+      action,
+      status: 'success',
+      message: 'Depo kaynak işlemi tamamlandı.',
+      targetUserId: target.target.id,
+      targetUsername: target.target.username,
+      targetEmail: target.target.email,
+      meta: {
+        ...baseMeta,
+        before,
+        after,
+        notificationSent: notice.sent,
+        notificationReason: notice.reason,
+        notificationId: notice.notificationId,
+        pushId: notice.pushId,
+        notificationAt: notice.timestamp,
+      },
+    })
+    return db
+  })
+  return result
+}
+
+export async function grantAdminResource(actorUserId, payload = {}) {
+  return adjustResourceInventory(actorUserId, payload, 'grant')
+}
+export async function revokeAdminResource(actorUserId, payload = {}) {
+  return adjustResourceInventory(actorUserId, payload, 'revoke')
 }
 
 async function moderate(actorUserId, payload, action, perm, applyFn, options = {}) {
