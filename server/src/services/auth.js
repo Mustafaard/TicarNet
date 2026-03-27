@@ -943,7 +943,7 @@ export async function loginUser(payload, meta = {}) {
     return {
       success: false,
       errors: {
-        global: 'Bu hesap sadece ilk kayit yapildigi Wi-Fi/IP uzerinden giris yapabilir.',
+        global: 'Bu hesap yalnızca ilk kayıt yapıldığı Wi-Fi/IP üzerinden giriş yapabilir.',
       },
       user: null,
       reason: 'network_restricted',
@@ -960,7 +960,7 @@ export async function loginUser(payload, meta = {}) {
       success: false,
       errors: {
         global:
-          'Bu hesap sadece ilk kayit yapildigi ag bloğundan giris yapabilir (farkli Wi-Fi engeli).',
+          'Bu hesap yalnızca ilk kayıt yapıldığı ağ bloğundan giriş yapabilir (farklı Wi-Fi engeli).',
       },
       user: null,
       reason: 'network_restricted',
@@ -1097,7 +1097,7 @@ export async function requestPasswordReset(payload, meta) {
           reason: 'mail_unavailable',
           errors: {
             global:
-              'Bu hesap icin sifre sifirlama henuz aktif degil. Once giris yapip tekrar deneyin.',
+              'Bu hesap için şifre sıfırlama henüz aktif değil. Önce giriş yapıp tekrar deneyin.',
           },
         }
       }
@@ -1112,7 +1112,7 @@ export async function requestPasswordReset(payload, meta) {
         reason: 'mail_unavailable',
         errors: {
           global:
-            'Su anda sifre sifirlama baglantisi gonderilemiyor. Lutfen daha sonra tekrar deneyin.',
+            'Şu anda şifre sıfırlama bağlantısı gönderilemiyor. Lütfen daha sonra tekrar deneyin.',
         },
       }
     }
@@ -1121,7 +1121,7 @@ export async function requestPasswordReset(payload, meta) {
       success: true,
       reason: null,
       message:
-        'Sifre sifirlama baglantisi e-posta adresinize gonderildi. Gelen kutunuzu ve spam klasorunu kontrol edin.',
+        'Şifre sıfırlama bağlantısı e-posta adresinize gönderildi. Gelen kutunuzu ve spam klasörünü kontrol edin.',
     }
   }
 

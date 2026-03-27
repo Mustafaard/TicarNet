@@ -195,8 +195,8 @@ export function attachMessageSocketServer(server) {
           errors: {
             global:
               guard.reason === 'payload_too_large'
-                ? 'Mesaj boyutu limiti asildi.'
-                : 'Cok hizli istek gonderdiniz. Lutfen yavaslayin.',
+                ? 'Mesaj boyutu limiti aþýldý.'
+                : 'Çok hýzlý istek gönderdiniz. Lütfen yavaþlayýn.',
           },
         })
         if (guard.reason === 'payload_too_large' || meta.abuseScore >= 3) {
@@ -212,7 +212,7 @@ export function attachMessageSocketServer(server) {
         wsSend(client, {
           type: 'messages:error',
           reason: 'validation',
-          errors: { global: 'Ge\u00e7ersiz mesaj formatÄ±.' },
+          errors: { global: 'Geçersiz mesaj formatý.' },
         })
         return
       }
@@ -302,3 +302,4 @@ export function attachMessageSocketServer(server) {
 
   return wss
 }
+

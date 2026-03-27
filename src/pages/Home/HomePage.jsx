@@ -1294,6 +1294,7 @@ const WEEKLY_EVENT_WEEK_MS = 7 * WEEKLY_EVENT_DAY_MS
 const WEEKLY_EVENT_START_OFFSET_MS = ((23 * 60) + 59) * 60 * 1000
 const WEEKLY_EVENT_WINDOW_DURATION_MS = (2 * WEEKLY_EVENT_DAY_MS) + (60 * 1000)
 const TURKIYE_UTC_OFFSET_MS = 3 * 60 * 60 * 1000
+const TURKIYE_TIMEZONE = 'Europe/Istanbul'
 const WEEKLY_EVENT_ICON_BY_TYPE = {
   xp: '/home/ui/hud/xp-icon.png',
   discount: '/home/icons/depot/cash.png',
@@ -1614,7 +1615,7 @@ function parseSafeDate(value) {
 }
 
 function chatSnippet(value, max = 76) {
-  const text = String(value || '').replace(/\s+/g, ' ').trim()
+  const text = normalizeMojibakeText(String(value || '')).replace(/\s+/g, ' ').trim()
   if (!text) return ''
   return text.length > max ? `${text.slice(0, max)}...` : text
 }
@@ -1711,12 +1712,13 @@ function _relativeChatTime(value) {
 
   const diffHour = Math.floor(diffMin / 60)
   if (diffHour < 24) return `${diffHour} saat önce`
-  if (diffHour < 48) return 'dün'
+  if (diffHour < 48) return 'Dün'
 
   const diffDay = Math.floor(diffHour / 24)
   if (diffDay < 8) return `${diffDay} gün önce`
 
   return date.toLocaleDateString('tr-TR', {
+    timeZone: TURKIYE_TIMEZONE,
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',
@@ -1727,6 +1729,7 @@ function _formatChatDateTime(value) {
   const date = parseSafeDate(value)
   if (!date) return '--.--.-- --:--'
   return date.toLocaleString('tr-TR', {
+    timeZone: TURKIYE_TIMEZONE,
     day: '2-digit',
     month: '2-digit',
     year: '2-digit',
@@ -1923,7 +1926,7 @@ function formatDateTime(value, options = {}) {
   const includeWeekday = options?.includeWeekday === true
 
   const formatterOptions = {
-    timeZone: 'Europe/Istanbul',
+    timeZone: TURKIYE_TIMEZONE,
     day: '2-digit',
     month: 'long',
     year: 'numeric',
@@ -1966,7 +1969,7 @@ function formatAnnouncementDateTime(value) {
   if (Number.isNaN(parsed.getTime())) return '-'
   return parsed
     .toLocaleString('tr-TR', {
-      timeZone: 'Europe/Istanbul',
+      timeZone: TURKIYE_TIMEZONE,
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -2234,6 +2237,32 @@ function messageIconMeta(item) {
 
 const MOJIBAKE_TEXT_PATTERN =
   /(?:\u00c3[\u0080-\u00bf]|\u00c4[\u0080-\u00bf]|\u00c5[\u0080-\u00bf]|\u00c2[\u0080-\u00bf]|\u00e2\u20ac[\u0080-\u00bf]|\u00e2\u20ac\u2122|\u00e2\u20ac\u00a2|\ufffd)/
+const MOJIBAKE_REPLACEMENTS = new Map([
+  ['Ã§', 'ç'],
+  ['Ã‡', 'Ç'],
+  ['Ã¶', 'ö'],
+  ['Ã–', 'Ö'],
+  ['Ã¼', 'ü'],
+  ['Ãœ', 'Ü'],
+  ['Ä±', 'ı'],
+  ['Ä°', 'İ'],
+  ['ÄŸ', 'ğ'],
+  ['Äž', 'Ğ'],
+  ['ÅŸ', 'ş'],
+  ['Åž', 'Ş'],
+  ['â€™', '\''],
+  ['â€œ', '"'],
+  ['â€¦', '...'],
+  ['Â', ''],
+])
+
+function replaceCommonMojibake(value) {
+  let output = String(value ?? '')
+  for (const [broken, fixed] of MOJIBAKE_REPLACEMENTS.entries()) {
+    output = output.split(broken).join(fixed)
+  }
+  return output
+}
 
 function normalizeMojibakeText(value) {
   const safeValue = String(value ?? '')
@@ -2247,12 +2276,12 @@ function normalizeMojibakeText(value) {
       }
       const decoded = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
       if (decoded && decoded !== safeValue) {
-        return decoded
+        return replaceCommonMojibake(decoded)
       }
     } catch {}
   }
 
-  return safeValue
+  return replaceCommonMojibake(safeValue)
 }
 
 function AssetMetric({ icon, label, value, status = '', statusHint = '' }) {
@@ -7530,7 +7559,7 @@ function HomePage({ user, onLogout }) {
   const _chatCooldownHint = MESSAGES_DISABLED
     ? 'Sohbet mesajları kapalı.'
     : chatBlockActive
-      ? `Sohbet engelin var. Kalan sure: ${formatCountdownTr(chatBlockRemainingMs)}.`
+      ? `Sohbet engelin var. Kalan süre: ${formatCountdownTr(chatBlockRemainingMs)}.`
     : chatCooldownActive
       ? `${Math.max(1, Math.ceil(chatCooldownRemainingMs / 1000))} saniye sonra tekrar yazabilirsin.`
       : '5 saniyede bir mesaj gönderebilirsin.'
@@ -14203,7 +14232,17 @@ function HomePage({ user, onLogout }) {
                     <strong>{auction.title}</strong>
                     <p>Satıcı {auction.sellerName || 'Oyuncu'} | Miktar {fmt(auction.quantity || 0)}</p>
                     <p>Teklif {fmt(auction.currentBid || 0)} | Min sonraki {fmt(suggestedBid)}</p>
-                    <p>Bitiş {new Date(auction.endAt).toLocaleTimeString('tr-TR')}</p>
+                    <p>
+                      Bitiş{' '}
+                      {new Date(auction.endAt).toLocaleString('tr-TR', {
+                        timeZone: TURKIYE_TIMEZONE,
+                        day: '2-digit',
+                        month: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      })}
+                    </p>
                     {isMine ? (
                       <p className="muted">Bu artırma sana ait.</p>
                     ) : (
@@ -18525,7 +18564,7 @@ function HomePage({ user, onLogout }) {
               </button>
             </div>
             <p className="chat-report-question">Bu mesajı yetkililere bildirmek istiyor musun?</p>
-            <p className="chat-report-preview">{chatReportModal.text}</p>
+            <p className="chat-report-preview">{normalizeMojibakeText(chatReportModal.text)}</p>
             <div className="chat-report-actions">
               <button
                 type="button"
@@ -18552,7 +18591,7 @@ function HomePage({ user, onLogout }) {
         <section className="chat-report-overlay dm-report-overlay" role="dialog" aria-modal="true" onClick={closeDmReportModal}>
           <article className="chat-report-modal dm-report-modal" onClick={(event) => event.stopPropagation()}>
             <div className="chat-report-header">
-              <h3>DM Mesajı Bildir</h3>
+              <h3>Özel Mesajı Bildir</h3>
               <button
                 type="button"
                 className="chat-report-close"
@@ -18563,7 +18602,7 @@ function HomePage({ user, onLogout }) {
               </button>
             </div>
             <p className="chat-report-question">
-              {dmReportModal.targetUsername} ile konuşmandan bir mesaj seç ve açıklama ekle.
+              {dmReportModal.targetUsername} ile konuşmandan bir mesaj seçin ve açıklama ekleyin.
             </p>
             <label className="dm-report-field">
               <span>Mesaj seç</span>
@@ -18576,7 +18615,7 @@ function HomePage({ user, onLogout }) {
                 }}
                 disabled={busy === 'dm-report'}
               >
-                <option value="">Seç...</option>
+                <option value="">Mesaj seçin...</option>
                 {dmReportMessages.map((entry) => (
                   <option key={entry.id} value={entry.id}>
                     {entry.label}
@@ -18584,9 +18623,11 @@ function HomePage({ user, onLogout }) {
                 ))}
               </select>
             </label>
-            <p className="chat-report-preview dm-report-preview">{dmReportSelectedMessage?.text || 'Mesaj seç...'}</p>
+            <p className="chat-report-preview dm-report-preview">
+              {normalizeMojibakeText(dmReportSelectedMessage?.text || 'Mesaj seçin...')}
+            </p>
             <label className="dm-report-field">
-              <span>Şikayet açıklaması</span>
+              <span>Şikâyet açıklaması</span>
               <textarea
                 className="dm-report-textarea"
                 value={String(dmReportModal.reason || '')}
@@ -18599,7 +18640,7 @@ function HomePage({ user, onLogout }) {
                 disabled={busy === 'dm-report'}
               />
             </label>
-            <p className="dm-report-hint">Bildirim admin loglarına iletilir.</p>
+            <p className="dm-report-hint">Bildirim, yönetici kayıtlarına iletilir.</p>
             <div className="chat-report-actions">
               <button
                 type="button"

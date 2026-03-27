@@ -77,7 +77,7 @@ function msgText(res, fallback) {
 function fmtDate(v) {
   const ms = new Date(v || '').getTime()
   if (!Number.isFinite(ms)) return '-'
-  return new Date(ms).toLocaleString('tr-TR')
+  return new Date(ms).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' })
 }
 
 function fmtRemain(ms) {

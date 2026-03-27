@@ -247,7 +247,7 @@ export function getDeviceId() {
 export async function hasRegisteredUsers() {
   const result = await request('/auth/has-users')
   if (!result?.success) {
-    // Ag/sunucu hatasinda yanlislikla "kayit zorunlu" ekranina dusmeyelim.
+    // Ağ/sunucu hatasında yanlışlıkla "kayıt zorunlu" ekranına düşmeyelim.
     return true
   }
   return Boolean(result.hasUsers)

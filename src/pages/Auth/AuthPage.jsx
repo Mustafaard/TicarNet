@@ -367,9 +367,9 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
         }
 
         setErrors({
-          global: 'Bu hesap bulunamadı. Kayıt ekranına yönlendirildiniz.',
+          global: 'Bu bilgilerle eşleşen bir hesap bulunamadı. Kayıt ekranına yönlendirildiniz.',
         })
-        setNotice('Henüz hesabınız yoksa Kayıt Ol formunu doldurarak yeni hesap açabilirsiniz.')
+        setNotice('Henüz hesabınız yoksa Kayıt Ol formunu doldurarak yeni hesap oluşturabilirsiniz.')
         setMode(AUTH_MODE.REGISTER)
         return
       }
@@ -402,7 +402,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
         setErrors({
           global: 'Şifreyi yanlış girdiniz. Şifremi Unuttum ekranına yönlendirildiniz.',
         })
-        setNotice('E-posta adresinizle şifrenizi sıfırlayıp tekrar giriş yapabilirsiniz.')
+        setNotice('Kayıtlı e-posta adresinizle şifrenizi sıfırlayıp tekrar giriş yapabilirsiniz.')
         setMode(AUTH_MODE.FORGOT)
       }
 
@@ -490,7 +490,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
           }))
         }
         setErrors({
-          global: 'Bu e-posta ile kayıtlı hesap bulunamadı. Kayıt ekranına yönlendirildiniz.',
+          global: 'Bu e-posta adresiyle kayıtlı bir hesap bulunamadı. Kayıt ekranına yönlendirildiniz.',
         })
         setNotice('Hesabınız yoksa Kayıt Ol ekranından yeni hesap oluşturabilirsiniz.')
         setMode(AUTH_MODE.REGISTER)
@@ -503,7 +503,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
     setErrors({})
     setNotice(
       result.message ||
-        'Sıfırlama bağlantısı gönderildi. Bağlantı 3 dakika geçerlidir. Gelen kutunu ve spam klasörünü kontrol et.',
+        'Şifre sıfırlama bağlantısı gönderildi. Bağlantı 3 dakika geçerlidir. Gelen kutunuzu ve spam klasörünü kontrol edin.',
     )
   }
 

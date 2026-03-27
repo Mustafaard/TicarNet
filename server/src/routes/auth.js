@@ -99,7 +99,7 @@ authRouter.get('/me', requireAuth, requireTurkeyAccess, async (req, res, next) =
       res.status(401).json({
         success: false,
         reason: 'unauthorized',
-        errors: { global: 'Oturum bulunamadi.' },
+        errors: { global: 'Oturum bulunamadı.' },
       })
       return
     }
