@@ -8,7 +8,6 @@ const PUBLIC_IP_KEY = 'ticarnet_public_ip'
 const AUTH_NOTICE_KEY = 'ticarnet_auth_notice'
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const AUTH_EMAIL_ALLOWED_DOMAINS = new Set(['gmail.com', 'outlook.com', 'hotmail.com'])
 const USERNAME_MIN_LENGTH = 3
 const USERNAME_MAX_LENGTH = 15
 const USERNAME_PATTERN = /^[A-Z][A-Za-z ]{2,14}$/
@@ -17,13 +16,6 @@ const PASSWORD_MAX_LENGTH = 64
 
 function normalize(value) {
   return value?.trim().toLowerCase() || ''
-}
-
-function isAllowedAuthEmailAddress(email) {
-  const safe = normalize(email)
-  if (!safe.includes('@')) return false
-  const domain = safe.split('@').pop() || ''
-  return AUTH_EMAIL_ALLOWED_DOMAINS.has(domain)
 }
 
 function isStrongEnoughPassword(password) {
@@ -158,8 +150,6 @@ function validateRegisterInput(values) {
     errors.email = 'E-posta zorunludur.'
   } else if (!emailRegex.test(email)) {
     errors.email = 'Geçerli bir e-posta adresi girin.'
-  } else if (!isAllowedAuthEmailAddress(email)) {
-    errors.email = 'Yalnızca Gmail, Outlook veya Hotmail adresleri kullanılabilir.'
   }
 
   if (!password) {
@@ -210,8 +200,6 @@ function validateResetRequestInput(values) {
     errors.email = 'E-posta zorunludur.'
   } else if (!emailRegex.test(email)) {
     errors.email = 'Geçerli bir e-posta adresi girin.'
-  } else if (!isAllowedAuthEmailAddress(email)) {
-    errors.email = 'Yalnızca Gmail, Outlook veya Hotmail adresleri kullanılabilir.'
   }
 
   return errors

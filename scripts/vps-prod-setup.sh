@@ -35,6 +35,8 @@ SMTP_APP_PASSWORD="${SMTP_APP_PASSWORD:-}"
 MAIL_FROM_VALUE="${MAIL_FROM_VALUE:-}"
 SUPPORT_INBOX_EMAIL="${SUPPORT_INBOX_EMAIL:-mustafaard76@gmail.com}"
 PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-}"
+FIREBASE_AUTH_ENABLED_VALUE="${FIREBASE_AUTH_ENABLED_VALUE:-true}"
+FIREBASE_WEB_API_KEY="${FIREBASE_WEB_API_KEY:-}"
 
 usage() {
   cat <<'EOF'
@@ -70,6 +72,10 @@ Opsiyonlar:
   --smtp-pass PASS          --smtp-app-password ile ayni
   --mail-from VALUE         Gonderen basligi (or: "TicarNet Online <mail@alanadiniz.com>")
   --support-inbox-email     Destek taleplerinin gidecegi e-posta (varsayilan: mustafaard76@gmail.com)
+  --firebase-auth-enabled true|false
+                            Firebase Auth ile kayit/giris/sifre reset (varsayilan: true)
+  --firebase-web-api-key KEY
+                            Firebase Web API key (FIREBASE_AUTH_ENABLED=true ise onerilir)
   --skip-ssl                 SSL kurulumunu atla
   --skip-firewall            UFW kurulumunu atla
   --skip-pm2-startup         PM2 systemd startup kurulumunu atla
@@ -174,6 +180,14 @@ while [[ $# -gt 0 ]]; do
       SUPPORT_INBOX_EMAIL="${2:-}"
       shift 2
       ;;
+    --firebase-auth-enabled)
+      FIREBASE_AUTH_ENABLED_VALUE="${2:-true}"
+      shift 2
+      ;;
+    --firebase-web-api-key)
+      FIREBASE_WEB_API_KEY="${2:-}"
+      shift 2
+      ;;
     --skip-ssl)
       ENABLE_SSL=0
       shift
@@ -266,6 +280,11 @@ fi
 
 if [[ "$ENFORCE_REGISTER_SUBNET_ON_LOGIN_VALUE" != "true" && "$ENFORCE_REGISTER_SUBNET_ON_LOGIN_VALUE" != "false" ]]; then
   echo "[vps-setup] Gecersiz --enforce-register-subnet-on-login: $ENFORCE_REGISTER_SUBNET_ON_LOGIN_VALUE (true|false olmali)." >&2
+  exit 1
+fi
+
+if [[ "$FIREBASE_AUTH_ENABLED_VALUE" != "true" && "$FIREBASE_AUTH_ENABLED_VALUE" != "false" ]]; then
+  echo "[vps-setup] Gecersiz --firebase-auth-enabled: $FIREBASE_AUTH_ENABLED_VALUE (true|false olmali)." >&2
   exit 1
 fi
 
@@ -511,6 +530,10 @@ configure_env() {
   upsert_env "CLIENT_URL" "$public_base_url" "$ENV_FILE"
   upsert_env "RESET_LINK_BASE_URL" "$public_base_url" "$ENV_FILE"
   upsert_env "CORS_ALLOWED_ORIGINS" "$public_base_url" "$ENV_FILE"
+  upsert_env "FIREBASE_AUTH_ENABLED" "$FIREBASE_AUTH_ENABLED_VALUE" "$ENV_FILE"
+  if [[ -n "$FIREBASE_WEB_API_KEY" ]]; then
+    upsert_env "FIREBASE_WEB_API_KEY" "$FIREBASE_WEB_API_KEY" "$ENV_FILE"
+  fi
   upsert_env "CORS_ALLOW_NO_ORIGIN" "true" "$ENV_FILE"
   upsert_env "WS_ALLOW_QUERY_TOKEN" "false" "$ENV_FILE"
   upsert_env "MAX_ACCOUNTS_PER_SCOPE" "$MAX_ACCOUNTS_PER_SCOPE" "$ENV_FILE"
@@ -553,13 +576,35 @@ configure_env() {
 }
 
 warn_if_smtp_incomplete() {
+  local firebase_auth_enabled_current
+  local firebase_web_api_key_current
   local smtp_user_current
   local smtp_pass_current
   local mail_from_current
 
+  firebase_auth_enabled_current="$(read_env_value "FIREBASE_AUTH_ENABLED" "$ENV_FILE" || true)"
+  firebase_web_api_key_current="$(read_env_value "FIREBASE_WEB_API_KEY" "$ENV_FILE" || true)"
   smtp_user_current="$(read_env_value "SMTP_USER" "$ENV_FILE" || true)"
   smtp_pass_current="$(read_env_value "SMTP_APP_PASSWORD" "$ENV_FILE" || true)"
   mail_from_current="$(read_env_value "MAIL_FROM" "$ENV_FILE" || true)"
+
+  if [[ "$firebase_auth_enabled_current" == "true" ]]; then
+    if is_placeholder_value "$firebase_web_api_key_current"; then
+      cat <<'EOF'
+[vps-setup] UYARI: FIREBASE_AUTH_ENABLED=true ama FIREBASE_WEB_API_KEY eksik/placeholder.
+[vps-setup] Duzenle:
+  server/.env icinde FIREBASE_WEB_API_KEY
+EOF
+    fi
+
+    if is_placeholder_value "$smtp_user_current" || is_placeholder_value "$smtp_pass_current" || is_placeholder_value "$mail_from_current"; then
+      cat <<'EOF'
+[vps-setup] BILGI: SMTP ayarlari eksik. Auth akislari Firebase ile calisir.
+[vps-setup] Destek e-postalari icin SMTP_USER, SMTP_APP_PASSWORD, MAIL_FROM tanimlayin.
+EOF
+    fi
+    return
+  fi
 
   if is_placeholder_value "$smtp_user_current" || is_placeholder_value "$smtp_pass_current" || is_placeholder_value "$mail_from_current"; then
     cat <<'EOF'

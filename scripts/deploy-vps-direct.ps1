@@ -8,6 +8,8 @@ param(
   [string]$SmtpAppPassword = "",
   [string]$MailFrom = "TicarNet Online <mustafaard76@gmail.com>",
   [string]$SupportInboxEmail = "mustafaard76@gmail.com",
+  [bool]$FirebaseAuthEnabled = $true,
+  [string]$FirebaseWebApiKey = "",
   [switch]$ResetGameData
 )
 
@@ -142,6 +144,7 @@ upsert_env "API_PORT" "8787" "$ENV_FILE"
 upsert_env "CLIENT_URL" "__PUBLIC_BASE_URL__" "$ENV_FILE"
 upsert_env "RESET_LINK_BASE_URL" "__PUBLIC_BASE_URL__" "$ENV_FILE"
 upsert_env "CORS_ALLOWED_ORIGINS" "__PUBLIC_BASE_URL__" "$ENV_FILE"
+upsert_env "FIREBASE_AUTH_ENABLED" "__FIREBASE_AUTH_ENABLED__" "$ENV_FILE"
 upsert_env "SUPPORT_INBOX_EMAIL" "__SUPPORT_INBOX_EMAIL__" "$ENV_FILE"
 upsert_env "SMTP_CONNECTION_TIMEOUT_MS" "10000" "$ENV_FILE"
 upsert_env "SMTP_GREETING_TIMEOUT_MS" "10000" "$ENV_FILE"
@@ -160,6 +163,9 @@ if [ -n "__SMTP_APP_PASSWORD__" ]; then
 fi
 if [ -n "__MAIL_FROM__" ]; then
   upsert_env "MAIL_FROM" "__MAIL_FROM__" "$ENV_FILE"
+fi
+if [ -n "__FIREBASE_WEB_API_KEY__" ]; then
+  upsert_env "FIREBASE_WEB_API_KEY" "__FIREBASE_WEB_API_KEY__" "$ENV_FILE"
 fi
 
 if [ "__RESET_GAME_DATA__" = "1" ]; then
@@ -191,6 +197,8 @@ $RemoteScript = $RemoteScript.Replace("__SMTP_USER__", (Escape-BashDoubleQuoted 
 $RemoteScript = $RemoteScript.Replace("__SMTP_APP_PASSWORD__", (Escape-BashDoubleQuoted $SmtpAppPassword))
 $RemoteScript = $RemoteScript.Replace("__MAIL_FROM__", (Escape-BashDoubleQuoted $MailFrom))
 $RemoteScript = $RemoteScript.Replace("__SUPPORT_INBOX_EMAIL__", (Escape-BashDoubleQuoted $SupportInboxEmail))
+$RemoteScript = $RemoteScript.Replace("__FIREBASE_AUTH_ENABLED__", (if ($FirebaseAuthEnabled) { "true" } else { "false" }))
+$RemoteScript = $RemoteScript.Replace("__FIREBASE_WEB_API_KEY__", (Escape-BashDoubleQuoted $FirebaseWebApiKey))
 $RemoteScript = $RemoteScript.Replace("__RESET_GAME_DATA__", $(if ($ResetGameData.IsPresent) { "1" } else { "0" }))
 
 $SshArgs = @("-p", "$Port")

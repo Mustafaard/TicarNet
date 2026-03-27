@@ -1,35 +1,32 @@
-﻿TicarNet Online - Kimlik doğrulama ve şifre sıfırlama kurulumu
+TicarNet Online - Kimlik dogrulama kurulumu (Firebase Auth)
 
-1) Görsel dosyaları
-- Auth arka planı: public/auth/auth-background.png
-- Splash logosu: public/splash/logo.png
-- Splash arka planı: public/splash/background.jpg
+1) Onerilen yapi
+- Kayit / giris / sifremi unuttum: Firebase Authentication
+- Destek talepleri e-postasi: SMTP (opsiyonel, yoksa ticket kuyrukta kalir)
 
-2) Sunucu ayarı
-- server/.env.example dosyasını server/.env olarak kopyalayın.
-- Aşağıdaki alanları doldurun:
-  - SMTP_USER=mustafaard76@gmail.com
-  - SMTP_PASS=Gmail App Password (16 haneli)
-  - MAIL_FROM="TicarNet Online <mustafaard76@gmail.com>"
-  - JWT_SECRET=uzun-gizli-anahtar
-  - JWT_EXPIRES=30d
-  - ADMIN_EMAILS=mustafaard76@gmail.com
+2) Zorunlu ortam degiskenleri (auth icin)
+- FIREBASE_AUTH_ENABLED=true
+- FIREBASE_WEB_API_KEY=<Firebase Web API Key>
+- CLIENT_URL=https://alanadiniz
+- RESET_LINK_BASE_URL=https://alanadiniz
+- CORS_ALLOWED_ORIGINS=https://alanadiniz
+- JWT_SECRET=<en az 32 karakter>
+- HEALTHCHECK_TOKEN=<en az 16 karakter>
 
-3) Çalıştırma
-- Tüm sistemi birlikte çalıştırın:
-  npm run dev:all
-- Yalnızca API için:
-  npm run dev:api
+3) Opsiyonel SMTP (destek e-postasi icin)
+- SMTP_USER=mustafaard76@gmail.com
+- SMTP_APP_PASSWORD=<gmail app password>
+- MAIL_FROM="TicarNet Online <mustafaard76@gmail.com>"
+- SUPPORT_INBOX_EMAIL=mustafaard76@gmail.com
 
-4) Şifremi unuttum akışı
-- Oyuncu e-posta adresini girer.
-- Backend, SMTP ile şifre sıfırlama bağlantısı gönderir.
-- Bağlantı adresi, talebin geldiği cihaz/origin adresine göre üretilir.
-- E-posta bağlantısı uygulamayı token ile açar.
-- Oyuncu yeni şifresini belirler ve backend token doğrulamasını tamamlayarak şifreyi günceller.
+Not: SMTP kapaliysa auth akislarinda sorun olmaz, ancak destek ticket e-postasi otomatik gitmez.
 
-5) Güvenlik kuralları
-- Yalnızca Gmail, Outlook veya Hotmail adresleri kabul edilir.
-- Aynı cihaz, yerel ağ (Wi-Fi alt ağı), istemci public IP ve sunucunun gördüğü IP kapsamında en fazla 2 hesap oluşturulabilir.
-- Şifreler backend tarafında hashlenir.
-- Sıfırlama token'ları tek kullanımlıktır ve süre sınırlıdır.
+4) Sifremi unuttum akisi
+- Oyuncu e-postayi girer.
+- Backend Firebase'e PASSWORD_RESET istegi yollar.
+- Firebase kullaniciya e-posta gonderir.
+- Kullanici linkten donunce frontend tokeni backend'e verir.
+- Backend Firebase uzerinden tokeni dogrular ve yeni sifreyi kaydeder.
+
+5) E-posta kurali
+- Tum gecerli e-posta domainleri desteklenir.

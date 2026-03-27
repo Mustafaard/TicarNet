@@ -8,12 +8,20 @@ import {
   emailRegex,
   generateSecureToken,
   hashToken,
-  isAllowedAuthEmailAddress,
   normalize,
   publicUser,
 } from '../utils.js'
 import { sendPasswordResetEmail } from './mailer.js'
 import { USER_ROLES, normalizeUserRole } from './roles.js'
+import {
+  firebaseConfirmPasswordReset,
+  firebaseLoginWithEmailPassword,
+  firebaseRegisterWithEmailPassword,
+  firebaseSendPasswordResetEmail,
+  firebaseVerifyPasswordResetCode,
+  getFirebaseAuthResetContinueUrl,
+  isFirebaseAuthEnabled,
+} from './firebaseAuth.js'
 
 const PASSWORD_MIN_LENGTH = 8
 const PASSWORD_MAX_LENGTH = 64
@@ -166,8 +174,6 @@ function validateRegisterPayload(payload) {
     errors.email = 'E-posta zorunludur.'
   } else if (!emailRegex.test(email)) {
     errors.email = 'Geçerli bir e-posta adresi girin.'
-  } else if (!isAllowedAuthEmailAddress(email)) {
-    errors.email = 'Yalnızca Gmail, Outlook veya Hotmail adresleri kullanılabilir.'
   }
 
   if (!password) {
@@ -204,8 +210,6 @@ function validatePasswordResetRequestPayload(payload) {
     errors.email = 'E-posta zorunludur.'
   } else if (!emailRegex.test(email)) {
     errors.email = 'Geçerli bir e-posta adresi girin.'
-  } else if (!isAllowedAuthEmailAddress(email)) {
-    errors.email = 'Yalnızca Gmail, Outlook veya Hotmail adresleri kullanılabilir.'
   }
 
   return errors
@@ -582,13 +586,90 @@ export async function registerUser(payload, meta) {
   const normalizedAppOrigin = normalizeHttpOrigin(payload.appOrigin || '')
   const username = payload.username.trim()
   const email = normalize(payload.email)
-  const passwordHash = await bcrypt.hash(payload.password, PASSWORD_HASH_ROUNDS)
   const deviceId = payload.deviceId?.trim() || 'unknown-device'
   const ip = meta.ip || 'unknown'
   const publicIp = ip
   const localSubnetFromOrigin = subnetFromOrigin(payload.appOrigin || '')
   const localSubnet =
     localSubnetFromOrigin !== 'unknown' ? localSubnetFromOrigin : subnetFromIp(ip)
+  const firebaseAuthEnabled = isFirebaseAuthEnabled()
+
+  const dbForPreflight = await readDb()
+  const emailExistsInDb = dbForPreflight.users.some((user) => normalize(user.email) === email)
+  if (emailExistsInDb) {
+    return {
+      success: false,
+      errors: { email: 'Bu e-posta zaten kayıtlı.' },
+      user: null,
+      reason: 'email_exists',
+    }
+  }
+
+  const usernameExistsInDb = dbForPreflight.users.some(
+    (user) => normalize(user.username) === normalize(username),
+  )
+  if (usernameExistsInDb) {
+    return {
+      success: false,
+      errors: { username: 'Bu kullanıcı adı zaten kayıtlı.' },
+      user: null,
+      reason: 'username_exists',
+    }
+  }
+
+  const byPublicIp = countUsersByPublicIp(dbForPreflight.users, publicIp)
+  if (byPublicIp >= config.maxAccountsPerScope) {
+    return {
+      success: false,
+      errors: {
+        global:
+          `Aynı internet (Wi-Fi/IP) üzerinden en fazla ${config.maxAccountsPerScope} hesap açılabilir.`,
+      },
+      user: null,
+      reason: 'limit_reached',
+    }
+  }
+
+  let firebaseUid = ''
+  if (firebaseAuthEnabled) {
+    const firebaseRegisterResult = await firebaseRegisterWithEmailPassword({
+      email,
+      password: payload.password,
+    })
+
+    if (!firebaseRegisterResult.success) {
+      if (firebaseRegisterResult.reason === 'email_exists') {
+        return {
+          success: false,
+          errors: { email: 'Bu e-posta zaten kayıtlı.' },
+          user: null,
+          reason: 'email_exists',
+        }
+      }
+
+      const fallbackMessage =
+        firebaseRegisterResult.reason === 'weak_password'
+          ? 'Şifre Firebase kuralları için geçersiz.'
+          : 'Kayıt işlemi şu anda tamamlanamıyor. Lütfen birazdan tekrar deneyin.'
+
+      console.error('[auth] Firebase register failed.', {
+        reason: firebaseRegisterResult.reason,
+        code: firebaseRegisterResult.code,
+        message: firebaseRegisterResult.message,
+      })
+
+      return {
+        success: false,
+        errors: { global: fallbackMessage },
+        user: null,
+        reason: 'register_unavailable',
+      }
+    }
+
+    firebaseUid = String(firebaseRegisterResult.uid || '').trim()
+  }
+
+  const passwordHash = await bcrypt.hash(payload.password, PASSWORD_HASH_ROUNDS)
 
   let createdUser = null
   let failure = null
@@ -655,6 +736,7 @@ export async function registerUser(payload, meta) {
       localSubnet,
       lastLoginAt: new Date().toISOString(),
       activeSessionId: null,
+      firebaseUid,
     }
 
     db.users.push(createdUser)
@@ -723,18 +805,127 @@ export async function loginUser(payload, meta = {}) {
     }
   }
 
-  const passwordOk = await comparePasswordSafe(
-    payload.password,
-    resolvePasswordHashForCompare(matchedUser?.passwordHash),
-  )
-  if (!passwordOk) {
-    return {
-      success: false,
-      errors: {
-        global: INVALID_CREDENTIALS_MESSAGE,
-      },
-      user: null,
-      reason: 'invalid_credentials',
+  const firebaseAuthEnabled = isFirebaseAuthEnabled()
+  let passwordOk = false
+  let syncPasswordHashFromLogin = false
+  let firebaseUidFromLogin = ''
+
+  if (firebaseAuthEnabled) {
+    const firebaseLoginResult = await firebaseLoginWithEmailPassword({
+      email: matchedUser.email,
+      password: payload.password,
+    })
+
+    if (firebaseLoginResult.success) {
+      passwordOk = true
+      syncPasswordHashFromLogin = true
+      firebaseUidFromLogin = String(firebaseLoginResult.uid || '').trim()
+    } else if (firebaseLoginResult.reason === 'account_not_found') {
+      const localPasswordOk = await comparePasswordSafe(
+        payload.password,
+        resolvePasswordHashForCompare(matchedUser?.passwordHash),
+      )
+      if (!localPasswordOk) {
+        return {
+          success: false,
+          errors: {
+            global: INVALID_CREDENTIALS_MESSAGE,
+          },
+          user: null,
+          reason: 'invalid_credentials',
+        }
+      }
+
+      const firebaseRegisterResult = await firebaseRegisterWithEmailPassword({
+        email: matchedUser.email,
+        password: payload.password,
+      })
+
+      if (firebaseRegisterResult.success) {
+        passwordOk = true
+        syncPasswordHashFromLogin = true
+        firebaseUidFromLogin = String(firebaseRegisterResult.uid || '').trim()
+      } else if (firebaseRegisterResult.reason === 'email_exists') {
+        const retryLogin = await firebaseLoginWithEmailPassword({
+          email: matchedUser.email,
+          password: payload.password,
+        })
+        if (!retryLogin.success) {
+          return {
+            success: false,
+            errors: {
+              global: 'Kimlik doğrulama servisine bağlanılamadı. Lütfen tekrar deneyin.',
+            },
+            user: null,
+            reason: 'auth_unavailable',
+          }
+        }
+
+        passwordOk = true
+        syncPasswordHashFromLogin = true
+        firebaseUidFromLogin = String(retryLogin.uid || '').trim()
+      } else {
+        console.error('[auth] Firebase login migration failed.', {
+          reason: firebaseRegisterResult.reason,
+          code: firebaseRegisterResult.code,
+          message: firebaseRegisterResult.message,
+        })
+        return {
+          success: false,
+          errors: {
+            global: 'Kimlik doğrulama servisine bağlanılamadı. Lütfen tekrar deneyin.',
+          },
+          user: null,
+          reason: 'auth_unavailable',
+        }
+      }
+    } else if (firebaseLoginResult.reason === 'invalid_credentials') {
+      return {
+        success: false,
+        errors: {
+          global: INVALID_CREDENTIALS_MESSAGE,
+        },
+        user: null,
+        reason: 'invalid_credentials',
+      }
+    } else if (firebaseLoginResult.reason === 'user_disabled') {
+      return {
+        success: false,
+        errors: {
+          global: 'Hesabınız geçici olarak devre dışı bırakıldı.',
+        },
+        user: null,
+        reason: 'blocked',
+      }
+    } else {
+      console.error('[auth] Firebase login failed.', {
+        reason: firebaseLoginResult.reason,
+        code: firebaseLoginResult.code,
+        message: firebaseLoginResult.message,
+      })
+      return {
+        success: false,
+        errors: {
+          global: 'Kimlik doğrulama servisine bağlanılamadı. Lütfen tekrar deneyin.',
+        },
+        user: null,
+        reason: 'auth_unavailable',
+      }
+    }
+  } else {
+    passwordOk = await comparePasswordSafe(
+      payload.password,
+      resolvePasswordHashForCompare(matchedUser?.passwordHash),
+    )
+    if (!passwordOk) {
+      return {
+        success: false,
+        errors: {
+          global: INVALID_CREDENTIALS_MESSAGE,
+        },
+        user: null,
+        reason: 'invalid_credentials',
+      }
     }
   }
 
@@ -802,6 +993,9 @@ export async function loginUser(payload, meta = {}) {
   }
 
   const sessionId = crypto.randomUUID()
+  const nextPasswordHash = syncPasswordHashFromLogin
+    ? await bcrypt.hash(String(payload.password || ''), PASSWORD_HASH_ROUNDS)
+    : ''
   let deletionCancelled = false
   let resolvedUser = null
 
@@ -819,6 +1013,12 @@ export async function loginUser(payload, meta = {}) {
       }
       if (resolveStoredSubnet(user) === 'unknown' && loginSubnet !== 'unknown') {
         user.localSubnet = loginSubnet
+      }
+      if (nextPasswordHash) {
+        user.passwordHash = nextPasswordHash
+      }
+      if (firebaseUidFromLogin) {
+        user.firebaseUid = firebaseUidFromLogin
       }
       user.activeSessionId = sessionId
       resolvedUser = { ...user }
@@ -881,6 +1081,47 @@ export async function requestPasswordReset(payload, meta) {
         email:
           'Bu e-posta adresi ile kayıtlı hesap bulunamadı. Lütfen adresi kontrol edin veya kayıt olun.',
       },
+    }
+  }
+
+  if (isFirebaseAuthEnabled()) {
+    const firebaseResetResult = await firebaseSendPasswordResetEmail({
+      email: user.email,
+      continueUrl: getFirebaseAuthResetContinueUrl(),
+    })
+
+    if (!firebaseResetResult.success) {
+      if (firebaseResetResult.reason === 'account_not_found') {
+        return {
+          success: false,
+          reason: 'mail_unavailable',
+          errors: {
+            global:
+              'Bu hesap icin sifre sifirlama henuz aktif degil. Once giris yapip tekrar deneyin.',
+          },
+        }
+      }
+
+      console.error('[auth] Firebase password reset mail failed.', {
+        reason: firebaseResetResult.reason,
+        code: firebaseResetResult.code,
+        message: firebaseResetResult.message,
+      })
+      return {
+        success: false,
+        reason: 'mail_unavailable',
+        errors: {
+          global:
+            'Su anda sifre sifirlama baglantisi gonderilemiyor. Lutfen daha sonra tekrar deneyin.',
+        },
+      }
+    }
+
+    return {
+      success: true,
+      reason: null,
+      message:
+        'Sifre sifirlama baglantisi e-posta adresinize gonderildi. Gelen kutunuzu ve spam klasorunu kontrol edin.',
     }
   }
 
@@ -1013,6 +1254,22 @@ export async function validateResetToken(rawToken) {
     }
   }
 
+  if (isFirebaseAuthEnabled()) {
+    const firebaseVerifyResult = await firebaseVerifyPasswordResetCode(rawToken)
+    if (!firebaseVerifyResult.success) {
+      return {
+        success: false,
+        reason:
+          firebaseVerifyResult.reason === 'token_expired'
+            ? 'token_expired'
+            : 'invalid_token',
+        errors: { global: 'Sıfırlama bağlantısı geçersiz veya süresi dolmuş.' },
+      }
+    }
+
+    return { success: true, reason: null }
+  }
+
   const db = await readDb()
   const { record, reason } = findValidResetTokenRecord(db, rawToken)
 
@@ -1031,6 +1288,44 @@ export async function resetPasswordWithToken(payload) {
   const errors = validatePasswordResetPayload(payload)
   if (Object.keys(errors).length > 0) {
     return { success: false, errors, reason: 'validation' }
+  }
+
+  if (isFirebaseAuthEnabled()) {
+    const firebaseResetResult = await firebaseConfirmPasswordReset(
+      payload.token,
+      payload.newPassword,
+    )
+
+    if (!firebaseResetResult.success) {
+      return {
+        success: false,
+        reason:
+          firebaseResetResult.reason === 'token_expired'
+            ? 'token_expired'
+            : 'invalid_token',
+        errors: { global: 'Sıfırlama bağlantısı geçersiz veya süresi dolmuş.' },
+      }
+    }
+
+    const safeEmail = normalize(firebaseResetResult.email)
+    if (safeEmail) {
+      const passwordHash = await bcrypt.hash(payload.newPassword, PASSWORD_HASH_ROUNDS)
+      const updatedAt = new Date().toISOString()
+      await updateDb((draft) => {
+        const targetUser = draft.users.find((item) => normalize(item.email) === safeEmail)
+        if (targetUser) {
+          targetUser.passwordHash = passwordHash
+          targetUser.updatedAt = updatedAt
+        }
+        return draft
+      })
+    }
+
+    return {
+      success: true,
+      reason: null,
+      message: 'Şifreniz başarıyla güncellendi. Artık giriş yapabilirsiniz.',
+    }
   }
 
   const db = await readDb()

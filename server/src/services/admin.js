@@ -2,7 +2,7 @@
 import bcrypt from 'bcryptjs'
 import { config } from '../config.js'
 import { NO_DB_WRITE, readDb, updateDb } from '../db.js'
-import { emailRegex, isAllowedAuthEmailAddress, normalize } from '../utils.js'
+import { emailRegex, normalize } from '../utils.js'
 import { getGameOverview } from '../game/service.js'
 import { getRequestMetricsSummary } from '../middleware/requestMetrics.js'
 import { getBackupHealthSummary, getProcessHealthSummary } from './systemHealth.js'
@@ -274,12 +274,6 @@ function validateAdminEmail(value) {
   }
   if (!emailRegex.test(email)) {
     return { ok: false, result: fail('validation', 'Geçerli bir e-posta adresi girin.') }
-  }
-  if (!isAllowedAuthEmailAddress(email)) {
-    return {
-      ok: false,
-      result: fail('validation', 'Yalnızca Gmail, Outlook veya Hotmail adresleri kullanılabilir.'),
-    }
   }
   return { ok: true, value: email }
 }

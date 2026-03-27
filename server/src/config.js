@@ -260,6 +260,10 @@ export const config = {
     serviceAccountJson: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '',
     serviceAccountFile: process.env.FIREBASE_SERVICE_ACCOUNT_FILE || '',
   },
+  firebaseAuth: {
+    enabled: toBoolean(process.env.FIREBASE_AUTH_ENABLED, false),
+    apiKey: process.env.FIREBASE_WEB_API_KEY || process.env.FIREBASE_API_KEY || '',
+  },
 }
 
 export function isSmtpConfigured() {
@@ -275,6 +279,19 @@ export function getSmtpMissingEnvVars() {
   if (isPlaceholderSecret(config.smtp.user)) missing.push('SMTP_USER')
   if (isPlaceholderSecret(config.smtp.pass)) missing.push('SMTP_APP_PASSWORD (veya SMTP_PASS)')
   if (isPlaceholderSecret(config.smtp.from)) missing.push('MAIL_FROM')
+  return missing
+}
+
+export function isFirebaseAuthConfigured() {
+  if (config.firebaseAuth.enabled !== true) return false
+  return !isPlaceholderSecret(config.firebaseAuth.apiKey)
+}
+
+export function getFirebaseAuthMissingEnvVars() {
+  const missing = []
+  if (config.firebaseAuth.enabled && isPlaceholderSecret(config.firebaseAuth.apiKey)) {
+    missing.push('FIREBASE_WEB_API_KEY')
+  }
   return missing
 }
 
@@ -336,7 +353,15 @@ export function getStartupWarnings() {
   }
 
   if (!isSmtpConfigured()) {
-    warnings.push(`SMTP ayarlari eksik: ${getSmtpMissingEnvVars().join(', ')}.`)
+    warnings.push(
+      `SMTP ayarlari eksik: ${getSmtpMissingEnvVars().join(', ')}. (Destek e-postalari gonderilemeyebilir.)`,
+    )
+  }
+
+  if (config.firebaseAuth.enabled && !isFirebaseAuthConfigured()) {
+    warnings.push(
+      `Firebase Auth etkin ama eksik: ${getFirebaseAuthMissingEnvVars().join(', ')}.`,
+    )
   }
 
   if (!String(config.supportInboxEmail || '').trim().includes('@')) {

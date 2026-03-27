@@ -14,6 +14,15 @@ function normalize(value) {
   return String(value ?? '').trim()
 }
 
+function parseBoolean(value, fallback = false) {
+  if (typeof value === 'boolean') return value
+  const safe = normalize(value).toLowerCase()
+  if (!safe) return fallback
+  if (safe === 'true' || safe === '1' || safe === 'yes') return true
+  if (safe === 'false' || safe === '0' || safe === 'no') return false
+  return fallback
+}
+
 function isPlaceholder(value) {
   const safe = normalize(value).toLowerCase()
   if (!safe) return true
@@ -166,27 +175,40 @@ async function main() {
   const mailFrom = normalize(process.env.MAIL_FROM || process.env.SMTP_USER)
   const smtpHost = normalize(process.env.SMTP_HOST || 'smtp.gmail.com')
   const smtpPort = Number(process.env.SMTP_PORT || 587)
+  const firebaseAuthEnabled = parseBoolean(process.env.FIREBASE_AUTH_ENABLED, false)
+  const firebaseWebApiKey = normalize(process.env.FIREBASE_WEB_API_KEY || process.env.FIREBASE_API_KEY)
+  const smtpReady = !isPlaceholder(smtpUser) && !isPlaceholder(smtpPass) && !isPlaceholder(mailFrom)
 
-  if (!smtpHost) {
-    errors.push('SMTP_HOST bos birakilamaz.')
+  if (firebaseAuthEnabled && isPlaceholder(firebaseWebApiKey)) {
+    errors.push('FIREBASE_WEB_API_KEY placeholder/missing (Firebase Auth acik).')
   }
 
-  if (!Number.isInteger(smtpPort) || smtpPort <= 0 || smtpPort > 65535) {
-    errors.push(`SMTP_PORT gecerli bir port olmali. Mevcut: ${process.env.SMTP_PORT || '(bos)'}`)
-  }
+  if (!firebaseAuthEnabled || smtpReady) {
+    if (!smtpHost) {
+      errors.push('SMTP_HOST bos birakilamaz.')
+    }
 
-  if (isPlaceholder(smtpUser)) {
-    errors.push('SMTP_USER placeholder/missing.')
-  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(smtpUser)) {
-    errors.push(`SMTP_USER gecerli bir e-posta olmali. Mevcut: ${smtpUser}`)
-  }
+    if (!Number.isInteger(smtpPort) || smtpPort <= 0 || smtpPort > 65535) {
+      errors.push(`SMTP_PORT gecerli bir port olmali. Mevcut: ${process.env.SMTP_PORT || '(bos)'}`)
+    }
 
-  if (isPlaceholder(smtpPass)) {
-    errors.push('SMTP_APP_PASSWORD (veya SMTP_PASS) placeholder/missing.')
-  }
+    if (isPlaceholder(smtpUser)) {
+      errors.push('SMTP_USER placeholder/missing.')
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(smtpUser)) {
+      errors.push(`SMTP_USER gecerli bir e-posta olmali. Mevcut: ${smtpUser}`)
+    }
 
-  if (isPlaceholder(mailFrom)) {
-    errors.push('MAIL_FROM placeholder/missing.')
+    if (isPlaceholder(smtpPass)) {
+      errors.push('SMTP_APP_PASSWORD (veya SMTP_PASS) placeholder/missing.')
+    }
+
+    if (isPlaceholder(mailFrom)) {
+      errors.push('MAIL_FROM placeholder/missing.')
+    }
+  } else {
+    warnings.push(
+      'SMTP ayarlari eksik. Firebase Auth ile giris/sifre reset calisir ama destek e-postalari queued kalabilir.',
+    )
   }
 
   const supportInbox = parseEmail('SUPPORT_INBOX_EMAIL', process.env.SUPPORT_INBOX_EMAIL, errors)

@@ -8,6 +8,7 @@ DEFAULT_BRANCH="main"
 DEFAULT_SMTP_USER="mustafaard76@gmail.com"
 DEFAULT_SUPPORT_INBOX="mustafaard76@gmail.com"
 DEFAULT_MAIL_FROM="TicarNet Online <mustafaard76@gmail.com>"
+DEFAULT_FIREBASE_AUTH_ENABLED="true"
 
 APP_BASE_DIR="/var/www/ticarnet"
 APP_DIR="${APP_BASE_DIR}/current"
@@ -21,6 +22,8 @@ SMTP_USER_ARG=""
 SUPPORT_INBOX_ARG=""
 MAIL_FROM_ARG=""
 SMTP_APP_PASSWORD_ARG=""
+FIREBASE_AUTH_ENABLED_ARG=""
+FIREBASE_WEB_API_KEY_ARG=""
 
 ask() {
   local prompt="$1"
@@ -47,6 +50,8 @@ Opsiyonlar:
   --support-inbox-email EMAIL
   --mail-from VALUE
   --smtp-app-password PASS
+  --firebase-auth-enabled true|false
+  --firebase-web-api-key KEY
   --non-interactive
   -h, --help
 EOF
@@ -84,6 +89,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --smtp-app-password)
       SMTP_APP_PASSWORD_ARG="${2:-}"
+      shift 2
+      ;;
+    --firebase-auth-enabled)
+      FIREBASE_AUTH_ENABLED_ARG="${2:-}"
+      shift 2
+      ;;
+    --firebase-web-api-key)
+      FIREBASE_WEB_API_KEY_ARG="${2:-}"
       shift 2
       ;;
     --non-interactive)
@@ -139,21 +152,35 @@ BRANCH="$(resolve_value "$BRANCH_ARG" "Branch" "${DEFAULT_BRANCH}")"
 SMTP_USER="$(resolve_value "$SMTP_USER_ARG" "SMTP user" "${DEFAULT_SMTP_USER}")"
 SUPPORT_INBOX="$(resolve_value "$SUPPORT_INBOX_ARG" "Support inbox e-mail" "${DEFAULT_SUPPORT_INBOX}")"
 MAIL_FROM="$(resolve_value "$MAIL_FROM_ARG" "MAIL_FROM" "${DEFAULT_MAIL_FROM}")"
+FIREBASE_AUTH_ENABLED="$(resolve_value "$FIREBASE_AUTH_ENABLED_ARG" "Firebase Auth enabled (true/false)" "${DEFAULT_FIREBASE_AUTH_ENABLED}")"
+
+if [[ "$FIREBASE_AUTH_ENABLED" != "true" && "$FIREBASE_AUTH_ENABLED" != "false" ]]; then
+  echo "[panel-bootstrap] --firebase-auth-enabled true veya false olmali." >&2
+  exit 1
+fi
 
 if [[ -z "${SMTP_APP_PASSWORD:-}" && -n "${SMTP_APP_PASSWORD_ARG:-}" ]]; then
   SMTP_APP_PASSWORD="${SMTP_APP_PASSWORD_ARG}"
 fi
+if [[ -z "${FIREBASE_WEB_API_KEY:-}" && -n "${FIREBASE_WEB_API_KEY_ARG:-}" ]]; then
+  FIREBASE_WEB_API_KEY="${FIREBASE_WEB_API_KEY_ARG}"
+fi
+
+if [[ "$FIREBASE_AUTH_ENABLED" == "true" && -z "${FIREBASE_WEB_API_KEY:-}" && "$NON_INTERACTIVE" == "0" ]]; then
+  echo
+  read -r -p "Firebase Web API Key: " FIREBASE_WEB_API_KEY
+fi
 
 if [[ -z "${SMTP_APP_PASSWORD:-}" && "$NON_INTERACTIVE" == "0" ]]; then
   echo
-  echo "SMTP App Password gir (yazarken ekranda gorunmez):"
+  echo "SMTP App Password (opsiyonel, sadece destek e-postasi icin). Bos gecmek icin Enter:"
   read -r -s SMTP_APP_PASSWORD
   echo
 fi
 
-if [[ -z "${SMTP_APP_PASSWORD:-}" ]]; then
-  echo "[panel-bootstrap] SMTP app password bos olamaz." >&2
-  echo "[panel-bootstrap] Alternatif: SMTP_APP_PASSWORD='xxxxx' bash scripts/vps-panel-bootstrap.sh --non-interactive" >&2
+if [[ "$FIREBASE_AUTH_ENABLED" == "true" && -z "${FIREBASE_WEB_API_KEY:-}" ]]; then
+  echo "[panel-bootstrap] Firebase Auth acik ama FIREBASE_WEB_API_KEY bos." >&2
+  echo "[panel-bootstrap] Alternatif: --firebase-web-api-key 'AIza...'" >&2
   exit 1
 fi
 
@@ -179,8 +206,10 @@ bash scripts/vps-prod-setup.sh \
   --repo-url "${REPO_URL}" \
   --branch "${BRANCH}" \
   --public-base-url "https://${DOMAIN}" \
+  --firebase-auth-enabled "${FIREBASE_AUTH_ENABLED}" \
+  --firebase-web-api-key "${FIREBASE_WEB_API_KEY:-}" \
   --smtp-user "${SMTP_USER}" \
-  --smtp-app-password "${SMTP_APP_PASSWORD}" \
+  --smtp-app-password "${SMTP_APP_PASSWORD:-}" \
   --mail-from "${MAIL_FROM}" \
   --support-inbox-email "${SUPPORT_INBOX}"
 

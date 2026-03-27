@@ -44,15 +44,16 @@ const initialResetForm = {
 }
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-const authEmailPattern = '^[^\\s@]+@(gmail\\.com|outlook\\.com|hotmail\\.com)$'
 const REGISTER_FLOW_DRAFT_KEY = 'ticarnet_register_flow_draft'
 const REGISTER_FORM_DRAFT_TTL_MS = 30 * 60 * 1000
 const TUTORIAL_PENDING_KEY = 'ticarnet_tutorial_pending'
 const USERNAME_MAX_LENGTH = 15
 
-function clearTokenFromUrl(paramName) {
+function clearResetFlowParamsFromUrl() {
   const url = new URL(window.location.href)
-  url.searchParams.delete(String(paramName || '').trim())
+  ;['resetToken', 'oobCode', 'mode', 'apiKey', 'lang', 'continueUrl'].forEach((paramName) => {
+    url.searchParams.delete(paramName)
+  })
   window.history.replaceState({}, '', `${url.pathname}${url.search}${url.hash}`)
 }
 
@@ -140,7 +141,10 @@ function getInitialRegisterFlowState({ resetTokenFromUrl, initialMode }) {
 
 function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
   const resetTokenFromUrl = useMemo(
-    () => new URLSearchParams(window.location.search).get('resetToken') || '',
+    () => {
+      const params = new URLSearchParams(window.location.search)
+      return params.get('resetToken') || params.get('oobCode') || ''
+    },
     [],
   )
   const initialRegisterFlowState = useMemo(
@@ -525,7 +529,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
       return
     }
 
-    clearTokenFromUrl('resetToken')
+    clearResetFlowParamsFromUrl()
     setResetToken('')
     setResetForm(initialResetForm)
     setErrors({})
@@ -660,7 +664,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 id="register-email"
                 name="email"
                 type="email"
-                label="E-posta (Gmail / Outlook / Hotmail)"
+                label="E-posta"
                 value={registerForm.email}
                 onChange={handleRegisterChange}
                 placeholder="E-posta adresinizi girin"
@@ -669,9 +673,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 inputMode="email"
                 autoCapitalize="none"
                 spellCheck={false}
-                pattern={authEmailPattern}
                 maxLength={80}
-                title="Yalnızca Gmail, Outlook veya Hotmail adresi kullanabilirsiniz."
               />
               <AuthPasswordField
                 id="register-password"
@@ -732,7 +734,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 {isSubmitting ? 'Güncelleniyor...' : 'Yeni Şifreyi Kaydet'}
               </AuthButton>
               <AuthButton type="button" variant="secondary" onClick={() => {
-                  clearTokenFromUrl('resetToken')
+                  clearResetFlowParamsFromUrl()
                 setResetToken('')
                 setMode(AUTH_MODE.LOGIN)
                 setErrors({})
@@ -805,9 +807,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 inputMode="email"
                 autoCapitalize="none"
                 spellCheck={false}
-                pattern={authEmailPattern}
                 maxLength={80}
-                title="Geçerli bir e-posta adresi girin."
               />
               <AuthButton type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Gönderiliyor...' : 'Şifre Yenile'}

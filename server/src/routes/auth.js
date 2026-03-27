@@ -44,6 +44,8 @@ authRouter.post('/register', authLoginRateLimit, requireTurkeyAccess, async (req
           ? 409
         : result.reason === 'limit_reached'
             ? 429
+            : result.reason === 'register_unavailable'
+              ? 503
             : 400
     res.status(status).json(result)
   } catch (error) {
@@ -69,6 +71,8 @@ authRouter.post('/login', authLoginRateLimit, requireTurkeyAccess, async (req, r
             ? 400
             : result.reason === 'account_not_found'
               ? 404
+            : result.reason === 'auth_unavailable'
+              ? 503
             : result.reason === 'blocked'
                 || result.reason === 'temp_ban'
                 || result.reason === 'network_restricted'
