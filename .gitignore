@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.codex/
 .tools/
 backups/
 android_backup_*/

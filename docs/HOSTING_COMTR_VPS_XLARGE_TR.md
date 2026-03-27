@@ -52,7 +52,7 @@ Sunucuda:
 
 ```bash
 cd /var/www/ticarnet/current
-chmod +x scripts/digitalocean-prod-setup.sh scripts/vps-prod-setup.sh scripts/db-backup.sh scripts/vps-deploy.sh
+chmod +x scripts/vps-prod-setup.sh scripts/db-backup.sh scripts/vps-deploy.sh
 sudo bash scripts/vps-prod-setup.sh \
   --domain play.ticarnet.com \
   --email admin@senindomain.com

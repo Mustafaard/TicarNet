@@ -132,7 +132,7 @@ if [[ "$ENABLE_SSL" == "1" ]]; then
 fi
 
 # shellcheck disable=SC2086
-bash "${SCRIPT_DIR}/digitalocean-prod-setup.sh" \
+bash "${SCRIPT_DIR}/vps-prod-setup.sh" \
   --domain "$DOMAIN" \
   --repo-url "$REPO_URL" \
   --branch "$BRANCH" \
@@ -153,3 +153,4 @@ echo "[fresh-install] Site: http://${DOMAIN}"
 echo "[fresh-install] API:  http://${DOMAIN}/api/health"
 echo "[fresh-install] APK:  http://${DOMAIN}/download/ticarnet.apk"
 echo "[fresh-install] Sonraki deploy: cd ${APP_BASE_DIR}/current && bash scripts/vps-deploy.sh --branch ${BRANCH} --force-clean"
+

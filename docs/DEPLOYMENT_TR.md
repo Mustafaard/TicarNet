@@ -7,15 +7,9 @@ Bu rehber ile su hedefleri tamamlarsin:
 - VS Code ile guncelleme yapip tek komutla yayina alabilirsin
 - Android APK demo uretebilirsin (bundled veya live mode)
 
-## Hizli Yol (DigitalOcean)
+## Hizli Yol (Aktif VPS Akisi)
 
-DigitalOcean'da tek komut production kurulum (Nginx + PM2 + SSL + backup + firewall + fail2ban + rate-limit):
-- `docs/DIGITALOCEAN_PROD_TR.md`
-- `scripts/digitalocean-prod-setup.sh`
-
-## Hizli Yol (Hosting.com.tr VPS - XLarge)
-
-Hosting.com.tr `VPS - XLarge` paketi icin GitHub'siz kurulum akisi:
+Bu proje icin aktif ve desteklenen sunucu kurulumu:
 - `docs/HOSTING_COMTR_VPS_XLARGE_TR.md`
 - `scripts/vps-prod-setup.sh`
 
@@ -35,17 +29,10 @@ Neden?
 - `pm2 startOrReload` ile servis kesintisi minimuma iner.
 - Nginx ayni domain altinda `/api` proxy yaptigi icin web + websocket stabil calisir.
 
-### Sunucu Secimi (Mart 2026 referansi)
+### Sunucu Notu
 
-1. Hetzner Cloud (fiyat/performans odakli)
-   - Ornek: CX23 DE/FI bolgesinde 4.99 USD/ay seviyesinde.
-   - Trafik/oyuncu sayisi arttiginda CPX22 veya ustune cik.
-2. DigitalOcean Droplets (panel ve ekosistem kolayligi)
-   - Giris seviyesi 1 vCPU / 1 GB plan 6 USD/ay.
-   - Dokumantasyon ve yonetim arayuzu yeni baslayanlar icin rahat.
-3. Railway (hizli cikis, tam VPS yonetimi istemiyorsan)
-   - Hobby plani 5 USD minimum kullanim modeliyle baslar.
-   - Erken demo asamasinda hizli yayina cikmak icin uygundur.
+- Bu kurulum Ubuntu VPS uzerinde calisir.
+- Aktif operasyon senaryosu: Hosting.com.tr VPS.
 
 ## 2) Ilk Kurulum
 

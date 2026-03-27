@@ -70,7 +70,7 @@ Bu yollar proje disinda oldugunda deploy sirasinda hesaplar korunur.
 
 Detayli kurulum:
 - `docs/DEPLOYMENT_TR.md`
-- `docs/DIGITALOCEAN_PROD_TR.md`
+- `docs/HOSTING_COMTR_VPS_XLARGE_TR.md`
 - `docs/GITHUB_AUTO_DEPLOY_TR.md` (self-hosted runner ile push yapinca otomatik VPS deploy)
 - `docs/VSC_SSH_DIREKT_DEPLOY_TR.md` (GitHub olmadan VS Code -> SSH direkt deploy)
 - `docs/nginx.ticarnet.conf.example`
@@ -131,12 +131,6 @@ PowerShell'de kontrol icin `curl` yerine `curl.exe` kullan:
 ```powershell
 curl.exe -s "http://SUNUCU_IP/api/health"
 curl.exe -I "http://SUNUCU_IP/download/ticarnet.apk"
-```
-
-DigitalOcean ilk kurulum otomasyonu:
-
-```bash
-sudo bash scripts/digitalocean-prod-setup.sh --help
 ```
 
 Tum Ubuntu VPS'lerde kullanilabilen genel komut:
