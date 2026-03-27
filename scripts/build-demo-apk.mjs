@@ -53,7 +53,8 @@ function writeSha256(filePath) {
 }
 
 function main() {
-  run("node", ["scripts/write-capacitor-config.mjs", "bundled"]);
+  const liveUrl = process.env.CAP_SERVER_URL || "https://tr-159ae5.hosting.net.tr";
+  run("node", ["scripts/write-capacitor-config.mjs", "live", liveUrl]);
   run(npxCmd, ["vite", "build"]);
   run(npxCmd, ["cap", "sync", "android"]);
   run("node", ["scripts/normalize-android-assets.mjs"]);
@@ -83,6 +84,7 @@ function main() {
   const shaPath = writeSha256(outApkPath);
 
   console.log("\n[apk:build:demo] Tamamlandi.");
+  console.log(`[apk:build:demo] Mod: live (${liveUrl})`);
   console.log(`[apk:build:demo] APK: ${outApkPath}`);
   console.log(`[apk:build:demo] Boyut: ${toMb(apkStats.size)} MB`);
   console.log(`[apk:build:demo] SHA256: ${shaPath}`);

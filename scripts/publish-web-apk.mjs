@@ -25,9 +25,7 @@ const targetDir = path.resolve(projectRoot, "public/download");
 const targetApkPath = path.resolve(targetDir, "ticarnet.apk");
 const targetShaPath = `${targetApkPath}.sha256`;
 const targetMetaPath = path.resolve(targetDir, "latest.json");
-const targetReleasesPath = path.resolve(targetDir, "releases.json");
 const targetLandingPath = path.resolve(targetDir, "index.html");
-const targetVersionsDir = path.resolve(targetDir, "versions");
 const publicApkUrl = "/download/ticarnet.apk";
 
 function formatBytes(bytes) {
@@ -70,59 +68,19 @@ async function main() {
   const apkBuffer = await fs.readFile(targetApkPath);
   const sha = createHash("sha256").update(apkBuffer).digest("hex");
   await fs.writeFile(targetShaPath, `${sha}  ticarnet.apk\n`, "utf8");
-  await fs.mkdir(targetVersionsDir, { recursive: true });
-
-  const versionArg = readArg("--version", "").trim();
-  const fallbackVersion = new Date().toISOString().replace(/[:.]/g, "-");
-  const version = versionArg || fallbackVersion;
-  const versionBaseName = `ticarnet-${version}`;
-  const versionApkPath = path.resolve(targetVersionsDir, `${versionBaseName}.apk`);
-  const versionShaPath = `${versionApkPath}.sha256`;
-  const versionApkUrl = `/download/versions/${versionBaseName}.apk`;
-
-  await fs.copyFile(targetApkPath, versionApkPath);
-  await fs.writeFile(versionShaPath, `${sha}  ${versionBaseName}.apk\n`, "utf8");
 
   const meta = {
     file: "ticarnet.apk",
     url: publicApkUrl,
-    version,
+    version: "latest",
     bytes: stat.size,
     size: formatBytes(stat.size),
     sha256: sha,
     publishedAt: new Date().toISOString(),
   };
   await fs.writeFile(targetMetaPath, `${JSON.stringify(meta, null, 2)}\n`, "utf8");
-
-  let releases = [];
-  if (await exists(targetReleasesPath)) {
-    try {
-      const raw = await fs.readFile(targetReleasesPath, "utf8");
-      const parsed = JSON.parse(raw);
-      if (Array.isArray(parsed)) {
-        releases = parsed;
-      }
-    } catch {
-      releases = [];
-    }
-  }
-
-  const nextRelease = {
-    version,
-    file: `${versionBaseName}.apk`,
-    url: versionApkUrl,
-    bytes: stat.size,
-    size: formatBytes(stat.size),
-    sha256: sha,
-    publishedAt: meta.publishedAt,
-  };
-
-  releases = [
-    nextRelease,
-    ...releases.filter((entry) => entry?.version !== version),
-  ].slice(0, 20);
-
-  await fs.writeFile(targetReleasesPath, `${JSON.stringify(releases, null, 2)}\n`, "utf8");
+  await fs.rm(path.resolve(targetDir, "releases.json"), { force: true });
+  await fs.rm(path.resolve(targetDir, "versions"), { force: true, recursive: true });
 
   const landingHtml = `<!doctype html>
 <html lang="tr">
@@ -146,7 +104,7 @@ async function main() {
     <h1>TicarNet Online</h1>
     <p>Android uygulamasini indirmek icin tikla.</p>
     <a href="${publicApkUrl}">APK Indir</a>
-    <small>Surum: ${version} | Boyut: ${meta.size}</small>
+    <small>Surum: latest | Boyut: ${meta.size}</small>
     <small>Sabit link: ${publicApkUrl}</small>
     <small>SHA256: ${sha.slice(0, 16)}...</small>
   </section>
@@ -158,8 +116,7 @@ async function main() {
 
   console.log(`[apk:publish:web] Kaynak: ${sourcePath}`);
   console.log(`[apk:publish:web] Hedef: ${targetApkPath}`);
-  console.log(`[apk:publish:web] Surum: ${version}`);
-  console.log(`[apk:publish:web] Arsiv: ${versionApkPath}`);
+  console.log(`[apk:publish:web] Surum: latest`);
   console.log(`[apk:publish:web] Boyut: ${meta.size}`);
   console.log(`[apk:publish:web] SHA256: ${sha}`);
   console.log(`[apk:publish:web] URL: ${publicApkUrl}`);

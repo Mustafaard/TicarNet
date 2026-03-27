@@ -53,7 +53,7 @@ function buildNextConfig(current, mode, liveUrl) {
   const next = {
     ...current,
     appId: String(current?.appId || 'com.ticarnet.app'),
-    appName: String(current?.appName || 'ticarnet'),
+    appName: String(current?.appName || 'TicarNet Online'),
     webDir: String(current?.webDir || 'dist'),
   }
 
