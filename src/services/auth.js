@@ -75,6 +75,15 @@ function cacheAuthNotice(message) {
   localStorage.setItem(AUTH_NOTICE_KEY, safeMessage)
 }
 
+export function isForcedLogoutReason(reason) {
+  const safeReason = String(reason || '').trim().toLowerCase()
+  return safeReason === 'unauthorized' || safeReason === 'geo_blocked'
+}
+
+export function shouldForceLogoutFromResult(result) {
+  return isForcedLogoutReason(result?.reason)
+}
+
 async function request(path, options = {}) {
   const { method = 'GET', body, auth = false } = options
   const headers = {}
@@ -438,8 +447,13 @@ export async function getStoredUser() {
 
   const result = await request('/auth/me', { auth: true })
   if (!result.success || !result.user) {
-    if (result?.reason === 'unauthorized') {
-      clearAuthStorage()
+    if (shouldForceLogoutFromResult(result)) {
+      const forcedMessage =
+        Object.values(result?.errors || {}).find((value) => typeof value === 'string' && value.trim()) || ''
+      clearAuthStorage({ keepNotice: Boolean(forcedMessage) })
+      if (forcedMessage) {
+        cacheAuthNotice(forcedMessage)
+      }
       return null
     }
     return getCachedUser()

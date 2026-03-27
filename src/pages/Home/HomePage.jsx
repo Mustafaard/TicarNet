@@ -90,6 +90,7 @@ import {
   changeCurrentUserPassword,
   consumeAuthNotice,
   getStoredUser,
+  shouldForceLogoutFromResult,
 } from '../../services/auth.js'
 import './HomePage.css'
 
@@ -1083,7 +1084,6 @@ const metricLengthClass = (value) => {
   return ''
 }
 const errText = (e, f) => Object.values(e || {}).find((v) => typeof v === 'string' && v.trim()) || f
-const unauthorized = (r) => r?.reason === 'unauthorized'
 const resolveVehicleImage = (entry, templateId = '') => {
   const safeTemplateId = String(templateId || entry?.templateId || '').trim()
   const directImage = String(entry?.image || '').trim()
@@ -3144,7 +3144,7 @@ function HomePage({ user, onLogout }) {
   }, [onLogout])
 
   const fail = useCallback((response, fallback) => {
-    if (unauthorized(response)) {
+    if (shouldForceLogoutFromResult(response)) {
       handleForcedLogout(errText(response?.errors, SESSION_REPLACED_NOTICE))
       return false
     }
@@ -8344,6 +8344,7 @@ function HomePage({ user, onLogout }) {
     ),
   )
   const missionBatchIndex = Math.max(1, Math.trunc(num(missionBatchMeta?.batchIndex || 1)))
+  const missionSeasonPointsTotal = Math.max(0, Math.trunc(num(missions?.seasonPoints || 0)))
   const missionCashIconPng = '/home/icons/depot/cash.png'
   const missionXpIconPng = '/home/ui/hud/xp-icon.png'
   const missionSlotCooldownMs = Math.max(
@@ -8447,7 +8448,13 @@ function HomePage({ user, onLogout }) {
     try {
       const response = await claimMissionReward(safeId)
       if (!response?.success) return fail(response, response?.errors?.global || 'Ödül alınamadı.')
-      setNotice(response?.message || 'Görev ödülü alındı.')
+      const seasonPointsGained = Math.max(0, Math.trunc(num(response?.seasonPointsGained || 0)))
+      setNotice(
+        response?.message ||
+          (seasonPointsGained > 0
+            ? `Görev ödülü alındı. +${fmt(seasonPointsGained)} sezon puanı kazandın.`
+            : 'Görev ödülü alındı.'),
+      )
       setNoticeIsSuccess(true)
       await Promise.all([loadMissions(), loadOverview(), loadProfile()])
     } finally {
@@ -9164,7 +9171,8 @@ function HomePage({ user, onLogout }) {
               <span className="missions-summary-pill">
                 Seri #{fmt(missionBatchIndex)} · {fmt(missionClaimedCount)}/{fmt(missionBatchSize)} tamamlandı
               </span>
-              <span className="missions-summary-pill">Ödül alınan her görevde sağ üstte ayrı sayaç vardır.</span>
+              <span className="missions-summary-pill">Sezon puanı: {fmt(missionSeasonPointsTotal)}</span>
+              <span className="missions-summary-pill">Her görev ödülünde +10 sezon puanı kazanırsın.</span>
             </div>
 
             <div className="missions-grid-pro">

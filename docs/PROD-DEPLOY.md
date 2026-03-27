@@ -41,6 +41,21 @@ Script su adimlari uygular:
 - PM2 servisini ayarlar
 - Nginx reverse proxy + SSL (Let's Encrypt) kurar
 
+Panel terminalinde daha kolay (tek satir, soru sormadan) kurulum:
+
+```bash
+sudo SMTP_APP_PASSWORD='GMAIL_APP_PASSWORD' \
+bash scripts/vps-panel-bootstrap.sh \
+  --non-interactive \
+  --domain tr-159ae5.hosting.net.tr \
+  --email mustafaard76@gmail.com \
+  --repo-url https://github.com/Mustafaard/TicarNet.git \
+  --branch main \
+  --smtp-user mustafaard76@gmail.com \
+  --support-inbox-email mustafaard76@gmail.com \
+  --mail-from "TicarNet Online <mustafaard76@gmail.com>"
+```
+
 ## 3) Production env zorunlu alanlar
 
 `server/.env` icinde en az su degerler dogru olmalidir:
@@ -87,6 +102,10 @@ CORS_ALLOWED_ORIGINS=https://tr-159ae5.hosting.net.tr
 Public sabit APK linki:
 
 - `/download/ticarnet.apk`
+- Ornek: `https://tr-159ae5.hosting.net.tr/download/ticarnet.apk`
+
+Not:
+- `https://TicarNetOnline/...` gibi adreslerin calismasi icin bu alan adinin DNS ve SSL olarak sunucuya baglanmasi gerekir.
 
 Sunucu uzerinden:
 

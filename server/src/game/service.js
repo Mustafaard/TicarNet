@@ -13083,6 +13083,7 @@ export async function getMissions(userId) {
       wallet: profile.wallet,
       reputation: profile.reputation,
       levelInfo,
+      seasonPoints: Math.max(0, asInt(profile?.league?.seasonPoints, 0)),
       missions,
       missionBatch,
       canClaimCount: missions.filter((item) => item.status === 'claimable').length,
@@ -13169,6 +13170,8 @@ export async function claimMission(userId, missionId) {
       missionBatch: missionBatchView(profile, timestamp),
       canClaimCount: profile.missions.filter((item) => item.status === 'claimable').length,
       seasonPointsGained: missionSeasonPoints,
+      seasonPoints: Math.max(0, asInt(profile?.league?.seasonPoints, 0)),
+      message: `${claimResult.reward.title} görev ödülü alındı. +${missionSeasonPoints} sezon puanı kazandın.`,
     }
 
     return db

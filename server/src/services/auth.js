@@ -858,10 +858,12 @@ export async function requestPasswordReset(payload, meta) {
 
   if (!user) {
     return {
-      success: true,
-      reason: null,
-      message:
-        'Eğer bu e-posta sistemde kayıtlıysa şifre sıfırlama bağlantısı gönderilecektir.',
+      success: false,
+      reason: 'not_found',
+      errors: {
+        email:
+          'Bu e-posta adresi ile kayıtlı hesap bulunamadı. Lütfen adresi kontrol edin veya kayıt olun.',
+      },
     }
   }
 

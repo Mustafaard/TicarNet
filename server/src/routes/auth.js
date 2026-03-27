@@ -124,6 +124,8 @@ authRouter.post('/request-password-reset', authLoginRateLimit, requireTurkeyAcce
       const status =
         result.reason === 'mail_unavailable' || result.reason === 'mail_failed'
           ? 503
+          : result.reason === 'not_found'
+            ? 404
           : 400
       res.status(status).json(result)
       return
