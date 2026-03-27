@@ -13139,7 +13139,7 @@ export async function claimMission(userId, missionId) {
 
     profile.wallet += claimResult.reward.cash
     addProfileXp(profile, claimResult.reward.xp)
-    addLeaguePoints(profile, missionSeasonPoints)
+    addSeasonPoints(profile, missionSeasonPoints)
 
     pushTransaction(
       profile,
