@@ -56,6 +56,7 @@ function main() {
   const liveUrl = process.env.CAP_SERVER_URL || "https://tr-159ae5.hosting.net.tr";
   run("node", ["scripts/write-capacitor-config.mjs", "live", liveUrl]);
   run(npxCmd, ["vite", "build"]);
+  run("node", ["scripts/sync-android-app-icon.mjs"]);
   run(npxCmd, ["cap", "sync", "android"]);
   run("node", ["scripts/normalize-android-assets.mjs"]);
   run(gradleCmd, ["clean", "assembleDebug", "--no-daemon"], androidRoot);
