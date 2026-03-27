@@ -3,7 +3,7 @@ import fs from 'node:fs/promises'
 import { requireAuth } from '../middleware/auth.js'
 import { requireTurkeyAccess } from '../middleware/accessPolicy.js'
 import { requireModerator } from '../middleware/admin.js'
-import { readDb } from '../db.js'
+import { readDb, updateDb } from '../db.js'
 import { config } from '../config.js'
 import {
   buyFromSellOrder,
@@ -155,6 +155,25 @@ function sendResult(res, result) {
       errors: { global: '\u0130\u015flem tamamlanamadi.' },
     },
   )
+}
+
+function resolveSupportEmailStatus(error) {
+  const code = String(error?.code || '').trim().toUpperCase()
+  if (code === 'EAUTH' || code === 'EENVELOPE') {
+    return 'failed'
+  }
+
+  const message = String(error?.message || '').trim().toLowerCase()
+  if (
+    message.includes('smtp ayar')
+    || message.includes('smtp')
+    || message.includes('invalid login')
+    || message.includes('missing')
+  ) {
+    return 'failed'
+  }
+
+  return 'queued'
 }
 
 gameRouter.use(requireAuth, requireTurkeyAccess)
@@ -726,43 +745,86 @@ gameRouter.post('/support/request', async (req, res, next) => {
     const createdAt = new Date().toISOString()
     const ipAddress = String(getClientIp(req) || '').trim() || '-'
     const userAgent = String(req.headers['user-agent'] || '').trim() || '-'
+    const ticket = {
+      ticketId,
+      username: user?.username || 'Oyuncu',
+      email: user?.email || '-',
+      userId: String(req.auth.userId || '').trim(),
+      title,
+      description,
+      createdAt,
+      ipAddress,
+      userAgent,
+      emailStatus: 'queued',
+    }
+
+    await updateDb((draft) => {
+      if (!Array.isArray(draft.supportTickets)) {
+        draft.supportTickets = []
+      }
+      draft.supportTickets.push(ticket)
+      return draft
+    })
+
+    let emailStatus = 'queued'
 
     try {
       await sendSupportRequestEmail({
         to: config.supportInboxEmail,
         ticketId,
-        username: user?.username || 'Oyuncu',
-        email: user?.email || '-',
-        userId: req.auth.userId,
+        username: ticket.username,
+        email: ticket.email,
+        userId: ticket.userId,
         title,
         description,
         createdAt,
         ipAddress,
         userAgent,
       })
+      emailStatus = 'sent'
     } catch (mailError) {
-      console.error('[SUPPORT_REQUEST_EMAIL_FAILED]', mailError)
-      sendResult(res, {
-        success: false,
-        reason: 'service_unavailable',
-        errors: {
-          global:
-            'Destek servisine şu anda ulaşılamıyor. Lütfen daha sonra tekrar deneyin.',
-        },
+      emailStatus = resolveSupportEmailStatus(mailError)
+      console.error('[SUPPORT_REQUEST_EMAIL_FAILED]', {
+        ticketId,
+        emailStatus,
+        message: mailError?.message,
+        code: mailError?.code,
       })
-      return
+    }
+
+    if (emailStatus !== 'queued') {
+      try {
+        await updateDb((draft) => {
+          if (!Array.isArray(draft.supportTickets)) return draft
+          const index = draft.supportTickets.findIndex((entry) => entry?.ticketId === ticketId)
+          if (index < 0) return draft
+          draft.supportTickets[index] = {
+            ...draft.supportTickets[index],
+            emailStatus,
+          }
+          return draft
+        })
+      } catch (statusUpdateError) {
+        console.error('[SUPPORT_TICKET_STATUS_UPDATE_FAILED]', {
+          ticketId,
+          emailStatus,
+          message: statusUpdateError?.message,
+        })
+      }
     }
 
     sendResult(res, {
       success: true,
       message: `Destek talebiniz alındı. Referans kodu: ${ticketId}`,
+      ticketId,
+      referenceCode: ticketId,
+      emailStatus,
       supportInbox: config.supportInboxEmail,
     })
   } catch (error) {
     next(error)
   }
 })
-
 gameRouter.post('/push/price-alert', async (req, res, next) => {
   try {
     const result = await createPushPriceAlert(req.auth.userId, req.body || {})
@@ -1157,3 +1219,4 @@ gameRouter.use((req, res) => {
 })
 
 export default gameRouter
+

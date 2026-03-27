@@ -47,6 +47,7 @@
     "lint": "eslint .",
     "check:admin-rbac": "node scripts/validate-admin-rbac.mjs",
     "check:data-safety": "node scripts/check-data-safety.mjs",
+    "check:production-env": "node scripts/check-production-env.mjs",
     "verify": "npm run lint && npm run native:build",
     "fresh:start": "npm run dev",
     "danger:fresh:start": "npm run danger:data:reset && npm run dev",

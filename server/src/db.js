@@ -16,6 +16,7 @@ const DEFAULT_DB = {
   users: [],
   passwordResetTokens: [],
   accountDeletionRequests: [],
+  supportTickets: [],
   gameProfiles: [],
   marketState: null,
   forexState: null,
@@ -250,6 +251,7 @@ function hasRecoverableUserState(db) {
   if (Array.isArray(db.users) && db.users.length > 0) return true
   if (Array.isArray(db.gameProfiles) && db.gameProfiles.length > 0) return true
   if (Array.isArray(db.accountDeletionRequests) && db.accountDeletionRequests.length > 0) return true
+  if (Array.isArray(db.supportTickets) && db.supportTickets.length > 0) return true
   if (Array.isArray(db.directMessages) && db.directMessages.length > 0) return true
   if (Array.isArray(db.friendRequests) && db.friendRequests.length > 0) return true
   return false
@@ -440,6 +442,11 @@ function normalizeDbShape(raw) {
       : [],
     accountDeletionRequests: Array.isArray(raw.accountDeletionRequests)
       ? raw.accountDeletionRequests.filter((entry) => entry && typeof entry === 'object')
+      : [],
+    supportTickets: Array.isArray(raw.supportTickets)
+      ? raw.supportTickets
+          .filter((entry) => entry && typeof entry === 'object')
+          .slice(-5000)
       : [],
     gameProfiles: Array.isArray(raw.gameProfiles) ? raw.gameProfiles : [],
     marketState:

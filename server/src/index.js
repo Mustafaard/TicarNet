@@ -5,7 +5,7 @@ import fs from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import compression from 'compression'
-import { config } from './config.js'
+import { config, getStartupWarnings } from './config.js'
 import { createDbAutoBackup, readDb } from './db.js'
 import { adminRateLimit, authRateLimit, globalApiRateLimit } from './middleware/rateLimit.js'
 import { getRequestMetricsSummary, requestMetricsMiddleware } from './middleware/requestMetrics.js'
@@ -222,6 +222,16 @@ async function logDbStateSummary() {
   }
 }
 
+function logStartupWarnings() {
+  const warnings = getStartupWarnings()
+  if (warnings.length === 0) return
+
+  console.warn(`[BOOT] ${warnings.length} ayar uyarısı var:`)
+  for (const warning of warnings) {
+    console.warn(`[BOOT][WARN] ${warning}`)
+  }
+}
+
 app.use(
   cors({
     origin(origin, callback) {
@@ -386,6 +396,7 @@ acquireApiProcessLockOrExit()
 
 const server = app.listen(config.apiPort, config.apiHost, () => {
   logApiUrls()
+  logStartupWarnings()
   void logDbStateSummary()
 })
 server.requestTimeout = 30_000

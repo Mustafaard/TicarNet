@@ -26,6 +26,7 @@ const targetApkPath = path.resolve(targetDir, "ticarnet.apk");
 const targetShaPath = `${targetApkPath}.sha256`;
 const targetMetaPath = path.resolve(targetDir, "latest.json");
 const targetLandingPath = path.resolve(targetDir, "index.html");
+const publicApkUrl = "/download/ticarnet.apk";
 
 function formatBytes(bytes) {
   if (bytes < 1024) {
@@ -51,21 +52,26 @@ async function exists(filePath) {
 async function main() {
   if (!(await exists(sourcePath))) {
     throw new Error(
-      `[apk:publish:web] APK bulunamadi: ${sourcePath}\n` +
-        `Once su komutu calistir: npm run apk:build:demo`
+      `[apk:publish:web] APK dosyasi bulunamadi.\n` +
+        `Beklenen kaynak: ${sourcePath}\n` +
+        `Cozum: npm run apk:build:demo veya --source ile dogru APK yolu verin.`
     );
   }
 
   await fs.mkdir(targetDir, { recursive: true });
   await fs.copyFile(sourcePath, targetApkPath);
+  const stat = await fs.stat(targetApkPath);
+  if (!Number.isFinite(stat.size) || stat.size <= 0) {
+    throw new Error(`[apk:publish:web] Kopyalanan APK gecersiz veya bos: ${targetApkPath}`);
+  }
 
   const apkBuffer = await fs.readFile(targetApkPath);
   const sha = createHash("sha256").update(apkBuffer).digest("hex");
   await fs.writeFile(targetShaPath, `${sha}  ticarnet.apk\n`, "utf8");
 
-  const stat = await fs.stat(targetApkPath);
   const meta = {
     file: "ticarnet.apk",
+    url: publicApkUrl,
     bytes: stat.size,
     size: formatBytes(stat.size),
     sha256: sha,
@@ -92,7 +98,7 @@ async function main() {
   <section class="card">
     <h1>TicarNet Online</h1>
     <p>Android uygulamasini indirmek icin tikla.</p>
-    <a href="/download/ticarnet.apk">APK Indir</a>
+    <a href="${publicApkUrl}">APK Indir</a>
     <small>Boyut: ${meta.size} | SHA256: ${sha.slice(0, 16)}...</small>
   </section>
 </body>
@@ -105,11 +111,10 @@ async function main() {
   console.log(`[apk:publish:web] Hedef: ${targetApkPath}`);
   console.log(`[apk:publish:web] Boyut: ${meta.size}`);
   console.log(`[apk:publish:web] SHA256: ${sha}`);
-  console.log(`[apk:publish:web] URL: /download/ticarnet.apk`);
+  console.log(`[apk:publish:web] URL: ${publicApkUrl}`);
 }
 
 main().catch((error) => {
   console.error(error.message);
   process.exit(1);
 });
-

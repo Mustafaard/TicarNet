@@ -1,7 +1,7 @@
 ﻿import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import crypto from 'node:crypto'
-import { config } from '../config.js'
+import { config, getSmtpMissingEnvVars, isSmtpConfigured } from '../config.js'
 import { NO_DB_WRITE, readDb, updateDb } from '../db.js'
 import { emitSessionActivated } from './sessionEvents.js'
 import {
@@ -320,13 +320,31 @@ function resolveResetLinkOrigins() {
   const unique = [
     normalizeHttpOrigin(config.resetLinkBaseUrl),
     normalizeHttpOrigin(config.clientUrl),
-  ].filter(Boolean)
+    ...(Array.isArray(config.corsAllowedOrigins) ? config.corsAllowedOrigins : []),
+  ]
+    .map((entry) => normalizeHttpOrigin(entry))
+    .filter(Boolean)
 
-  if (unique.length === 0) {
+  const filteredForEnvironment = [...new Set(unique)].filter((origin) => {
+    if (config.nodeEnv !== 'production') return true
+
+    try {
+      const host = String(new URL(origin).hostname || '').trim().toLowerCase()
+      return host !== 'localhost' && host !== '127.0.0.1' && host !== '0.0.0.0'
+    } catch {
+      return false
+    }
+  })
+
+  if (filteredForEnvironment.length > 0) {
+    return filteredForEnvironment
+  }
+
+  if (config.nodeEnv !== 'production') {
     return ['http://localhost:5173']
   }
 
-  return [...new Set(unique)]
+  return []
 }
 
 function asValidTimestampMs(value) {
@@ -847,12 +865,50 @@ export async function requestPasswordReset(payload, meta) {
     }
   }
 
+  const resetOrigins = resolveResetLinkOrigins()
+  if (resetOrigins.length === 0) {
+    console.error('[auth] Password reset mail skipped: reset link origin missing.', {
+      nodeEnv: config.nodeEnv,
+      clientUrl: config.clientUrl || '-',
+      resetLinkBaseUrl: config.resetLinkBaseUrl || '-',
+      corsAllowedOriginsCount: Array.isArray(config.corsAllowedOrigins)
+        ? config.corsAllowedOrigins.length
+        : 0,
+    })
+    return {
+      success: false,
+      reason: 'mail_unavailable',
+      errors: {
+        global:
+          'Şu anda şifre sıfırlama bağlantısı gönderilemiyor. Lütfen daha sonra tekrar deneyin.',
+      },
+    }
+  }
+
+  if (!isSmtpConfigured()) {
+    console.error('[auth] Password reset mail skipped: SMTP is not configured.', {
+      missing: getSmtpMissingEnvVars(),
+    })
+    return {
+      success: false,
+      reason: 'mail_unavailable',
+      errors: {
+        global:
+          'Şu anda şifre sıfırlama bağlantısı gönderilemiyor. Lütfen daha sonra tekrar deneyin.',
+      },
+    }
+  }
+
   const rawToken = generateSecureToken(40)
   const tokenHash = hashToken(rawToken)
   const now = Date.now()
   const expiresAt = new Date(
     now + config.resetTokenTtlMinutes * 60 * 1000,
   ).toISOString()
+  const resetUrl = `${resetOrigins[0]}/?resetToken=${encodeURIComponent(rawToken)}`
+  const alternativeResetUrls = resetOrigins
+    .slice(1, 3)
+    .map((origin) => `${origin}/?resetToken=${encodeURIComponent(rawToken)}`)
 
   await updateDb((draft) => {
     draft.passwordResetTokens = draft.passwordResetTokens.filter((item) => {
@@ -877,12 +933,6 @@ export async function requestPasswordReset(payload, meta) {
     return draft
   })
 
-  const resetOrigins = resolveResetLinkOrigins()
-  const resetUrl = `${resetOrigins[0]}/?resetToken=${encodeURIComponent(rawToken)}`
-  const alternativeResetUrls = resetOrigins
-    .slice(1, 3)
-    .map((origin) => `${origin}/?resetToken=${encodeURIComponent(rawToken)}`)
-
   try {
     await sendPasswordResetEmail({
       to: user.email,
@@ -892,13 +942,18 @@ export async function requestPasswordReset(payload, meta) {
       expiresMinutes: config.resetTokenTtlMinutes,
     })
   } catch (error) {
-    console.error('[auth] Password reset mail send failed:', error)
+    console.error('[auth] Password reset mail send failed.', {
+      code: error?.code,
+      message: error?.message,
+      responseCode: error?.responseCode,
+      command: error?.command,
+    })
     return {
       success: false,
-      reason: 'mail_failed',
+      reason: 'mail_unavailable',
       errors: {
         global:
-          'E-posta gönderilemedi. Lütfen daha sonra tekrar deneyin.',
+          'Şu anda şifre sıfırlama bağlantısı gönderilemiyor. Lütfen daha sonra tekrar deneyin.',
       },
     }
   }

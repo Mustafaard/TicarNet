@@ -105,7 +105,13 @@ function isPlaceholderSecret(value) {
     return true
   }
 
-  if (safe.startsWith('your_') || safe.startsWith('buraya_') || safe.startsWith('uzun_')) {
+  if (
+    safe.startsWith('change_me')
+    || safe.startsWith('replace_me')
+    || safe.startsWith('your_')
+    || safe.startsWith('buraya_')
+    || safe.startsWith('uzun_')
+  ) {
     return true
   }
 
@@ -134,9 +140,15 @@ function resolveJwtSecret(nodeEnv) {
   return generated
 }
 
-const nodeEnv = process.env.NODE_ENV || 'development'
-const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173'
-const resetLinkBaseUrl = process.env.RESET_LINK_BASE_URL || clientUrl
+const nodeEnv = String(process.env.NODE_ENV || 'development').trim().toLowerCase()
+const isProduction = nodeEnv === 'production'
+const devClientFallback = 'http://localhost:5173'
+const clientUrl = normalizeHttpOrigin(
+  process.env.CLIENT_URL || (isProduction ? '' : devClientFallback),
+)
+const resetLinkBaseUrl = normalizeHttpOrigin(
+  process.env.RESET_LINK_BASE_URL || clientUrl || (isProduction ? '' : devClientFallback),
+)
 const defaultCorsOrigins = [clientUrl, resetLinkBaseUrl]
   .map((entry) => normalizeHttpOrigin(entry))
   .filter(Boolean)
@@ -157,14 +169,14 @@ const resolvedDbRootDir = path.dirname(resolvedDbFilePath)
 
 export const config = {
   nodeEnv,
-  apiHost: process.env.API_HOST || '0.0.0.0',
+  apiHost: process.env.API_HOST || (isProduction ? '127.0.0.1' : '0.0.0.0'),
   apiPort: toNumber(process.env.API_PORT || process.env.PORT, 8787),
   clientUrl,
   resetLinkBaseUrl,
   corsAllowedOrigins,
   corsAllowNoOrigin: toBoolean(process.env.CORS_ALLOW_NO_ORIGIN, true),
   healthToken: String(process.env.HEALTHCHECK_TOKEN || process.env.HEALTH_TOKEN || '').trim(),
-  wsAllowQueryToken: toBoolean(process.env.WS_ALLOW_QUERY_TOKEN, nodeEnv !== 'production'),
+  wsAllowQueryToken: toBoolean(process.env.WS_ALLOW_QUERY_TOKEN, !isProduction),
   maxAccountsPerScope: toNumber(process.env.MAX_ACCOUNTS_PER_SCOPE, 2),
   enforceRegisterIpOnLogin: toBoolean(process.env.ENFORCE_REGISTER_IP_ON_LOGIN, false),
   enforceRegisterSubnetOnLogin: toBoolean(process.env.ENFORCE_REGISTER_SUBNET_ON_LOGIN, false),
@@ -231,6 +243,9 @@ export const config = {
     user: process.env.SMTP_USER || '',
     pass: process.env.SMTP_APP_PASSWORD || process.env.SMTP_PASS || '',
     from: process.env.MAIL_FROM || process.env.SMTP_USER || '',
+    connectionTimeoutMs: toPositiveInt(process.env.SMTP_CONNECTION_TIMEOUT_MS, 10_000, 1_000, 120_000),
+    greetingTimeoutMs: toPositiveInt(process.env.SMTP_GREETING_TIMEOUT_MS, 10_000, 1_000, 120_000),
+    socketTimeoutMs: toPositiveInt(process.env.SMTP_SOCKET_TIMEOUT_MS, 15_000, 1_000, 180_000),
   },
   supportInboxEmail: String(
     process.env.SUPPORT_INBOX_EMAIL || 'mustafaard76@gmail.com',
@@ -261,4 +276,72 @@ export function getSmtpMissingEnvVars() {
   if (isPlaceholderSecret(config.smtp.pass)) missing.push('SMTP_APP_PASSWORD (veya SMTP_PASS)')
   if (isPlaceholderSecret(config.smtp.from)) missing.push('MAIL_FROM')
   return missing
+}
+
+function isLocalOrigin(value) {
+  const safe = normalizeHttpOrigin(value)
+  if (!safe) return false
+
+  try {
+    const hostname = String(new URL(safe).hostname || '').trim().toLowerCase()
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0'
+  } catch {
+    return false
+  }
+}
+
+function isPlaceholderUrl(value) {
+  const safe = normalizeEnvString(value).toLowerCase()
+  if (!safe) return true
+
+  if (safe.includes('alanadi') || safe.includes('example.com')) {
+    return true
+  }
+
+  if (safe.includes('your-domain') || safe.includes('yourdomain')) {
+    return true
+  }
+
+  return false
+}
+
+export function getStartupWarnings() {
+  const warnings = []
+
+  if (isPlaceholderSecret(process.env.JWT_SECRET || '')) {
+    warnings.push('JWT_SECRET placeholder/missing. Guvenli bir gizli anahtar tanimlayin.')
+  }
+
+  const healthToken = process.env.HEALTHCHECK_TOKEN || process.env.HEALTH_TOKEN || ''
+  if (isPlaceholderSecret(healthToken)) {
+    warnings.push('HEALTHCHECK_TOKEN placeholder/missing. Health endpoint korumasini etkinlestirin.')
+  }
+
+  if (config.nodeEnv === 'production') {
+    if (!config.clientUrl || isPlaceholderUrl(config.clientUrl) || isLocalOrigin(config.clientUrl)) {
+      warnings.push('CLIENT_URL production icin gecerli bir public HTTPS origin olmali.')
+    }
+
+    if (
+      !config.resetLinkBaseUrl
+      || isPlaceholderUrl(config.resetLinkBaseUrl)
+      || isLocalOrigin(config.resetLinkBaseUrl)
+    ) {
+      warnings.push('RESET_LINK_BASE_URL production icin gecerli bir public HTTPS origin olmali.')
+    }
+
+    if (!Array.isArray(config.corsAllowedOrigins) || config.corsAllowedOrigins.length === 0) {
+      warnings.push('CORS_ALLOWED_ORIGINS bos. Production istemcisi API erisimi engellenebilir.')
+    }
+  }
+
+  if (!isSmtpConfigured()) {
+    warnings.push(`SMTP ayarlari eksik: ${getSmtpMissingEnvVars().join(', ')}.`)
+  }
+
+  if (!String(config.supportInboxEmail || '').trim().includes('@')) {
+    warnings.push('SUPPORT_INBOX_EMAIL gecerli bir e-posta adresi olmali.')
+  }
+
+  return warnings
 }

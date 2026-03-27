@@ -122,8 +122,8 @@ authRouter.post('/request-password-reset', authLoginRateLimit, requireTurkeyAcce
 
     if (!result.success) {
       const status =
-        result.reason === 'mail_failed'
-          ? 500
+        result.reason === 'mail_unavailable' || result.reason === 'mail_failed'
+          ? 503
           : 400
       res.status(status).json(result)
       return
@@ -215,3 +215,4 @@ authRouter.post('/change-password', requireAuth, requireTurkeyAccess, async (req
 })
 
 export default authRouter
+

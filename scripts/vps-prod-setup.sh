@@ -33,7 +33,7 @@ ENFORCE_REGISTER_SUBNET_ON_LOGIN_VALUE="${ENFORCE_REGISTER_SUBNET_ON_LOGIN_VALUE
 SMTP_USER="${SMTP_USER:-}"
 SMTP_APP_PASSWORD="${SMTP_APP_PASSWORD:-}"
 MAIL_FROM_VALUE="${MAIL_FROM_VALUE:-}"
-SUPPORT_INBOX_EMAIL="${SUPPORT_INBOX_EMAIL:-}"
+SUPPORT_INBOX_EMAIL="${SUPPORT_INBOX_EMAIL:-mustafaard76@gmail.com}"
 
 usage() {
   cat <<'EOF'
@@ -67,7 +67,7 @@ Opsiyonlar:
   --smtp-app-password PASS  SMTP App Password (Gmail uygulama sifresi)
   --smtp-pass PASS          --smtp-app-password ile ayni
   --mail-from VALUE         Gonderen basligi (or: "TicarNet Online <mail@alanadiniz.com>")
-  --support-inbox-email     Destek taleplerinin gidecegi e-posta
+  --support-inbox-email     Destek taleplerinin gidecegi e-posta (varsayilan: mustafaard76@gmail.com)
   --skip-ssl                 SSL kurulumunu atla
   --skip-firewall            UFW kurulumunu atla
   --skip-pm2-startup         PM2 systemd startup kurulumunu atla
@@ -515,6 +515,9 @@ configure_env() {
   if [[ -n "$SMTP_APP_PASSWORD" ]]; then
     upsert_env "SMTP_APP_PASSWORD" "$SMTP_APP_PASSWORD" "$ENV_FILE"
   fi
+  upsert_env "SMTP_CONNECTION_TIMEOUT_MS" "10000" "$ENV_FILE"
+  upsert_env "SMTP_GREETING_TIMEOUT_MS" "10000" "$ENV_FILE"
+  upsert_env "SMTP_SOCKET_TIMEOUT_MS" "15000" "$ENV_FILE"
   if [[ -n "$MAIL_FROM_VALUE" ]]; then
     upsert_env "MAIL_FROM" "$MAIL_FROM_VALUE" "$ENV_FILE"
   elif [[ -n "$SMTP_USER" ]]; then
@@ -556,6 +559,7 @@ install_app_dependencies_and_build() {
   sudo -u "$APP_USER" -H bash -lc "
     cd '$APP_DIR' && \
     npm ci && \
+    npm run check:production-env && \
     npm run build
   "
 }

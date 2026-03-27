@@ -1,7 +1,11 @@
 import nodemailer from 'nodemailer'
 import { config, getSmtpMissingEnvVars, isSmtpConfigured } from '../config.js'
 
-let transporter
+let transporter = null
+let verifyPromise = null
+let lastVerifiedAtMs = 0
+
+const VERIFY_CACHE_TTL_MS = 5 * 60 * 1000
 
 function escapeHtml(value) {
   return String(value || '')
@@ -12,27 +16,73 @@ function escapeHtml(value) {
     .replaceAll("'", '&#39;')
 }
 
-function getTransporter() {
-  if (!isSmtpConfigured()) {
-    const missing = getSmtpMissingEnvVars()
-    throw new Error(
-      `SMTP ayarları eksik: ${missing.join(', ')}. server/.env içinde Gmail için SMTP_USER + SMTP_APP_PASSWORD (uygulama şifresi) + MAIL_FROM tanımlayın.`,
-    )
-  }
+function createSmtpConfigError() {
+  const missing = getSmtpMissingEnvVars()
+  const error = new Error(
+    `SMTP ayarları eksik: ${missing.join(', ')}. server/.env içinde Gmail için SMTP_USER + SMTP_APP_PASSWORD (uygulama şifresi) + MAIL_FROM tanımlayın.`,
+  )
+  error.code = 'SMTP_CONFIG_MISSING'
+  error.missing = missing
+  return error
+}
 
+function buildTransportConfig() {
+  return {
+    host: config.smtp.host,
+    port: config.smtp.port,
+    secure: config.smtp.secure,
+    auth: {
+      user: config.smtp.user,
+      pass: config.smtp.pass,
+    },
+    connectionTimeout: config.smtp.connectionTimeoutMs,
+    greetingTimeout: config.smtp.greetingTimeoutMs,
+    socketTimeout: config.smtp.socketTimeoutMs,
+  }
+}
+
+function ensureTransporterInstance() {
   if (!transporter) {
-    transporter = nodemailer.createTransport({
-      host: config.smtp.host,
-      port: config.smtp.port,
-      secure: config.smtp.secure,
-      auth: {
-        user: config.smtp.user,
-        pass: config.smtp.pass,
-      },
-    })
+    transporter = nodemailer.createTransport(buildTransportConfig())
+    verifyPromise = null
+    lastVerifiedAtMs = 0
   }
 
   return transporter
+}
+
+async function verifyTransporterIfNeeded(client) {
+  const now = Date.now()
+  if (lastVerifiedAtMs > 0 && now - lastVerifiedAtMs < VERIFY_CACHE_TTL_MS) {
+    return
+  }
+
+  if (!verifyPromise) {
+    verifyPromise = client
+      .verify()
+      .then(() => {
+        lastVerifiedAtMs = Date.now()
+      })
+      .catch((error) => {
+        lastVerifiedAtMs = 0
+        throw error
+      })
+      .finally(() => {
+        verifyPromise = null
+      })
+  }
+
+  await verifyPromise
+}
+
+async function getTransporter() {
+  if (!isSmtpConfigured()) {
+    throw createSmtpConfigError()
+  }
+
+  const client = ensureTransporterInstance()
+  await verifyTransporterIfNeeded(client)
+  return client
 }
 
 export async function sendPasswordResetEmail({
@@ -114,7 +164,7 @@ export async function sendPasswordResetEmail({
     </div>
   `
 
-  const client = getTransporter()
+  const client = await getTransporter()
   return client.sendMail({
     from: config.smtp.from,
     to,
@@ -187,7 +237,7 @@ export async function sendSupportRequestEmail({
     </div>
   `
 
-  const client = getTransporter()
+  const client = await getTransporter()
   return client.sendMail({
     from: config.smtp.from,
     to: safeTo,
