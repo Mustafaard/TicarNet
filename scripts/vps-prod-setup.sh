@@ -308,6 +308,9 @@ is_placeholder_value() {
   value="$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]')"
   [[ -z "$value" ]] && return 0
   [[ "$value" == "change_me" ]] && return 0
+  [[ "$value" == "changeme" ]] && return 0
+  [[ "$value" == "replace_me" ]] && return 0
+  [[ "$value" == *"change_me"* ]] && return 0
   [[ "$value" == *"buraya_"* ]] && return 0
   [[ "$value" == *"uzun_"* ]] && return 0
   [[ "$value" == *"your_"* ]] && return 0
