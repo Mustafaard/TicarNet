@@ -30,6 +30,10 @@ BACKUP_CRON_SCHEDULE="${BACKUP_CRON_SCHEDULE:-17 */6 * * *}"
 MAX_ACCOUNTS_PER_SCOPE="${MAX_ACCOUNTS_PER_SCOPE:-2}"
 ENFORCE_REGISTER_IP_ON_LOGIN_VALUE="${ENFORCE_REGISTER_IP_ON_LOGIN_VALUE:-false}"
 ENFORCE_REGISTER_SUBNET_ON_LOGIN_VALUE="${ENFORCE_REGISTER_SUBNET_ON_LOGIN_VALUE:-false}"
+SMTP_USER="${SMTP_USER:-}"
+SMTP_APP_PASSWORD="${SMTP_APP_PASSWORD:-}"
+MAIL_FROM_VALUE="${MAIL_FROM_VALUE:-}"
+SUPPORT_INBOX_EMAIL="${SUPPORT_INBOX_EMAIL:-}"
 
 usage() {
   cat <<'EOF'
@@ -59,6 +63,11 @@ Opsiyonlar:
                             Ilk kayit IP'si disinda giris engeli (varsayilan: false)
   --enforce-register-subnet-on-login true|false
                             Ilk kayit subnet disinda giris engeli (varsayilan: false)
+  --smtp-user EMAIL         SMTP kullanici e-postasi (or: gmail adresin)
+  --smtp-app-password PASS  SMTP App Password (Gmail uygulama sifresi)
+  --smtp-pass PASS          --smtp-app-password ile ayni
+  --mail-from VALUE         Gonderen basligi (or: "TicarNet Online <mail@alanadiniz.com>")
+  --support-inbox-email     Destek taleplerinin gidecegi e-posta
   --skip-ssl                 SSL kurulumunu atla
   --skip-firewall            UFW kurulumunu atla
   --skip-pm2-startup         PM2 systemd startup kurulumunu atla
@@ -141,6 +150,22 @@ while [[ $# -gt 0 ]]; do
       ;;
     --enforce-register-subnet-on-login)
       ENFORCE_REGISTER_SUBNET_ON_LOGIN_VALUE="${2:-false}"
+      shift 2
+      ;;
+    --smtp-user)
+      SMTP_USER="${2:-}"
+      shift 2
+      ;;
+    --smtp-app-password|--smtp-pass)
+      SMTP_APP_PASSWORD="${2:-}"
+      shift 2
+      ;;
+    --mail-from)
+      MAIL_FROM_VALUE="${2:-}"
+      shift 2
+      ;;
+    --support-inbox-email)
+      SUPPORT_INBOX_EMAIL="${2:-}"
       shift 2
       ;;
     --skip-ssl)
@@ -453,6 +478,12 @@ sync_code() {
 }
 
 configure_env() {
+  local public_scheme="http"
+  if [[ "$ENABLE_SSL" == "1" ]]; then
+    public_scheme="https"
+  fi
+  local public_base_url="${public_scheme}://${DOMAIN}"
+
   if [[ ! -f "$ENV_FILE" ]]; then
     cp "${APP_DIR}/server/.env.example" "$ENV_FILE"
     chown "$APP_USER":"$APP_GROUP" "$ENV_FILE"
@@ -462,9 +493,9 @@ configure_env() {
   upsert_env "NODE_ENV" "production" "$ENV_FILE"
   upsert_env "API_HOST" "127.0.0.1" "$ENV_FILE"
   upsert_env "API_PORT" "$API_PORT" "$ENV_FILE"
-  upsert_env "CLIENT_URL" "https://${DOMAIN}" "$ENV_FILE"
-  upsert_env "RESET_LINK_BASE_URL" "https://${DOMAIN}" "$ENV_FILE"
-  upsert_env "CORS_ALLOWED_ORIGINS" "https://${DOMAIN}" "$ENV_FILE"
+  upsert_env "CLIENT_URL" "$public_base_url" "$ENV_FILE"
+  upsert_env "RESET_LINK_BASE_URL" "$public_base_url" "$ENV_FILE"
+  upsert_env "CORS_ALLOWED_ORIGINS" "$public_base_url" "$ENV_FILE"
   upsert_env "CORS_ALLOW_NO_ORIGIN" "true" "$ENV_FILE"
   upsert_env "WS_ALLOW_QUERY_TOKEN" "false" "$ENV_FILE"
   upsert_env "MAX_ACCOUNTS_PER_SCOPE" "$MAX_ACCOUNTS_PER_SCOPE" "$ENV_FILE"
@@ -478,10 +509,47 @@ configure_env() {
   upsert_env "DB_ROLLING_BACKUP_FILE_PATH" "${DATA_DIR}/backups/db-rolling.json" "$ENV_FILE"
   upsert_env "DB_BACKUP_RETENTION_DAYS" "0" "$ENV_FILE"
 
+  if [[ -n "$SMTP_USER" ]]; then
+    upsert_env "SMTP_USER" "$SMTP_USER" "$ENV_FILE"
+  fi
+  if [[ -n "$SMTP_APP_PASSWORD" ]]; then
+    upsert_env "SMTP_APP_PASSWORD" "$SMTP_APP_PASSWORD" "$ENV_FILE"
+  fi
+  if [[ -n "$MAIL_FROM_VALUE" ]]; then
+    upsert_env "MAIL_FROM" "$MAIL_FROM_VALUE" "$ENV_FILE"
+  elif [[ -n "$SMTP_USER" ]]; then
+    local existing_mail_from
+    existing_mail_from="$(read_env_value "MAIL_FROM" "$ENV_FILE" || true)"
+    if is_placeholder_value "$existing_mail_from"; then
+      upsert_env "MAIL_FROM" "\"TicarNet Online <${SMTP_USER}>\"" "$ENV_FILE"
+    fi
+  fi
+  if [[ -n "$SUPPORT_INBOX_EMAIL" ]]; then
+    upsert_env "SUPPORT_INBOX_EMAIL" "$SUPPORT_INBOX_EMAIL" "$ENV_FILE"
+  fi
+
   set_secret_if_missing "JWT_SECRET"
   set_secret_if_missing "HEALTHCHECK_TOKEN"
 
   chown "$APP_USER":"$APP_GROUP" "$ENV_FILE"
+}
+
+warn_if_smtp_incomplete() {
+  local smtp_user_current
+  local smtp_pass_current
+  local mail_from_current
+
+  smtp_user_current="$(read_env_value "SMTP_USER" "$ENV_FILE" || true)"
+  smtp_pass_current="$(read_env_value "SMTP_APP_PASSWORD" "$ENV_FILE" || true)"
+  mail_from_current="$(read_env_value "MAIL_FROM" "$ENV_FILE" || true)"
+
+  if is_placeholder_value "$smtp_user_current" || is_placeholder_value "$smtp_pass_current" || is_placeholder_value "$mail_from_current"; then
+    cat <<'EOF'
+[vps-setup] UYARI: SMTP ayarlari tam degil. Sifre yenileme e-postasi gonderimi basarisiz olabilir.
+[vps-setup] Duzenle:
+  server/.env icinde SMTP_USER, SMTP_APP_PASSWORD, MAIL_FROM
+EOF
+  fi
 }
 
 install_app_dependencies_and_build() {
@@ -676,6 +744,7 @@ configure_firewall
 configure_fail2ban
 configure_db_backup_cron
 post_checks
+warn_if_smtp_incomplete
 echo "[vps-setup] Tamamlandi."
 echo "[vps-setup] App dizini: ${APP_DIR}"
 echo "[vps-setup] Env dosyasi: ${ENV_FILE}"

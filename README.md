@@ -35,6 +35,7 @@ Varsayilan adresler:
 - `npm run verify`: lint + build kontrolu
 - `npm run ship`: tek komutla `git add + commit + push` (sunucu deploy tetikleme)
 - `npm run ship:mobile`: demo APK build + `/download/ticarnet.apk` hazirlama + `git push`
+- `npm run season:reset`: tum profillerin sezon puanini (league.seasonPoints) sifirlar
 
 ### Android (Bundled)
 
@@ -87,6 +88,19 @@ Domain + SSL ile:
 sudo bash scripts/vps-fresh-install.sh --domain ticarnet.online --enable-ssl --email admin@ticarnet.online
 ```
 
+Domain + SSL + SMTP (sifre yenileme e-postasi icin onerilen):
+
+```bash
+sudo bash scripts/vps-fresh-install.sh \
+  --domain ticarnet.online \
+  --enable-ssl \
+  --email admin@ticarnet.online \
+  --smtp-user YOUR_GMAIL@gmail.com \
+  --smtp-app-password YOUR_GMAIL_APP_PASSWORD \
+  --mail-from "TicarNet Online <YOUR_GMAIL@gmail.com>" \
+  --support-inbox-email YOUR_GMAIL@gmail.com
+```
+
 Tek komut deploy scripti:
 
 ```bash
@@ -137,6 +151,14 @@ Tum Ubuntu VPS'lerde kullanilabilen genel komut:
 
 ```bash
 sudo bash scripts/vps-prod-setup.sh --help
+```
+
+Sifre sifirlama e-postasi dogrulamasi:
+
+```bash
+cd /var/www/ticarnet/current
+grep -E "^(SMTP_USER|SMTP_APP_PASSWORD|MAIL_FROM|RESET_LINK_BASE_URL)=" server/.env
+curl -s http://127.0.0.1:8787/api/health
 ```
 
 Yuk testi (smoke):

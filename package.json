@@ -41,6 +41,7 @@
     "backup:db:verify": "node scripts/verify-db-backup.mjs --write-meta",
     "backup:db:verify:strict": "node scripts/verify-db-backup.mjs --strict --write-meta",
     "backup:db:run": "bash scripts/db-backup.sh",
+    "season:reset": "node scripts/reset-season-points.mjs",
     "android:live:bridge": "vite --host 0.0.0.0 --port 5173 --strictPort",
     "android:run:live": "npx cap run android -l --external",
     "lint": "eslint .",

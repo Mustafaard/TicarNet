@@ -86,6 +86,41 @@ function parseJwtExpires(value, fallback = '30d') {
   return raw
 }
 
+function normalizeEnvString(value) {
+  return String(value ?? '').trim()
+}
+
+function isPlaceholderSecret(value) {
+  const safe = normalizeEnvString(value).toLowerCase()
+  if (!safe) return true
+
+  if (
+    safe === 'change_me'
+    || safe === 'changeme'
+    || safe === 'replace_me'
+    || safe === 'your_password'
+    || safe === 'your_app_password'
+    || safe === 'your_email@gmail.com'
+  ) {
+    return true
+  }
+
+  if (safe.startsWith('your_') || safe.startsWith('buraya_') || safe.startsWith('uzun_')) {
+    return true
+  }
+
+  if (
+    safe.includes('your_gmail')
+    || safe.includes('example.com')
+    || safe.includes('gmail_app_password')
+    || safe.includes('smtp_app_password')
+  ) {
+    return true
+  }
+
+  return false
+}
+
 function resolveJwtSecret(nodeEnv) {
   const configured = String(process.env.JWT_SECRET || '').trim()
   if (configured) return configured
@@ -213,13 +248,17 @@ export const config = {
 }
 
 export function isSmtpConfigured() {
-  return Boolean(config.smtp.user && config.smtp.pass && config.smtp.from)
+  return (
+    !isPlaceholderSecret(config.smtp.user)
+    && !isPlaceholderSecret(config.smtp.pass)
+    && !isPlaceholderSecret(config.smtp.from)
+  )
 }
 
 export function getSmtpMissingEnvVars() {
   const missing = []
-  if (!config.smtp.user) missing.push('SMTP_USER')
-  if (!config.smtp.pass) missing.push('SMTP_APP_PASSWORD (veya SMTP_PASS)')
-  if (!config.smtp.from) missing.push('MAIL_FROM')
+  if (isPlaceholderSecret(config.smtp.user)) missing.push('SMTP_USER')
+  if (isPlaceholderSecret(config.smtp.pass)) missing.push('SMTP_APP_PASSWORD (veya SMTP_PASS)')
+  if (isPlaceholderSecret(config.smtp.from)) missing.push('MAIL_FROM')
   return missing
 }

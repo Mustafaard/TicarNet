@@ -14,6 +14,10 @@ APP_BASE_DIR="${APP_BASE_DIR:-/var/www/ticarnet}"
 DATA_DIR="${DATA_DIR:-/var/lib/ticarnet}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/ticarnet}"
 MAX_ACCOUNTS_PER_SCOPE="${MAX_ACCOUNTS_PER_SCOPE:-2}"
+SMTP_USER="${SMTP_USER:-}"
+SMTP_APP_PASSWORD="${SMTP_APP_PASSWORD:-}"
+MAIL_FROM_VALUE="${MAIL_FROM_VALUE:-}"
+SUPPORT_INBOX_EMAIL="${SUPPORT_INBOX_EMAIL:-}"
 
 usage() {
   cat <<'EOF'
@@ -30,6 +34,11 @@ Opsiyonlar:
   --data-dir DIR              Kalici veri (varsayilan: /var/lib/ticarnet)
   --backup-dir DIR            Yedek dizini (varsayilan: /var/backups/ticarnet)
   --max-accounts-per-scope N  Ayni public IP hesap limiti (varsayilan: 2)
+  --smtp-user EMAIL           SMTP kullanici e-postasi (or: gmail adresin)
+  --smtp-app-password PASS    SMTP App Password (Gmail uygulama sifresi)
+  --smtp-pass PASS            --smtp-app-password ile ayni
+  --mail-from VALUE           Gonderen basligi (or: "TicarNet Online <mail@alanadiniz.com>")
+  --support-inbox-email EMAIL Destek taleplerinin gidecegi e-posta
   --enable-ssl                Certbot SSL ac
   --email EMAIL               SSL icin e-posta (enable-ssl ile zorunlu)
   -h, --help                  Yardim
@@ -78,6 +87,22 @@ while [[ $# -gt 0 ]]; do
       ;;
     --max-accounts-per-scope)
       MAX_ACCOUNTS_PER_SCOPE="${2:-2}"
+      shift 2
+      ;;
+    --smtp-user)
+      SMTP_USER="${2:-}"
+      shift 2
+      ;;
+    --smtp-app-password|--smtp-pass)
+      SMTP_APP_PASSWORD="${2:-}"
+      shift 2
+      ;;
+    --mail-from)
+      MAIL_FROM_VALUE="${2:-}"
+      shift 2
+      ;;
+    --support-inbox-email)
+      SUPPORT_INBOX_EMAIL="${2:-}"
       shift 2
       ;;
     --enable-ssl)
@@ -131,6 +156,20 @@ if [[ "$ENABLE_SSL" == "1" ]]; then
   EMAIL_FLAG="--email ${EMAIL}"
 fi
 
+SMTP_ARGS=()
+if [[ -n "$SMTP_USER" ]]; then
+  SMTP_ARGS+=(--smtp-user "$SMTP_USER")
+fi
+if [[ -n "$SMTP_APP_PASSWORD" ]]; then
+  SMTP_ARGS+=(--smtp-app-password "$SMTP_APP_PASSWORD")
+fi
+if [[ -n "$MAIL_FROM_VALUE" ]]; then
+  SMTP_ARGS+=(--mail-from "$MAIL_FROM_VALUE")
+fi
+if [[ -n "$SUPPORT_INBOX_EMAIL" ]]; then
+  SMTP_ARGS+=(--support-inbox-email "$SUPPORT_INBOX_EMAIL")
+fi
+
 # shellcheck disable=SC2086
 bash "${SCRIPT_DIR}/vps-prod-setup.sh" \
   --domain "$DOMAIN" \
@@ -145,6 +184,7 @@ bash "${SCRIPT_DIR}/vps-prod-setup.sh" \
   --max-accounts-per-scope "$MAX_ACCOUNTS_PER_SCOPE" \
   --enforce-register-ip-on-login false \
   --enforce-register-subnet-on-login false \
+  "${SMTP_ARGS[@]}" \
   $SSL_FLAG \
   $EMAIL_FLAG
 
