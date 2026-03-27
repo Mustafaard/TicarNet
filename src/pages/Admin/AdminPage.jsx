@@ -93,6 +93,23 @@ function fmtRemain(ms) {
   return rh ? `${d} g ${rh} sa` : `${d} g`
 }
 
+function hoursToMinutes(value, { allowZero = false, fallbackHours = 1 } = {}) {
+  const raw = String(value ?? '').trim()
+  if (!raw) return allowZero ? 0 : Math.max(1, toInt(fallbackHours, 1)) * 60
+  const safeHours = Math.max(0, toInt(raw, allowZero ? 0 : fallbackHours))
+  if (allowZero && safeHours === 0) return 0
+  return Math.max(1, safeHours) * 60
+}
+
+function fmtPenaltyDuration(minutesValue) {
+  const minutes = Math.max(0, toInt(minutesValue, 0))
+  if (minutes <= 0) return 'kalıcı'
+  if (minutes < 60) return `${minutes} dakika`
+  const hours = Math.floor(minutes / 60)
+  const remainMinutes = minutes % 60
+  return remainMinutes > 0 ? `${hours} saat ${remainMinutes} dakika` : `${hours} saat`
+}
+
 function AdminPage({ user, onLogout }) {
   const initializedRef = useRef(false)
   const seededLogRoleRef = useRef(false)
@@ -119,11 +136,11 @@ function AdminPage({ user, onLogout }) {
   const [diaSub, setDiaSub] = useState('')
   const [diaSubReason, setDiaSubReason] = useState('')
 
-  const [chatMin, setChatMin] = useState('60')
+  const [chatHours, setChatHours] = useState('1')
   const [chatReason, setChatReason] = useState('')
-  const [msgMin, setMsgMin] = useState('120')
+  const [msgHours, setMsgHours] = useState('2')
   const [msgReason, setMsgReason] = useState('')
-  const [banMin, setBanMin] = useState('')
+  const [banHours, setBanHours] = useState('')
   const [banReason, setBanReason] = useState('')
 
   const [emailNext, setEmailNext] = useState('')
@@ -132,8 +149,8 @@ function AdminPage({ user, onLogout }) {
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const [passwordReason, setPasswordReason] = useState('')
   const [quickActionReason, setQuickActionReason] = useState('')
-  const [quickMuteMinutes, setQuickMuteMinutes] = useState('60')
-  const [quickTempBanMinutes, setQuickTempBanMinutes] = useState('240')
+  const [quickMuteHours, setQuickMuteHours] = useState('1')
+  const [quickTempBanHours, setQuickTempBanHours] = useState('4')
 
   const [roleReason, setRoleReason] = useState('')
   const [announcementTitle, setAnnouncementTitle] = useState('')
@@ -510,26 +527,26 @@ function AdminPage({ user, onLogout }) {
     let confirmText = ''
 
     if (type === 'chat' && canChatBlock) {
-      minutes = toInt(chatMin, 0)
+      minutes = hoursToMinutes(chatHours, { fallbackHours: 1 })
       reason = String(chatReason || '').trim()
-      if (minutes <= 0) return void setError('Sohbet engeli süresi en az 1 dk olmalı.')
+      if (minutes <= 0) return void setError('Sohbet engeli süresi en az 1 saat olmalı.')
       fn = setAdminChatBlock
       busyKey = 'chat-block'
-      confirmText = `${selected.username} kullanıcısına ${minutes} dk sohbet engeli verilsin mi?`
+      confirmText = `${selected.username} kullanıcısına ${fmtPenaltyDuration(minutes)} sohbet engeli verilsin mi?`
     } else if (type === 'message' && canMsgBlock) {
-      minutes = toInt(msgMin, 0)
+      minutes = hoursToMinutes(msgHours, { fallbackHours: 2 })
       reason = String(msgReason || '').trim()
-      if (minutes <= 0) return void setError('Mesaj engeli süresi en az 1 dk olmalı.')
+      if (minutes <= 0) return void setError('Mesaj engeli süresi en az 1 saat olmalı.')
       fn = setAdminMessageBlock
       busyKey = 'message-block'
-      confirmText = `${selected.username} kullanıcısına ${minutes} dk DM + sohbet engeli verilsin mi?`
+      confirmText = `${selected.username} kullanıcısına ${fmtPenaltyDuration(minutes)} DM + sohbet engeli verilsin mi?`
     } else if (type === 'ban' && canTempBan) {
-      minutes = Math.max(0, toInt(banMin, 0))
+      minutes = hoursToMinutes(banHours, { allowZero: true })
       reason = String(banReason || '').trim()
       fn = setAdminTempBan
       busyKey = 'temp-ban'
       confirmText = minutes > 0
-        ? `${selected.username} kullanıcısına ${minutes} dk geçici ban verilsin mi?`
+        ? `${selected.username} kullanıcısına ${fmtPenaltyDuration(minutes)} geçici ban verilsin mi?`
         : `${selected.username} kullanıcısına kalıcı ban verilsin mi?`
     }
 
@@ -777,14 +794,14 @@ function AdminPage({ user, onLogout }) {
 
     let response = null
     if (mode === 'mute') {
-      const minutes = Math.max(1, toInt(quickMuteMinutes, 60))
-      if (!window.confirm(`${targetLookup} kullanıcısı ${minutes} dakika susturulsun mu?`)) return
+      const minutes = hoursToMinutes(quickMuteHours, { fallbackHours: 1 })
+      if (!window.confirm(`${targetLookup} kullanıcısı ${fmtPenaltyDuration(minutes)} susturulsun mu?`)) return
       setBusy(`quick:mute:${targetUserId}`)
       response = await setAdminMute(targetLookup, targetUserId, minutes, reason)
       setBusy('')
     } else if (mode === 'temp-ban') {
-      const minutes = Math.max(1, toInt(quickTempBanMinutes, 240))
-      if (!window.confirm(`${targetLookup} kullanıcısı ${minutes} dakika geçici banlansın mı?`)) return
+      const minutes = hoursToMinutes(quickTempBanHours, { fallbackHours: 4 })
+      if (!window.confirm(`${targetLookup} kullanıcısı ${fmtPenaltyDuration(minutes)} geçici banlansın mı?`)) return
       setBusy(`quick:temp-ban:${targetUserId}`)
       response = await setAdminTempBan(targetLookup, targetUserId, minutes, reason)
       setBusy('')
@@ -991,16 +1008,16 @@ function AdminPage({ user, onLogout }) {
             <input
               type="number"
               min="1"
-              value={quickMuteMinutes}
-              onChange={(e) => setQuickMuteMinutes(e.target.value)}
-              placeholder="Susturma dakikası"
+              value={quickMuteHours}
+              onChange={(e) => setQuickMuteHours(e.target.value)}
+              placeholder="Susturma (saat)"
             />
             <input
               type="number"
               min="1"
-              value={quickTempBanMinutes}
-              onChange={(e) => setQuickTempBanMinutes(e.target.value)}
-              placeholder="Geçici ban dakikası"
+              value={quickTempBanHours}
+              onChange={(e) => setQuickTempBanHours(e.target.value)}
+              placeholder="Geçici ban (saat)"
             />
           </div>
 
@@ -1111,16 +1128,17 @@ function AdminPage({ user, onLogout }) {
       {(canMsgBlock || canChatBlock || canTempBan) ? (
         <section className="admin-card">
           <h2>{isAdmin ? '4) Ceza İşlemleri' : '3) Moderatör Ceza İşlemleri'}</h2>
+          <p className="admin-inline-note">Süreler saat cinsinden girilir; sistem arka planda dakikaya çevirir.</p>
           {isAdmin && canChatBlock ? (
             <div className="admin-row">
-              <input type="number" min="1" value={chatMin} onChange={(e) => setChatMin(e.target.value)} placeholder="Chat engel dakika" />
+              <input type="number" min="1" value={chatHours} onChange={(e) => setChatHours(e.target.value)} placeholder="Sohbet engeli (saat)" />
               <input type="text" value={chatReason} onChange={(e) => setChatReason(e.target.value)} placeholder="Chat engel nedeni" maxLength={160} />
               <button type="button" disabled={!selected || busy === 'chat-block'} onClick={() => void applyPenalty('chat')}>{busy === 'chat-block' ? 'Uygulaniyor...' : 'Chat Engeli Ver'}</button>
             </div>
           ) : null}
           {canMsgBlock ? (
             <div className="admin-row">
-              <input type="number" min="1" value={msgMin} onChange={(e) => setMsgMin(e.target.value)} placeholder="Mesaj engeli dakika" />
+              <input type="number" min="1" value={msgHours} onChange={(e) => setMsgHours(e.target.value)} placeholder="Mesaj engeli (saat)" />
               <input type="text" value={msgReason} onChange={(e) => setMsgReason(e.target.value)} placeholder="Mesaj engeli nedeni" maxLength={160} />
               <button type="button" disabled={!selected || busy === 'message-block'} onClick={() => void applyPenalty('message')}>{busy === 'message-block' ? 'Uygulaniyor...' : 'DM + Chat Engeli Ver'}</button>
               <button type="button" className="btn-secondary" disabled={!selected || busy === 'message-block-clear'} onClick={() => void clearMsgBlock()}>{busy === 'message-block-clear' ? 'Kaldırılıyor...' : 'Mesaj Engelini Kaldır'}</button>
@@ -1128,7 +1146,7 @@ function AdminPage({ user, onLogout }) {
           ) : null}
           {isAdmin && canTempBan ? (
             <div className="admin-row">
-              <input type="number" min="0" value={banMin} onChange={(e) => setBanMin(e.target.value)} placeholder="Ban dakika (boş/0=kalıcı)" />
+              <input type="number" min="0" value={banHours} onChange={(e) => setBanHours(e.target.value)} placeholder="Ban (saat, 0=kalıcı)" />
               <input type="text" value={banReason} onChange={(e) => setBanReason(e.target.value)} placeholder="Ban nedeni" maxLength={160} />
               <button type="button" className="btn-danger" disabled={!selected || busy === 'temp-ban'} onClick={() => void applyPenalty('ban')}>{busy === 'temp-ban' ? 'Uygulaniyor...' : 'Ban Uygula'}</button>
             </div>

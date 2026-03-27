@@ -283,7 +283,6 @@ function isStrongAdminPassword(password) {
   if (password.length < PASSWORD_MIN_LENGTH || password.length > PASSWORD_MAX_LENGTH) return false
   if (/\s/.test(password)) return false
   if (!/[a-z]/.test(password)) return false
-  if (!/[A-Z]/.test(password)) return false
   if (!/[0-9]/.test(password)) return false
   return true
 }
@@ -442,6 +441,15 @@ function buildEconomyNotice(kind, mode, amount, reason, actorName) {
   return `Yönetim işlemi: hesabına ${amount} ${unit} eklendi. Neden: ${reason}. İşlem: ${actorName}.`
 }
 
+function formatPenaltyDuration(minutesValue) {
+  const minutes = Math.max(0, asInt(minutesValue, 0))
+  if (minutes <= 0) return 'kalıcı'
+  if (minutes < 60) return `${minutes} dakika`
+  const hours = Math.floor(minutes / 60)
+  const remainMinutes = minutes % 60
+  return remainMinutes > 0 ? `${hours} saat ${remainMinutes} dakika` : `${hours} saat`
+}
+
 function buildModerationNotice(action, durationMinutes, reason, until, actorName) {
   const byAction = {
     user_mute: 'susturma',
@@ -450,7 +458,8 @@ function buildModerationNotice(action, durationMinutes, reason, until, actorName
     user_temp_ban: 'geçici engel',
   }
   const label = byAction[action] || 'ceza'
-  return `Yönetim cezası: ${durationMinutes} dk ${label} uygulandı. Neden: ${reason}. Bitiş: ${until}. İşlem: ${actorName}.`
+  const durationLabel = formatPenaltyDuration(durationMinutes)
+  return `Yönetim cezası: ${durationLabel} ${label} uygulandı. Neden: ${reason}. Bitiş: ${until}. İşlem: ${actorName}.`
 }
 
 function sendAdminNotice(db, targetUser, payload = {}) {
@@ -1016,7 +1025,7 @@ export async function updateAdminUserPassword(actorUserId, payload = {}) {
   if (!reasonCheck.ok) return reasonCheck.result
   if (!newPassword) return fail('validation', 'Yeni şifre zorunlu.')
   if (!isStrongAdminPassword(newPassword)) {
-    return fail('validation', 'Şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermeli.')
+    return fail('validation', 'Şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermeli.')
   }
   if (!confirmPassword) return fail('validation', 'Şifre tekrarı zorunlu.')
   if (newPassword !== confirmPassword) return fail('validation', 'Şifreler birbiriyle eşleşmiyor.')
@@ -1126,6 +1135,60 @@ export async function updateAdminUserPassword(actorUserId, payload = {}) {
         })
         return db
       }
+    }
+
+    const normalizedPassword = String(newPassword || '').trim().toLowerCase().replace(/\s+/g, '')
+    const normalizedUsername = String(target.target.username || '').trim().toLowerCase().replace(/\s+/g, '')
+    const normalizedEmail = String(target.target.email || '').trim().toLowerCase().replace(/\s+/g, '')
+    if (normalizedPassword && (normalizedPassword === normalizedUsername || normalizedPassword === normalizedEmail)) {
+      result = fail('validation', 'Yeni şifre kullanıcı adı veya e-posta ile aynı olamaz.')
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: result.errors.global,
+        targetUserId: target.target.id,
+        targetUsername: target.target.username,
+        targetEmail: target.target.email,
+        meta: baseMeta,
+      })
+      return db
+    }
+
+    const duplicatePasswordUser = Array.isArray(db.users)
+      ? db.users.find((candidate) => {
+        if (!candidate || candidate.id === target.target.id) return false
+        const hash = String(candidate.passwordHash || '').trim()
+        if (!(hash.startsWith('$2a$') || hash.startsWith('$2b$') || hash.startsWith('$2y$'))) return false
+        try {
+          return bcrypt.compareSync(newPassword, hash)
+        } catch {
+          return false
+        }
+      })
+      : null
+    if (duplicatePasswordUser) {
+      result = fail('validation', 'Bu şifre başka bir hesapta kullanılıyor. Farklı bir şifre seçin.')
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: result.errors.global,
+        targetUserId: target.target.id,
+        targetUsername: target.target.username,
+        targetEmail: target.target.email,
+        meta: {
+          ...baseMeta,
+          conflictUserId: duplicatePasswordUser.id || '',
+        },
+      })
+      return db
     }
 
     const profile = findProfileByUserId(db, target.target.id)

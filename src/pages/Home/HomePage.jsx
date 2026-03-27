@@ -1083,7 +1083,46 @@ const metricLengthClass = (value) => {
   if (len >= 12) return 'is-long'
   return ''
 }
-const errText = (e, f) => Object.values(e || {}).find((v) => typeof v === 'string' && v.trim()) || f
+const safeUiText = (value, depth = 0) => {
+  if (value == null) return ''
+  if (typeof value === 'string') {
+    const text = value.trim()
+    if (!text) return ''
+    if (text === '[object Object]') return ''
+    return text
+  }
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return String(value)
+  }
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const candidate = safeUiText(entry, depth + 1)
+      if (candidate) return candidate
+    }
+    return ''
+  }
+  if (typeof value === 'object' && depth < 3) {
+    const priorityKeys = ['global', 'message', 'error', 'detail', 'reason', 'title']
+    for (const key of priorityKeys) {
+      const candidate = safeUiText(value?.[key], depth + 1)
+      if (candidate) return candidate
+    }
+    for (const entry of Object.values(value || {})) {
+      const candidate = safeUiText(entry, depth + 1)
+      if (candidate) return candidate
+    }
+  }
+  return ''
+}
+const errText = (errors, fallback) => {
+  const direct = safeUiText(errors?.global || errors?.message || errors?.error)
+  if (direct) return direct
+  for (const value of Object.values(errors || {})) {
+    const candidate = safeUiText(value)
+    if (candidate) return candidate
+  }
+  return safeUiText(fallback) || 'İşlem sırasında bir hata oluştu.'
+}
 const resolveVehicleImage = (entry, templateId = '') => {
   const safeTemplateId = String(templateId || entry?.templateId || '').trim()
   const directImage = String(entry?.image || '').trim()
@@ -2767,6 +2806,8 @@ function HomePage({ user, onLogout }) {
   const messageConnectRef = useRef(() => {})
   const messageReplyTargetRef = useRef(null)
   const messageViewTabRef = useRef('bildirimler')
+  const liveMessageRefreshTimerRef = useRef(0)
+  const liveMessageRefreshInFlightRef = useRef(false)
   const notificationsMarkedRef = useRef(false)
   const notificationsMarkingInFlightRef = useRef(false)
   const logoutTriggeredRef = useRef(false)
@@ -2783,6 +2824,7 @@ function HomePage({ user, onLogout }) {
     clearTimeout(fxTimer.current)
     clearTimeout(forexBoundaryRetryTimerRef.current)
     clearTimeout(tutorialSpotlightTimerRef.current)
+    clearTimeout(liveMessageRefreshTimerRef.current)
     if (typeof window !== 'undefined' && forexHoverRafRef.current) {
       window.cancelAnimationFrame(forexHoverRafRef.current)
       forexHoverRafRef.current = 0
@@ -3400,6 +3442,36 @@ function HomePage({ user, onLogout }) {
     return true
   }, [fail, user?.id])
 
+  const triggerLiveStateRefresh = useCallback(() => {
+    const runRefresh = async () => {
+      if (liveMessageRefreshInFlightRef.current) return
+      liveMessageRefreshInFlightRef.current = true
+      try {
+        const tasks = [
+          loadOverview(),
+          loadProfile(),
+          loadBank({ force: true }),
+        ]
+        if (tab === 'missions') {
+          tasks.push(loadMissions())
+        }
+        await Promise.allSettled(tasks)
+      } finally {
+        liveMessageRefreshInFlightRef.current = false
+      }
+    }
+
+    if (typeof window === 'undefined') {
+      void runRefresh()
+      return
+    }
+
+    clearTimeout(liveMessageRefreshTimerRef.current)
+    liveMessageRefreshTimerRef.current = window.setTimeout(() => {
+      void runRefresh()
+    }, 160)
+  }, [loadBank, loadMissions, loadOverview, loadProfile, tab])
+
   const loadDailyStoreState = useCallback(async () => {
     const response = await getDailyStore()
     if (!response?.success) return fail(response, '12 saatlik fırsatlar alınamadı.')
@@ -3733,6 +3805,7 @@ function HomePage({ user, onLogout }) {
           ? 'all'
           : (messageFilterRef.current || 'all')
         void loadMessageCenter(refreshFilter)
+        void triggerLiveStateRefresh()
         return
       }
 
@@ -3744,6 +3817,7 @@ function HomePage({ user, onLogout }) {
         if (messageReplyTargetRef.current?.username) {
           void loadDirectMessageThread(messageReplyTargetRef.current.username)
         }
+        void triggerLiveStateRefresh()
         return
       }
 
@@ -3770,7 +3844,7 @@ function HomePage({ user, onLogout }) {
       if (messageSocketRef.current !== socket) return
       setMessageSocketState('offline')
     }
-  }, [handleForcedLogout, loadDirectMessageThread, loadMessageCenter])
+  }, [handleForcedLogout, loadDirectMessageThread, loadMessageCenter, triggerLiveStateRefresh])
 
   useEffect(() => {
     messageConnectRef.current = connectMessageSocket
@@ -4129,6 +4203,18 @@ function HomePage({ user, onLogout }) {
     document.addEventListener('visibilitychange', onVisibilityChange)
     return () => document.removeEventListener('visibilitychange', onVisibilityChange)
   }, [loadBank, tab])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const intervalId = window.setInterval(() => {
+      if (!isPageVisible()) return
+      void triggerLiveStateRefresh()
+      if (tab === 'profile' && profileTab === 'leaderboard') {
+        void _loadLeague()
+      }
+    }, 9000)
+    return () => window.clearInterval(intervalId)
+  }, [_loadLeague, profileTab, tab, triggerLiveStateRefresh])
 
   const openDiamondMarketHub = async () => {
     await openTab('profile', { profileTab: 'diamond-market' })
@@ -5685,19 +5771,19 @@ function HomePage({ user, onLogout }) {
     return { cancelled: false, value: raw.slice(0, 160) }
   }
 
-  const promptStaffMinutes = (title, defaultMinutes = 60) => {
+  const promptStaffDurationHours = (title, defaultHours = 1) => {
     const raw = String(
       typeof window !== 'undefined'
-        ? window.prompt(`${title} (dakika):`, String(defaultMinutes)) || ''
+        ? window.prompt(`${title} (saat):`, String(defaultHours)) || ''
         : '',
     ).trim()
     if (!raw) return { cancelled: true, value: 0 }
-    const minutes = Math.max(0, Math.trunc(num(raw)))
-    if (minutes <= 0) {
-      setError('Süre dakika cinsinden 1 veya daha büyük olmalı.')
+    const hours = Math.max(0, Math.trunc(num(raw)))
+    if (hours <= 0) {
+      setError('Süre saat cinsinden 1 veya daha büyük olmalı.')
       return { cancelled: false, value: 0 }
     }
-    return { cancelled: false, value: minutes }
+    return { cancelled: false, value: hours * 60 }
   }
 
   const staffDeleteChatMessageAction = async (message) => {
@@ -5724,7 +5810,7 @@ function HomePage({ user, onLogout }) {
       setError('Hedef kullanıcı bilgisi bulunamadı.')
       return
     }
-    const minutesPrompt = promptStaffMinutes('Mesaj engeli süresi', 120)
+    const minutesPrompt = promptStaffDurationHours('Mesaj engeli süresi', 2)
     if (minutesPrompt.cancelled) return
     if (!minutesPrompt.value) return
     const reasonPrompt = promptStaffReason('Mesaj engeli nedeni')
@@ -7575,8 +7661,10 @@ function HomePage({ user, onLogout }) {
       : ''
   const chatRestrictionRemainingMs = chatBlockActive ? chatBlockRemainingMs : chatMuteRemainingMs
   const chatRestrictionEndLabel = chatBlockActive ? chatBlockEndLabel : chatMuteEndLabel
-  const floatingFeedbackText = error || notice
-  const floatingFeedbackType = error ? 'error' : notice ? (noticeIsSuccess ? 'success' : 'notice') : ''
+  const floatingErrorText = safeUiText(error)
+  const floatingNoticeText = safeUiText(notice)
+  const floatingFeedbackText = floatingErrorText || floatingNoticeText
+  const floatingFeedbackType = floatingErrorText ? 'error' : floatingNoticeText ? (noticeIsSuccess ? 'success' : 'notice') : ''
 
   const activeChatMessages = useMemo(
     () => (MESSAGES_DISABLED ? [] : (Array.isArray(chat[CHAT_ROOM]) ? chat[CHAT_ROOM] : [])),
@@ -15526,7 +15614,7 @@ function HomePage({ user, onLogout }) {
             autoComplete="new-password"
           />
           <p className="settings-helper-text">
-            Güvenlik kuralı: 8-64 karakter, en az bir büyük harf, bir küçük harf ve bir rakam.
+            Güvenlik kuralı: 8-64 karakter, en az bir küçük harf ve bir rakam.
             Mevcut şifre sorulmaz.
           </p>
           <button
@@ -15687,7 +15775,7 @@ function HomePage({ user, onLogout }) {
             <button
               type="button"
               className="btn btn-accent settings-action-btn profile-logout-action"
-              onClick={onLogout}
+              onClick={() => onLogout('Güvenli çıkış yapıldı. Tekrar görüşmek üzere.')}
               disabled={Boolean(busy)}
             >
               Güvenli Çıkış Yap
@@ -16406,7 +16494,7 @@ function HomePage({ user, onLogout }) {
       <article className="warehouse-modal season-rewards-modal" onClick={(e) => e.stopPropagation()}>
         <h3>Sezon Ödülleri</h3>
         <p className="season-rewards-sub">
-          Sezon bitiminde ilk 3 oyuncuya özel sandık, 4-25 sıralamasına Sıradan Sandık verilir. Sandıkları sınırsız biriktirip istediğin zaman açabilirsin.
+          Sezon sonunda ilk 3 oyuncu özel sandık ve sezon rozeti kazanır. 4-25 sıralaması Sıradan Sandık alır. Sandıklarını sınırsız biriktirip istediğin zaman tek tek açabilirsin.
         </p>
         <div className="season-rewards-grid">
           {leagueSeasonRewardCatalogResolved.map((entry) => {
@@ -16460,7 +16548,7 @@ function HomePage({ user, onLogout }) {
                     ) : null}
                     <strong>#{rankDisplay}</strong>
                   </div>
-                  <span>{entry.chestLabel}</span>
+                  <span className="season-reward-tier-label">{entry.chestLabel}</span>
                 </div>
                 <div className="season-reward-visuals">
                   <div className="season-reward-visual-item">
@@ -16490,9 +16578,9 @@ function HomePage({ user, onLogout }) {
                     </div>
                   ) : null}
                 </div>
-                <p className="season-reward-line">Nakit ödülü: {fmt(entry.cashAmount || 0)}</p>
-                <p className="season-reward-line">Kaynak ödülü: {fmt(entry.resourceAmount || 0)}</p>
-                <p className="season-reward-line season-reward-line-multiplier">Ödül katı: {multiplierText}</p>
+                <p className="season-reward-line"><span>Nakit ödülü</span><strong>{fmt(entry.cashAmount || 0)}</strong></p>
+                <p className="season-reward-line"><span>Kaynak ödülü</span><strong>{fmt(entry.resourceAmount || 0)}</strong></p>
+                <p className="season-reward-line season-reward-line-multiplier"><span>Ödül katı</span><strong>{multiplierText}</strong></p>
               </article>
             )
           })}
@@ -16510,10 +16598,17 @@ function HomePage({ user, onLogout }) {
   const seasonChestsModal = seasonChestsOpen && createPortal(
     <section className="warehouse-overlay season-chests-overlay" onClick={() => setSeasonChestsOpen(false)}>
       <article className="warehouse-modal season-chests-modal" onClick={(e) => e.stopPropagation()}>
-        <h3>Sezon Sandıkları</h3>
-        <p className="season-rewards-sub">
-          Sandıklarını burada sınırsız biriktirebilir, istediğin sırada tek tek açabilirsin.
-        </p>
+        <header className="season-modal-head">
+          <div className="season-modal-head-copy">
+            <h3>Sezon Sandıkları</h3>
+            <p className="season-rewards-sub season-rewards-sub-compact">
+              Sandıklarını burada sınırsız biriktirebilir, istediğin sırada tek tek açabilirsin.
+            </p>
+          </div>
+          <button type="button" className="btn btn-ghost season-modal-close" onClick={() => setSeasonChestsOpen(false)}>
+            Kapat
+          </button>
+        </header>
         <div className="season-chests-stats">
           <span>Bekleyen: <strong>{fmt(leaguePendingSeasonChests.length)}</strong></span>
           <span>Açılan: <strong>{fmt(leagueOpenedSeasonChests.length)}</strong></span>
@@ -16625,7 +16720,11 @@ function HomePage({ user, onLogout }) {
             })}
           </div>
         ) : (
-          <p className="empty">Bekleyen sezon sandığın yok.</p>
+          <div className="season-chests-empty">
+            <span className="season-chests-empty-icon" aria-hidden>🎁</span>
+            <strong>Bekleyen sezon sandığın yok.</strong>
+            <small>Sezon sonunda kazandığın sandıklar burada görünecek.</small>
+          </div>
         )}
 
         {leagueOpenedSeasonChests.length ? (
@@ -16836,17 +16935,18 @@ function HomePage({ user, onLogout }) {
           />
         </span>
         <h3>Ödül Kazandın!</h3>
+        <p className="daily-login-result-headline">Günlük giriş ödülün hesabına eklendi.</p>
         <div className="daily-login-result-list">
           {dailyRewardResultRows.map((entry) => (
             <p key={`daily-result-${entry.itemId}`} className="daily-login-result-row">
               <img src={entry.icon} alt="" aria-hidden />
-              <strong>+{fmt(entry.quantity)}</strong>
-              <span>{entry.label}</span>
+              <strong className="daily-login-result-value">+{fmt(entry.quantity)}</strong>
+              <span className="daily-login-result-label">{entry.label}</span>
             </p>
           ))}
         </div>
         <button type="button" className="btn btn-primary full" onClick={() => setDailyRewardResult(null)}>
-          Harika!
+          Devam Et
         </button>
       </article>
     </section>,

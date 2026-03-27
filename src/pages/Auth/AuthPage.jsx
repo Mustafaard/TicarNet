@@ -49,6 +49,22 @@ const REGISTER_FORM_DRAFT_TTL_MS = 30 * 60 * 1000
 const TUTORIAL_PENDING_KEY = 'ticarnet_tutorial_pending'
 const USERNAME_MAX_LENGTH = 15
 
+function normalizeFeedbackMessage(value) {
+  if (typeof value === 'string') {
+    const text = value.trim()
+    if (!text || text === '[object Object]') return ''
+    return text
+  }
+  if (value && typeof value === 'object') {
+    const candidates = [value.global, value.message, value.notice, value.error]
+    for (const candidate of candidates) {
+      const text = typeof candidate === 'string' ? candidate.trim() : ''
+      if (text && text !== '[object Object]') return text
+    }
+  }
+  return ''
+}
+
 function clearResetFlowParamsFromUrl() {
   const url = new URL(window.location.href)
   ;['resetToken', 'oobCode', 'mode', 'apiKey', 'lang', 'continueUrl'].forEach((paramName) => {
@@ -177,8 +193,10 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
     }
     return ''
   }, [errors])
-  const floatingFeedback = errors.global || firstFieldError || notice
-  const hasErrorFeedback = Boolean(errors.global || firstFieldError)
+  const safeGlobalError = useMemo(() => normalizeFeedbackMessage(errors?.global), [errors])
+  const safeNotice = useMemo(() => normalizeFeedbackMessage(notice), [notice])
+  const floatingFeedback = safeGlobalError || firstFieldError || safeNotice
+  const hasErrorFeedback = Boolean(safeGlobalError || firstFieldError)
   const feedbackKey = floatingFeedback
     ? `${hasErrorFeedback ? 'error' : 'notice'}:${mode}:${floatingFeedback}`
     : ''
@@ -728,7 +746,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 autoComplete="new-password"
               />
               <p className="text-[11px] sm:text-xs text-slate-300/85 -mt-1 mb-1">
-                Şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.
+                Şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermelidir.
               </p>
               <AuthButton type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Güncelleniyor...' : 'Yeni Şifreyi Kaydet'}

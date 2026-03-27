@@ -64,6 +64,28 @@ function prewarmHeavyScreens() {
   window.setTimeout(run, 900)
 }
 
+function normalizeLogoutNotice(value) {
+  if (typeof value === 'string') {
+    const text = value.trim()
+    return text === '[object Object]' ? '' : text
+  }
+
+  if (value && typeof value === 'object') {
+    if ('nativeEvent' in value) {
+      return ''
+    }
+
+    const candidates = [value.global, value.message, value.notice, value.error]
+    for (const candidate of candidates) {
+      if (typeof candidate === 'string' && candidate.trim() && candidate.trim() !== '[object Object]') {
+        return candidate.trim()
+      }
+    }
+  }
+
+  return ''
+}
+
 function AppRouter() {
   const [page, setPage] = useState(APP_PAGE.SPLASH)
   const [initialAuthMode, setInitialAuthMode] = useState('register')
@@ -119,7 +141,7 @@ function AppRouter() {
 
   const handleLogout = useCallback((noticeMessage = '') => {
     void unregisterNativePush()
-    logoutUser({ notice: noticeMessage })
+    logoutUser({ notice: normalizeLogoutNotice(noticeMessage) })
     setUser(null)
     setInitialAuthMode('login')
     setPage(APP_PAGE.AUTH)

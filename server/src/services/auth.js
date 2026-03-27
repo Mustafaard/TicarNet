@@ -28,6 +28,8 @@ const PASSWORD_MAX_LENGTH = 64
 const USERNAME_MIN_LENGTH = 3
 const USERNAME_MAX_LENGTH = 15
 const USERNAME_PATTERN = /^[A-Z][A-Za-z ]{2,14}$/
+const RESERVED_ADMIN_USERNAME = 'admin'
+const RESERVED_ADMIN_OWNER_EMAIL = 'mustafaard76@gmail.com'
 const USERNAME_CHANGE_DIAMOND_COST = 100
 const ACCOUNT_DELETION_GRACE_DAYS = 2
 const ACCOUNT_DELETION_GRACE_MS = ACCOUNT_DELETION_GRACE_DAYS * 24 * 60 * 60 * 1000
@@ -90,9 +92,33 @@ function isStrongEnoughPassword(password) {
   if (password.length < PASSWORD_MIN_LENGTH || password.length > PASSWORD_MAX_LENGTH) return false
   if (/\s/.test(password)) return false
   if (!/[a-z]/.test(password)) return false
-  if (!/[A-Z]/.test(password)) return false
   if (!/[0-9]/.test(password)) return false
   return true
+}
+
+function normalizeComparableSecret(value) {
+  return String(value || '').trim().toLowerCase()
+}
+
+function isReservedAdminUsername(username) {
+  const safe = normalizeComparableSecret(username).replace(/\s+/g, '')
+  return safe === RESERVED_ADMIN_USERNAME
+}
+
+function canUseReservedAdminUsername(email) {
+  return normalizeComparableSecret(email) === normalizeComparableSecret(RESERVED_ADMIN_OWNER_EMAIL)
+}
+
+function isPasswordSameAsIdentity(password, ...identities) {
+  const safePassword = normalizeComparableSecret(password)
+  if (!safePassword) return false
+  const compactPassword = safePassword.replace(/\s+/g, '')
+  return identities.some((identity) => {
+    const safeIdentity = normalizeComparableSecret(identity)
+    if (!safeIdentity) return false
+    const compactIdentity = safeIdentity.replace(/\s+/g, '')
+    return safePassword === safeIdentity || compactPassword === compactIdentity
+  })
 }
 
 function createAccessToken(userId, sessionId, role = USER_ROLES.PLAYER) {
@@ -168,6 +194,8 @@ function validateRegisterPayload(payload) {
   } else if (!USERNAME_PATTERN.test(username)) {
     errors.username =
       'Kullanıcı adı büyük harfle başlamalı, toplam 3-15 karakter olmalı ve yalnızca harf ile boşluk içermelidir.'
+  } else if (isReservedAdminUsername(username) && !canUseReservedAdminUsername(email)) {
+    errors.username = '"admin" kullanıcı adı sadece yetkili hesapta kullanılabilir.'
   }
 
   if (!email) {
@@ -180,7 +208,9 @@ function validateRegisterPayload(payload) {
     errors.password = 'Şifre zorunludur.'
   } else if (!isStrongEnoughPassword(password)) {
     errors.password =
-      'Şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.'
+      'Şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermelidir.'
+  } else if (isPasswordSameAsIdentity(password, username, email)) {
+    errors.password = 'Şifre kullanıcı adı veya e-posta ile aynı olamaz.'
   }
 
   return errors
@@ -229,7 +259,7 @@ function validatePasswordResetPayload(payload) {
     errors.newPassword = 'Yeni şifre zorunludur.'
   } else if (!isStrongEnoughPassword(newPassword)) {
     errors.newPassword =
-      'Yeni şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.'
+      'Yeni şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermelidir.'
   }
 
   if (!confirmPassword) {
@@ -268,7 +298,7 @@ function validatePasswordChangePayload(payload) {
     errors.newPassword = 'Yeni şifre zorunludur.'
   } else if (!isStrongEnoughPassword(newPassword)) {
     errors.newPassword =
-      'Yeni şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.'
+      'Yeni şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermelidir.'
   }
 
   if (!confirmPassword) {
@@ -380,6 +410,25 @@ async function comparePasswordSafe(rawPassword, hashValue) {
   } catch {
     return false
   }
+}
+
+async function isPasswordUsedByAnotherUser(users, rawPassword, options = {}) {
+  const safeUsers = Array.isArray(users) ? users : []
+  const excludedUserId = String(options?.excludedUserId || '').trim()
+  const safePassword = String(rawPassword || '')
+  if (!safePassword) return false
+
+  for (const user of safeUsers) {
+    if (!user || typeof user !== 'object') continue
+    const candidateUserId = String(user.id || '').trim()
+    if (excludedUserId && candidateUserId === excludedUserId) continue
+    const candidateHash = String(user.passwordHash || '').trim()
+    if (!candidateHash) continue
+    const matched = await comparePasswordSafe(safePassword, candidateHash)
+    if (matched) return true
+  }
+
+  return false
 }
 
 function normalizeStoredNetworkValue(value) {
@@ -614,6 +663,16 @@ export async function registerUser(payload, meta) {
       errors: { username: 'Bu kullanıcı adı zaten kayıtlı.' },
       user: null,
       reason: 'username_exists',
+    }
+  }
+
+  const duplicatePassword = await isPasswordUsedByAnotherUser(dbForPreflight.users, password)
+  if (duplicatePassword) {
+    return {
+      success: false,
+      errors: { password: 'Bu şifre başka bir hesapta kullanılıyor. Farklı bir şifre belirleyin.' },
+      user: null,
+      reason: 'password_reused',
     }
   }
 
@@ -1309,16 +1368,48 @@ export async function resetPasswordWithToken(payload) {
 
     const safeEmail = normalize(firebaseResetResult.email)
     if (safeEmail) {
-      const passwordHash = await bcrypt.hash(payload.newPassword, PASSWORD_HASH_ROUNDS)
-      const updatedAt = new Date().toISOString()
-      await updateDb((draft) => {
-        const targetUser = draft.users.find((item) => normalize(item.email) === safeEmail)
-        if (targetUser) {
-          targetUser.passwordHash = passwordHash
-          targetUser.updatedAt = updatedAt
+      const db = await readDb()
+      const targetUser = db.users.find((item) => normalize(item.email) === safeEmail)
+      if (targetUser) {
+        if (isPasswordSameAsIdentity(payload.newPassword, targetUser.username, targetUser.email)) {
+          return {
+            success: false,
+            reason: 'validation',
+            errors: { newPassword: 'Yeni şifre kullanıcı adı veya e-posta ile aynı olamaz.' },
+          }
         }
-        return draft
-      })
+
+        const isSameAsCurrent = await comparePasswordSafe(payload.newPassword, targetUser.passwordHash)
+        if (isSameAsCurrent) {
+          return {
+            success: false,
+            reason: 'validation',
+            errors: { newPassword: 'Yeni şifre mevcut şifreyle aynı olamaz.' },
+          }
+        }
+
+        const duplicatePassword = await isPasswordUsedByAnotherUser(db.users, payload.newPassword, {
+          excludedUserId: targetUser.id,
+        })
+        if (duplicatePassword) {
+          return {
+            success: false,
+            reason: 'validation',
+            errors: { newPassword: 'Bu şifre başka bir hesapta kullanılıyor. Farklı bir şifre seçin.' },
+          }
+        }
+
+        const passwordHash = await bcrypt.hash(payload.newPassword, PASSWORD_HASH_ROUNDS)
+        const updatedAt = new Date().toISOString()
+        await updateDb((draft) => {
+          const mutableTarget = draft.users.find((item) => normalize(item.email) === safeEmail)
+          if (mutableTarget) {
+            mutableTarget.passwordHash = passwordHash
+            mutableTarget.updatedAt = updatedAt
+          }
+          return draft
+        })
+      }
     }
 
     return {
@@ -1339,12 +1430,40 @@ export async function resetPasswordWithToken(payload) {
     }
   }
 
-  const userExists = db.users.some((item) => item.id === record.userId)
-  if (!userExists) {
+  const existingUser = db.users.find((item) => item.id === record.userId)
+  if (!existingUser) {
     return {
       success: false,
       reason: 'invalid_token',
       errors: { global: 'Sıfırlama kaydı bozuk. Yeni bağlantı isteyin.' },
+    }
+  }
+
+  if (isPasswordSameAsIdentity(payload.newPassword, existingUser.username, existingUser.email)) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { newPassword: 'Yeni şifre kullanıcı adı veya e-posta ile aynı olamaz.' },
+    }
+  }
+
+  const isSameAsCurrent = await comparePasswordSafe(payload.newPassword, existingUser.passwordHash)
+  if (isSameAsCurrent) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { newPassword: 'Yeni şifre mevcut şifreyle aynı olamaz.' },
+    }
+  }
+
+  const duplicatePassword = await isPasswordUsedByAnotherUser(db.users, payload.newPassword, {
+    excludedUserId: existingUser.id,
+  })
+  if (duplicatePassword) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { newPassword: 'Bu şifre başka bir hesapta kullanılıyor. Farklı bir şifre seçin.' },
     }
   }
 
@@ -1401,6 +1520,15 @@ export async function changeUsernameForUser(userId, payload) {
 
     const normalizedNext = normalize(username)
     const normalizedCurrent = normalize(targetUser.username)
+    if (isReservedAdminUsername(normalizedNext) && !canUseReservedAdminUsername(targetUser.email)) {
+      result = {
+        success: false,
+        reason: 'validation',
+        errors: { username: '"admin" kullanıcı adı sadece yetkili hesapta kullanılabilir.' },
+      }
+      return draft
+    }
+
     const gameProfile = Array.isArray(draft.gameProfiles)
       ? draft.gameProfiles.find((item) => item?.userId === userId)
       : null
@@ -1496,6 +1624,25 @@ export async function changePasswordForUser(userId, payload) {
       success: false,
       reason: 'validation',
       errors: { newPassword: 'Yeni şifre mevcut şifreyle aynı olamaz.' },
+    }
+  }
+
+  if (isPasswordSameAsIdentity(newPassword, existingUser.username, existingUser.email)) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { newPassword: 'Yeni şifre kullanıcı adı veya e-posta ile aynı olamaz.' },
+    }
+  }
+
+  const duplicatePassword = await isPasswordUsedByAnotherUser(db.users, newPassword, {
+    excludedUserId: existingUser.id,
+  })
+  if (duplicatePassword) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { newPassword: 'Bu şifre başka bir hesapta kullanılıyor. Farklı bir şifre seçin.' },
     }
   }
 

@@ -11,6 +11,8 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const USERNAME_MIN_LENGTH = 3
 const USERNAME_MAX_LENGTH = 15
 const USERNAME_PATTERN = /^[A-Z][A-Za-z ]{2,14}$/
+const RESERVED_ADMIN_USERNAME = 'admin'
+const RESERVED_ADMIN_OWNER_EMAIL = 'mustafaard76@gmail.com'
 const PASSWORD_MIN_LENGTH = 8
 const PASSWORD_MAX_LENGTH = 64
 
@@ -23,9 +25,33 @@ function isStrongEnoughPassword(password) {
   if (password.length < PASSWORD_MIN_LENGTH || password.length > PASSWORD_MAX_LENGTH) return false
   if (/\s/.test(password)) return false
   if (!/[a-z]/.test(password)) return false
-  if (!/[A-Z]/.test(password)) return false
   if (!/[0-9]/.test(password)) return false
   return true
+}
+
+function normalizeComparableSecret(value) {
+  return String(value || '').trim().toLowerCase()
+}
+
+function isReservedAdminUsername(username) {
+  const safe = normalizeComparableSecret(username).replace(/\s+/g, '')
+  return safe === RESERVED_ADMIN_USERNAME
+}
+
+function canUseReservedAdminUsername(email) {
+  return normalizeComparableSecret(email) === normalizeComparableSecret(RESERVED_ADMIN_OWNER_EMAIL)
+}
+
+function isPasswordSameAsIdentity(password, ...identities) {
+  const safePassword = normalizeComparableSecret(password)
+  if (!safePassword) return false
+  const compactPassword = safePassword.replace(/\s+/g, '')
+  return identities.some((identity) => {
+    const safeIdentity = normalizeComparableSecret(identity)
+    if (!safeIdentity) return false
+    const compactIdentity = safeIdentity.replace(/\s+/g, '')
+    return safePassword === safeIdentity || compactPassword === compactIdentity
+  })
 }
 
 function getStoredToken() {
@@ -69,8 +95,32 @@ function clearAuthStorage(options = {}) {
   }
 }
 
+function normalizeAuthNoticeMessage(message) {
+  if (typeof message === 'string') {
+    const text = message.trim()
+    if (!text || text === '[object Object]') return ''
+    return text
+  }
+
+  if (message && typeof message === 'object') {
+    const objectTextCandidates = [
+      message.global,
+      message.message,
+      message.notice,
+      message.error,
+    ]
+    for (const candidate of objectTextCandidates) {
+      if (typeof candidate === 'string' && candidate.trim() && candidate.trim() !== '[object Object]') {
+        return candidate.trim()
+      }
+    }
+  }
+
+  return ''
+}
+
 function cacheAuthNotice(message) {
-  const safeMessage = String(message || '').trim()
+  const safeMessage = normalizeAuthNoticeMessage(message)
   if (!safeMessage) return
   localStorage.setItem(AUTH_NOTICE_KEY, safeMessage)
 }
@@ -144,6 +194,8 @@ function validateRegisterInput(values) {
   } else if (!USERNAME_PATTERN.test(username)) {
     errors.username =
       'Kullanıcı adı büyük harfle başlamalı, toplam 3-15 karakter olmalı ve yalnızca harf ile boşluk içermelidir.'
+  } else if (isReservedAdminUsername(username) && !canUseReservedAdminUsername(email)) {
+    errors.username = '"admin" kullanıcı adı sadece yetkili hesapta kullanılabilir.'
   }
 
   if (!email) {
@@ -156,7 +208,9 @@ function validateRegisterInput(values) {
     errors.password = 'Şifre zorunludur.'
   } else if (!isStrongEnoughPassword(password)) {
     errors.password =
-      'Şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.'
+      'Şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermelidir.'
+  } else if (isPasswordSameAsIdentity(password, username, email)) {
+    errors.password = 'Şifre kullanıcı adı veya e-posta ile aynı olamaz.'
   }
 
   return errors
@@ -219,7 +273,7 @@ function validateResetWithTokenInput(values) {
     errors.newPassword = 'Yeni şifre zorunludur.'
   } else if (!isStrongEnoughPassword(newPassword)) {
     errors.newPassword =
-      'Yeni şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.'
+      'Yeni şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermelidir.'
   }
 
   if (!confirmPassword) {
@@ -412,8 +466,17 @@ export async function changeCurrentUserPassword(values) {
       reason: 'validation',
       errors: {
         newPassword:
-          'Yeni şifre 8-64 karakter olmalı; en az bir büyük harf, bir küçük harf ve bir rakam içermelidir.',
+          'Yeni şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermelidir.',
       },
+    }
+  }
+
+  const currentUser = getCachedUser()
+  if (isPasswordSameAsIdentity(newPassword, currentUser?.username, currentUser?.email)) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { newPassword: 'Yeni şifre kullanıcı adı veya e-posta ile aynı olamaz.' },
     }
   }
 
@@ -472,7 +535,7 @@ export function getLastKnownUser() {
 }
 
 export function logoutUser(options = {}) {
-  const notice = String(options?.notice || '').trim()
+  const notice = normalizeAuthNoticeMessage(options?.notice)
   clearAuthStorage({ keepNotice: Boolean(notice) })
   if (notice) {
     cacheAuthNotice(notice)
@@ -480,7 +543,7 @@ export function logoutUser(options = {}) {
 }
 
 export function consumeAuthNotice() {
-  const notice = String(localStorage.getItem(AUTH_NOTICE_KEY) || '').trim()
+  const notice = normalizeAuthNoticeMessage(localStorage.getItem(AUTH_NOTICE_KEY))
   if (!notice) return ''
   localStorage.removeItem(AUTH_NOTICE_KEY)
   return notice
