@@ -42,17 +42,11 @@ function getCache(ip) {
   const now = Date.now()
 
   if (cached.expiresAt >= now) {
-    return {
-      value: cached.value,
-      stale: false,
-    }
+    return { value: cached.value, stale: false }
   }
 
   if (cached.staleExpiresAt >= now) {
-    return {
-      value: cached.value,
-      stale: true,
-    }
+    return { value: cached.value, stale: true }
   }
 
   ipIntelCache.delete(ip)
@@ -231,10 +225,10 @@ export async function evaluateAccessByIp(clientIp) {
 
     const result = config.geo.failClosed
       ? buildDeniedResult(
-          'geo_unverified',
-          'Konum doğrulaması yapılamadı. Lütfen daha sonra tekrar deneyin.',
-          intel,
-        )
+        'geo_unverified',
+        'Konum doğrulaması yapılamadı. Lütfen daha sonra tekrar deneyin.',
+        intel,
+      )
       : { allowed: true, reason: 'unverified_allow', countryCode: '', isProxy: false }
     setCache(ip, result)
     return result

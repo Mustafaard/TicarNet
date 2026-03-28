@@ -318,13 +318,12 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
       }
       nextValue = raw
     } else if (name === 'username') {
-      // Kullanıcı adı: harf + boşluk, en fazla 15 karakter.
-      const raw = value.replace(/[^A-Za-z ]/g, '').slice(0, USERNAME_MAX_LENGTH)
-      if (!raw) {
-        nextValue = ''
-      } else {
-        nextValue = `${raw[0].toUpperCase()}${raw.slice(1)}`
-      }
+      // Kullanıcı adı: harf/rakam/boşluk, en fazla 15 karakter.
+      nextValue = String(value || '')
+        .replace(/[^A-Za-z0-9ÇĞİÖŞÜçğıöşü ]/g, '')
+        .replace(/\s{2,}/g, ' ')
+        .replace(/^\s+/, '')
+        .slice(0, USERNAME_MAX_LENGTH)
     }
 
     setRegisterForm((prev) => ({

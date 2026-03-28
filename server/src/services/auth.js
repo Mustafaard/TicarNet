@@ -27,7 +27,8 @@ const PASSWORD_MIN_LENGTH = 8
 const PASSWORD_MAX_LENGTH = 64
 const USERNAME_MIN_LENGTH = 3
 const USERNAME_MAX_LENGTH = 15
-const USERNAME_PATTERN = /^[A-Z][A-Za-z ]{2,14}$/
+const USERNAME_PATTERN =
+  /^(?=.{3,15}$)[A-Za-z0-9ÇĞİÖŞÜçğıöşü](?:[A-Za-z0-9ÇĞİÖŞÜçğıöşü ]*[A-Za-z0-9ÇĞİÖŞÜçğıöşü])$/
 const RESERVED_ADMIN_USERNAME = 'admin'
 const RESERVED_ADMIN_OWNER_EMAIL = 'mustafaard76@gmail.com'
 const USERNAME_CHANGE_DIAMOND_COST = 100
@@ -193,7 +194,7 @@ function validateRegisterPayload(payload) {
     errors.username = 'Kullanıcı adı en fazla 15 karakter olabilir.'
   } else if (!USERNAME_PATTERN.test(username)) {
     errors.username =
-      'Kullanıcı adı büyük harfle başlamalı, toplam 3-15 karakter olmalı ve yalnızca harf ile boşluk içermelidir.'
+      'Kullanıcı adı 3-15 karakter olmalı; harf, rakam ve boşluk dışında karakter içermemelidir.'
   } else if (isReservedAdminUsername(username) && !canUseReservedAdminUsername(email)) {
     errors.username = '"admin" kullanıcı adı sadece yetkili hesapta kullanılabilir.'
   }
@@ -283,7 +284,7 @@ function validateUsernameChangePayload(payload) {
     errors.username = 'Kullanıcı adı en fazla 15 karakter olabilir.'
   } else if (!USERNAME_PATTERN.test(username)) {
     errors.username =
-      'Kullanıcı adı büyük harfle başlamalı, toplam 3-15 karakter olmalı ve yalnızca harf ile boşluk içermelidir.'
+      'Kullanıcı adı 3-15 karakter olmalı; harf, rakam ve boşluk dışında karakter içermemelidir.'
   }
 
   return { errors, username }
@@ -314,6 +315,24 @@ function countUsersByPublicIp(users, publicIp) {
   const safePublicIp = String(publicIp || '').trim()
   if (!safePublicIp || safePublicIp === 'unknown') return 0
   return users.filter((user) => String(user?.publicIp || '').trim() === safePublicIp).length
+}
+
+function countUsersByDeviceId(users, deviceId) {
+  const safeDeviceId = String(deviceId || '').trim()
+  if (!safeDeviceId || safeDeviceId === 'unknown-device') return 0
+  return users.filter((user) => String(user?.deviceId || '').trim() === safeDeviceId).length
+}
+
+function evaluateRegisterScopeLimit(users, publicIp, deviceId) {
+  const maxAccountsPerScope = Math.max(1, Number(config.maxAccountsPerScope) || 2)
+  const byPublicIp = countUsersByPublicIp(users, publicIp)
+  const byDeviceId = countUsersByDeviceId(users, deviceId)
+  return {
+    maxAccountsPerScope,
+    byPublicIp,
+    byDeviceId,
+    reached: byPublicIp >= maxAccountsPerScope || byDeviceId >= maxAccountsPerScope,
+  }
 }
 
 function subnetFromIp(ip) {
@@ -676,13 +695,13 @@ export async function registerUser(payload, meta) {
     }
   }
 
-  const byPublicIp = countUsersByPublicIp(dbForPreflight.users, publicIp)
-  if (byPublicIp >= config.maxAccountsPerScope) {
+  const preflightLimit = evaluateRegisterScopeLimit(dbForPreflight.users, publicIp, deviceId)
+  if (preflightLimit.reached) {
     return {
       success: false,
       errors: {
         global:
-          `Aynı internet (Wi-Fi/IP) üzerinden en fazla ${config.maxAccountsPerScope} hesap açılabilir.`,
+          `Aynı internet (Wi-Fi/IP) veya aynı cihazdan en fazla ${preflightLimit.maxAccountsPerScope} hesap açılabilir.`,
       },
       user: null,
       reason: 'limit_reached',
@@ -755,13 +774,13 @@ export async function registerUser(payload, meta) {
       return db
     }
 
-    const byPublicIp = countUsersByPublicIp(db.users, publicIp)
-    if (byPublicIp >= config.maxAccountsPerScope) {
+    const registerScopeLimit = evaluateRegisterScopeLimit(db.users, publicIp, deviceId)
+    if (registerScopeLimit.reached) {
       failure = {
         success: false,
         errors: {
           global:
-            `Aynı internet (Wi-Fi/IP) üzerinden en fazla ${config.maxAccountsPerScope} hesap açılabilir.`,
+            `Aynı internet (Wi-Fi/IP) veya aynı cihazdan en fazla ${registerScopeLimit.maxAccountsPerScope} hesap açılabilir.`,
         },
         user: null,
         reason: 'limit_reached',

@@ -10,7 +10,8 @@ const AUTH_NOTICE_KEY = 'ticarnet_auth_notice'
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 const USERNAME_MIN_LENGTH = 3
 const USERNAME_MAX_LENGTH = 15
-const USERNAME_PATTERN = /^[A-Z][A-Za-z ]{2,14}$/
+const USERNAME_PATTERN =
+  /^(?=.{3,15}$)[A-Za-z0-9ÇĞİÖŞÜçğıöşü](?:[A-Za-z0-9ÇĞİÖŞÜçğıöşü ]*[A-Za-z0-9ÇĞİÖŞÜçğıöşü])$/
 const RESERVED_ADMIN_USERNAME = 'admin'
 const RESERVED_ADMIN_OWNER_EMAIL = 'mustafaard76@gmail.com'
 const PASSWORD_MIN_LENGTH = 8
@@ -193,7 +194,7 @@ function validateRegisterInput(values) {
     errors.username = 'Kullanıcı adı en fazla 15 karakter olabilir.'
   } else if (!USERNAME_PATTERN.test(username)) {
     errors.username =
-      'Kullanıcı adı büyük harfle başlamalı, toplam 3-15 karakter olmalı ve yalnızca harf ile boşluk içermelidir.'
+      'Kullanıcı adı 3-15 karakter olmalı; harf, rakam ve boşluk dışında karakter içermemelidir.'
   } else if (isReservedAdminUsername(username) && !canUseReservedAdminUsername(email)) {
     errors.username = '"admin" kullanıcı adı sadece yetkili hesapta kullanılabilir.'
   }

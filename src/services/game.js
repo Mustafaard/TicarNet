@@ -1,10 +1,14 @@
 import { buildApiUrl, buildRealtimeSocketUrl } from './apiRuntime.js'
+import { logoutUser, shouldForceLogoutFromResult } from './auth.js'
 
 const ACCESS_TOKEN_KEY = 'ticarnet_access_token'
 const SESSION_TOKEN_KEY = 'ticarnet_session_token'
 const WS_PROTOCOL_SAFE_TOKEN = /^[A-Za-z0-9._~-]+$/
 const AVATAR_MAX_FILE_BYTES = 2 * 1024 * 1024
 const AVATAR_ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
+const FORCED_LOGOUT_EVENT = 'ticarnet:auth-force-logout'
+const SESSION_LOST_MESSAGE =
+  'Oturum bulunamad?. Hesab?n ba?ka bir cihazda a??lm?? olabilir veya s?resi dolmu? olabilir. L?tfen tekrar giri? yap.'
 
 function getStoredToken() {
   return localStorage.getItem(ACCESS_TOKEN_KEY) || sessionStorage.getItem(SESSION_TOKEN_KEY)
@@ -15,6 +19,26 @@ function createRequestId() {
     return crypto.randomUUID()
   }
   return `req_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`
+}
+
+function firstErrorText(errors, fallback = '') {
+  if (!errors || typeof errors !== 'object') return String(fallback || '').trim()
+  const found = Object.values(errors).find((value) => typeof value === 'string' && value.trim())
+  return String(found || fallback || '').trim()
+}
+
+function emitForcedLogout(message, reason = 'unauthorized') {
+  const safeMessage = String(message || '').trim() || SESSION_LOST_MESSAGE
+  logoutUser({ notice: safeMessage })
+  if (typeof window === 'undefined' || typeof window.dispatchEvent !== 'function') return
+  window.dispatchEvent(
+    new CustomEvent(FORCED_LOGOUT_EVENT, {
+      detail: {
+        reason: String(reason || '').trim() || 'unauthorized',
+        message: safeMessage,
+      },
+    }),
+  )
 }
 
 export function getAuthTokenForRealtime() {
@@ -55,14 +79,15 @@ async function gameRequest(path, options = {}) {
   const token = getStoredToken()
 
   if (!token) {
-    return {
+    const result = {
       success: false,
       reason: 'unauthorized',
       errors: {
-        global:
-          'Oturum bulunamadı. Hesabın başka bir cihazda açılmış olabilir veya süresi dolmuş olabilir. Lütfen tekrar giriş yap.',
+        global: SESSION_LOST_MESSAGE,
       },
     }
+    emitForcedLogout(result.errors.global, result.reason)
+    return result
   }
 
   const headers = {
@@ -83,20 +108,27 @@ async function gameRequest(path, options = {}) {
 
     const payload = await response
       .json()
-      .catch(() => ({ success: false, errors: { global: 'Sunucu yanıtı okunamadı.' } }))
+      .catch(() => ({ success: false, errors: { global: 'Sunucu yan?t? okunamad?.' } }))
 
     if (!response.ok) {
-      return payload.success === false
+      const result = payload.success === false
         ? payload
-        : { success: false, errors: { global: 'Sunucu hatası oluştu.' } }
+        : { success: false, errors: { global: 'Sunucu hatas? olu?tu.' } }
+      if (shouldForceLogoutFromResult(result)) {
+        emitForcedLogout(firstErrorText(result?.errors, SESSION_LOST_MESSAGE), result.reason)
+      }
+      return result
     }
 
+    if (payload?.success === false && shouldForceLogoutFromResult(payload)) {
+      emitForcedLogout(firstErrorText(payload?.errors, SESSION_LOST_MESSAGE), payload.reason)
+    }
     return payload
   } catch {
     return {
       success: false,
       reason: 'network_error',
-      errors: { global: 'Sunucuya bağlanılamadı. API çalışıyor mu kontrol et.' },
+      errors: { global: 'Sunucuya ba?lan?lamad?. API ?al???yor mu kontrol et.' },
     }
   }
 }

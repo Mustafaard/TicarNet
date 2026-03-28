@@ -247,6 +247,7 @@ const LISTING_PRICE_PROFILE = {
 }
 const MESSAGES_DISABLED = false
 const WS_SESSION_REPLACED_CODE = 4001
+const AUTH_FORCE_LOGOUT_EVENT = 'ticarnet:auth-force-logout'
 const SESSION_REPLACED_NOTICE =
   'Hesabınız başka bir cihazda açıldı. Bu cihazdaki oturum güvenlik nedeniyle kapatıldı.'
 const NAV_THEME_STORAGE_KEY = 'ticarnet-mobile-nav-theme'
@@ -3235,6 +3236,15 @@ function HomePage({ user, onLogout }) {
     }, 12000)
 
     return () => window.clearInterval(intervalId)
+  }, [handleForcedLogout])
+
+  useEffect(() => {
+    const onForcedLogout = (event) => {
+      const safeMessage = String(event?.detail?.message || '').trim() || SESSION_REPLACED_NOTICE
+      handleForcedLogout(safeMessage)
+    }
+    window.addEventListener(AUTH_FORCE_LOGOUT_EVENT, onForcedLogout)
+    return () => window.removeEventListener(AUTH_FORCE_LOGOUT_EVENT, onForcedLogout)
   }, [handleForcedLogout])
 
   const applyChatRestrictions = useCallback((rawState) => {
@@ -15558,13 +15568,11 @@ function HomePage({ user, onLogout }) {
             type="text"
             value={profileAccountForm.username}
             onChange={(event) => {
-              const raw = String(event.target.value || '')
-                .replace(/[^A-Za-z\u00c7\u011e\u0130\u00d6\u015e\u00dc\u00e7\u011f\u0131\u00f6\u015f\u00fc ]/g, '')
+              const normalized = String(event.target.value || '')
+                .replace(/[^A-Za-z0-9\u00c7\u011e\u0130\u00d6\u015e\u00dc\u00e7\u011f\u0131\u00f6\u015f\u00fc ]/g, '')
+                .replace(/\s{2,}/g, ' ')
                 .replace(/^\s+/, '')
                 .slice(0, 15)
-              const normalized = raw
-                ? `${raw[0].toLocaleUpperCase('tr-TR')}${raw.slice(1)}`
-                : ''
               setProfileAccountForm((prev) => ({ ...prev, username: normalized }))
             }}
             placeholder={profileAccountUsername}
@@ -15572,7 +15580,7 @@ function HomePage({ user, onLogout }) {
             autoComplete="username"
           />
           <p className="settings-helper-text">
-            3-15 karakter • sadece harf/boşluk • emoji/özel karakter kullanılamaz.
+            3-15 karakter • harf/rakam/boşluk • emoji/özel karakter kullanılamaz.
           </p>
           <p className="settings-helper-text">
             Ücret: 100 Elmas • Mevcut Elmas: {fmt(cGold)}
