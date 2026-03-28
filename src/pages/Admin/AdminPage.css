@@ -124,6 +124,24 @@
   color: #b8cbe3;
 }
 
+.admin-reason-flag {
+  margin: 2px 2px 8px;
+  font-size: 0.82rem;
+  color: #ff9a9a;
+}
+
+.admin-reason-input {
+  border-color: rgba(216, 84, 84, 0.72) !important;
+  box-shadow: inset 0 0 0 1px rgba(216, 84, 84, 0.2);
+}
+
+.admin-verify-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .admin-economy-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -522,6 +540,22 @@
   .admin-announcement-top {
     flex-direction: column;
     align-items: stretch;
+  }
+}
+
+@media (max-width: 430px) {
+  .admin-page {
+    padding: 12px 8px 80px;
+  }
+
+  .admin-user-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-verify-actions button,
+  .admin-row button,
+  .admin-search-row button {
+    width: 100%;
   }
 }
 

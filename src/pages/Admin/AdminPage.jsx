@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import {
   clearAdminBan,
+  clearAdminUserLogos,
   createAdminAnnouncement,
   clearAdminMessageBlock,
   deleteAdminUserAccount,
@@ -503,7 +504,6 @@ function AdminPage({ user, onLogout }) {
     const amount = toInt(amountRaw, 0)
     const reason = String(reasonRaw || '').trim()
     if (amount <= 0) return void setError('Miktar sıfırdan büyük olmalı.')
-    if (reason.length < 3) return void setError('Neden en az 3 karakter olmalı.')
 
     const ok = window.confirm(`${selected.username} için ${amount} ${cash ? 'nakit' : 'elmas'} işlemi onaylansın mı?`)
     if (!ok) return
@@ -556,7 +556,6 @@ function AdminPage({ user, onLogout }) {
 
     if (!itemId) return void setError('Önce bir kaynak seçmelisin.')
     if (amount <= 0) return void setError('Miktar sıfırdan büyük olmalı.')
-    if (reason.length < 3) return void setError('Neden en az 3 karakter olmalı.')
 
     const confirmText = isGrant
       ? `${selected.username} deposuna ${amount} ${itemName} eklensin mi?`
@@ -850,6 +849,25 @@ function AdminPage({ user, onLogout }) {
     await reloadAll()
   }
 
+  const clearSelectedUserLogos = async () => {
+    if (!isAdmin || !canCredentialManage || !selected || busy) return
+    clearFeedback()
+    if (!window.confirm(`${selected.username} kullanıcısının logo/avatar dosyaları temizlensin mi?`)) return
+
+    setBusy('user-logo-clear')
+    const res = await clearAdminUserLogos(selected.username, selected.id)
+    setBusy('')
+    if (!res?.success) {
+      if (!handleAccessLoss(res, 'Logo temizleme işlemi başarısız.')) {
+        setError(msgText(res, 'Logo temizleme işlemi başarısız.'))
+      }
+      return
+    }
+
+    setNotice(res.message || 'Logo/avatar temizleme işlemi tamamlandı.')
+    await reloadAll()
+  }
+
   const runQuickAction = async (mode, targetEntry) => {
     const target = targetEntry || selected
     if (!isAdmin || !target || busy) return
@@ -990,6 +1008,18 @@ function AdminPage({ user, onLogout }) {
               {selected?.moderation?.permanentBan ? 'Kalıcı Ban; ' : ''}
               {!selected?.moderation?.chatBlockUntil && !selected?.moderation?.messageBlockUntil && !selected?.moderation?.tempBanUntil && !selected?.moderation?.permanentBan ? 'Yok' : ''}
             </p>
+            {isAdmin && canCredentialManage ? (
+              <div className="admin-verify-actions">
+                <button
+                  type="button"
+                  className="btn-danger"
+                  disabled={busy === 'user-logo-clear'}
+                  onClick={() => void clearSelectedUserLogos()}
+                >
+                  {busy === 'user-logo-clear' ? 'Temizleniyor...' : 'Logoları Temizle'}
+                </button>
+              </div>
+            ) : null}
           </div>
         ) : <p className="admin-meta">İşlem yapmadan önce kullanıcıyı seç.</p>}
       </section>
@@ -1151,6 +1181,7 @@ function AdminPage({ user, onLogout }) {
       {isAdmin && (canCashGrant || canDiaGrant || canCashRevoke || canDiaRevoke || canResourceGrant || canResourceRevoke) ? (
         <section className="admin-card">
           <h2>3) Ekonomi İşlemleri</h2>
+          <p className="admin-reason-flag">Neden alanı opsiyoneldir. Dilersen boş bırakabilirsin.</p>
           <div className="admin-economy-grid">
             {(canCashGrant || canCashRevoke) ? (
               <article className="admin-economy-card">
@@ -1158,14 +1189,14 @@ function AdminPage({ user, onLogout }) {
                 {canCashGrant ? (
                   <div className="admin-row admin-row-compact">
                     <input type="number" value={cashAdd} onChange={(e) => setCashAdd(e.target.value)} placeholder="Eklenecek nakit" />
-                    <input type="text" value={cashAddReason} onChange={(e) => setCashAddReason(e.target.value)} placeholder="Neden" maxLength={160} />
+                    <input type="text" className="admin-reason-input" value={cashAddReason} onChange={(e) => setCashAddReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
                     <button type="button" disabled={!selected || busy === 'cash-grant'} onClick={() => void runEconomy('grant', 'cash')}>{busy === 'cash-grant' ? 'İşleniyor...' : 'Nakit Ekle'}</button>
                   </div>
                 ) : null}
                 {canCashRevoke ? (
                   <div className="admin-row admin-row-compact">
                     <input type="number" value={cashSub} onChange={(e) => setCashSub(e.target.value)} placeholder="Düşülecek nakit" />
-                    <input type="text" value={cashSubReason} onChange={(e) => setCashSubReason(e.target.value)} placeholder="Neden" maxLength={160} />
+                    <input type="text" className="admin-reason-input" value={cashSubReason} onChange={(e) => setCashSubReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
                     <button type="button" className="btn-danger" disabled={!selected || busy === 'cash-revoke'} onClick={() => void runEconomy('revoke', 'cash')}>{busy === 'cash-revoke' ? 'İşleniyor...' : 'Nakit Düş'}</button>
                   </div>
                 ) : null}
@@ -1178,14 +1209,14 @@ function AdminPage({ user, onLogout }) {
                 {canDiaGrant ? (
                   <div className="admin-row admin-row-compact">
                     <input type="number" value={diaAdd} onChange={(e) => setDiaAdd(e.target.value)} placeholder="Eklenecek elmas" />
-                    <input type="text" value={diaAddReason} onChange={(e) => setDiaAddReason(e.target.value)} placeholder="Neden" maxLength={160} />
+                    <input type="text" className="admin-reason-input" value={diaAddReason} onChange={(e) => setDiaAddReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
                     <button type="button" disabled={!selected || busy === 'dia-grant'} onClick={() => void runEconomy('grant', 'diamond')}>{busy === 'dia-grant' ? 'İşleniyor...' : 'Elmas Ekle'}</button>
                   </div>
                 ) : <p className="admin-inline-note">Elmas ekleme bu hesapta kapalı.</p>}
                 {canDiaRevoke ? (
                   <div className="admin-row admin-row-compact">
                     <input type="number" value={diaSub} onChange={(e) => setDiaSub(e.target.value)} placeholder="Düşülecek elmas" />
-                    <input type="text" value={diaSubReason} onChange={(e) => setDiaSubReason(e.target.value)} placeholder="Neden" maxLength={160} />
+                    <input type="text" className="admin-reason-input" value={diaSubReason} onChange={(e) => setDiaSubReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
                     <button type="button" className="btn-danger" disabled={!selected || busy === 'dia-revoke'} onClick={() => void runEconomy('revoke', 'diamond')}>{busy === 'dia-revoke' ? 'İşleniyor...' : 'Elmas Düş'}</button>
                   </div>
                 ) : null}
@@ -1213,7 +1244,7 @@ function AdminPage({ user, onLogout }) {
                     {canResourceGrant ? (
                       <div className="admin-row admin-row-compact">
                         <input type="number" value={resourceAddAmount} onChange={(e) => setResourceAddAmount(e.target.value)} placeholder="Eklenecek miktar" />
-                        <input type="text" value={resourceAddReason} onChange={(e) => setResourceAddReason(e.target.value)} placeholder="Neden" maxLength={160} />
+                        <input type="text" className="admin-reason-input" value={resourceAddReason} onChange={(e) => setResourceAddReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
                         <button type="button" disabled={!selected || busy === 'resource-grant'} onClick={() => void runResourceInventory('grant')}>{busy === 'resource-grant' ? 'İşleniyor...' : 'Kaynak Ekle'}</button>
                       </div>
                     ) : null}
@@ -1221,7 +1252,7 @@ function AdminPage({ user, onLogout }) {
                     {canResourceRevoke ? (
                       <div className="admin-row admin-row-compact">
                         <input type="number" value={resourceSubAmount} onChange={(e) => setResourceSubAmount(e.target.value)} placeholder="Düşülecek miktar" />
-                        <input type="text" value={resourceSubReason} onChange={(e) => setResourceSubReason(e.target.value)} placeholder="Neden" maxLength={160} />
+                        <input type="text" className="admin-reason-input" value={resourceSubReason} onChange={(e) => setResourceSubReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
                         <button type="button" className="btn-danger" disabled={!selected || busy === 'resource-revoke'} onClick={() => void runResourceInventory('revoke')}>{busy === 'resource-revoke' ? 'İşleniyor...' : 'Kaynak Düş'}</button>
                       </div>
                     ) : null}

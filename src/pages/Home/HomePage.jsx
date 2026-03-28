@@ -212,6 +212,15 @@ const AVATAR_CROP_PREVIEW_SIZE = 248
 const AVATAR_CROP_OUTPUT_SIZE = 512
 const AVATAR_MAX_FILE_BYTES = 2 * 1024 * 1024
 const AVATAR_MAX_FILE_MB = Math.round(AVATAR_MAX_FILE_BYTES / (1024 * 1024))
+const AVATAR_CHANGE_COST_DIAMONDS = 10
+const USERNAME_CHANGE_COST_DIAMONDS = 25
+const AVATAR_ALLOWED_MIME_TYPES = new Set([
+  'image/png',
+  'image/jpeg',
+  'image/jpg',
+  'image/webp',
+  'image/gif',
+])
 const COLLECTION_TAX_RATE = 0.01
 const COLLECTION_TAX_PERCENT = Math.round(COLLECTION_TAX_RATE * 100)
 const VEHICLE_MARKET_COMMISSION_RATE = 0.05
@@ -1934,7 +1943,11 @@ function formatCollectionCountdown(valueMs) {
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
-  return `${hours} saat ${minutes} dakika ${seconds} saniye`
+  const parts = []
+  if (hours > 0) parts.push(`${hours} saat`)
+  if (minutes > 0) parts.push(`${minutes} dakika`)
+  if (seconds > 0 || parts.length === 0) parts.push(`${seconds} saniye`)
+  return parts.join(' ').trim() || '0 saniye'
 }
 
 /** İnşaat süresi için kısa format: "0 saat 30 dk 0 sn" → "30 dakika" */
@@ -2018,6 +2031,18 @@ function formatAnnouncementDateTime(value) {
       hour12: false,
     })
     .replace(',', '')
+}
+
+function formatHourMinuteTurkey(value) {
+  if (!value) return ''
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return ''
+  return parsed.toLocaleTimeString('tr-TR', {
+    timeZone: TURKIYE_TIMEZONE,
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
 }
 
 function normalizeAnnouncementType(value) {
@@ -2713,7 +2738,12 @@ function HomePage({ user, onLogout }) {
     description: '',
   })
   const [settingsThemeModalOpen, setSettingsThemeModalOpen] = useState(false)
-  const [dailyStore, setDailyStore] = useState({ offers: [], nextResetAt: '', remainingMs: 0 })
+  const [dailyStore, setDailyStore] = useState({
+    offers: [],
+    nextResetAt: '',
+    remainingMs: 0,
+    weekMultiplier: 1,
+  })
   const [dailyLoginReward, setDailyLoginReward] = useState(DAILY_LOGIN_STATE_SEED)
   const [dailyRewardOpen, setDailyRewardOpen] = useState(false)
   const [dailyRewardResult, setDailyRewardResult] = useState(null)
@@ -3484,11 +3514,12 @@ function HomePage({ user, onLogout }) {
 
   const loadDailyStoreState = useCallback(async () => {
     const response = await getDailyStore()
-    if (!response?.success) return fail(response, '12 saatlik fırsatlar alınamadı.')
+    if (!response?.success) return fail(response, 'Haftalık sınırlı fırsatlar alınamadı.')
     setDailyStore({
       offers: Array.isArray(response.offers) ? response.offers : [],
       nextResetAt: String(response.nextResetAt || ''),
       remainingMs: Math.max(0, Math.trunc(num(response.remainingMs || 0))),
+      weekMultiplier: Math.max(1, Math.trunc(num(response.weekMultiplier || 1))),
     })
     return true
   }, [fail])
@@ -4108,6 +4139,17 @@ function HomePage({ user, onLogout }) {
     if (options.messageFilter) setMessageFilter(options.messageFilter)
 
     if (next === 'businesses') {
+      // İşletme sekmesi her zaman ana sayfadan açılır; son alt-sekmeyi hatırlamaz.
+      setBusinessScene('hub')
+      setBusinessDetailTab('garage')
+      setLogisticsScene('detail')
+      setLogisticsDetailTab('garage')
+      setSelectedBusinessId('')
+      setCollectTargetBusinessId('')
+      setBusinessModal('')
+      setListingDraft(null)
+      setMarketDetailDraft(null)
+      setMarketPurchaseResult(null)
       await Promise.all([loadBusiness(), loadLogistics(), loadMarket()])
     }
     if (next === 'private-listings') {
@@ -5327,8 +5369,8 @@ function HomePage({ user, onLogout }) {
     setBusy(`daily:${safeOfferId}`)
     const response = await purchaseDailyOffer(safeOfferId)
     setBusy('')
-    if (!response?.success) return fail(response, '12 saatlik fırsat alınamadı.')
-    setNotice(String(response.message || '12 saatlik fırsat başarıyla alındı.'))
+    if (!response?.success) return fail(response, 'Haftalık fırsat alınamadı.')
+    setNotice(String(response.message || 'Haftalık fırsat başarıyla alındı.'))
     if (Array.isArray(response.inventory)) {
       setMarket((prev) => {
         if (!prev || typeof prev !== 'object') return prev
@@ -5342,6 +5384,7 @@ function HomePage({ user, onLogout }) {
       offers: Array.isArray(response.offers) ? response.offers : [],
       nextResetAt: String(response.nextResetAt || ''),
       remainingMs: Math.max(0, Math.trunc(num(response.remainingMs || 0))),
+      weekMultiplier: Math.max(1, Math.trunc(num(response.weekMultiplier || 1))),
     })
     await Promise.all([loadOverview(), loadProfile(), loadMarket()])
   }
@@ -5589,6 +5632,23 @@ function HomePage({ user, onLogout }) {
   const openAvatarCropFromFile = useCallback((event) => {
     const file = event.target?.files?.[0]
     if (!file) return
+    const mimeType = String(file.type || '').trim().toLowerCase()
+    const fileSize = Number(file.size || 0)
+    if (!AVATAR_ALLOWED_MIME_TYPES.has(mimeType)) {
+      setError('Desteklenmeyen dosya türü. Sadece PNG, JPG, WEBP veya GIF yükleyebilirsin.')
+      event.target.value = ''
+      return
+    }
+    if (!Number.isFinite(fileSize) || fileSize <= 0) {
+      setError('Geçersiz avatar dosyası.')
+      event.target.value = ''
+      return
+    }
+    if (fileSize > AVATAR_MAX_FILE_BYTES) {
+      setError(`Avatar dosyası en fazla ${AVATAR_MAX_FILE_MB} MB olabilir.`)
+      event.target.value = ''
+      return
+    }
     clearAvatarCropSource()
     const url = URL.createObjectURL(file)
     avatarCropSourceRef.current = url
@@ -5606,11 +5666,23 @@ function HomePage({ user, onLogout }) {
 
   const triggerAvatarFilePicker = useCallback(() => {
     if (busy) return
+    const currentDiamonds = Math.max(0, Math.trunc(num(overview?.profile?.reputation || 0)))
+    if (currentDiamonds < AVATAR_CHANGE_COST_DIAMONDS) {
+      setError(`Avatar değiştirmek için ${AVATAR_CHANGE_COST_DIAMONDS} elmas gerekli.`)
+      return
+    }
     avatarFileInputRef.current?.click()
-  }, [busy])
+  }, [busy, overview?.profile?.reputation])
 
   const applyAvatarCropAction = async () => {
     if (!avatarCropFile || busy) return
+    const currentDiamonds = Math.max(0, Math.trunc(num(overview?.profile?.reputation || 0)))
+    if (currentDiamonds < AVATAR_CHANGE_COST_DIAMONDS) {
+      setError(`Avatar değiştirmek için ${AVATAR_CHANGE_COST_DIAMONDS} elmas gerekli.`)
+      return
+    }
+    const confirmed = window.confirm('Bunu yapmak istediğinize emin misiniz?')
+    if (!confirmed) return
 
     setBusy('avatar-upload')
     setError('')
@@ -5714,6 +5786,13 @@ function HomePage({ user, onLogout }) {
       setError('Yeni kullanıcı adı zorunludur.')
       return
     }
+    const currentDiamonds = Math.max(0, Math.trunc(num(overview?.profile?.reputation || 0)))
+    if (currentDiamonds < USERNAME_CHANGE_COST_DIAMONDS) {
+      setError(`Kullanıcı adı değiştirmek için ${USERNAME_CHANGE_COST_DIAMONDS} elmas gerekli.`)
+      return
+    }
+    const confirmed = window.confirm('Kullanıcı adınızı değiştirmek istediğinize emin misiniz?')
+    if (!confirmed) return
 
     setBusy('profile-username')
     setError('')
@@ -6283,13 +6362,14 @@ function HomePage({ user, onLogout }) {
 
     const now = new Date()
     const optimisticId = `dm-local-${now.getTime()}-${Math.random().toString(36).slice(2, 8)}`
+    const optimisticCreatedAt = now.toISOString()
     const optimisticEntry = {
       id: optimisticId,
       text,
       own: true,
-      at: `${`${now.getHours()}`.padStart(2, '0')}:${`${now.getMinutes()}`.padStart(2, '0')}`,
-      createdAt: now.toISOString(),
-      readAt: now.toISOString(),
+      at: formatHourMinuteTurkey(optimisticCreatedAt),
+      createdAt: optimisticCreatedAt,
+      readAt: optimisticCreatedAt,
       counterpart: {
         userId: messageReplyTarget?.userId || null,
         username: toUsername,
@@ -7206,7 +7286,8 @@ function HomePage({ user, onLogout }) {
   }, null)
   const dailyResetRemainingMs = remainingMsFromIso(dailyStore.nextResetAt || '', liveNowMs)
   const dailyResetLabel = dailyResetRemainingMs > 0 ? formatCountdownClock(dailyResetRemainingMs) : '00:00:00'
-  const dailyResetInfoLabel = 'Türkiye saatine göre her 12 saatte bir (00:00 / 12:00) yenilenir'
+  const dailyOfferWeekMultiplier = Math.max(1, Math.trunc(num(dailyStore?.weekMultiplier || 1)))
+  const dailyResetInfoLabel = `Türkiye saatine göre haftalık yenilenir · Bu hafta ${dailyOfferWeekMultiplier}x içerik`
   const dailyLoginState = dailyLoginReward || DAILY_LOGIN_STATE_SEED
   const dailyLoginSeriesLabel = String(dailyLoginState?.series?.label || `0/${DAILY_LOGIN_TOTAL_DAYS}`)
   const dailyLoginCanClaim = Boolean(dailyLoginState?.canClaim) && !dailyLoginState?.claimedToday
@@ -7977,7 +8058,16 @@ function HomePage({ user, onLogout }) {
   const warehouseTotalQuantity = useMemo(
     () =>
       warehouseCards.reduce(
-        (sum, item) => sum + Math.max(0, Math.trunc(num(item.quantity || 0))),
+        (sum, item) => {
+          const itemId = String(item?.id || '').trim()
+          const shouldExclude =
+            item?.fromWallet === true ||
+            item?.fromReputation === true ||
+            itemId === 'cash' ||
+            itemId === 'diamond'
+          if (shouldExclude) return sum
+          return sum + Math.max(0, Math.trunc(num(item.quantity || 0)))
+        },
         0,
       ),
     [warehouseCards],
@@ -8364,7 +8454,7 @@ function HomePage({ user, onLogout }) {
           <button type="button" className="btn btn-ghost btn-sm" onClick={() => void openTab('home', { tab: 'home' })}>Şehir</button>
         </div>
         <p className="muted" style={{ marginTop: 4 }}>
-          Her maden 10 sn kazı, 30 dk bekleme. 10—1000 arası rastgele kaynak; Premium üyeler 2x kazanır. Nakit maliyeti kartta; yetersizse uyarı verilir.
+          Her maden 10 sn kazı, 30 dk bekleme. Standart üyeler 10-500 arası, Premium üyeler 20-1000 arası rastgele kaynak kazanır. Nakit maliyeti kartta; yetersizse uyarı verilir.
         </p>
         {minesList.length === 0 ? (
           <p className="empty" style={{ marginTop: 16 }}>Yükleniyor...</p>
@@ -11910,11 +12000,11 @@ function HomePage({ user, onLogout }) {
                 <h4>Yükseltme sonrası kazanç</h4>
                 <p className="fleet-summary-line positive">
                   <img src={factoryUpgradeModal.outputMeta?.icon} alt="" aria-hidden="true" />
-                  Üretim: +{fmt(Math.round(num(factoryUpgradeModal.outputPerCollect || 0) * (factoryUpgradeModal.nextUpgrade?.nextLevel || factoryUpgradeModal.level + 1) / Math.max(1, factoryUpgradeModal.level)))} {factoryUpgradeModal.outputMeta?.label} / tahsilat
+                  Üretim: +{fmt(Math.max(0, Math.trunc(num(factoryUpgradeModal.outputPerCollect || 0) * 2)))} {factoryUpgradeModal.outputMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line negative">
                   <img src={factoryUpgradeModal.energyMeta?.icon} alt="" aria-hidden="true" />
-                  Enerji maliyeti: -{fmt(Math.round(num(factoryUpgradeModal.energyCostPerCollect || 0) * (factoryUpgradeModal.nextUpgrade?.nextLevel || factoryUpgradeModal.level + 1) / Math.max(1, factoryUpgradeModal.level)))} {factoryUpgradeModal.energyMeta?.label} / tahsilat
+                  Enerji maliyeti: -{fmt(Math.max(0, Math.trunc(num(factoryUpgradeModal.energyCostPerCollect || 0) * 2)))} {factoryUpgradeModal.energyMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line positive">
                   <img src="/home/ui/hud/xp-icon.webp" alt="" aria-hidden="true" />
@@ -14484,11 +14574,14 @@ function HomePage({ user, onLogout }) {
     if (!iso) return ''
     try {
       const d = new Date(iso)
-      const day = String(d.getDate()).padStart(2, '0')
-      const month = String(d.getMonth() + 1).padStart(2, '0')
-      const hour = String(d.getHours()).padStart(2, '0')
-      const min = String(d.getMinutes()).padStart(2, '0')
-      return `${day}.${month} ${hour}:${min}`
+      if (Number.isNaN(d.getTime())) return ''
+      const datePart = d.toLocaleDateString('tr-TR', {
+        timeZone: TURKIYE_TIMEZONE,
+        day: '2-digit',
+        month: '2-digit',
+      })
+      const timePart = formatHourMinuteTurkey(iso)
+      return `${datePart} ${timePart}`.trim()
     } catch (_) { return '' }
   }
 
@@ -15353,9 +15446,9 @@ function HomePage({ user, onLogout }) {
 
         <article className="card premium-daily-card">
         <div className="premium-daily-head">
-          <h4>12 Saatlik Sınırlı Fırsatlar</h4>
+          <h4>Haftalık Sınırlı Fırsatlar</h4>
           <p className="muted">
-            Türkiye saatine göre her 12 saatte bir (00:00 / 12:00) yenilenen özel elmas teklifleri. Her paket periyot başına bir kez alınabilir.
+            Türkiye saatine göre her hafta yenilenen özel elmas teklifleri. Her paket haftalık periyotta bir kez alınabilir.
           </p>
         </div>
         <div className="premium-daily-grid">
@@ -15373,7 +15466,7 @@ function HomePage({ user, onLogout }) {
             return (
               <div key={offer.id} className="premium-daily-offer">
                 <div className="premium-daily-main">
-                  <span className="badge">12 SAAT</span>
+                  <span className="badge">HAFTALIK</span>
                   <div className="premium-daily-title">
                     <img src={dailyOfferIcon} alt="" aria-hidden="true" />
                     <strong>{offer.title}</strong>
@@ -15560,7 +15653,7 @@ function HomePage({ user, onLogout }) {
         </header>
 
         <section className="settings-section-card">
-          <h4>1) Kullanıcı Adı (100 Elmas)</h4>
+          <h4>1) Kullanıcı Adı (25 Elmas)</h4>
           <label className="settings-field-label" htmlFor="settings-username-input">Yeni kullanıcı adı</label>
           <input
             id="settings-username-input"
@@ -15583,7 +15676,7 @@ function HomePage({ user, onLogout }) {
             3-15 karakter • harf/rakam/boşluk • emoji/özel karakter kullanılamaz.
           </p>
           <p className="settings-helper-text">
-            Ücret: 100 Elmas • Mevcut Elmas: {fmt(cGold)}
+            Ücret: 25 Elmas • Mevcut Elmas: {fmt(cGold)}
           </p>
           <button
             type="button"
@@ -15657,6 +15750,9 @@ function HomePage({ user, onLogout }) {
           </div>
           <p className="settings-helper-text">
             Avatarını PNG, JPG, WEBP veya GIF olarak güncelleyebilirsin (en fazla 2 MB).
+          </p>
+          <p className="settings-helper-text">
+            Ücret: 10 Elmas • Mevcut Elmas: {fmt(cGold)}
           </p>
           <div className="settings-inline-actions">
             <button
@@ -17754,11 +17850,20 @@ function HomePage({ user, onLogout }) {
 
                     const businessCards = order.flatMap((templateId) => {
                       if (templateId === 'logistics') {
-                        const hasLogisticsBusiness = allBusinesses.some((entry) => entry.templateId === 'logistics')
+                        const lf = profileModalData.logisticsFleet && typeof profileModalData.logisticsFleet === 'object'
+                          ? profileModalData.logisticsFleet
+                          : null
+                        const trucks = lf
+                          ? (lf.owned || lf.trucks || [])
+                          : []
+                        const truckCount = Math.max(
+                          0,
+                          Math.trunc(num(lf?.truckCount || lf?.summary?.truckCount || trucks.length || 0)),
+                        )
+                        const hasLogisticsBusiness =
+                          allBusinesses.some((entry) => entry.templateId === 'logistics') ||
+                          truckCount > 0
                         if (!hasLogisticsBusiness) return []
-                        const lf = profileModalData.logisticsFleet
-                        if (!lf) return []
-                        const trucks = lf.owned || lf.trucks || []
 
                         const openLogisticsPanel = () => {
                           if (isOtherUser) {
@@ -17781,7 +17886,7 @@ function HomePage({ user, onLogout }) {
                           }
                           setProfileModalUserId(null)
                           setProfileModalBusinessExpand(null)
-                          openTab('businesses', { tab: 'businesses', subTab: 'logistics' })
+                          openTab('businesses')
                         }
 
                         return (
@@ -17846,7 +17951,6 @@ function HomePage({ user, onLogout }) {
                         setProfileModalUserId(null)
                         setProfileModalBusinessExpand(null)
                         openTab('businesses')
-                        openBusinessDetail(b.id)
                       }
 
                       return (
@@ -18823,5 +18927,3 @@ function HomePage({ user, onLogout }) {
 }
 
 export default HomePage
-
-

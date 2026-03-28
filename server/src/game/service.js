@@ -87,6 +87,7 @@ const MS_MINUTE = 60000
 const MS_HOUR = 60 * MS_MINUTE
 const DAY_MS = 24 * 60 * 60 * 1000
 const DAILY_STORE_RESET_INTERVAL_MS = 12 * MS_HOUR
+const LIMITED_OFFER_RESET_INTERVAL_MS = 7 * DAY_MS
 const BUILD_SPEEDUP_BASE_DIAMONDS = 40
 const BUILD_SPEEDUP_DIAMONDS_PER_HOUR = 5
 const UPGRADE_SPEEDUP_BASE_DIAMONDS = 55
@@ -103,7 +104,9 @@ const WEEKLY_EVENT_XP_MULTIPLIER = 2
 const WEEKLY_EVENT_COST_DISCOUNT_RATE = 0.25
 const WEEKLY_EVENT_COST_MULTIPLIER = 1 - WEEKLY_EVENT_COST_DISCOUNT_RATE
 const BUSINESS_EXPENSE_MULTIPLIER = 3
-const FACTORY_EXPENSE_MULTIPLIER = 3
+const AVATAR_CHANGE_DIAMOND_COST = 10
+const NOTIFICATION_DEDUPE_WINDOW_MS = 30 * 1000
+const PUSH_ALERT_DEDUPE_WINDOW_MS = 30 * 1000
 const FOREX_UPDATE_INTERVAL_MS = 3 * 60 * 60 * 1000
 const FOREX_HISTORY_KEEP = 600
 const FOREX_HISTORY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000
@@ -531,8 +534,6 @@ function createDefaultBusinessUnlocks() {
 const FACTORY_MIN_LEVEL = 1
 const FACTORY_UNCAPPED_MAX_LEVEL = 1000000000
 const FACTORY_DEFAULT_MAX_LEVEL = 200
-const FACTORY_DEFAULT_UPGRADE_GROWTH = 2
-const FACTORY_UPGRADE_RESOURCE_GROWTH = 1.5
 const FACTORY_DEFAULT_SPEEDUP_RATIO = 0.3
 const FACTORY_DEFAULT_SPEEDUP_DIAMONDS = 40
 const FACTORY_MAX_SLOTS_DEFAULT = 1
@@ -770,17 +771,16 @@ function mineCooldownMs(template) {
 
 function mineCostCash(template) {
   const baseCost = Math.max(0, asInt(template?.costCash, 0))
-  return Math.max(0, baseCost * 3)
+  return Math.max(0, baseCost * 4)
 }
 
 function mineRandomOutput(profile, template, timestamp) {
-  const minOut = Math.max(1, asInt(template?.minOutput, 10))
-  const maxOut = Math.max(minOut, asInt(template?.maxOutput, 1000))
+  const minOut = Math.max(10, asInt(template?.minOutput, 10))
+  const maxOut = Math.min(Math.max(minOut, asInt(template?.maxOutput, 500)), 500)
   let amount = minOut + Math.floor(Math.random() * (maxOut - minOut + 1))
   if (isPremiumActive(profile, timestamp)) {
     amount = Math.floor(amount * MINE_PREMIUM_MULTIPLIER)
   }
-  amount = Math.floor(amount / 2)
   return Math.max(1, amount)
 }
 
@@ -817,13 +817,15 @@ function minesView(profile, timestamp) {
     const costCash = mineCostCash(template)
     const outputItemId = normalizeItemId(template.outputItemId || 'gold')
     const outputItem = ITEM_BY_ID.get(outputItemId)
+    const minOutput = Math.max(10, asInt(template.minOutput, 10))
+    const maxOutput = Math.min(Math.max(minOutput, asInt(template.maxOutput, 500)), 500)
     return {
       id: template.id,
       name: template.name || template.id,
       outputItemId,
       outputItemName: outputItem?.name || outputItemId,
-      minOutput: Math.max(1, asInt(template.minOutput, 10)),
-      maxOutput: Math.max(1, asInt(template.maxOutput, 1000)),
+      minOutput,
+      maxOutput,
       digDurationSeconds: Math.max(1, asInt(template.digDurationSeconds, 10)),
       cooldownMinutes: Math.max(1, asInt(template.cooldownMinutes, 30)),
       costCash,
@@ -848,17 +850,11 @@ function factoryCollectIntervalMs(template) {
   return Math.max(1, asInt(template?.collectIntervalMinutes, 30)) * MS_MINUTE
 }
 
-function factoryUpgradeGrowth(template) {
-  const raw = Number(template?.upgrade?.growthMultiplier ?? FACTORY_DEFAULT_UPGRADE_GROWTH)
-  if (!Number.isFinite(raw)) return FACTORY_DEFAULT_UPGRADE_GROWTH
-  return clamp(raw, 1, 10)
-}
-
 function factoryUpgradeDurationMs(template, targetLevel) {
   const baseMinutes = Math.max(1, asInt(template?.upgrade?.baseDurationMinutes, 30))
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  return Math.max(1, Math.round(baseMinutes * Math.pow(2, levelStep))) * MS_MINUTE
+  return Math.max(1, Math.round(baseMinutes * Math.pow(4, levelStep))) * MS_MINUTE
 }
 
 const FACTORY_UPGRADE_MIN_CASH = 5000000
@@ -869,7 +865,7 @@ function factoryUpgradeCashCost(template, targetLevel, options = {}) {
   const baseCash = Math.max(FACTORY_UPGRADE_MIN_CASH, configuredBaseCash > 0 ? configuredBaseCash : fallbackBaseCash)
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  const growth = factoryUpgradeGrowth(template)
+  const growth = 4
   const calculated = Math.max(FACTORY_UPGRADE_MIN_CASH, Math.round(baseCash * Math.pow(growth, levelStep)))
   return weeklyEventCostValue(
     calculated,
@@ -885,9 +881,7 @@ function factoryUpgradeResourceCost(template, targetLevel, options = {}) {
     : {}
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  const growth = Number.isFinite(Number(template?.upgrade?.resourceGrowthMultiplier))
-    ? Number(template.upgrade.resourceGrowthMultiplier)
-    : FACTORY_UPGRADE_RESOURCE_GROWTH
+  const growth = 4
   const multiplier = Math.pow(growth, levelStep)
   const nextCost = {}
   for (const [itemId, amount] of Object.entries(base)) {
@@ -927,13 +921,15 @@ function factorySpeedupRatio(template) {
 function factoryOutputPerCollect(template, level) {
   const safeLevel = Math.max(FACTORY_MIN_LEVEL, asInt(level, FACTORY_MIN_LEVEL))
   const baseOutput = Math.max(1, asInt(template?.baseOutputPerCollect, 1))
-  return Math.max(1, Math.round(baseOutput * safeLevel))
+  const levelStep = Math.max(0, safeLevel - FACTORY_MIN_LEVEL)
+  return Math.max(1, Math.round(baseOutput * Math.pow(2, levelStep)))
 }
 
 function factoryEnergyCostPerCollect(template, level) {
   const safeLevel = Math.max(FACTORY_MIN_LEVEL, asInt(level, FACTORY_MIN_LEVEL))
   const baseEnergy = Math.max(0, asInt(template?.baseEnergyCostPerCollect, 0))
-  return Math.max(0, Math.round(baseEnergy * safeLevel * FACTORY_EXPENSE_MULTIPLIER))
+  const levelStep = Math.max(0, safeLevel - FACTORY_MIN_LEVEL)
+  return Math.max(0, Math.round(baseEnergy * Math.pow(2, levelStep)))
 }
 
 function factoryPurchaseResourceCost(template, options = {}) {
@@ -1473,6 +1469,19 @@ function avatarView(profile) {
   }
 }
 
+const TURKIYE_HOUR_MINUTE_FORMATTER = new Intl.DateTimeFormat('tr-TR', {
+  timeZone: WEEKLY_EVENT_TIMEZONE,
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false,
+})
+
+function formatHourMinuteTurkiye(value) {
+  const date = new Date(value || '')
+  if (Number.isNaN(date.getTime())) return '--:--'
+  return TURKIYE_HOUR_MINUTE_FORMATTER.format(date)
+}
+
 function dayKeyFromIso(timestamp) {
   return String(timestamp || '').slice(0, 10)
 }
@@ -1686,6 +1695,114 @@ function dailyStoreResetInfoFromIso(timestamp) {
   return {
     nextResetAt: new Date(nextResetMs).toISOString(),
     remainingMs: Math.max(0, nextResetMs - nowMs),
+  }
+}
+
+const LIMITED_OFFER_WEEK_BASE_START_MS = Date.UTC(2026, 0, 5, 0, 0, 0, 0) - TURKIYE_UTC_OFFSET_MS
+
+function limitedOfferWeekStartMs(timestamp) {
+  const dayStartMs = turkiyeDayStartMs(timestamp)
+  const trDate = new Date(dayStartMs + TURKIYE_UTC_OFFSET_MS)
+  const trDay = trDate.getUTCDay() || 7
+  const mondayOffsetDays = trDay - 1
+  return dayStartMs - (mondayOffsetDays * DAY_MS)
+}
+
+function limitedOfferDayKeyFromIso(timestamp) {
+  const weekStartMs = limitedOfferWeekStartMs(timestamp)
+  const trDate = new Date(weekStartMs + TURKIYE_UTC_OFFSET_MS)
+  const yyyy = trDate.getUTCFullYear()
+  const mm = String(trDate.getUTCMonth() + 1).padStart(2, '0')
+  const dd = String(trDate.getUTCDate()).padStart(2, '0')
+  return `${yyyy}-W${mm}${dd}`
+}
+
+function limitedOfferResetInfoFromIso(timestamp) {
+  const nowMs = createdMs(timestamp) || Date.now()
+  const nextResetMs = limitedOfferWeekStartMs(timestamp) + LIMITED_OFFER_RESET_INTERVAL_MS
+  return {
+    nextResetAt: new Date(nextResetMs).toISOString(),
+    remainingMs: Math.max(0, nextResetMs - nowMs),
+  }
+}
+
+function limitedOfferMultiplier(timestamp) {
+  const weekStartMs = limitedOfferWeekStartMs(timestamp)
+  const elapsedWeeks = Math.max(
+    0,
+    Math.floor((weekStartMs - LIMITED_OFFER_WEEK_BASE_START_MS) / LIMITED_OFFER_RESET_INTERVAL_MS),
+  )
+  return Math.max(1, Math.pow(2, elapsedWeeks))
+}
+
+function dailyStoreMaterialItemIds(db) {
+  const list = Array.isArray(db?.marketState?.items) ? db.marketState.items : []
+  const ids = new Set()
+  for (const entry of list) {
+    const itemId = normalizeItemId(entry?.id)
+    if (!itemId || !ITEM_BY_ID.has(itemId)) continue
+    ids.add(itemId)
+  }
+  if (ids.size === 0) {
+    for (const fallbackId of ['brick', 'timber', 'cement', 'energy', 'spare-parts', 'engine-kit', 'oil']) {
+      if (ITEM_BY_ID.has(fallbackId)) ids.add(fallbackId)
+    }
+  }
+  return Array.from(ids)
+}
+
+function dailyStoreOfferSnapshot(db, offer, timestamp) {
+  const safeOffer = offer && typeof offer === 'object' ? offer : null
+  if (!safeOffer) return null
+  const multiplier = limitedOfferMultiplier(timestamp)
+  const safePrice = Math.max(0, asInt(safeOffer.price, 0))
+  const baseCash = Math.max(0, asInt(safeOffer?.rewards?.cash, 0))
+  const scaledCash = Math.max(0, Math.floor(baseCash * multiplier))
+
+  if (safeOffer.id === 'daily-materials-pack') {
+    const itemIds = dailyStoreMaterialItemIds(db)
+    const eachQuantity = Math.max(1, Math.floor(2000 * multiplier))
+    const items = Object.fromEntries(itemIds.map((itemId) => [itemId, eachQuantity]))
+    const names = itemIds.map((itemId) => ITEM_BY_ID.get(itemId)?.name || itemId)
+    const listedNames = names.slice(0, 8).join(', ')
+    const extraCount = Math.max(0, names.length - 8)
+    const nameText = extraCount > 0 ? `${listedNames} ve +${extraCount} kaynak` : listedNames
+    return {
+      id: safeOffer.id,
+      title: safeOffer.title,
+      description: `Pazardaki tüm kaynaklar depoya eklenir (${eachQuantity} adet): ${nameText}.`,
+      price: safePrice,
+      weekMultiplier: multiplier,
+      rewards: {
+        cash: 0,
+        items,
+      },
+    }
+  }
+
+  const description = safeOffer.id === 'daily-cash-1m'
+    ? `${new Intl.NumberFormat('tr-TR').format(scaledCash)} nakit anında kasana eklenir.`
+    : String(safeOffer.description || '').trim()
+
+  return {
+    id: safeOffer.id,
+    title: safeOffer.title,
+    description,
+    price: safePrice,
+    weekMultiplier: multiplier,
+    rewards: {
+      cash: scaledCash,
+      items: safeOffer?.rewards?.items && typeof safeOffer.rewards.items === 'object'
+        ? Object.fromEntries(
+          Object.entries(safeOffer.rewards.items)
+            .map(([itemId, amount]) => [
+              normalizeItemId(itemId),
+              Math.max(0, Math.floor(asInt(amount, 0) * multiplier)),
+            ])
+            .filter(([itemId, quantity]) => itemId && quantity > 0 && ITEM_BY_ID.has(itemId)),
+        )
+        : {},
+    },
   }
 }
 
@@ -2115,6 +2232,7 @@ function normalizeProfileNotificationEntry(entry, timestamp) {
     id: String(entry.id || crypto.randomUUID()),
     type: String(entry.type || 'info').trim() || 'info',
     message,
+    read: entry.read === true,
     createdAt: String(entry.createdAt || timestamp),
   }
 }
@@ -4614,7 +4732,7 @@ function createDefaultProfile(user, timestamp) {
       lastClaimAt: '',
     },
     dailyStore: {
-      dayKey: dailyStoreDayKeyFromIso(timestamp),
+      dayKey: limitedOfferDayKeyFromIso(timestamp),
       purchased: [],
     },
     diamondStore: {
@@ -4710,11 +4828,11 @@ function normalizeProfile(profile, timestamp) {
   }
   if (!profile.dailyStore || typeof profile.dailyStore !== 'object') {
     profile.dailyStore = {
-      dayKey: dailyStoreDayKeyFromIso(timestamp),
+      dayKey: limitedOfferDayKeyFromIso(timestamp),
       purchased: [],
     }
   } else {
-    const todayKey = dailyStoreDayKeyFromIso(timestamp)
+    const todayKey = limitedOfferDayKeyFromIso(timestamp)
     profile.dailyStore.dayKey = String(profile.dailyStore.dayKey || todayKey)
     if (!Array.isArray(profile.dailyStore.purchased)) {
       profile.dailyStore.purchased = []
@@ -5168,30 +5286,53 @@ function pushTransaction(profile, payload, timestamp) {
 
 function pushNotification(profile, type, message, timestamp) {
   if (!Array.isArray(profile.notifications)) profile.notifications = []
+  const safeType = String(type || 'other').trim() || 'other'
+  const safeMessage = String(message || '').replace(/\s+/g, ' ').trim()
+  if (!safeMessage) return
+  const nowMs = createdMs(timestamp) || Date.now()
 
-  // İşletme bildirimleri: aynı işletme için tek satır; mesajın sonunda işletme adı varsa biriktir.
-  if (type === 'business') {
-    const baseMessage = String(message || '').trim()
-    if (baseMessage) {
-      const last = profile.notifications.find((entry) => entry.type === 'business')
-      if (last && last.message && last.message.startsWith(baseMessage.split(' satın')[0])) {
-        // Mevcut satırı sadece güncelle (en son zamanı koru), yeni kayıt ekleme.
-        last.message = baseMessage
-        last.createdAt = timestamp
-      } else {
-        profile.notifications.unshift({
-          id: crypto.randomUUID(),
-          type,
-          message: baseMessage,
-          createdAt: timestamp,
-        })
+  let updatedExisting = false
+
+  if (safeType === 'business') {
+    const prefix = safeMessage.includes(' satın')
+      ? String(safeMessage.split(' satın')[0] || '').trim()
+      : safeMessage
+    if (prefix) {
+      const existingBusiness = profile.notifications.find((entry) =>
+        String(entry?.type || '').trim() === 'business' &&
+        String(entry?.message || '').trim().startsWith(prefix),
+      )
+      if (existingBusiness) {
+        existingBusiness.message = safeMessage
+        existingBusiness.read = false
+        existingBusiness.createdAt = timestamp
+        updatedExisting = true
       }
     }
-  } else {
+  }
+
+  if (!updatedExisting) {
+    const duplicate = profile.notifications.find((entry) => {
+      if (!entry || typeof entry !== 'object') return false
+      if (String(entry.type || '').trim() !== safeType) return false
+      if (String(entry.message || '').replace(/\s+/g, ' ').trim() !== safeMessage) return false
+      const entryMs = createdMs(entry.createdAt)
+      if (entryMs <= 0) return false
+      return Math.abs(nowMs - entryMs) <= NOTIFICATION_DEDUPE_WINDOW_MS
+    })
+    if (duplicate) {
+      duplicate.read = false
+      duplicate.createdAt = timestamp
+      updatedExisting = true
+    }
+  }
+
+  if (!updatedExisting) {
     profile.notifications.unshift({
       id: crypto.randomUUID(),
-      type,
-      message,
+      type: safeType,
+      message: safeMessage,
+      read: false,
       createdAt: timestamp,
     })
   }
@@ -5330,23 +5471,44 @@ function dispatchNativePush(profile, type, title, message, timestamp, meta = {})
 function pushMobileAlert(profile, type, title, message, timestamp, meta = {}) {
   if (!profile.pushCenter?.enabled) return
   if (!profile.pushCenter.subscriptions?.[type]) return
+  if (!Array.isArray(profile.pushCenter.inbox)) profile.pushCenter.inbox = []
+  const safeType = String(type || '').trim()
+  const safeTitle = String(title || 'Bildirim').replace(/\s+/g, ' ').trim() || 'Bildirim'
+  const safeMessage = String(message || '').replace(/\s+/g, ' ').trim()
+  if (!safeType || !safeMessage) return
+  const nowMs = createdMs(timestamp) || Date.now()
 
-  profile.pushCenter.inbox.unshift({
-    id: crypto.randomUUID(),
-    type,
-    title,
-    message,
-    read: false,
-    createdAt: timestamp,
-    meta,
+  const duplicate = (profile.pushCenter.inbox || []).find((entry) => {
+    if (!entry || typeof entry !== 'object') return false
+    if (String(entry.type || '').trim() !== safeType) return false
+    if (String(entry.title || '').replace(/\s+/g, ' ').trim() !== safeTitle) return false
+    if (String(entry.message || '').replace(/\s+/g, ' ').trim() !== safeMessage) return false
+    const entryMs = createdMs(entry.createdAt)
+    if (entryMs <= 0) return false
+    return Math.abs(nowMs - entryMs) <= PUSH_ALERT_DEDUPE_WINDOW_MS
   })
+
+  if (duplicate) {
+    duplicate.read = false
+    duplicate.createdAt = timestamp
+    duplicate.meta = meta && typeof meta === 'object' ? meta : {}
+  } else {
+    profile.pushCenter.inbox.unshift({
+      id: crypto.randomUUID(),
+      type: safeType,
+      title: safeTitle,
+      message: safeMessage,
+      read: false,
+      createdAt: timestamp,
+      meta: meta && typeof meta === 'object' ? meta : {},
+    })
+  }
   profile.pushCenter.inbox = pruneAlertEntries(
     profile.pushCenter.inbox,
     (entry) => isAlertType(entry?.type),
   ).slice(0, MAX_PUSH_HISTORY)
-
-  pushNotification(profile, 'push', `${title}: ${message}`, timestamp)
-  dispatchNativePush(profile, type, title, message, timestamp, meta)
+  emitMessageCenterRefresh(profile.userId, 'push')
+  dispatchNativePush(profile, safeType, safeTitle, safeMessage, timestamp, meta)
 }
 
 function tickPriceAlerts(profile, marketState, timestamp) {
@@ -7460,13 +7622,49 @@ function notificationItemView(entry) {
     message,
     preview: message.slice(0, 120),
     createdAt: entry.createdAt,
-    read: true,
+    read: entry.read === true,
     canReply: false,
     incoming: true,
     subject: '',
     counterpart: null,
     replyToId: null,
   }
+}
+
+const MESSAGE_CENTER_ALERT_DEDUPE_WINDOW_MS = 2 * MS_MINUTE
+
+function messageCenterAlertDedupKey(entry) {
+  if (!entry || typeof entry !== 'object') return ''
+  const source = String(entry.source || '').trim().toLowerCase()
+  if (!['push', 'notification'].includes(source)) return ''
+  const message = String(entry.message || '').replace(/\s+/g, ' ').trim().toLowerCase()
+  if (!message) return ''
+  const type = String(entry.type || entry.filter || 'other').trim().toLowerCase() || 'other'
+  return `${type}|${message}`
+}
+
+function dedupeMessageCenterAlertItems(items) {
+  const safeItems = Array.isArray(items) ? items : []
+  const keyToMs = new Map()
+  const deduped = []
+
+  for (const entry of safeItems) {
+    const dedupeKey = messageCenterAlertDedupKey(entry)
+    if (!dedupeKey) {
+      deduped.push(entry)
+      continue
+    }
+    const entryMsRaw = createdMs(entry.createdAt)
+    const entryMs = entryMsRaw > 0 ? entryMsRaw : Date.now()
+    const prevMs = keyToMs.get(dedupeKey)
+    if (Number.isFinite(prevMs) && Math.abs(prevMs - entryMs) <= MESSAGE_CENTER_ALERT_DEDUPE_WINDOW_MS) {
+      continue
+    }
+    keyToMs.set(dedupeKey, entryMs)
+    deduped.push(entry)
+  }
+
+  return deduped
 }
 
 function announcementItemView(entry) {
@@ -7623,13 +7821,16 @@ function messageCenterView(db, profile, currentUserId, options = {}, timestamp =
     .map((entry) => transactionItemView(entry))
     .filter((entry) => entry)
   const announcementItems = (db.globalAnnouncements || []).map((entry) => announcementItemView(entry))
+  const alertItems = dedupeMessageCenterAlertItems([
+    ...pushItems,
+    ...notificationItems,
+  ])
 
   const all = [
     ...announcementItems,
     ...directItems,
     ...friendRequestItems,
-    ...pushItems,
-    ...notificationItems,
+    ...alertItems,
     ...transactionItems,
   ]
     .filter((entry) => entry && entry.id)
@@ -7650,8 +7851,7 @@ function messageCenterView(db, profile, currentUserId, options = {}, timestamp =
   const unreadCount =
     totalUnreadDirect +
     unreadFriendRequests +
-    pushItems.filter((e) => !e.read).length +
-    notificationItems.filter((e) => !e.read).length +
+    alertItems.filter((entry) => entry?.read !== true).length +
     transactionItems.filter((e) => !e.read).length +
     announcementItems.filter((e) => !e.read).length
   const spotlight = all.find((entry) => !entry.read) || all[0] || null
@@ -12746,8 +12946,8 @@ export async function claimDailyLoginReward(userId) {
   return result
 }
 
-function dailyStoreView(profile, timestamp) {
-  const todayKey = dailyStoreDayKeyFromIso(timestamp)
+function dailyStoreView(db, profile, timestamp) {
+  const todayKey = limitedOfferDayKeyFromIso(timestamp)
   if (!profile.dailyStore || typeof profile.dailyStore !== 'object') {
     profile.dailyStore = {
       dayKey: todayKey,
@@ -12764,9 +12964,13 @@ function dailyStoreView(profile, timestamp) {
   }
   const purchasedSet = new Set(store.purchased)
 
-  const resetInfo = dailyStoreResetInfoFromIso(timestamp)
+  const resetInfo = limitedOfferResetInfoFromIso(timestamp)
+  const offerMultiplier = limitedOfferMultiplier(timestamp)
+  const offerSnapshots = DAILY_STORE_OFFERS
+    .map((offer) => dailyStoreOfferSnapshot(db, offer, timestamp))
+    .filter(Boolean)
 
-  const offers = DAILY_STORE_OFFERS.map((offer) => ({
+  const offers = offerSnapshots.map((offer) => ({
     id: offer.id,
     title: offer.title,
     description: offer.description,
@@ -12778,6 +12982,7 @@ function dailyStoreView(profile, timestamp) {
     dayKey: store.dayKey,
     nextResetAt: resetInfo.nextResetAt,
     remainingMs: resetInfo.remainingMs,
+    weekMultiplier: offerMultiplier,
     offers,
   }
 }
@@ -12799,7 +13004,7 @@ export async function getDailyStore(userId) {
       return db
     }
 
-    const view = dailyStoreView(profile, timestamp)
+    const view = dailyStoreView(db, profile, timestamp)
     result = {
       success: true,
       reputation: profile.reputation,
@@ -12814,12 +13019,12 @@ export async function getDailyStore(userId) {
 
 export async function purchaseDailyOffer(userId, payload = {}) {
   const offerId = String(payload?.offerId || '').trim()
-  const offer = DAILY_STORE_OFFERS.find((entry) => entry.id === offerId)
-  if (!offer) {
+  const offerTemplate = DAILY_STORE_OFFERS.find((entry) => entry.id === offerId)
+  if (!offerTemplate) {
     return {
       success: false,
       reason: 'validation',
-      errors: { global: '12 saatlik fırsat seçimi geçersiz.' },
+      errors: { global: 'Haftalık fırsat seçimi geçersiz.' },
     }
   }
 
@@ -12839,7 +13044,7 @@ export async function purchaseDailyOffer(userId, payload = {}) {
       return db
     }
 
-    const todayKey = dailyStoreDayKeyFromIso(timestamp)
+    const todayKey = limitedOfferDayKeyFromIso(timestamp)
     if (!profile.dailyStore || typeof profile.dailyStore !== 'object') {
       profile.dailyStore = {
         dayKey: todayKey,
@@ -12854,11 +13059,21 @@ export async function purchaseDailyOffer(userId, payload = {}) {
       profile.dailyStore.purchased = []
     }
 
+    const offer = dailyStoreOfferSnapshot(db, offerTemplate, timestamp)
+    if (!offer) {
+      result = {
+        success: false,
+        reason: 'validation',
+        errors: { global: 'Haftalık fırsat oluşturulamadı.' },
+      }
+      return db
+    }
+
     if (profile.dailyStore.purchased.includes(offer.id)) {
       result = {
         success: false,
         reason: 'already_claimed',
-        errors: { global: 'Bu fırsat bu 12 saatlik periyotta zaten kullanıldı.' },
+        errors: { global: 'Bu fırsat bu haftalık periyotta zaten kullanıldı.' },
       }
       return db
     }
@@ -12878,15 +13093,18 @@ export async function purchaseDailyOffer(userId, payload = {}) {
     if (offer.rewards.cash > 0) {
       profile.wallet += offer.rewards.cash
       const formattedCash = new Intl.NumberFormat('tr-TR').format(offer.rewards.cash)
-      rewardMessage = `12 Saatlik Para Paketi: +${formattedCash} nakit kazandın.`
+      rewardMessage = `Haftalık Para Paketi: +${formattedCash} nakit kazandın.`
     }
     if (offer.id === 'daily-materials-pack') {
-      const pool = ['brick', 'timber', 'cement', 'energy', 'spare-parts', 'engine-kit', 'oil']
-      const randomIndex = Math.floor(Math.random() * pool.length)
-      const randomItemId = pool[randomIndex]
-      const itemName = ITEM_BY_ID.get(randomItemId)?.name || randomItemId
-      addInventory(profile, randomItemId, 2000)
-      rewardMessage = `12 Saatlik Kaynak Paketi: Şansına ${itemName} x2000 kazandın.`
+      const itemEntries = Object.entries(offer.rewards.items || {})
+      for (const [itemIdRaw, qty] of itemEntries) {
+        const itemId = normalizeItemId(itemIdRaw)
+        const quantity = Math.max(0, asInt(qty, 0))
+        if (!itemId || quantity <= 0 || !ITEM_BY_ID.has(itemId)) continue
+        addInventory(profile, itemId, quantity)
+      }
+      const firstQuantity = Math.max(0, asInt(itemEntries[0]?.[1], 0))
+      rewardMessage = `Haftalık Kaynak Paketi: Pazardaki tüm kaynaklar depoya eklendi (her biri +${firstQuantity}).`
     } else if (offer.rewards.items && typeof offer.rewards.items === 'object') {
       for (const [itemIdRaw, qty] of Object.entries(offer.rewards.items)) {
         const itemId = String(itemIdRaw || '').trim()
@@ -12916,7 +13134,7 @@ export async function purchaseDailyOffer(userId, payload = {}) {
       timestamp,
     )
 
-    const view = dailyStoreView(profile, timestamp)
+    const view = dailyStoreView(db, profile, timestamp)
     const marketItems = db.marketState.items.map((item) => marketItemView(profile, item))
     result = {
       success: true,
@@ -13434,19 +13652,48 @@ export async function updateProfileAvatarUrl(userId, payload) {
 
     runGameTick(db, profile, timestamp)
 
+    const currentAvatarUrl = String(profile.avatarUrl || '').trim()
+    const currentAvatarType = String(profile.avatarType || 'default').trim()
+    const currentDiamonds = Math.max(0, asInt(profile.reputation, 0))
+    const isResetRequest = !safeUrl
+    const alreadyCurrent = !isResetRequest &&
+      currentAvatarType === 'url' &&
+      currentAvatarUrl === safeUrl
+
+    if (!isResetRequest && !alreadyCurrent && currentDiamonds < AVATAR_CHANGE_DIAMOND_COST) {
+      result = {
+        success: false,
+        reason: 'insufficient_funds',
+        errors: {
+          global: `Avatar değiştirmek için ${AVATAR_CHANGE_DIAMOND_COST} elmas gerekli. Mevcut elmas: ${currentDiamonds}.`,
+        },
+      }
+      return db
+    }
+
     const previousUploadUrl =
       profile.avatarType === 'upload' && isUploadedAvatarUrl(profile.avatarUrl)
         ? profile.avatarUrl
         : ''
 
+    let charged = 0
+    if (!isResetRequest && !alreadyCurrent) {
+      profile.reputation = Math.max(0, currentDiamonds - AVATAR_CHANGE_DIAMOND_COST)
+      charged = AVATAR_CHANGE_DIAMOND_COST
+    }
     profile.avatarUrl = safeUrl
     profile.avatarType = safeUrl ? 'url' : 'default'
     profile.updatedAt = timestamp
 
     result = {
       success: true,
-      message: safeUrl ? 'Profil resmi URL ile g\u00fcncellendi.' : 'Profil resmi varsayılan görsele döndürüldü.',
+      message: safeUrl
+        ? (charged > 0
+          ? `Profil resmi güncellendi. ${charged} elmas düşüldü.`
+          : 'Profil resmi zaten güncel.')
+        : 'Profil resmi varsayılan görsele döndürüldü.',
       avatar: avatarView(profile),
+      diamonds: Math.max(0, asInt(profile.reputation, 0)),
       previousUploadUrl,
     }
     return db
@@ -13481,19 +13728,45 @@ export async function updateProfileAvatarUpload(userId, payload) {
 
     runGameTick(db, profile, timestamp)
 
+    const currentAvatarUrl = String(profile.avatarUrl || '').trim()
+    const currentAvatarType = String(profile.avatarType || 'default').trim()
+    const currentDiamonds = Math.max(0, asInt(profile.reputation, 0))
+    const alreadyCurrent =
+      currentAvatarType === 'upload' &&
+      currentAvatarUrl === avatarUrl
+
+    if (!alreadyCurrent && currentDiamonds < AVATAR_CHANGE_DIAMOND_COST) {
+      result = {
+        success: false,
+        reason: 'insufficient_funds',
+        errors: {
+          global: `Avatar değiştirmek için ${AVATAR_CHANGE_DIAMOND_COST} elmas gerekli. Mevcut elmas: ${currentDiamonds}.`,
+        },
+      }
+      return db
+    }
+
     const previousUploadUrl =
       profile.avatarType === 'upload' && isUploadedAvatarUrl(profile.avatarUrl)
         ? profile.avatarUrl
         : ''
 
+    let charged = 0
+    if (!alreadyCurrent) {
+      profile.reputation = Math.max(0, currentDiamonds - AVATAR_CHANGE_DIAMOND_COST)
+      charged = AVATAR_CHANGE_DIAMOND_COST
+    }
     profile.avatarUrl = avatarUrl
     profile.avatarType = 'upload'
     profile.updatedAt = timestamp
 
     result = {
       success: true,
-      message: 'Profil resmi y\u00fcklendi.',
+      message: charged > 0
+        ? `Profil resmi yüklendi. ${charged} elmas düşüldü.`
+        : 'Profil resmi zaten güncel.',
       avatar: avatarView(profile),
+      diamonds: Math.max(0, asInt(profile.reputation, 0)),
       previousUploadUrl,
     }
     return db
@@ -15981,10 +16254,7 @@ export async function getDirectMessageThread(userId, payload) {
 
     const items = thread.map((entry) => {
       const fromSelf = String(entry.fromUserId || '').trim() === currentUserId
-      const safeDate = new Date(entry.createdAt)
-      const at = Number.isNaN(safeDate.getTime())
-        ? '--:--'
-        : `${`${safeDate.getHours()}`.padStart(2, '0')}:${`${safeDate.getMinutes()}`.padStart(2, '0')}`
+      const at = formatHourMinuteTurkiye(entry.createdAt)
 
       return {
         id: entry.id,
@@ -16070,7 +16340,26 @@ export async function markMessageCenterRead(userId, messageId) {
       return db
     }
 
-    if (rawMessageId.startsWith('notif:') || rawMessageId.startsWith('txn:')) {
+    if (rawMessageId.startsWith('notif:')) {
+      const notificationId = rawMessageId.slice('notif:'.length).trim()
+      const notification = (profile.notifications || []).find(
+        (entry) => String(entry?.id || '').trim() === notificationId,
+      )
+      if (!notification) {
+        result = {
+          success: false,
+          reason: 'not_found',
+          errors: { global: 'Bildirim bulunamadı.' },
+        }
+        return db
+      }
+      notification.read = true
+      emitMessageCenterRefresh(userId, 'read')
+      result = { success: true }
+      return db
+    }
+
+    if (rawMessageId.startsWith('txn:')) {
       result = { success: true }
       return db
     }

@@ -8,7 +8,7 @@ const AVATAR_MAX_FILE_BYTES = 2 * 1024 * 1024
 const AVATAR_ALLOWED_MIME_TYPES = new Set(['image/png', 'image/jpeg', 'image/webp', 'image/gif'])
 const FORCED_LOGOUT_EVENT = 'ticarnet:auth-force-logout'
 const SESSION_LOST_MESSAGE =
-  'Oturum bulunamad?. Hesab?n ba?ka bir cihazda a??lm?? olabilir veya s?resi dolmu? olabilir. L?tfen tekrar giri? yap.'
+  'Oturum bulunamadı. Hesabın başka bir cihazda açılmış olabilir veya süresi dolmuş olabilir. Lütfen tekrar giriş yap.'
 
 function getStoredToken() {
   return localStorage.getItem(ACCESS_TOKEN_KEY) || sessionStorage.getItem(SESSION_TOKEN_KEY)
@@ -108,12 +108,12 @@ async function gameRequest(path, options = {}) {
 
     const payload = await response
       .json()
-      .catch(() => ({ success: false, errors: { global: 'Sunucu yan?t? okunamad?.' } }))
+      .catch(() => ({ success: false, errors: { global: 'Sunucu yanıtı okunamadı.' } }))
 
     if (!response.ok) {
       const result = payload.success === false
         ? payload
-        : { success: false, errors: { global: 'Sunucu hatas? olu?tu.' } }
+        : { success: false, errors: { global: 'Sunucu hatası oluştu.' } }
       if (shouldForceLogoutFromResult(result)) {
         emitForcedLogout(firstErrorText(result?.errors, SESSION_LOST_MESSAGE), result.reason)
       }
@@ -128,7 +128,7 @@ async function gameRequest(path, options = {}) {
     return {
       success: false,
       reason: 'network_error',
-      errors: { global: 'Sunucuya ba?lan?lamad?. API ?al???yor mu kontrol et.' },
+      errors: { global: 'Sunucuya bağlanılamadı. API çalışıyor mu kontrol et.' },
     }
   }
 }

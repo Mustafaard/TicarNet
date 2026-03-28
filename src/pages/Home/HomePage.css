@@ -5827,13 +5827,14 @@
 }
 
 .mine-card-countdown {
-  color: #dc2626 !important;
+  color: #f5c25b !important;
   font-weight: 700;
   font-size: 0.95rem;
   text-align: center;
   margin: 0 0 8px 0;
   padding: 6px 10px;
-  background: rgba(220, 38, 38, 0.12);
+  background: rgba(18, 50, 92, 0.52);
+  border: 1px solid rgba(245, 194, 91, 0.36);
   border-radius: 8px;
   line-height: 1.3;
 }
@@ -24657,3 +24658,59 @@ select {
   padding-right: 0 !important;
 }
 
+@media (max-width: 430px) {
+  .home-page {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .home-shell,
+  .tab-content-layer,
+  .panel-stack,
+  .message-screen,
+  .message-screen-gold,
+  .factory-screen,
+  .mines-screen,
+  .business-screen,
+  .card,
+  .tile {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .fleet-tabs,
+  .message-gold-tabs {
+    gap: 6px;
+  }
+
+  .fleet-tabs button,
+  .message-gold-tab {
+    min-width: 0;
+    font-size: 11px;
+    padding-inline: 8px;
+  }
+
+  .factory-upgrade-modal,
+  .avatar-crop-modal,
+  .warehouse-modal-fullscreen {
+    width: min(100%, calc(100vw - 12px));
+    max-width: min(100%, calc(100vw - 12px));
+  }
+
+  .warehouse-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .warehouse-item {
+    min-width: 0;
+    padding: 10px 8px;
+  }
+
+  .warehouse-item-name,
+  .warehouse-item-qty,
+  .warehouse-item-unit {
+    overflow-wrap: anywhere;
+  }
+}

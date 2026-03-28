@@ -135,6 +135,18 @@ export async function deleteAdminUserAccount(targetLookup, targetUserId, reason)
   })
 }
 
+export async function clearAdminUserLogos(targetLookup, targetUserId) {
+  return adminRequest('/admin/users/logos/clear', {
+    method: 'POST',
+    body: {
+      requestId: createRequestId(),
+      targetLookup,
+      targetUsername: targetLookup,
+      targetUserId,
+    },
+  })
+}
+
 export async function grantAdminCash(targetLookup, targetUserId, amount, reason) {
   return adminRequest('/admin/economy/cash/grant', {
     method: 'POST',

@@ -1,4 +1,6 @@
 ﻿import crypto from 'node:crypto'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 import bcrypt from 'bcryptjs'
 import { config } from '../config.js'
 import { NO_DB_WRITE, readDb, updateDb } from '../db.js'
@@ -42,6 +44,7 @@ const ANNOUNCEMENT_LIST_DEFAULT_LIMIT = 50
 const ANNOUNCEMENT_LIST_MAX_LIMIT = 100
 const ADMIN_PUSH_TYPE = 'alert'
 const ADMIN_PUSH_TITLE = 'Yönetim Bildirimi'
+const ADMIN_NOTICE_DEDUPE_WINDOW_MS = 30 * 1000
 const LOG_SUPPRESSED_ACTIONS = new Set([
   'chat_message_delete',
   'dm_message_delete',
@@ -115,6 +118,11 @@ function nowIso() {
 function asInt(value, fallback = 0) {
   const n = Number(value)
   return Number.isFinite(n) ? Math.trunc(n) : fallback
+}
+
+function createdMs(value) {
+  const ms = new Date(String(value || '').trim()).getTime()
+  return Number.isFinite(ms) ? ms : 0
 }
 
 function clamp(v, min, max) {
@@ -505,19 +513,45 @@ function ensureProfileMessages(profile) {
   if (!Array.isArray(profile.pushCenter.inbox)) profile.pushCenter.inbox = []
 }
 
+function resolveUploadedAvatarPath(rawUrl) {
+  const safeUrl = String(rawUrl || '').trim().split('?')[0].split('#')[0]
+  if (!safeUrl) return ''
+  const base = String(config.avatarPublicBase || '/api/uploads/avatars').replace(/\/+$/, '')
+  const prefix = `${base}/`
+  if (!safeUrl.startsWith(prefix)) return ''
+  const rawFileName = safeUrl.slice(prefix.length)
+  const safeFileName = path.basename(rawFileName)
+  if (!safeFileName || safeFileName !== rawFileName) return ''
+  return path.join(config.avatarUploadDir, safeFileName)
+}
+
+async function deleteUploadedAvatarPathSafe(filePath) {
+  const safePath = String(filePath || '').trim()
+  if (!safePath) return false
+  try {
+    await fs.unlink(safePath)
+    return true
+  } catch (error) {
+    if (error?.code === 'ENOENT') return false
+    throw error
+  }
+}
+
 function buildEconomyNotice(kind, mode, amount, reason, actorName) {
   const unit = kind === 'cash' ? 'nakit' : 'elmas'
+  const reasonText = String(reason || '').trim() || 'Belirtilmedi'
   if (mode === 'revoke') {
-    return `Yönetim işlemi: hesabından ${amount} ${unit} düşürüldü. Neden: ${reason}. İşlem: ${actorName}.`
+    return `Yönetim işlemi: hesabından ${amount} ${unit} düşürüldü. Neden: ${reasonText}. İşlem: ${actorName}.`
   }
-  return `Yönetim işlemi: hesabına ${amount} ${unit} eklendi. Neden: ${reason}. İşlem: ${actorName}.`
+  return `Yönetim işlemi: hesabına ${amount} ${unit} eklendi. Neden: ${reasonText}. İşlem: ${actorName}.`
 }
 
 function buildResourceNotice(itemName, mode, amount, reason, actorName) {
+  const reasonText = String(reason || '').trim() || 'Belirtilmedi'
   if (mode === 'revoke') {
-    return `Yönetim işlemi: depodan ${amount} ${itemName} düşürüldü. Neden: ${reason}. İşlem: ${actorName}.`
+    return `Yönetim işlemi: depodan ${amount} ${itemName} düşürüldü. Neden: ${reasonText}. İşlem: ${actorName}.`
   }
-  return `Yönetim işlemi: depoya ${amount} ${itemName} eklendi. Neden: ${reason}. İşlem: ${actorName}.`
+  return `Yönetim işlemi: depoya ${amount} ${itemName} eklendi. Neden: ${reasonText}. İşlem: ${actorName}.`
 }
 
 function formatPenaltyDuration(minutesValue) {
@@ -559,26 +593,63 @@ function sendAdminNotice(db, targetUser, payload = {}) {
   }
   const type = String(payload.type || ADMIN_PUSH_TYPE).trim() || ADMIN_PUSH_TYPE
   const meta = compactMeta(payload.meta)
+  const normalizeText = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+  const nowMs = createdMs(timestamp) || Date.now()
 
-  const notificationId = crypto.randomUUID()
-  profile.notifications.unshift({
-    id: notificationId,
-    type,
-    message,
-    createdAt: timestamp,
+  const existingNotification = (profile.notifications || []).find((entry) => {
+    if (!entry || typeof entry !== 'object') return false
+    if (String(entry.type || '').trim() !== type) return false
+    if (normalizeText(entry.message) !== message) return false
+    const entryMs = createdMs(entry.createdAt)
+    if (entryMs <= 0) return false
+    return Math.abs(nowMs - entryMs) <= ADMIN_NOTICE_DEDUPE_WINDOW_MS
   })
+
+  let notificationId = ''
+  if (existingNotification) {
+    existingNotification.read = false
+    existingNotification.createdAt = timestamp
+    notificationId = String(existingNotification.id || '').trim()
+  } else {
+    notificationId = crypto.randomUUID()
+    profile.notifications.unshift({
+      id: notificationId,
+      type,
+      message,
+      read: false,
+      createdAt: timestamp,
+    })
+  }
   profile.notifications = profile.notifications.filter(Boolean).slice(0, MAX_NOTIFICATION_HISTORY)
 
-  const pushId = crypto.randomUUID()
-  profile.pushCenter.inbox.unshift({
-    id: pushId,
-    type,
-    title,
-    message,
-    read: false,
-    createdAt: timestamp,
-    meta,
+  const existingPush = (profile.pushCenter.inbox || []).find((entry) => {
+    if (!entry || typeof entry !== 'object') return false
+    if (String(entry.type || '').trim() !== type) return false
+    if (normalizeText(entry.title) !== title) return false
+    if (normalizeText(entry.message) !== message) return false
+    const entryMs = createdMs(entry.createdAt)
+    if (entryMs <= 0) return false
+    return Math.abs(nowMs - entryMs) <= ADMIN_NOTICE_DEDUPE_WINDOW_MS
   })
+
+  let pushId = ''
+  if (existingPush) {
+    existingPush.read = false
+    existingPush.createdAt = timestamp
+    existingPush.meta = meta
+    pushId = String(existingPush.id || '').trim()
+  } else {
+    pushId = crypto.randomUUID()
+    profile.pushCenter.inbox.unshift({
+      id: pushId,
+      type,
+      title,
+      message,
+      read: false,
+      createdAt: timestamp,
+      meta,
+    })
+  }
   profile.pushCenter.inbox = profile.pushCenter.inbox.filter(Boolean).slice(0, MAX_PUSH_HISTORY)
 
   emitMessageCenterRefresh(targetUserId, String(payload.refreshReason || 'admin_action').trim() || 'admin_action')
@@ -779,7 +850,7 @@ export async function searchAdminUsers(actorUserId, payload = {}) {
         norm(u?.email).includes(nq)
       ))
       .filter((u) => {
-        if (String(u?.id || '').trim() === String(actor.actor.id || '').trim()) return false
+        if (String(u?.id || '').trim() === String(actor.actor.id || '').trim()) return true
         if (includeStaff) return roleOf(u) !== USER_ROLES.ADMIN
         return roleOf(u) === USER_ROLES.PLAYER
       })
@@ -883,7 +954,8 @@ export async function resolveAdminUser(actorUserId, payload = {}) {
       return db
     }
     const targetRole = roleOf(target.target)
-    if (targetRole === USER_ROLES.ADMIN) {
+    const targetIsActor = String(target.target.id || '').trim() === String(actor.actor.id || '').trim()
+    if (targetRole === USER_ROLES.ADMIN && !targetIsActor) {
       result = fail('forbidden', 'Admin hesapları hedef olarak seçilemez.')
       addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action: 'user_resolve', status: 'failed', message: result.errors.global, targetUserId: target.target.id, targetUsername: target.target.username, targetEmail: target.target.email })
       return db
@@ -1476,10 +1548,178 @@ export async function deleteAdminUserAccount(actorUserId, payload = {}) {
   return result
 }
 
+export async function clearAdminUserLogos(actorUserId, payload = {}) {
+  const requestId = String(payload?.requestId || '').trim()
+  const targetLookup = String(
+    payload?.targetLookup ||
+    payload?.targetIdentifier ||
+    payload?.targetUsername ||
+    payload?.targetEmail ||
+    '',
+  ).trim()
+  const targetUserId = String(payload?.targetUserId || '').trim()
+
+  let result
+  let avatarPathToDelete = ''
+  await updateDb((db) => {
+    const actor = actorPayload(db, actorUserId)
+    if (!actor.ok) { result = actor.result; return db }
+
+    const action = 'user_logo_clear'
+    const baseMeta = { requestId, targetLookup, targetUserId }
+
+    const permErr = can(actor.role, PERM.USER_CREDENTIALS_MANAGE)
+    if (permErr) {
+      result = permErr
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: permErr.errors.global,
+        meta: baseMeta,
+      })
+      return db
+    }
+
+    const req = consumeRequestId(db, actor.actor.id, action, requestId)
+    if (!req.ok) {
+      result = fail(req.reason, req.message)
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: result.errors.global,
+        meta: baseMeta,
+      })
+      return db
+    }
+
+    const target = resolveTarget(db, payload)
+    if (!target.ok) {
+      result = target.result
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: result.errors.global,
+        meta: baseMeta,
+      })
+      return db
+    }
+
+    const profile = findProfileByUserId(db, target.target.id)
+    if (!profile) {
+      result = fail('not_found', 'Hedef oyuncu profili bulunamadı.')
+      addLog(db, {
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+        actorEmail: actor.actor.email,
+        actorRole: actor.role,
+        action,
+        status: 'failed',
+        message: result.errors.global,
+        targetUserId: target.target.id,
+        targetUsername: target.target.username,
+        targetEmail: target.target.email,
+        meta: baseMeta,
+      })
+      return db
+    }
+
+    const hadUploadAvatar =
+      String(profile.avatarType || '').trim() === 'upload' &&
+      String(profile.avatarUrl || '').trim().length > 0
+    const previousAvatarUrl = hadUploadAvatar ? String(profile.avatarUrl || '').trim() : ''
+    avatarPathToDelete = previousAvatarUrl ? resolveUploadedAvatarPath(previousAvatarUrl) : ''
+
+    profile.avatarUrl = ''
+    profile.avatarType = 'default'
+    profile.updatedAt = nowIso()
+
+    const notice = sendAdminNotice(db, target.target, {
+      title: 'Yönetim Profil İşlemi',
+      message: 'Profil logosu/avatarı yönetim tarafından temizlendi.',
+      refreshReason: 'admin_profile_logo_clear',
+      meta: {
+        source: 'admin_panel',
+        action,
+        requestId,
+        actorUserId: actor.actor.id,
+        actorUsername: actor.actor.username,
+      },
+    })
+
+    result = {
+      success: true,
+      message: hadUploadAvatar
+        ? `${target.target.username} kullanıcısının logosu/avatarı temizlendi.`
+        : `${target.target.username} kullanıcısında temizlenecek yüklenmiş logo/avatar bulunamadı; profil varsayılan görsele çekildi.`,
+      targetUser: {
+        id: target.target.id,
+        username: target.target.username,
+        email: target.target.email,
+      },
+      notification: {
+        sent: notice.sent,
+        timestamp: notice.timestamp,
+      },
+    }
+
+    addLog(db, {
+      actorUserId: actor.actor.id,
+      actorUsername: actor.actor.username,
+      actorEmail: actor.actor.email,
+      actorRole: actor.role,
+      action,
+      status: 'success',
+      message: hadUploadAvatar
+        ? 'Kullanıcı logosu/avatarı temizlendi.'
+        : 'Yüklenmiş logo/avatar bulunamadı, profil varsayılan görsele çekildi.',
+      targetUserId: target.target.id,
+      targetUsername: target.target.username,
+      targetEmail: target.target.email,
+      meta: {
+        ...baseMeta,
+        hadUploadAvatar,
+        deletedAvatarPath: avatarPathToDelete ? mask(avatarPathToDelete, 24) : '',
+        previousAvatarUrl: previousAvatarUrl ? mask(previousAvatarUrl, 42) : '',
+        notificationSent: notice.sent,
+        notificationReason: notice.reason,
+        pushId: notice.pushId,
+        notificationAt: notice.timestamp,
+      },
+    })
+    return db
+  })
+
+  if (result?.success && avatarPathToDelete) {
+    try {
+      const deleted = await deleteUploadedAvatarPathSafe(avatarPathToDelete)
+      if (deleted) {
+        result.deletedFile = true
+      }
+    } catch (_error) {
+      result.deletedFile = false
+      result.fileDeleteWarning = 'Logo dosyası silinirken bir hata oluştu.'
+    }
+  }
+
+  return result
+}
+
 async function adjustEconomy(actorUserId, payload, kind, mode = 'grant') {
   const amountCheck = validateAmount(payload?.amount)
   if (!amountCheck.ok) return amountCheck.result
-  const reasonCheck = validateReason(payload?.reason)
+  const reasonCheck = validateOptionalReason(payload?.reason)
   if (!reasonCheck.ok) return reasonCheck.result
 
   const targetLookup = String(payload?.targetLookup || payload?.targetIdentifier || payload?.targetUsername || payload?.targetEmail || '').trim()
@@ -1538,7 +1778,9 @@ async function adjustEconomy(actorUserId, payload, kind, mode = 'grant') {
       return db
     }
 
-    if (roleOf(target.target) !== USER_ROLES.PLAYER) {
+    const targetRole = roleOf(target.target)
+    const targetIsActor = String(target.target.id || '').trim() === String(actor.actor.id || '').trim()
+    if (targetRole !== USER_ROLES.PLAYER && !targetIsActor) {
       result = fail('forbidden', 'Ekonomi işlemleri sadece normal oyunculara uygulanabilir.')
       addLog(db, {
         actorUserId: actor.actor.id,
@@ -1678,7 +1920,7 @@ export async function revokeAdminDiamonds(actorUserId, payload = {}) {
 async function adjustResourceInventory(actorUserId, payload, mode = 'grant') {
   const amountCheck = validateAmount(payload?.amount)
   if (!amountCheck.ok) return amountCheck.result
-  const reasonCheck = validateReason(payload?.reason)
+  const reasonCheck = validateOptionalReason(payload?.reason)
   if (!reasonCheck.ok) return reasonCheck.result
   const itemCheck = validateResourceItemId(payload?.itemId)
   if (!itemCheck.ok) return itemCheck.result
@@ -1736,7 +1978,9 @@ async function adjustResourceInventory(actorUserId, payload, mode = 'grant') {
       return db
     }
 
-    if (roleOf(target.target) !== USER_ROLES.PLAYER) {
+    const targetRole = roleOf(target.target)
+    const targetIsActor = String(target.target.id || '').trim() === String(actor.actor.id || '').trim()
+    if (targetRole !== USER_ROLES.PLAYER && !targetIsActor) {
       result = fail('forbidden', 'Depo kaynak işlemleri sadece normal oyunculara uygulanabilir.')
       addLog(db, {
         actorUserId: actor.actor.id,

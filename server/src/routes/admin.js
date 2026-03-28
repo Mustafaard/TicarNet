@@ -4,6 +4,7 @@ import { requireTurkeyAccess } from '../middleware/accessPolicy.js'
 import { requireModerator } from '../middleware/admin.js'
 import {
   clearAdminBan,
+  clearAdminUserLogos,
   createAdminAnnouncement,
   clearAdminMessageBlock,
   deleteAdminUserAccount,
@@ -125,6 +126,15 @@ adminRouter.post('/users/password', async (req, res, next) => {
 adminRouter.post('/users/delete', async (req, res, next) => {
   try {
     const result = await deleteAdminUserAccount(req.auth.userId, req.body || {})
+    sendResult(res, result)
+  } catch (error) {
+    next(error)
+  }
+})
+
+adminRouter.post('/users/logos/clear', async (req, res, next) => {
+  try {
+    const result = await clearAdminUserLogos(req.auth.userId, req.body || {})
     sendResult(res, result)
   } catch (error) {
     next(error)
