@@ -25216,6 +25216,39 @@ select {
   text-transform: uppercase;
 }
 
+.chat-inline-status {
+  margin: 0 0 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.chat-inline-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.chat-inline-status.on {
+  color: #b6f7dc;
+  border: 1px solid rgba(130, 226, 180, 0.52);
+  background: rgba(16, 77, 56, 0.42);
+}
+
+.chat-inline-status.off {
+  color: #ffe0a8;
+  border: 1px solid rgba(243, 196, 94, 0.48);
+  background: rgba(76, 56, 16, 0.38);
+}
+
 .chat-community-tabs {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -25365,6 +25398,24 @@ select {
 .chat-rules-penalty {
   color: #ffdba2;
   font-size: 11px;
+  font-weight: 700;
+}
+
+.chat-rules-note {
+  color: rgba(168, 195, 232, 0.88);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.chat-rules-group-final {
+  background: linear-gradient(180deg, rgba(23, 46, 78, 0.86), rgba(14, 29, 50, 0.9));
+}
+
+.chat-rules-final-text {
+  margin: 0;
+  color: #fff1cb;
+  font-size: 12px;
+  line-height: 1.45;
   font-weight: 700;
 }
 
@@ -25737,6 +25788,122 @@ select {
     radial-gradient(circle at 100% 100%, rgba(243, 193, 79, 0.15), transparent 48%),
     linear-gradient(168deg, rgba(7, 24, 52, 0.97), rgba(4, 12, 28, 0.98));
   box-shadow: 0 22px 42px rgba(2, 8, 18, 0.56);
+}
+
+/* Comprehensive module polish - blue/gold theme */
+.factory-screen .factory-hub-card,
+.factory-screen .factory-section,
+.factory-screen .factory-card,
+.business-screen .fleet-fullscreen-card,
+.premium-screen .premium-card,
+.diamond-market-screen .premium-card,
+.leaderboard-card-modern,
+.bank-screen .bank-panel {
+  border-color: rgba(116, 182, 249, 0.46) !important;
+  box-shadow: 0 16px 34px rgba(2, 10, 22, 0.5);
+}
+
+.factory-screen .factory-hub-card,
+.factory-screen .factory-section,
+.business-screen .fleet-fullscreen-card {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(244, 194, 85, 0.14), transparent 44%),
+    linear-gradient(175deg, rgba(8, 28, 58, 0.94), rgba(4, 16, 35, 0.96));
+}
+
+.factory-screen .factory-card {
+  background:
+    radial-gradient(circle at 0% 100%, rgba(65, 154, 255, 0.14), transparent 38%),
+    linear-gradient(172deg, rgba(9, 28, 56, 0.92), rgba(5, 17, 34, 0.95));
+}
+
+.factory-screen .factory-action-btn,
+.factory-screen .factory-buy-btn,
+.factory-screen .factory-hub-collect-btn {
+  border-color: rgba(245, 199, 98, 0.7) !important;
+  background: linear-gradient(180deg, rgba(220, 166, 57, 0.97), rgba(153, 101, 24, 0.97)) !important;
+  color: #fff4d8 !important;
+}
+
+.factory-screen .factory-action-btn:hover:not(:disabled),
+.factory-screen .factory-buy-btn:hover:not(:disabled),
+.factory-screen .factory-hub-collect-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(236, 183, 75, 0.98), rgba(170, 114, 27, 0.98)) !important;
+}
+
+.business-screen .fleet-subheader,
+.business-screen .fleet-detail-hero,
+.business-screen .fleet-market-row,
+.business-screen .fleet-vehicle-row {
+  border-color: rgba(113, 179, 247, 0.42) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(242, 194, 88, 0.12), transparent 44%),
+    linear-gradient(172deg, rgba(10, 30, 59, 0.9), rgba(5, 18, 37, 0.94));
+}
+
+.business-screen .btn.btn-primary,
+.business-screen .btn.btn-success,
+.business-screen .btn.btn-accent {
+  border: 1px solid rgba(245, 201, 103, 0.7);
+  background: linear-gradient(180deg, rgba(219, 165, 58, 0.98), rgba(154, 102, 24, 0.98));
+  color: #fff5dc;
+}
+
+.business-screen .btn.btn-primary:hover:not(:disabled),
+.business-screen .btn.btn-success:hover:not(:disabled),
+.business-screen .btn.btn-accent:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(235, 182, 74, 0.98), rgba(171, 115, 29, 0.98));
+}
+
+.bank-screen .bank-stat-card,
+.bank-screen .bank-block,
+.bank-screen .bank-preview-card,
+.bank-screen .bank-term-live-card,
+.bank-screen .bank-history-row {
+  background:
+    radial-gradient(circle at 100% 0%, rgba(241, 193, 88, 0.11), transparent 42%),
+    linear-gradient(172deg, rgba(8, 26, 52, 0.92), rgba(4, 14, 30, 0.95));
+}
+
+.leaderboard-row-modern {
+  border-color: rgba(113, 176, 244, 0.34);
+  background: linear-gradient(170deg, rgba(10, 29, 56, 0.85), rgba(5, 17, 35, 0.92));
+}
+
+.leaderboard-row-modern.is-highlighted,
+.leaderboard-row-modern.is-me {
+  border-color: rgba(245, 198, 95, 0.72);
+  box-shadow: 0 10px 24px rgba(24, 17, 6, 0.44);
+}
+
+.premium-screen .premium-card,
+.diamond-market-screen .premium-card {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(64, 156, 255, 0.2), transparent 44%),
+    radial-gradient(circle at 100% 100%, rgba(244, 196, 89, 0.14), transparent 48%),
+    linear-gradient(172deg, rgba(8, 27, 55, 0.94), rgba(4, 14, 30, 0.97));
+}
+
+.premium-screen .premium-plan,
+.premium-screen .premium-daily-offer,
+.diamond-market-screen .diamond-pack {
+  border-color: rgba(114, 179, 247, 0.42);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(242, 196, 91, 0.12), transparent 44%),
+    linear-gradient(170deg, rgba(10, 30, 58, 0.88), rgba(5, 17, 34, 0.94));
+  box-shadow: 0 10px 22px rgba(2, 10, 22, 0.42);
+}
+
+.premium-screen .premium-gold-btn,
+.diamond-market-screen .premium-gold-btn {
+  border: 1px solid rgba(247, 206, 105, 0.72);
+  background: linear-gradient(180deg, rgba(219, 165, 56, 0.98), rgba(152, 101, 24, 0.98));
+  color: #fff4d7;
+}
+
+.premium-screen .premium-gold-btn:hover:not(:disabled),
+.diamond-market-screen .premium-gold-btn:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(235, 182, 73, 0.98), rgba(168, 113, 27, 0.98));
 }
 
 .bank-stat-card,

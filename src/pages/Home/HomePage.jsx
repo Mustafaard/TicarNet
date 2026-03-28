@@ -163,8 +163,8 @@ const MESSAGE_ICONS = {
 }
 const CHAT_COMMUNITY_TAB_ITEMS = [
   { id: 'sohbet', label: 'Sohbet', icon: '💬' },
-  { id: 'kurallar', label: 'Kurallar', icon: '📜' },
   { id: 'haberler', label: 'Haberler', icon: '✨' },
+  { id: 'kurallar', label: 'Kurallar', icon: '📜' },
 ]
 
 const CHAT_SEED = {
@@ -14808,13 +14808,12 @@ function HomePage({ user, onLogout }) {
   }
 
   const chatRulesDigest = CITY_RULES_GUIDE.groups
-    .slice(0, 4)
     .map((group) => ({
       id: group.id,
       icon: group.icon,
       title: group.title,
       subtitle: group.description,
-      rules: (Array.isArray(group.rules) ? group.rules : []).slice(0, 2),
+      rules: Array.isArray(group.rules) ? group.rules : [],
     }))
 
   const chatNewsFeed = Array.isArray(chatRecentPlayers)
@@ -14838,13 +14837,10 @@ function HomePage({ user, onLogout }) {
   const chatView = (
     <section className="panel-stack chat-screen chat-screen-pro">
       <article className="card chat-card chat-card-pro chat-card-clean">
-        <div className="chat-feed-head chat-feed-head-pro chat-feed-head-clean">
-          <h3 className="chat-title-pro">Oyun Sohbet</h3>
-          <span className={`chat-live chat-live-pro ${chatSocketState === 'online' ? 'on' : 'off'}`}>
-            {chatSocketState === 'online' ? 'CANLI' : 'KAPALI'}
-          </span>
-        </div>
         <p className="chat-community-tabs-caption">Topluluk Menüsü</p>
+        <p className={`chat-inline-status ${chatSocketState === 'online' ? 'on' : 'off'}`}>
+          {chatSocketState === 'online' ? 'Sohbet canlı' : 'Bağlantı kuruluyor'}
+        </p>
         <div className="chat-community-tabs" role="tablist" aria-label="Sohbet menüsü">
           {CHAT_COMMUNITY_TAB_ITEMS.map((entry) => (
             <button
@@ -15056,7 +15052,7 @@ function HomePage({ user, onLogout }) {
           <section className="chat-side-panel chat-rules-panel" aria-label="Sohbet kuralları">
             <header className="chat-side-panel-head">
               <h4 className="chat-side-panel-title">Sohbet Kuralları</h4>
-              <p className="chat-side-panel-sub">Şehir kurallarının sohbet için kritik maddeleri.</p>
+              <p className="chat-side-panel-sub">Şehir kurallarındaki güncel maddeler burada aynen gösterilir.</p>
             </header>
             <div className="chat-rules-list">
               {chatRulesDigest.map((group) => (
@@ -15073,11 +15069,15 @@ function HomePage({ user, onLogout }) {
                       <p key={`${group.id}-rule-${index + 1}`} className="chat-rules-item">
                         <span>{rule.text}</span>
                         <small className="chat-rules-penalty">{rule.penalty}</small>
+                        {rule.note ? <small className="chat-rules-note">{rule.note}</small> : null}
                       </p>
                     ))}
                   </div>
                 </article>
               ))}
+              <article className="chat-rules-group chat-rules-group-final">
+                <p className="chat-rules-final-text">{CITY_RULES_GUIDE.finalNote}</p>
+              </article>
             </div>
           </section>
         ) : null}
@@ -15116,7 +15116,9 @@ function HomePage({ user, onLogout }) {
                     </button>
                     <div className="chat-news-copy">
                       <p className="chat-news-title">{entry.username}</p>
-                      <p className="chat-news-text">Aramıza yeni oyuncu katıldı.</p>
+                      <p className="chat-news-text">
+                        {`Oyunumuza ${String(entry.username || 'Oyuncu').trim().toLocaleUpperCase('tr-TR')} adında oyuncu katıldı. Kayıt işlemi tamamlandı.`}
+                      </p>
                       <p className="chat-news-meta">{entry.timeLabel}</p>
                     </div>
                     <span className="chat-news-chip">YENİ</span>
