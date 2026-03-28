@@ -851,6 +851,7 @@ const normalizeMineLabel = (value) => String(value || '')
   .replace(/\bAltin\b/gi, 'Altın')
   .replace(/\bBakir\b/gi, 'Bakır')
   .replace(/\bKomur\b/gi, 'Kömür')
+  .replace(/\bcoal\b/gi, 'Kömür')
   .replace(/\bKazi\b/gi, 'Kazı')
 
 const mineDisplayName = (mine) => {
@@ -12105,21 +12106,24 @@ function HomePage({ user, onLogout }) {
         {factoryCollectModal && createPortal(
           <section className="warehouse-overlay" onClick={() => setFactoryCollectModalId('')}>
             <article className="warehouse-modal fleet-modal fleet-accountant-modal" onClick={(e) => e.stopPropagation()}>
-              <h3>Muhasebeci</h3>
-              <p>{factoryCollectModal.name} için tahsilat dökümü hazır.</p>
-              <button
-                className="btn btn-success full btn-collect-inline"
-                onClick={() => void confirmFactoryCollectFromModal()}
-                disabled={Boolean(busy)}
-              >
-                <span className="btn-icon">
-                  <img src={premiumActive && factoryBulkPreview.is2x ? '/home/icons/depot/diamond.webp' : factoryCollectModal.outputMeta?.icon || '/home/icons/depot/cash.webp'} alt="" aria-hidden="true" />
-                </span>
-                <span className="btn-label">
-                  {busy === `factory-collect:${factoryCollectModal.id}` ? 'Kasaya aktarılıyor...' : `Tahsilat Yap (+${fmt(factoryCollectModal.outputPerCollect || 0)} ${factoryCollectModal.outputMeta?.label || ''})`}
-                </span>
-              </button>
+              <h3 className="fleet-accountant-title">Muhasebeci</h3>
+              <p className="fleet-accountant-subtitle">{factoryCollectModal.name} için tahsilat özeti hazır.</p>
+              <div className="fleet-accountant-cta-card">
+                <button
+                  className="btn btn-success full btn-collect-inline"
+                  onClick={() => void confirmFactoryCollectFromModal()}
+                  disabled={Boolean(busy)}
+                >
+                  <span className="btn-icon">
+                    <img src={premiumActive && factoryBulkPreview.is2x ? '/home/icons/depot/diamond.webp' : factoryCollectModal.outputMeta?.icon || '/home/icons/depot/cash.webp'} alt="" aria-hidden="true" />
+                  </span>
+                  <span className="btn-label">
+                    {busy === `factory-collect:${factoryCollectModal.id}` ? 'Kasaya aktarılıyor...' : `Tahsilatı Topla (+${fmt(factoryCollectModal.outputPerCollect || 0)} ${factoryCollectModal.outputMeta?.label || ''})`}
+                  </span>
+                </button>
+              </div>
               <article className="fleet-bulk-summary fleet-accountant-summary">
+                <p className="fleet-accountant-summary-title">Tahsilat özeti</p>
                 <p className="fleet-summary-line positive">
                   <img src={factoryCollectModal.outputMeta?.icon} alt="" aria-hidden="true" />
                   +{fmt(premiumActive && premiumMultiplier > 1 ? Math.round((factoryCollectModal.outputPerCollect || 0) * premiumMultiplier) : factoryCollectModal.outputPerCollect || 0)} {factoryCollectModal.outputMeta?.label}
@@ -12133,9 +12137,11 @@ function HomePage({ user, onLogout }) {
                   <img src={factoryCollectModal.energyMeta?.icon} alt="" aria-hidden="true" />
                   - {fmt(factoryCollectModal.energyCostPerCollect || 0)} {factoryCollectModal.energyMeta?.label}
                 </p>
-                <small>Depodaki {factoryCollectModal.energyMeta?.label}: {fmt(inventoryById[factoryCollectModal.energyItemId] || 0)}</small>
+                <small className="fleet-accountant-footnote">Depodaki {factoryCollectModal.energyMeta?.label}: {fmt(inventoryById[factoryCollectModal.energyItemId] || 0)}</small>
               </article>
-              <button type="button" className="btn btn-danger fleet-modal-close" onClick={() => setFactoryCollectModalId('')}>Kapat</button>
+              <div className="fleet-accountant-footer">
+                <button type="button" className="btn btn-danger fleet-modal-close fleet-accountant-close" onClick={() => setFactoryCollectModalId('')}>Kapat</button>
+              </div>
             </article>
           </section>,
           document.body
@@ -14034,10 +14040,11 @@ function HomePage({ user, onLogout }) {
           setCollectTargetBusinessId('')
         }}>
           <article className="warehouse-modal fleet-modal fleet-accountant-modal" onClick={(event) => event.stopPropagation()}>
-            <h3>Muhasebeci</h3>
-            <p>
-              {collectModalMeta?.label || 'Kiralama işletmesi'} için saatlik tahsilat dökümü hazır.
+            <h3 className="fleet-accountant-title">Muhasebeci</h3>
+            <p className="fleet-accountant-subtitle">
+              {collectModalMeta?.label || 'Kiralama işletmesi'} için saatlik tahsilat özeti hazır.
             </p>
+            <div className="fleet-accountant-cta-card">
               <button
                 className="btn btn-success full btn-collect-inline"
                 onClick={() => void confirmCollectFromModal()}
@@ -14065,7 +14072,9 @@ function HomePage({ user, onLogout }) {
                   ) : null}
                 </span>
               </button>
+            </div>
             <article className="fleet-bulk-summary fleet-accountant-summary">
+              <p className="fleet-accountant-summary-title">Tahsilat özeti</p>
               <p className="fleet-summary-line positive">
                 <img src="/home/icons/depot/cash.webp" alt="" aria-hidden="true" />
                 Normal Net Tahsilat: +{fmt(collectModalPreviewBase.netCash)}
@@ -14093,19 +14102,21 @@ function HomePage({ user, onLogout }) {
                 <img src="/home/icons/depot/cash.webp" alt="" aria-hidden="true" />
                 Brüt Tahsilat: {fmt(collectModalPreview.grossAfterFuel)}
               </p>
-              <small>
+              <small className="fleet-accountant-footnote">
                 Yakıt durumu: {fmt(collectModalPreview.fuelAvailable)} / {fmt(collectModalPreview.fuelNeeded)} {collectModalPreview.fuelItemName}
               </small>
             </article>
-            <button
-              className="btn btn-danger fleet-modal-close"
-              onClick={() => {
-                setBusinessModal('')
-                setCollectTargetBusinessId('')
-              }}
-            >
-              Kapat
-            </button>
+            <div className="fleet-accountant-footer">
+              <button
+                className="btn btn-danger fleet-modal-close fleet-accountant-close"
+                onClick={() => {
+                  setBusinessModal('')
+                  setCollectTargetBusinessId('')
+                }}
+              >
+                Kapat
+              </button>
+            </div>
           </article>
         </section>
       ) : null}
@@ -14113,38 +14124,41 @@ function HomePage({ user, onLogout }) {
       {businessModal === 'logistics-collect' ? (
         <section className="warehouse-overlay" onClick={() => setBusinessModal('')}>
           <article className="warehouse-modal fleet-modal fleet-accountant-modal" onClick={(event) => event.stopPropagation()}>
-            <h3>Muhasebeci</h3>
-            <p>
-              Tır kiralama için saatlik tahsilat dökümü hazır.
+            <h3 className="fleet-accountant-title">Muhasebeci</h3>
+            <p className="fleet-accountant-subtitle">
+              Tır kiralama için saatlik tahsilat özeti hazır.
             </p>
-            <button
-              className="btn btn-success full btn-collect-inline"
-              onClick={() => void confirmLogisticsCollectFromModal()}
-              disabled={Boolean(busy) || !logisticsPreviewFuelEnough}
-            >
-              <span className="btn-icon">
-                <img
-                  src={premiumBoostActive ? '/home/icons/depot/diamond.webp' : '/home/icons/depot/cash.png'}
-                  alt=""
-                  aria-hidden="true"
-                />
-              </span>
-              <span className="btn-label btn-label-stack">
-                <span>
-                  {busy === 'collect-logistics'
-                    ? 'Kasaya aktarılıyor...'
-                    : !logisticsPreviewFuelEnough
-                      ? 'Petrol Yetersiz'
-                      : premiumBoostActive
-                        ? `2x Tahsilat Yap (+${fmt(logisticsPreviewActive.netCash || 0)})`
-                        : `Net Tahsilat Yap (+${fmt(logisticsPreviewActive.netCash || 0)})`}
+            <div className="fleet-accountant-cta-card">
+              <button
+                className="btn btn-success full btn-collect-inline"
+                onClick={() => void confirmLogisticsCollectFromModal()}
+                disabled={Boolean(busy) || !logisticsPreviewFuelEnough}
+              >
+                <span className="btn-icon">
+                  <img
+                    src={premiumBoostActive ? '/home/icons/depot/diamond.webp' : '/home/icons/depot/cash.png'}
+                    alt=""
+                    aria-hidden="true"
+                  />
                 </span>
-                {premiumBoostActive ? (
-                  <small>{premiumMultiplier}x Premium uygulanıyor</small>
-                ) : null}
-              </span>
-            </button>
+                <span className="btn-label btn-label-stack">
+                  <span>
+                    {busy === 'collect-logistics'
+                      ? 'Kasaya aktarılıyor...'
+                      : !logisticsPreviewFuelEnough
+                        ? 'Petrol Yetersiz'
+                        : premiumBoostActive
+                          ? `2x Tahsilat Yap (+${fmt(logisticsPreviewActive.netCash || 0)})`
+                          : `Net Tahsilat Yap (+${fmt(logisticsPreviewActive.netCash || 0)})`}
+                  </span>
+                  {premiumBoostActive ? (
+                    <small>{premiumMultiplier}x Premium uygulanıyor</small>
+                  ) : null}
+                </span>
+              </button>
+            </div>
             <article className="fleet-bulk-summary fleet-accountant-summary">
+              <p className="fleet-accountant-summary-title">Tahsilat özeti</p>
               <p className="fleet-summary-line positive">
                 <img src="/home/icons/depot/cash.webp" alt="" aria-hidden="true" />
                 Normal Net Tahsilat: +{fmt(logisticsPreview.netCash || 0)}
@@ -14172,11 +14186,13 @@ function HomePage({ user, onLogout }) {
                 <img src="/home/icons/depot/cash.webp" alt="" aria-hidden="true" />
                 Brüt Tahsilat: {fmt(logisticsPreviewActive.grossCash || 0)}
               </p>
-              <small>
+              <small className="fleet-accountant-footnote">
                 Depodaki yakıt: {fmt(inventoryById[String(logisticsPreviewActive.fuelItemId || 'oil')] || 0)} {String(logisticsPreviewActive.fuelItemName || 'Petrol')}
               </small>
             </article>
-            <button className="btn btn-danger fleet-modal-close" onClick={() => setBusinessModal('')}>Kapat</button>
+            <div className="fleet-accountant-footer">
+              <button className="btn btn-danger fleet-modal-close fleet-accountant-close" onClick={() => setBusinessModal('')}>Kapat</button>
+            </div>
           </article>
         </section>
       ) : null}
@@ -15578,11 +15594,11 @@ function HomePage({ user, onLogout }) {
                     Boolean(friendRequest?.incoming) && String(friendRequest?.status || '').toLowerCase() === 'pending'
                   const tag = isIncomingFriendRequest ? 'ARKADAŞLIK' : messageItemTag(sourceType)
                   const iconSrc = messageItemIcon()
-                  const rawDetail = normalizeMojibakeText(
+                  const rawDetail = normalizeMineLabel(normalizeMojibakeText(
                     String(item?.message ?? item?.detail ?? item?.body ?? item?.text ?? '').trim()
                       || (item?.title ? `${item.title}: ${item.message || ''}`.trim() : '')
                       || 'Bildirim',
-                  )
+                  ))
                   const dateStr = formatMessageDate(item?.createdAt || item?.sentAt || item?.updatedAt)
                   const isUnread = Boolean(item?.read !== true && item?.unread !== false)
                   // Başlangıç sermayesi bildirimi: hoş geldin + detaylar için buraya tıklayabilirsin metni
@@ -17427,13 +17443,15 @@ function HomePage({ user, onLogout }) {
               ) : (
                 'Premium ile kazı başına 2× kaynak kazanırsın. '
               )}
-              Kazıyı başlattıktan sonra 10 saniye animasyon gösterilir, süre bitince kaynak depoya aktarılır.
+              Kazıyı başlattıktan sonra 10 saniyelik işlem gösterilir. Süre tamamlanınca kaynak otomatik olarak depoya aktarılır.
             </p>
-            <div className="mine-confirm-actions">
-              <button type="button" className="btn btn-primary" onClick={() => { setMineConfirmModal(null); mineDigAction(mineConfirmModal.id) }} disabled={!mineConfirmModal.hasEnoughCash || Boolean(busy)}>
-                Kazıyı gerçekleştir
-              </button>
-              <button type="button" className="btn btn-ghost" onClick={() => setMineConfirmModal(null)}>Kapat</button>
+            <div className="mine-confirm-footer">
+              <div className="mine-confirm-actions">
+                <button type="button" className="btn btn-primary mine-confirm-submit" onClick={() => { setMineConfirmModal(null); mineDigAction(mineConfirmModal.id) }} disabled={!mineConfirmModal.hasEnoughCash || Boolean(busy)}>
+                  Kazıyı Başlat
+                </button>
+                <button type="button" className="btn btn-ghost mine-confirm-cancel" onClick={() => setMineConfirmModal(null)}>Vazgeç</button>
+              </div>
             </div>
           </article>
         </section>,
