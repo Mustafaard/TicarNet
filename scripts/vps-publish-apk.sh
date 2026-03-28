@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-DOMAIN="${APK_DOMAIN:-apk.ticarnet.online}"
+DOMAIN="${APK_DOMAIN:-apk.ticarnet.tr}"
 APP_ROOT="${APP_ROOT:-/var/www/ticarnet/current}"
 APK_SOURCE="${APK_SOURCE:-}"
 APK_NAME="${APK_NAME:-ticarnet.apk}"
@@ -16,7 +16,7 @@ Kullanim:
   sudo bash scripts/vps-publish-apk.sh [--domain DOMAIN] [--apk-source PATH] [--apk-name NAME] [--app-root PATH] [--brand-name NAME] [--logo-source PATH] [--enable-ssl --email EMAIL]
 
 Opsiyonlar:
-  --domain DOMAIN    APK icin alan adi (varsayilan: apk.ticarnet.online)
+  --domain DOMAIN    APK icin alan adi (varsayilan: apk.ticarnet.tr)
   --apk-source PATH  Yayina alinacak APK dosyasi
   --apk-name NAME    URL'de gorunecek dosya adi (varsayilan: ticarnet.apk)
   --app-root PATH    Uygulama kok dizini (varsayilan: /var/www/ticarnet/current)
@@ -28,11 +28,11 @@ Opsiyonlar:
 
 Ornek:
   sudo bash scripts/vps-publish-apk.sh \
-    --domain apk.ticarnet.online \
+    --domain apk.ticarnet.tr \
     --apk-source /var/www/ticarnet/current/release/ticarnet-demo-debug.apk \
     --apk-name ticarnet.apk \
     --brand-name "TicarNet Online" \
-    --enable-ssl --email admin@ticarnet.online
+    --enable-ssl --email admin@ticarnet.tr
 EOF
 }
 

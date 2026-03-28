@@ -12,7 +12,8 @@ ENV_FILE="${ENV_FILE:-${PROJECT_ROOT}/server/.env}"
 PM2_APP_NAME="${PM2_APP_NAME:-ticarnet-api}"
 DB_BACKUP_DIR="${DB_BACKUP_DIR:-/var/backups/ticarnet}"
 DEFAULT_DATA_ROOT_CANDIDATE="${DEFAULT_DATA_ROOT_CANDIDATE:-/var/lib/ticarnet}"
-PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-https://tr-159ae5.hosting.net.tr}"
+DEFAULT_PUBLIC_BASE_URL="${DEFAULT_PUBLIC_BASE_URL:-https://ticarnet.tr}"
+PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-}"
 
 usage() {
   cat <<'EOF'
@@ -96,6 +97,28 @@ read_env_value() {
   local value="${line#*=}"
   value="$(trim_quotes "$value")"
   printf '%s' "$value"
+}
+
+resolve_public_base_url() {
+  if [[ -n "$PUBLIC_BASE_URL" ]]; then
+    printf '%s' "$PUBLIC_BASE_URL"
+    return 0
+  fi
+
+  local current=""
+  current="$(read_env_value CLIENT_URL || true)"
+  if [[ -n "$current" ]]; then
+    printf '%s' "$current"
+    return 0
+  fi
+
+  current="$(read_env_value RESET_LINK_BASE_URL || true)"
+  if [[ -n "$current" ]]; then
+    printf '%s' "$current"
+    return 0
+  fi
+
+  printf '%s' "$DEFAULT_PUBLIC_BASE_URL"
 }
 
 upsert_env() {
@@ -338,6 +361,7 @@ fi
 
 require_cmd openssl
 ensure_env_file
+PUBLIC_BASE_URL="$(resolve_public_base_url)"
 
 DATA_ROOT="$(choose_data_root)"
 ensure_env_defaults "$DATA_ROOT"

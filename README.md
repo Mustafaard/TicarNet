@@ -48,7 +48,7 @@ Varsayilan adresler:
 APK'nin uzaktaki web surumunu acmasi icin:
 
 ```bash
-CAP_SERVER_URL=https://play.ticarnet.com npm run android:sync:live
+CAP_SERVER_URL=https://ticarnet.tr npm run android:sync:live
 npm run android:install
 ```
 
@@ -66,7 +66,7 @@ DB_FILE_PATH=/var/lib/ticarnet/db.json
 UPLOAD_ROOT_DIR=/var/lib/ticarnet/uploads
 AVATAR_UPLOAD_DIR=/var/lib/ticarnet/uploads/avatars
 JWT_SECRET=UZUN_VE_GUVENLI_BIR_ANAHTAR
-CORS_ALLOWED_ORIGINS=https://play.ticarnet.com
+CORS_ALLOWED_ORIGINS=https://ticarnet.tr
 HEALTHCHECK_TOKEN=UZUN_VE_GIZLI_BIR_TOKEN
 ```
 
@@ -81,35 +81,35 @@ Detayli kurulum:
 - `docs/VSC_SSH_DIREKT_DEPLOY_TR.md` (GitHub olmadan VS Code -> SSH direkt deploy)
 - `docs/nginx.ticarnet.conf.example`
 
-Sifirdan kurulum (server klasorleri silinse bile tekrar kurar):
+Hosting panel terminalinde sifirdan kurulum (yeniden kurulum sonrasi tek satir):
 
 ```bash
-sudo bash scripts/vps-fresh-install.sh --domain 178.210.161.210
+apt-get update -y && apt-get install -y curl ca-certificates && bash <(curl -fsSL https://raw.githubusercontent.com/Mustafaard/TicarNet/main/scripts/vps-panel-bootstrap.sh) --non-interactive --domain ticarnet.tr --email mustafaard76@gmail.com --repo-url https://github.com/Mustafaard/TicarNet.git --branch main --smtp-user mustafaard76@gmail.com --support-inbox-email mustafaard76@gmail.com --mail-from "TicarNet Online <mustafaard76@gmail.com>"
 ```
 
 Domain + SSL ile:
 
 ```bash
-sudo bash scripts/vps-fresh-install.sh --domain ticarnet.online --enable-ssl --email admin@ticarnet.online
+sudo bash scripts/vps-fresh-install.sh --domain ticarnet.tr --enable-ssl --email admin@ticarnet.tr
 ```
 
 Domain + SSL + SMTP (sifre yenileme e-postasi icin onerilen):
 
 ```bash
 sudo bash scripts/vps-fresh-install.sh \
-  --domain ticarnet.online \
+  --domain ticarnet.tr \
   --enable-ssl \
-  --email admin@ticarnet.online \
+  --email admin@ticarnet.tr \
   --smtp-user YOUR_GMAIL@gmail.com \
   --smtp-app-password YOUR_GMAIL_APP_PASSWORD \
   --mail-from "TicarNet Online <YOUR_GMAIL@gmail.com>" \
   --support-inbox-email YOUR_GMAIL@gmail.com
 ```
 
-Tek komut deploy scripti:
+Sunucuda GitHub'a pushlanan son kodu tek komutla cekip guncellemek icin:
 
 ```bash
-npm run deploy:vps
+cd /var/www/ticarnet/current && bash scripts/vps-update.sh
 ```
 
 Bu script:
@@ -121,7 +121,7 @@ Bu script:
 GitHub kullanmadan (sunucuda VS Code Remote-SSH ile duzenleme):
 
 ```bash
-bash scripts/vps-deploy.sh --skip-pull --run-lint
+bash scripts/vps-update.sh
 ```
 
 GitHub kullanmadan (lokal VS Code'dan SSH ile tek komut upload + deploy):
@@ -143,13 +143,13 @@ npm run ship:mobile
 ```
 
 Bu komut sonunda dosya su adrese duser:
-- `http://SUNUCU_IP/download/ticarnet.apk`
+- `https://ticarnet.tr/download/ticarnet.apk`
 
 PowerShell'de kontrol icin `curl` yerine `curl.exe` kullan:
 
 ```powershell
-curl.exe -s "http://SUNUCU_IP/api/health"
-curl.exe -I "http://SUNUCU_IP/download/ticarnet.apk"
+curl.exe -s "https://ticarnet.tr/api/health"
+curl.exe -I "https://ticarnet.tr/download/ticarnet.apk"
 ```
 
 Tum Ubuntu VPS'lerde kullanilabilen genel komut:
@@ -169,5 +169,5 @@ curl -s http://127.0.0.1:8787/api/health
 Yuk testi (smoke):
 
 ```bash
-bash scripts/vps-load-smoke.sh --url https://play.ticarnet.com/api/health --connections 60 --duration 25
+bash scripts/vps-load-smoke.sh --url https://ticarnet.tr/api/health --connections 60 --duration 25
 ```

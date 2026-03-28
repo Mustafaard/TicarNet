@@ -17,7 +17,7 @@ Opsiyonlar:
   -h, --help         Yardim
 
 Ornek:
-  bash scripts/vps-load-smoke.sh --url https://tr-159ae5.hosting.net.tr/api/health --connections 80 --duration 30
+  bash scripts/vps-load-smoke.sh --url https://ticarnet.tr/api/health --connections 80 --duration 30
 EOF
 }
 

@@ -8,54 +8,48 @@ olarak online calistirir.
 
 Not:
 - Evet, `VPS - XLarge (8 vCPU / 8 GB RAM)` bu is icin uygundur.
-- Kurulum Ubuntu 22.04 LTS varsayimi ile yazildi.
+- Kurulum Ubuntu 20.04 / 22.04 icin gecerli.
 
 ## 1) Satin Alirken Secilecekler
 
 Hosting.com.tr panelde:
 1. Paket: `VPS - XLarge`
-2. Isletim sistemi: `Ubuntu 22.04 LTS`
+2. Isletim sistemi: `Ubuntu 20.04 LTS` veya `Ubuntu 22.04 LTS`
 3. Lokasyon: Turkiye (oyuncu kitlen TR ise)
 4. Root erisimi aktif
 
-Domain gerekiyorsa ornek: `tr-159ae5.hosting.net.tr`
+Domain gerekiyorsa ornek: `ticarnet.tr`
 
 ## 2) DNS Ayari
 
 Domain yonetiminde A kaydi:
-- Host: `play`
+- Host: `@`
+- Type: `A`
+- Value: `VPS_IP`
+
+Istersen ek olarak:
+- Host: `www`
 - Type: `A`
 - Value: `VPS_IP`
 
 DNS yayilimi tamamlaninca devam et.
 
-## 3) VPS'e Baglan ve Projeyi Kopyala (GitHub'siz)
+## 3) Panel ekranina gore dogru giris
 
-Windows PowerShell (kendi bilgisayarinda):
+Bu panelde Ubuntu kurulu olsa bile `Erisim Bilgileri` sekmesinde `administrator / RDP` bilgisi gorunebilir.
+Bu bilgi Linux `root` terminal sifresi yerine gecmez.
 
-```powershell
-scp -r C:\Users\user\OneDrive\Desktop\TicarNet root@VPS_IP:/var/www/
-```
+Temiz kurulum sonrasi dogru yol:
+- `Terminal` butonu veya `VNC` ekrani
+- login: `root`
+- sonra panel terminalinden asagidaki tek satir
 
-Sunucuda:
-
-```bash
-ssh root@VPS_IP
-mkdir -p /var/www/ticarnet
-if [ -d /var/www/ticarnet/current ]; then mv /var/www/ticarnet/current /var/www/ticarnet/current_backup_$(date +%Y%m%d_%H%M%S); fi
-mv /var/www/TicarNet /var/www/ticarnet/current
-```
-
-## 4) Tek Komut Prod Kurulum
+## 4) Tek Satir Ilk Kurulum (GitHub'dan cekip kurar)
 
 Sunucuda:
 
 ```bash
-cd /var/www/ticarnet/current
-chmod +x scripts/vps-prod-setup.sh scripts/db-backup.sh scripts/vps-deploy.sh
-sudo bash scripts/vps-prod-setup.sh \
-  --domain tr-159ae5.hosting.net.tr \
-  --email admin@senindomain.com
+apt-get update -y && apt-get install -y curl ca-certificates && bash <(curl -fsSL https://raw.githubusercontent.com/Mustafaard/TicarNet/main/scripts/vps-panel-bootstrap.sh) --non-interactive --domain ticarnet.tr --email mustafaard76@gmail.com --repo-url https://github.com/Mustafaard/TicarNet.git --branch main --smtp-user mustafaard76@gmail.com --support-inbox-email mustafaard76@gmail.com --mail-from "TicarNet Online <mustafaard76@gmail.com>"
 ```
 
 Bu komut otomatik kurar:
@@ -81,7 +75,7 @@ sudo bash scripts/vps-apply-account-policy.sh \
 ```bash
 sudo -u deploy pm2 status
 curl -s http://127.0.0.1:8787/api/health
-curl -I https://tr-159ae5.hosting.net.tr
+curl -I https://ticarnet.tr
 sudo fail2ban-client status
 ```
 
@@ -89,7 +83,7 @@ sudo fail2ban-client status
 
 ### 6.1 Web
 Kullanicilar direkt:
-- `https://tr-159ae5.hosting.net.tr`
+- `https://ticarnet.tr`
 
 ### 6.2 APK (Canli Sunucuya Bagli)
 Bu modda web deploy ettiginde APK otomatik yeni surumu gorur.
@@ -97,7 +91,7 @@ Bu modda web deploy ettiginde APK otomatik yeni surumu gorur.
 Local bilgisayarinda proje klasorunde:
 
 ```bash
-CAP_SERVER_URL=https://tr-159ae5.hosting.net.tr npm run android:deploy:live
+CAP_SERVER_URL=https://ticarnet.tr npm run android:deploy:live
 ```
 
 ### 6.3 APK (Bundled)
@@ -107,20 +101,23 @@ Store release yaklasiminda APK icine o anki web dosyalari gomulur:
 npm run android:release:apk
 ```
 
-## 7) Guncelleme Akisi (GitHub'siz)
+## 7) GitHub Push Sonrasi Tek Komut Guncelleme
 
-VS Code Remote-SSH ile VPS'e baglan:
-- Klasor: `/var/www/ticarnet/current`
-- Dosyalari dogrudan duzenle
-
-Deploy:
+Sunucuda:
 
 ```bash
 cd /var/www/ticarnet/current
-bash scripts/vps-deploy.sh --skip-pull --run-lint
+bash scripts/vps-update.sh
 ```
 
-Bu akista deploy oncesi DB yedegi alinmaya devam eder.
+Bu komut:
+- GitHub'daki `main` branch'i ceker
+- lokal kirli kodu temizler
+- `npm ci` + `npm run lint` + `npm run build` calistirir
+- DB yedegi alir
+- PM2 reload yapar
+
+Kod degisikligini GitHub'a attiktan sonra sunucuda sadece bu komutu calistirman yeterlidir.
 
 ## 8) Kritik Notlar
 
@@ -159,20 +156,20 @@ VPS'te:
 ```bash
 cd /var/www/ticarnet/current
 sudo bash scripts/vps-publish-apk.sh \
-  --domain apk.ticarnet.online \
+  --domain apk.ticarnet.tr \
   --apk-source /var/www/ticarnet/current/release/ticarnet-demo-debug.apk \
   --apk-name ticarnet.apk \
   --brand-name "TicarNet Online" \
-  --enable-ssl --email admin@ticarnet.online
+  --enable-ssl --email admin@ticarnet.tr
 ```
 
 Calisan link:
-- `https://apk.ticarnet.online/` (logo + butonlu indirme sayfasi)
-- `https://apk.ticarnet.online/ticarnet.apk` (direkt APK)
+- `https://apk.ticarnet.tr/` (logo + butonlu indirme sayfasi)
+- `https://apk.ticarnet.tr/ticarnet.apk` (direkt APK)
 
 Not:
 - Dosya ayni anda web dist altina da kopyalandigi icin ana domainde de calisir:
-  - `https://tr-159ae5.hosting.net.tr/download/ticarnet.apk`
+  - `https://ticarnet.tr/download/ticarnet.apk`
 
 ### 9.4 DNS zorunlu
 

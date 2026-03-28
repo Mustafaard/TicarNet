@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-DEFAULT_DOMAIN="tr-159ae5.hosting.net.tr"
+DEFAULT_DOMAIN="ticarnet.tr"
 DEFAULT_EMAIL="mustafaard76@gmail.com"
 DEFAULT_REPO="https://github.com/Mustafaard/TicarNet.git"
 DEFAULT_BRANCH="main"
@@ -13,6 +13,7 @@ DEFAULT_FIREBASE_AUTH_ENABLED="true"
 APP_BASE_DIR="/var/www/ticarnet"
 APP_DIR="${APP_BASE_DIR}/current"
 NON_INTERACTIVE="0"
+ENABLE_SSL="1"
 
 DOMAIN_ARG=""
 LE_EMAIL_ARG=""
@@ -52,6 +53,7 @@ Opsiyonlar:
   --smtp-app-password PASS
   --firebase-auth-enabled true|false
   --firebase-web-api-key KEY
+  --skip-ssl
   --non-interactive
   -h, --help
 EOF
@@ -99,6 +101,10 @@ while [[ $# -gt 0 ]]; do
       FIREBASE_WEB_API_KEY_ARG="${2:-}"
       shift 2
       ;;
+    --skip-ssl)
+      ENABLE_SSL="0"
+      shift
+      ;;
     --non-interactive)
       NON_INTERACTIVE="1"
       shift
@@ -144,6 +150,7 @@ require_root
 
 echo "[panel-bootstrap] TicarNet Online panel kurulum basliyor."
 echo "[panel-bootstrap] Bu script Ubuntu 20.04 VPS panel terminali icin tasarlandi."
+echo "[panel-bootstrap] Paneldeki RDP/administrator bilgileri Ubuntu icin SSH/root sifresi yerine gecmez."
 
 DOMAIN="$(resolve_value "$DOMAIN_ARG" "Domain" "${DEFAULT_DOMAIN}")"
 LE_EMAIL="$(resolve_value "$LE_EMAIL_ARG" "Let's Encrypt e-posta" "${DEFAULT_EMAIL}")"
@@ -200,19 +207,29 @@ fi
 
 cd "${APP_DIR}"
 
-bash scripts/vps-prod-setup.sh \
-  --domain "${DOMAIN}" \
-  --email "${LE_EMAIL}" \
-  --repo-url "${REPO_URL}" \
-  --branch "${BRANCH}" \
-  --public-base-url "https://${DOMAIN}" \
-  --firebase-auth-enabled "${FIREBASE_AUTH_ENABLED}" \
-  --firebase-web-api-key "${FIREBASE_WEB_API_KEY:-}" \
-  --smtp-user "${SMTP_USER}" \
-  --smtp-app-password "${SMTP_APP_PASSWORD:-}" \
-  --mail-from "${MAIL_FROM}" \
+SETUP_ARGS=(
+  --domain "${DOMAIN}"
+  --repo-url "${REPO_URL}"
+  --branch "${BRANCH}"
+  --public-base-url "https://${DOMAIN}"
+  --firebase-auth-enabled "${FIREBASE_AUTH_ENABLED}"
+  --firebase-web-api-key "${FIREBASE_WEB_API_KEY:-}"
+  --smtp-user "${SMTP_USER}"
+  --smtp-app-password "${SMTP_APP_PASSWORD:-}"
+  --mail-from "${MAIL_FROM}"
   --support-inbox-email "${SUPPORT_INBOX}"
+)
+
+if [[ "$ENABLE_SSL" == "1" ]]; then
+  SETUP_ARGS+=(--email "${LE_EMAIL}")
+else
+  SETUP_ARGS+=(--skip-ssl)
+fi
+
+bash scripts/vps-prod-setup.sh \
+  "${SETUP_ARGS[@]}"
 
 echo "[panel-bootstrap] Tamamlandi."
 echo "[panel-bootstrap] Kontrol: curl -fsS http://127.0.0.1:8787/api/health"
 echo "[panel-bootstrap] APK: https://${DOMAIN}/download/ticarnet.apk"
+echo "[panel-bootstrap] Sonraki guncelleme: cd ${APP_DIR} && bash scripts/vps-update.sh"

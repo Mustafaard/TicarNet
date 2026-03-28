@@ -10,7 +10,7 @@ DATA_DIR="${DATA_DIR:-/var/lib/ticarnet}"
 BACKUP_DIR="${BACKUP_DIR:-/var/backups/ticarnet}"
 ENV_FILE="${APP_DIR}/server/.env"
 PM2_APP_NAME="${PM2_APP_NAME:-ticarnet-api}"
-DOMAIN="${DOMAIN:-tr-159ae5.hosting.net.tr}"
+DOMAIN="${DOMAIN:-ticarnet.tr}"
 LETSENCRYPT_EMAIL="${LETSENCRYPT_EMAIL:-}"
 REPO_URL="${REPO_URL:-}"
 BRANCH="${BRANCH:-main}"
@@ -42,12 +42,12 @@ usage() {
   cat <<'EOF'
 Kullanim:
   sudo bash scripts/vps-prod-setup.sh \
-    --domain tr-159ae5.hosting.net.tr \
+    --domain ticarnet.tr \
     --email admin@domain.com \
     --repo-url https://github.com/<org>/<repo>.git
 
 Opsiyonlar:
-  --domain DOMAIN             Domain/hostname (varsayilan: tr-159ae5.hosting.net.tr)
+  --domain DOMAIN             Domain/hostname (varsayilan: ticarnet.tr)
   --email EMAIL              Let's Encrypt e-posta (SSL aciksa zorunlu)
   --repo-url URL             Git repo URL (opsiyonel, ilk clone icin)
   --public-base-url URL      CLIENT_URL/RESET_LINK_BASE_URL/CORS_ALLOWED_ORIGINS icin temel URL
@@ -478,7 +478,7 @@ EOF
 install_base_packages() {
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -y
-  apt-get install -y ca-certificates curl gnupg git jq nginx ufw openssl fail2ban apache2-utils
+  apt-get install -y ca-certificates curl gnupg git jq nginx ufw openssl fail2ban apache2-utils sudo
 }
 
 install_node() {
@@ -811,6 +811,7 @@ post_checks() {
 }
 
 echo "[vps-setup] Basliyor..."
+echo "[vps-setup] Ubuntu panel/VNC kurulumunda RDP bilgilerini degil, root terminal oturumunu kullan."
 install_base_packages
 configure_swap
 configure_sysctl_tuning

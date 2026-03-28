@@ -130,7 +130,7 @@ function buildVersionMeta(now = new Date()) {
 }
 
 function main() {
-  const liveUrl = process.env.CAP_SERVER_URL || "https://tr-159ae5.hosting.net.tr";
+  const liveUrl = process.env.CAP_SERVER_URL || "https://ticarnet.tr";
   const { versionCode, versionName } = buildVersionMeta();
   run("node", ["scripts/write-capacitor-config.mjs", "live", liveUrl]);
   writeMinimalLiveShell(liveUrl);

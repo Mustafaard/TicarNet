@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-DOMAIN="${DOMAIN:-178.210.161.210}"
+DOMAIN="${DOMAIN:-ticarnet.tr}"
 PUBLIC_BASE_URL="${PUBLIC_BASE_URL:-}"
 EMAIL="${EMAIL:-}"
 ENABLE_SSL="${ENABLE_SSL:-0}"
@@ -26,7 +26,7 @@ Kullanim:
   sudo bash scripts/vps-fresh-install.sh [opsiyonlar]
 
 Opsiyonlar:
-  --domain DOMAIN             Domain veya sunucu IP (varsayilan: 178.210.161.210)
+  --domain DOMAIN             Domain veya sunucu IP (varsayilan: ticarnet.tr)
   --public-base-url URL       CLIENT_URL/RESET/CORS icin temel URL (varsayilan: https://DOMAIN)
   --repo-url URL              Git repo (varsayilan: https://github.com/Mustafaard/TicarNet.git)
   --branch BRANCH             Branch (varsayilan: main)
@@ -46,10 +46,10 @@ Opsiyonlar:
   -h, --help                  Yardim
 
 Ornek (SSL kapali - IP ile):
-  sudo bash scripts/vps-fresh-install.sh --domain 178.210.161.210
+  sudo bash scripts/vps-fresh-install.sh --domain 178.210.161.210 --public-base-url http://178.210.161.210
 
 Ornek (domain + SSL):
-  sudo bash scripts/vps-fresh-install.sh --domain ticarnet.online --enable-ssl --email admin@ticarnet.online
+  sudo bash scripts/vps-fresh-install.sh --domain ticarnet.tr --enable-ssl --email admin@ticarnet.tr
 EOF
 }
 
@@ -163,6 +163,7 @@ fi
 echo "[fresh-install] Basliyor..."
 echo "[fresh-install] Domain/IP: $DOMAIN"
 echo "[fresh-install] Repo: $REPO_URL (branch: $BRANCH)"
+echo "[fresh-install] Sonraki tek komut guncelleme: cd ${APP_BASE_DIR}/current && bash scripts/vps-update.sh"
 
 SSL_FLAG="--skip-ssl"
 EMAIL_FLAG=""
@@ -209,5 +210,5 @@ echo "[fresh-install] Public Base URL: ${PUBLIC_BASE_URL}"
 echo "[fresh-install] Site (HTTP fallback): http://${DOMAIN}"
 echo "[fresh-install] API (HTTP fallback):  http://${DOMAIN}/api/health"
 echo "[fresh-install] APK (HTTP fallback):  http://${DOMAIN}/download/ticarnet.apk"
-echo "[fresh-install] Sonraki deploy: cd ${APP_BASE_DIR}/current && bash scripts/vps-deploy.sh --branch ${BRANCH} --force-clean"
+echo "[fresh-install] Sonraki deploy: cd ${APP_BASE_DIR}/current && bash scripts/vps-update.sh"
 

@@ -2,6 +2,10 @@
 
 Bu akista kodu lokalde VS Code ile duzenlersin, sonra tek komutla VPS'e atip canliya alirsin.
 
+Not:
+- Hosting.com.tr panelde Ubuntu kurulu sunucularda `administrator / RDP` bilgileri Linux SSH sifresi yerine gecmez.
+- Ilk ayarlari `Terminal` veya `VNC` icindeki `root` oturumundan yap.
+
 ## 1) Sunucuda bir kez hazirlik (hosting panel terminal, root)
 
 ```bash

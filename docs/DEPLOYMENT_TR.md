@@ -15,7 +15,7 @@ Bu proje icin aktif ve desteklenen sunucu kurulumu:
 
 ## 1) Onerilen Mimari
 
-- Isletim sistemi: Ubuntu 22.04 LTS
+- Isletim sistemi: Ubuntu 20.04 LTS veya Ubuntu 22.04 LTS
 - Sunucu: minimum 2 vCPU / 4 GB RAM / 80 GB SSD
 - Web sunucu: Nginx
 - Process manager: PM2
@@ -33,6 +33,15 @@ Neden?
 
 - Bu kurulum Ubuntu VPS uzerinde calisir.
 - Aktif operasyon senaryosu: Hosting.com.tr VPS.
+- Hosting panelde Ubuntu kullanirken `administrator / RDP` bilgilerini degil, `Terminal` veya `VNC` ekranindaki `root` oturumunu kullan.
+
+### Panel Terminalinde Sifirdan Kurulum
+
+Temiz Ubuntu ekrani geldiyse su tek satir yeterlidir:
+
+```bash
+apt-get update -y && apt-get install -y curl ca-certificates && bash <(curl -fsSL https://raw.githubusercontent.com/Mustafaard/TicarNet/main/scripts/vps-panel-bootstrap.sh) --non-interactive --domain ticarnet.tr --email mustafaard76@gmail.com --repo-url https://github.com/Mustafaard/TicarNet.git --branch main --smtp-user mustafaard76@gmail.com --support-inbox-email mustafaard76@gmail.com --mail-from "TicarNet Online <mustafaard76@gmail.com>"
+```
 
 ## 2) Ilk Kurulum
 
@@ -66,9 +75,9 @@ sudo chown -R $USER:$USER /var/lib/ticarnet
 
 ```env
 NODE_ENV=production
-CLIENT_URL=https://tr-159ae5.hosting.net.tr
-RESET_LINK_BASE_URL=https://tr-159ae5.hosting.net.tr
-CORS_ALLOWED_ORIGINS=https://tr-159ae5.hosting.net.tr
+CLIENT_URL=https://ticarnet.tr
+RESET_LINK_BASE_URL=https://ticarnet.tr
+CORS_ALLOWED_ORIGINS=https://ticarnet.tr
 CORS_ALLOW_NO_ORIGIN=true
 HEALTHCHECK_TOKEN=UZUN_VE_GIZLI_BIR_TOKEN
 WS_ALLOW_QUERY_TOKEN=false
@@ -117,7 +126,7 @@ curl http://127.0.0.1:8787/api/health/backup
 curl http://127.0.0.1:8787/api/health/system
 sudo fail2ban-client status
 sudo fail2ban-client status ticarnet-auth-abuse
-bash scripts/vps-load-smoke.sh --url https://tr-159ae5.hosting.net.tr/api/health --connections 60 --duration 25
+bash scripts/vps-load-smoke.sh --url https://ticarnet.tr/api/health --connections 60 --duration 25
 ```
 
 ## 5) VS Code ile Guncelleme (Hesaplar Korunarak)
@@ -129,11 +138,13 @@ En temiz yol:
 4. Asagidaki tek komutu calistir:
 
 ```bash
-npm run deploy:vps
+cd /var/www/ticarnet/current
+bash scripts/vps-update.sh
 ```
 
 Bu komut ne yapar?
-- `scripts/vps-deploy.sh` calisir
+- `scripts/vps-update.sh` calisir
+- `scripts/vps-deploy.sh` tetiklenir
 - DB dosyasinin yedegini alir (`/var/backups/ticarnet`)
 - `npm ci` + `npm run build`
 - PM2 ile API servisini reload eder
@@ -167,7 +178,7 @@ npm run android:install
 Bu modda APK uzaktaki siteyi acar. Web deploy ettiginde APK hemen yeni surumu gorur.
 
 ```bash
-CAP_SERVER_URL=https://tr-159ae5.hosting.net.tr npm run android:sync:live
+CAP_SERVER_URL=https://ticarnet.tr npm run android:sync:live
 npm run android:install
 ```
 

@@ -2,7 +2,7 @@
 
 Bu dokuman, Hosting.com.tr uzerindeki su an aktif VPS icin TicarNet production kurulumunu ozetler:
 
-- Hostname: `tr-159ae5.hosting.net.tr`
+- Hostname: `ticarnet.tr`
 - IP: `178.210.161.210`
 - Isletim sistemi: Ubuntu 20.04
 
@@ -20,11 +20,14 @@ Gmail notu:
 
 ## 2) Sunucuda ilk kurulum
 
+Hosting.com.tr panelde Ubuntu kurulu sunucularda `Erisim Bilgileri` sekmesinde `administrator / RDP` alanlari gorunebilir.
+Linux kurulumunda kullanman gereken yer `Terminal` veya `VNC` ekranidir. Oturum `root` ile acilmalidir.
+
 Proje klasorunde calistir:
 
 ```bash
 sudo bash scripts/vps-prod-setup.sh \
-  --domain tr-159ae5.hosting.net.tr \
+  --domain ticarnet.tr \
   --email MAIL@ALANADI \
   --repo-url https://github.com/<org>/<repo>.git \
   --branch main \
@@ -44,16 +47,7 @@ Script su adimlari uygular:
 Panel terminalinde daha kolay (tek satir, soru sormadan) kurulum:
 
 ```bash
-sudo SMTP_APP_PASSWORD='GMAIL_APP_PASSWORD' \
-bash scripts/vps-panel-bootstrap.sh \
-  --non-interactive \
-  --domain tr-159ae5.hosting.net.tr \
-  --email mustafaard76@gmail.com \
-  --repo-url https://github.com/Mustafaard/TicarNet.git \
-  --branch main \
-  --smtp-user mustafaard76@gmail.com \
-  --support-inbox-email mustafaard76@gmail.com \
-  --mail-from "TicarNet Online <mustafaard76@gmail.com>"
+apt-get update -y && apt-get install -y curl ca-certificates && SMTP_APP_PASSWORD='GMAIL_APP_PASSWORD' bash <(curl -fsSL https://raw.githubusercontent.com/Mustafaard/TicarNet/main/scripts/vps-panel-bootstrap.sh) --non-interactive --domain ticarnet.tr --email mustafaard76@gmail.com --repo-url https://github.com/Mustafaard/TicarNet.git --branch main --smtp-user mustafaard76@gmail.com --support-inbox-email mustafaard76@gmail.com --mail-from "TicarNet Online <mustafaard76@gmail.com>"
 ```
 
 ## 3) Production env zorunlu alanlar
@@ -86,9 +80,9 @@ SUPPORT_INBOX_EMAIL=mustafaard76@gmail.com
 Hostname ile hizli baslangic:
 
 ```env
-CLIENT_URL=https://tr-159ae5.hosting.net.tr
-RESET_LINK_BASE_URL=https://tr-159ae5.hosting.net.tr
-CORS_ALLOWED_ORIGINS=https://tr-159ae5.hosting.net.tr
+CLIENT_URL=https://ticarnet.tr
+RESET_LINK_BASE_URL=https://ticarnet.tr
+CORS_ALLOWED_ORIGINS=https://ticarnet.tr
 ```
 
 ## 4) E-posta akislari
@@ -102,7 +96,7 @@ CORS_ALLOWED_ORIGINS=https://tr-159ae5.hosting.net.tr
 Public sabit APK linki:
 
 - `/download/ticarnet.apk`
-- Ornek: `https://tr-159ae5.hosting.net.tr/download/ticarnet.apk`
+- Ornek: `https://ticarnet.tr/download/ticarnet.apk`
 
 Not:
 - `https://TicarNetOnline/...` gibi adreslerin calismasi icin bu alan adinin DNS ve SSL olarak sunucuya baglanmasi gerekir.
@@ -144,4 +138,13 @@ Production env self-check:
 
 ```bash
 npm run check:production-env
+```
+
+## 7) Sonraki guncellemeler
+
+GitHub'a push sonrasi sunucuda tek komut:
+
+```bash
+cd /var/www/ticarnet/current
+bash scripts/vps-update.sh
 ```

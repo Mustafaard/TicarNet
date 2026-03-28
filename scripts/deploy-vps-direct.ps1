@@ -1,6 +1,6 @@
 param(
   [string]$VpsHost = "178.210.161.210",
-  [string]$PublicBaseUrl = "https://tr-159ae5.hosting.net.tr",
+  [string]$PublicBaseUrl = "https://ticarnet.tr",
   [string]$User = "root",
   [int]$Port = 22,
   [string]$KeyPath = "$env:USERPROFILE\.ssh\ticarnet_actions",

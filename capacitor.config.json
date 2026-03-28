@@ -3,7 +3,7 @@
   "appName": "TicarNet Online",
   "webDir": "dist",
   "server": {
-    "url": "https://tr-159ae5.hosting.net.tr",
+    "url": "https://ticarnet.tr",
     "cleartext": false
   }
 }
