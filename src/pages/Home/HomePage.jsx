@@ -89,6 +89,8 @@ import {
   changeCurrentUserUsername,
   changeCurrentUserPassword,
   consumeAuthNotice,
+  deleteCurrentUserAccount,
+  getRecentRegisteredPlayers,
   getStoredUser,
   shouldForceLogoutFromResult,
 } from '../../services/auth.js'
@@ -158,6 +160,11 @@ const MESSAGE_ICONS = {
   other: '/home/icons/v2/settings.png',
   otherFallback: '/home/icons/v2/nav-message.png',
 }
+const CHAT_COMMUNITY_TAB_ITEMS = [
+  { id: 'sohbet', label: 'Sohbet', icon: '💬' },
+  { id: 'kurallar', label: 'Kurallar', icon: '📜' },
+  { id: 'haberler', label: 'Haberler', icon: '✨' },
+]
 
 const CHAT_SEED = {
   global: [],
@@ -2676,9 +2683,12 @@ function HomePage({ user, onLogout }) {
   const [chatInput, setChatInput] = useState('')
   const [chatReplyTarget, setChatReplyTarget] = useState(null)
   const [chatFirstUnreadId, setChatFirstUnreadId] = useState('')
+  const [chatCommunityTab, setChatCommunityTab] = useState('sohbet')
   const [chatSocketState, setChatSocketState] = useState('offline')
   const [chatRestrictions, setChatRestrictions] = useState(EMPTY_CHAT_RESTRICTIONS)
   const [chatClockMs, setChatClockMs] = useState(() => new Date().getTime())
+  const [chatRecentPlayers, setChatRecentPlayers] = useState([])
+  const [chatRecentPlayersLoading, setChatRecentPlayersLoading] = useState(false)
   const [, setMessageSocketState] = useState('offline')
   const [messageCenter, setMessageCenter] = useState({
     filter: 'all',
@@ -2732,6 +2742,7 @@ function HomePage({ user, onLogout }) {
     avatarUrl: '',
     newPassword: '',
     confirmPassword: '',
+    deletePassword: '',
   }))
   const [supportForm, setSupportForm] = useState({
     title: '',
@@ -3514,7 +3525,7 @@ function HomePage({ user, onLogout }) {
 
   const loadDailyStoreState = useCallback(async () => {
     const response = await getDailyStore()
-    if (!response?.success) return fail(response, 'Haftalık sınırlı fırsatlar alınamadı.')
+    if (!response?.success) return fail(response, 'Sınırlı fırsatlar alınamadı.')
     setDailyStore({
       offers: Array.isArray(response.offers) ? response.offers : [],
       nextResetAt: String(response.nextResetAt || ''),
@@ -3582,6 +3593,36 @@ function HomePage({ user, onLogout }) {
     setPushCenter(response)
     return true
   }, [fail])
+
+  const loadRecentPlayers = useCallback(async (options = {}) => {
+    const shouldShowLoading = options?.silent !== true
+    if (shouldShowLoading) {
+      setChatRecentPlayersLoading(true)
+    }
+    const response = await getRecentRegisteredPlayers(20)
+    if (!response?.success) {
+      if (shouldShowLoading) {
+        setChatRecentPlayersLoading(false)
+        return fail(response, 'Yeni oyuncu akışı yüklenemedi.')
+      }
+      return false
+    }
+    setChatRecentPlayers(Array.isArray(response.players) ? response.players : [])
+    if (shouldShowLoading) {
+      setChatRecentPlayersLoading(false)
+    }
+    return true
+  }, [fail])
+
+  useEffect(() => {
+    if (tab !== 'chat') return undefined
+    void loadRecentPlayers()
+    const intervalId = setInterval(() => {
+      if (!isPageVisible()) return
+      void loadRecentPlayers({ silent: true })
+    }, 45 * 1000)
+    return () => clearInterval(intervalId)
+  }, [loadRecentPlayers, tab])
 
   const loadMessageCenter = useCallback(async (filter) => {
     if (MESSAGES_DISABLED) {
@@ -5369,8 +5410,8 @@ function HomePage({ user, onLogout }) {
     setBusy(`daily:${safeOfferId}`)
     const response = await purchaseDailyOffer(safeOfferId)
     setBusy('')
-    if (!response?.success) return fail(response, 'Haftalık fırsat alınamadı.')
-    setNotice(String(response.message || 'Haftalık fırsat başarıyla alındı.'))
+    if (!response?.success) return fail(response, 'Sınırlı fırsat alınamadı.')
+    setNotice(String(response.message || 'Sınırlı fırsat başarıyla alındı.'))
     if (Array.isArray(response.inventory)) {
       setMarket((prev) => {
         if (!prev || typeof prev !== 'object') return prev
@@ -5808,6 +5849,29 @@ function HomePage({ user, onLogout }) {
     setNotice(response.message || 'Kullanıcı adı güncellendi.')
     setNoticeIsSuccess(true)
     await Promise.all([loadOverview(), loadProfile()])
+  }
+
+  const deleteOwnAccountAction = async () => {
+    if (busy) return
+    const currentPassword = String(profileAccountForm.deletePassword || '')
+    if (!currentPassword) {
+      setError('Hesabı kalıcı silmek için mevcut şifreni girmelisin.')
+      return
+    }
+    const confirmed = window.confirm('Hesabını kalıcı olarak silmek istediğine emin misin? Bu işlem geri alınamaz.')
+    if (!confirmed) return
+
+    setBusy('profile-delete-account')
+    setError('')
+    const response = await deleteCurrentUserAccount({ currentPassword })
+    setBusy('')
+    if (!response?.success) return fail(response, 'Hesap silinemedi.')
+
+    setProfileAccountForm((prev) => ({
+      ...prev,
+      deletePassword: '',
+    }))
+    onLogout(response.message || 'Hesabın kalıcı olarak silindi.')
   }
 
   const sendSupportRequestAction = async () => {
@@ -7286,8 +7350,11 @@ function HomePage({ user, onLogout }) {
   }, null)
   const dailyResetRemainingMs = remainingMsFromIso(dailyStore.nextResetAt || '', liveNowMs)
   const dailyResetLabel = dailyResetRemainingMs > 0 ? formatCountdownClock(dailyResetRemainingMs) : '00:00:00'
-  const dailyOfferWeekMultiplier = Math.max(1, Math.trunc(num(dailyStore?.weekMultiplier || 1)))
-  const dailyResetInfoLabel = `Türkiye saatine göre haftalık yenilenir · Bu hafta ${dailyOfferWeekMultiplier}x içerik`
+  const dailyOfferWeekMultiplier = Math.max(1, Math.trunc(num(dailyStore?.cycleMultiplier ?? dailyStore?.weekMultiplier ?? 1)))
+  const dailyOfferCycleDays = Math.max(1, Math.trunc(num(dailyStore?.cycleLengthDays || 20)))
+  const dailyOfferCycleRemainingMs = remainingMsFromIso(dailyStore?.cycleNextResetAt || '', liveNowMs)
+  const dailyOfferCycleResetLabel = dailyOfferCycleRemainingMs > 0 ? formatCountdownClock(dailyOfferCycleRemainingMs) : '00:00:00'
+  const dailyResetInfoLabel = `Her gün 00:00'da yenilenir · Mevcut çarpan ${dailyOfferWeekMultiplier}x · ${dailyOfferCycleDays} gün dolunca 2x artar (${dailyOfferCycleResetLabel}) · Para paketi üst sınır 50.000.000, kaynak paketi üst sınır 400.000`
   const dailyLoginState = dailyLoginReward || DAILY_LOGIN_STATE_SEED
   const dailyLoginSeriesLabel = String(dailyLoginState?.series?.label || `0/${DAILY_LOGIN_TOTAL_DAYS}`)
   const dailyLoginCanClaim = Boolean(dailyLoginState?.canClaim) && !dailyLoginState?.claimedToday
@@ -14604,6 +14671,34 @@ function HomePage({ user, onLogout }) {
     } catch (_) { return '' }
   }
 
+  const chatRulesDigest = CITY_RULES_GUIDE.groups
+    .slice(0, 4)
+    .map((group) => ({
+      id: group.id,
+      icon: group.icon,
+      title: group.title,
+      subtitle: group.description,
+      rules: (Array.isArray(group.rules) ? group.rules : []).slice(0, 2),
+    }))
+
+  const chatNewsFeed = Array.isArray(chatRecentPlayers)
+    ? chatRecentPlayers.map((entry) => {
+      const userId = String(entry?.userId || '').trim()
+      const username = String(entry?.username || 'Oyuncu').trim() || 'Oyuncu'
+      const avatarUrl = String(entry?.avatarUrl || '').trim()
+      const createdAt = String(entry?.createdAt || '').trim()
+      const timeAgoLabel = formatMessageTimeAgo(createdAt)
+      const dateLabel = formatMessageDate(createdAt)
+      return {
+        userId,
+        username,
+        avatarUrl,
+        createdAt,
+        timeLabel: timeAgoLabel || dateLabel || 'Az önce',
+      }
+    })
+    : []
+
   const chatView = (
     <section className="panel-stack chat-screen chat-screen-pro">
       <article className="card chat-card chat-card-pro chat-card-clean">
@@ -14613,193 +14708,286 @@ function HomePage({ user, onLogout }) {
             {chatSocketState === 'online' ? 'CANLI' : 'KAPALI'}
           </span>
         </div>
-        {chatHardRestrictionActive ? (
-          <div className="chat-lock-banner mute">
-            <strong>{chatRestrictionTitle}</strong>
-            <p>Neden: {chatRestrictionReason || 'Yönetici işlemi'}</p>
-            <small>
-              Bitiş: {chatRestrictionEndLabel || '-'} | Kalan: {formatCountdownTr(chatRestrictionRemainingMs)}
-            </small>
-          </div>
-        ) : null}
-        <div className="chat-thread chat-thread-pro chat-thread-clean" ref={chatThreadRef}>
-          {_chatTimeline.length === 0 ? (
-            <p className="empty chat-empty-pro">Henüz mesaj yok. İlk mesajı sen yaz.</p>
-          ) : (
-            _chatTimeline.map((entry) => {
-              if (entry.type !== 'message' || !entry.message) return null
-              const msg = entry.message
-              const msgId = String(msg.id || '').trim()
-              const rawName = String(msg.u || 'Oyuncu').trim() || 'Oyuncu'
-              const username = rawName.replace(/^\s*\d+\s*-\s*/, '').trim() || rawName
-              const isOwn = Boolean(msg.own)
-              const ownChatAvatar = String(overview?.profile?.avatar?.url || '').trim()
-              const userMeta = msg.userId ? _chatUsersById[msg.userId] : null
-              const userAvatar = String(userMeta?.avatarUrl || '').trim()
-              const rawAvatar = String(msg.avatar || '').trim()
-              const avatarSrc = isOwn && ownChatAvatar
-                ? ownChatAvatar
-                : (userAvatar || rawAvatar || DEFAULT_CHAT_AVATAR)
-              const messageRole = normalizeRoleValue(msg.userRole || userMeta?.userRole || 'player')
-              const canReportMessage = !isOwn && messageRole !== 'admin' && role !== 'admin'
-              const staffCanModerateMessage = role === 'admin' || messageRole === 'player'
-              const messageRoleLabel = roleLabelFromValue(
-                messageRole,
-                msg.userRoleLabel || userMeta?.userRoleLabel || '',
-              )
-              const chatBadge = roleBadgeMeta(
-                messageRole,
-                Boolean(msg.premium),
-                messageRoleLabel,
-                msg.seasonBadge || userMeta?.seasonBadge || null,
-              )
-              const level = Math.max(1, Math.trunc(num(msg.lv || 1)))
-              const targetChatUserId = String(msg.userId || (isOwn ? user?.id : '')).trim()
-              return (
-                <div
-                  key={entry.id}
-                  ref={(el) => { if (el && msgId) chatMessageRefs.current[msgId] = el }}
-                  className={`chat-msg-clean ${isOwn ? 'own' : ''}`}
-                >
-                  <div className="chat-msg-clean-body">
-                    <div className="chat-msg-clean-row">
-                      <button
-                        type="button"
-                        className="chat-msg-clean-avatar chat-msg-clean-avatar-frame"
-                        aria-label={isOwn ? 'Kendi avatarın' : `${username} avatarı`}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          if (!targetChatUserId) return
-                          void openProfileModal(targetChatUserId, {
-                            username,
-                            displayName: username,
-                            avatarUrl: avatarSrc,
-                            level,
-                            role: messageRole,
-                            roleLabel: messageRoleLabel,
-                            premium: Boolean(msg.premium),
-                            seasonBadge: msg.seasonBadge || userMeta?.seasonBadge || null,
-                          })
-                        }}
-                      >
-                        <span className="chat-msg-clean-avatar-inner">
-                          <img src={avatarSrc || DEFAULT_CHAT_AVATAR} alt="" onError={(e) => { e.target.src = DEFAULT_CHAT_AVATAR }} />
-                        </span>
-                      </button>
-                      <div className="chat-msg-clean-bubble">
-                        <div className="chat-msg-clean-meta chat-msg-clean-meta-inside">
-                          {isOwn ? (
-                            <>
-                              <span className="chat-msg-clean-role">Sen</span>
-                              <span className="chat-msg-clean-level" title="Seviye">Lv.{level}</span>
-                              <span className={`chat-msg-clean-badge ${chatBadge.className} ${chatBadge.tierClass || ''}`}>
-                                {chatBadge.icon ? (
-                                  <img
-                                    src={chatBadge.icon}
-                                    alt=""
-                                    className={`chat-msg-badge-icon ${chatBadge.isStaff ? 'role' : ''}`}
-                                    onError={(e) => { e.target.style.display = 'none' }}
-                                  />
-                                ) : null}
-                                {chatBadge.text}
-                              </span>
-                            </>
-                          ) : (
-                            <>
-                              <button
-                                type="button"
-                                className="chat-msg-clean-name"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  if (!targetChatUserId) return
-                                  void openProfileModal(targetChatUserId, {
-                                    username,
-                                    displayName: username,
-                                    avatarUrl: avatarSrc,
-                                    level,
-                                    role: messageRole,
-                                    roleLabel: messageRoleLabel,
-                                    premium: Boolean(msg.premium),
-                                    seasonBadge: msg.seasonBadge || userMeta?.seasonBadge || null,
-                                  })
-                                }}
-                              >
-                                {username}
-                              </button>
-                              <span className="chat-msg-clean-level" title="Seviye">Lv.{level}</span>
-                              <span className={`chat-msg-clean-badge ${chatBadge.className} ${chatBadge.tierClass || ''}`}>
-                                {chatBadge.icon ? (
-                                  <img
-                                    src={chatBadge.icon}
-                                    alt=""
-                                    className={`chat-msg-badge-icon ${chatBadge.isStaff ? 'role' : ''}`}
-                                    onError={(e) => { e.target.style.display = 'none' }}
-                                  />
-                                ) : null}
-                                {chatBadge.text}
-                              </span>
-                            </>
-                          )}
-                        </div>
-                        <p className="chat-msg-clean-text">{chatSnippet(msg.t, 400)}</p>
-                        <div className="chat-msg-clean-footer">
-                          <span className="chat-msg-clean-time">{formatMessageTimeAgo(msg.createdAt) || formatMessageDate(msg.createdAt)}</span>
-                          {isStaffUser && msg.userId ? (
-                            <span className="chat-msg-clean-actions">
-                              {staffCanModerateMessage ? (
-                                <button type="button" className="chat-msg-clean-action danger" onClick={() => { void staffDeleteChatMessageAction(msg) }}>
-                                  Sil
-                                </button>
-                              ) : null}
-                              {!isOwn && staffCanModerateMessage ? (
+        <div className="chat-community-tabs" role="tablist" aria-label="Sohbet menüsü">
+          {CHAT_COMMUNITY_TAB_ITEMS.map((entry) => (
+            <button
+              key={entry.id}
+              type="button"
+              role="tab"
+              aria-selected={chatCommunityTab === entry.id}
+              className={`chat-community-tab ${chatCommunityTab === entry.id ? 'is-active' : ''}`}
+              onClick={() => setChatCommunityTab(entry.id)}
+            >
+              <span className="chat-community-tab-icon" aria-hidden>{entry.icon}</span>
+              <span>{entry.label}</span>
+            </button>
+          ))}
+        </div>
+        {chatCommunityTab === 'sohbet' ? (
+          <>
+            {chatHardRestrictionActive ? (
+              <div className="chat-lock-banner mute">
+                <strong>{chatRestrictionTitle}</strong>
+                <p>Neden: {chatRestrictionReason || 'Yönetici işlemi'}</p>
+                <small>
+                  Bitiş: {chatRestrictionEndLabel || '-'} | Kalan: {formatCountdownTr(chatRestrictionRemainingMs)}
+                </small>
+              </div>
+            ) : null}
+            <div className="chat-thread chat-thread-pro chat-thread-clean" ref={chatThreadRef}>
+              {_chatTimeline.length === 0 ? (
+                <p className="empty chat-empty-pro">Henüz mesaj yok. İlk mesajı sen yaz.</p>
+              ) : (
+                _chatTimeline.map((entry) => {
+                  if (entry.type !== 'message' || !entry.message) return null
+                  const msg = entry.message
+                  const msgId = String(msg.id || '').trim()
+                  const rawName = String(msg.u || 'Oyuncu').trim() || 'Oyuncu'
+                  const username = rawName.replace(/^\s*\d+\s*-\s*/, '').trim() || rawName
+                  const isOwn = Boolean(msg.own)
+                  const ownChatAvatar = String(overview?.profile?.avatar?.url || '').trim()
+                  const userMeta = msg.userId ? _chatUsersById[msg.userId] : null
+                  const userAvatar = String(userMeta?.avatarUrl || '').trim()
+                  const rawAvatar = String(msg.avatar || '').trim()
+                  const avatarSrc = isOwn && ownChatAvatar
+                    ? ownChatAvatar
+                    : (userAvatar || rawAvatar || DEFAULT_CHAT_AVATAR)
+                  const messageRole = normalizeRoleValue(msg.userRole || userMeta?.userRole || 'player')
+                  const canReportMessage = !isOwn && messageRole !== 'admin' && role !== 'admin'
+                  const staffCanModerateMessage = role === 'admin' || messageRole === 'player'
+                  const messageRoleLabel = roleLabelFromValue(
+                    messageRole,
+                    msg.userRoleLabel || userMeta?.userRoleLabel || '',
+                  )
+                  const chatBadge = roleBadgeMeta(
+                    messageRole,
+                    Boolean(msg.premium),
+                    messageRoleLabel,
+                    msg.seasonBadge || userMeta?.seasonBadge || null,
+                  )
+                  const level = Math.max(1, Math.trunc(num(msg.lv || 1)))
+                  const targetChatUserId = String(msg.userId || (isOwn ? user?.id : '')).trim()
+                  return (
+                    <div
+                      key={entry.id}
+                      ref={(el) => { if (el && msgId) chatMessageRefs.current[msgId] = el }}
+                      className={`chat-msg-clean ${isOwn ? 'own' : ''}`}
+                    >
+                      <div className="chat-msg-clean-body">
+                        <div className="chat-msg-clean-row">
+                          <button
+                            type="button"
+                            className="chat-msg-clean-avatar chat-msg-clean-avatar-frame"
+                            aria-label={isOwn ? 'Kendi avatarın' : `${username} avatarı`}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (!targetChatUserId) return
+                              void openProfileModal(targetChatUserId, {
+                                username,
+                                displayName: username,
+                                avatarUrl: avatarSrc,
+                                level,
+                                role: messageRole,
+                                roleLabel: messageRoleLabel,
+                                premium: Boolean(msg.premium),
+                                seasonBadge: msg.seasonBadge || userMeta?.seasonBadge || null,
+                              })
+                            }}
+                          >
+                            <span className="chat-msg-clean-avatar-inner">
+                              <img src={avatarSrc || DEFAULT_CHAT_AVATAR} alt="" onError={(e) => { e.target.src = DEFAULT_CHAT_AVATAR }} />
+                            </span>
+                          </button>
+                          <div className="chat-msg-clean-bubble">
+                            <div className="chat-msg-clean-meta chat-msg-clean-meta-inside">
+                              {isOwn ? (
                                 <>
-                                  <button type="button" className="chat-msg-clean-action" onClick={() => { void staffBlockMessagesAction(msg) }}>
-                                    Mesaj Engeli
-                                  </button>
+                                  <span className="chat-msg-clean-role">Sen</span>
+                                  <span className="chat-msg-clean-level" title="Seviye">Lv.{level}</span>
+                                  <span className={`chat-msg-clean-badge ${chatBadge.className} ${chatBadge.tierClass || ''}`}>
+                                    {chatBadge.icon ? (
+                                      <img
+                                        src={chatBadge.icon}
+                                        alt=""
+                                        className={`chat-msg-badge-icon ${chatBadge.isStaff ? 'role' : ''}`}
+                                        onError={(e) => { e.target.style.display = 'none' }}
+                                      />
+                                    ) : null}
+                                    {chatBadge.text}
+                                  </span>
                                 </>
-                              ) : null}
-                              {canReportMessage ? (
+                              ) : (
+                                <>
+                                  <button
+                                    type="button"
+                                    className="chat-msg-clean-name"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      if (!targetChatUserId) return
+                                      void openProfileModal(targetChatUserId, {
+                                        username,
+                                        displayName: username,
+                                        avatarUrl: avatarSrc,
+                                        level,
+                                        role: messageRole,
+                                        roleLabel: messageRoleLabel,
+                                        premium: Boolean(msg.premium),
+                                        seasonBadge: msg.seasonBadge || userMeta?.seasonBadge || null,
+                                      })
+                                    }}
+                                  >
+                                    {username}
+                                  </button>
+                                  <span className="chat-msg-clean-level" title="Seviye">Lv.{level}</span>
+                                  <span className={`chat-msg-clean-badge ${chatBadge.className} ${chatBadge.tierClass || ''}`}>
+                                    {chatBadge.icon ? (
+                                      <img
+                                        src={chatBadge.icon}
+                                        alt=""
+                                        className={`chat-msg-badge-icon ${chatBadge.isStaff ? 'role' : ''}`}
+                                        onError={(e) => { e.target.style.display = 'none' }}
+                                      />
+                                    ) : null}
+                                    {chatBadge.text}
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                            <p className="chat-msg-clean-text">{chatSnippet(msg.t, 400)}</p>
+                            <div className="chat-msg-clean-footer">
+                              <span className="chat-msg-clean-time">{formatMessageTimeAgo(msg.createdAt) || formatMessageDate(msg.createdAt)}</span>
+                              {isStaffUser && msg.userId ? (
+                                <span className="chat-msg-clean-actions">
+                                  {staffCanModerateMessage ? (
+                                    <button type="button" className="chat-msg-clean-action danger" onClick={() => { void staffDeleteChatMessageAction(msg) }}>
+                                      Sil
+                                    </button>
+                                  ) : null}
+                                  {!isOwn && staffCanModerateMessage ? (
+                                    <>
+                                      <button type="button" className="chat-msg-clean-action" onClick={() => { void staffBlockMessagesAction(msg) }}>
+                                        Mesaj Engeli
+                                      </button>
+                                    </>
+                                  ) : null}
+                                  {canReportMessage ? (
+                                    <button type="button" className="chat-msg-clean-report" onClick={() => { openChatReportModal(msg, messageRole) }}>
+                                      Bildir
+                                    </button>
+                                  ) : null}
+                                </span>
+                              ) : isOwn ? (
+                                <span className="chat-msg-clean-sent" aria-hidden>Gönderildi</span>
+                              ) : msg.userId && canReportMessage ? (
                                 <button type="button" className="chat-msg-clean-report" onClick={() => { openChatReportModal(msg, messageRole) }}>
                                   Bildir
                                 </button>
                               ) : null}
-                            </span>
-                          ) : isOwn ? (
-                            <span className="chat-msg-clean-sent" aria-hidden>Gönderildi</span>
-                          ) : msg.userId && canReportMessage ? (
-                            <button type="button" className="chat-msg-clean-report" onClick={() => { openChatReportModal(msg, messageRole) }}>
-                              Bildir
-                            </button>
-                          ) : null}
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+                  )
+                })
+              )}
+            </div>
+            {!MESSAGES_DISABLED ? (
+              <form className="chat-send-form chat-send-form-clean" onSubmit={_sendChat}>
+                <input
+                  type="text"
+                  className="chat-send-input chat-send-input-clean"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value.slice(0, 500))}
+                  placeholder={chatHardRestrictionActive || chatCooldownActive ? 'Bekle...' : 'Mesaj yaz...'}
+                  disabled={chatHardRestrictionActive || chatCooldownActive || busy === 'chat-send'}
+                  maxLength={500}
+                  autoComplete="off"
+                />
+                <button
+                  type="submit"
+                  className="chat-send-btn-clean"
+                  disabled={!chatInput.trim() || chatHardRestrictionActive || chatCooldownActive || busy === 'chat-send'}
+                >
+                  Gönder
+                </button>
+              </form>
+            ) : null}
+          </>
+        ) : null}
+        {chatCommunityTab === 'kurallar' ? (
+          <section className="chat-side-panel chat-rules-panel" aria-label="Sohbet kuralları">
+            <header className="chat-side-panel-head">
+              <h4 className="chat-side-panel-title">Sohbet Kuralları</h4>
+              <p className="chat-side-panel-sub">Şehir kurallarının sohbet için kritik maddeleri.</p>
+            </header>
+            <div className="chat-rules-list">
+              {chatRulesDigest.map((group) => (
+                <article key={group.id} className="chat-rules-group">
+                  <header className="chat-rules-group-head">
+                    <span className="chat-rules-group-icon" aria-hidden>{group.icon}</span>
+                    <div>
+                      <strong className="chat-rules-group-title">{group.title}</strong>
+                      <p className="chat-rules-group-sub">{group.subtitle}</p>
+                    </div>
+                  </header>
+                  <div className="chat-rules-items">
+                    {group.rules.map((rule, index) => (
+                      <p key={`${group.id}-rule-${index + 1}`} className="chat-rules-item">
+                        <span>{rule.text}</span>
+                        <small className="chat-rules-penalty">{rule.penalty}</small>
+                      </p>
+                    ))}
                   </div>
-                </div>
-              )
-            })
-          )}
-        </div>
-        {!MESSAGES_DISABLED ? (
-          <form className="chat-send-form chat-send-form-clean" onSubmit={_sendChat}>
-            <input
-              type="text"
-              className="chat-send-input chat-send-input-clean"
-              value={chatInput}
-              onChange={(e) => setChatInput(e.target.value.slice(0, 500))}
-              placeholder={chatHardRestrictionActive || chatCooldownActive ? 'Bekle...' : 'Mesaj yaz...'}
-              disabled={chatHardRestrictionActive || chatCooldownActive || busy === 'chat-send'}
-              maxLength={500}
-              autoComplete="off"
-            />
-            <button
-              type="submit"
-              className="chat-send-btn-clean"
-              disabled={!chatInput.trim() || chatHardRestrictionActive || chatCooldownActive || busy === 'chat-send'}
-            >
-              Gönder
-            </button>
-          </form>
+                </article>
+              ))}
+            </div>
+          </section>
+        ) : null}
+        {chatCommunityTab === 'haberler' ? (
+          <section className="chat-side-panel chat-news-panel" aria-label="Yeni oyuncular">
+            <header className="chat-side-panel-head">
+              <h4 className="chat-side-panel-title">Haberler</h4>
+              <p className="chat-side-panel-sub">Aramıza yeni katılan oyuncular.</p>
+            </header>
+            <div className="chat-news-list">
+              {chatRecentPlayersLoading ? (
+                <p className="chat-news-empty">Yeni oyuncu akışı yükleniyor...</p>
+              ) : chatNewsFeed.length === 0 ? (
+                <p className="chat-news-empty">Henüz yeni oyuncu kaydı görünmüyor.</p>
+              ) : (
+                chatNewsFeed.map((entry) => (
+                  <article key={`${entry.userId || entry.username}-${entry.createdAt}`} className="chat-news-item">
+                    <button
+                      type="button"
+                      className="chat-news-avatar"
+                      onClick={() => {
+                        if (!entry.userId) return
+                        void openProfileModal(entry.userId, {
+                          username: entry.username,
+                          displayName: entry.username,
+                          avatarUrl: entry.avatarUrl,
+                        })
+                      }}
+                      aria-label={`${entry.username} profili`}
+                    >
+                      <img
+                        src={entry.avatarUrl || DEFAULT_CHAT_AVATAR}
+                        alt={entry.username}
+                        onError={(event) => { event.currentTarget.src = DEFAULT_CHAT_AVATAR }}
+                      />
+                    </button>
+                    <div className="chat-news-copy">
+                      <p className="chat-news-title">{entry.username}</p>
+                      <p className="chat-news-text">Aramıza yeni oyuncu katıldı.</p>
+                      <p className="chat-news-meta">{entry.timeLabel}</p>
+                    </div>
+                    <span className="chat-news-chip">YENİ</span>
+                  </article>
+                ))
+              )}
+            </div>
+          </section>
         ) : null}
       </article>
     </section>
@@ -14807,6 +14995,7 @@ function HomePage({ user, onLogout }) {
 
   const messageItemTag = (typeOrKind) => {
     const t = String(typeOrKind || '').toLowerCase()
+    if (t === 'announcement') return 'DUYURU'
     if (t === 'market' || t === 'trade') return 'PAZAR'
     if (t === 'business') return 'İşletmeler'
     if (t === 'factory') return 'Fabrikalar'
@@ -15313,10 +15502,22 @@ function HomePage({ user, onLogout }) {
                     : rawDetail
                   const handleClick = () => {
                     if (isIncomingFriendRequest) return
+                    const itemSource = String(item?.source || '').trim().toLowerCase()
+                    const itemType = String(item?.type || '').trim().toLowerCase()
+                    const targetTab = String(item?.targetTab || '').trim().toLowerCase()
+                    const shouldOpenAnnouncements =
+                      targetTab === 'announcements' ||
+                      itemSource === 'announcement' ||
+                      itemType === 'announcement'
                     if (isStarterNotice) {
                       setStarterDetailOpen(true)
                     }
-                    item?.id && _readMessageItemAction(item.id)
+                    if (shouldOpenAnnouncements) {
+                      void openTab('announcements', { tab: 'announcements' })
+                    }
+                    if (itemSource !== 'announcement' && item?.id) {
+                      void _readMessageItemAction(item.id)
+                    }
                   }
                   const handleKeyDown = (e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -15446,9 +15647,10 @@ function HomePage({ user, onLogout }) {
 
         <article className="card premium-daily-card">
         <div className="premium-daily-head">
-          <h4>Haftalık Sınırlı Fırsatlar</h4>
+          <h4>Sınırlı Fırsatlar</h4>
           <p className="muted">
-            Türkiye saatine göre her hafta yenilenen özel elmas teklifleri. Her paket haftalık periyotta bir kez alınabilir.
+            Paketler her gün 00:00'dan sonra yeniden alınabilir. Çarpan sadece 20 gün tamamlanınca 2x artar.
+            Para paketi en fazla 50.000.000, kaynak paketi en fazla 400.000 adede ulaşır.
           </p>
         </div>
         <div className="premium-daily-grid">
@@ -15466,7 +15668,7 @@ function HomePage({ user, onLogout }) {
             return (
               <div key={offer.id} className="premium-daily-offer">
                 <div className="premium-daily-main">
-                  <span className="badge">HAFTALIK</span>
+                  <span className="badge">GÜNLÜK</span>
                   <div className="premium-daily-title">
                     <img src={dailyOfferIcon} alt="" aria-hidden="true" />
                     <strong>{offer.title}</strong>
@@ -15478,7 +15680,7 @@ function HomePage({ user, onLogout }) {
                   <span>{fmt(price)}</span>
                 </div>
                 <p className={`premium-daily-reset${isPurchased ? ' is-active' : ''}`}>
-                  {isPurchased ? `Yenilenme: ${dailyResetLabel}` : dailyResetInfoLabel}
+                    {isPurchased ? `Yeni hak: ${dailyResetLabel}` : dailyResetInfoLabel}
                 </p>
                 <button
                   className="btn full premium-gold-btn"
@@ -15491,10 +15693,10 @@ function HomePage({ user, onLogout }) {
                     void openDiamondMarketHub()
                   }}
                 >
-                  {isPurchased
-                    ? 'Bu periyotta kullanıldı'
-                    : isBusy
-                      ? 'Yükleniyor...'
+                    {isPurchased
+                      ? 'Bugün kullanıldı'
+                      : isBusy
+                        ? 'Yükleniyor...'
                       : canAfford
                         ? 'Satın Al'
                         : 'Elmas Marketi'}
@@ -15885,6 +16087,33 @@ function HomePage({ user, onLogout }) {
               Güvenli Çıkış Yap
             </button>
           </div>
+        </section>
+
+        <section className="settings-section-card settings-danger-card">
+          <h4>7) Hesabı Kalıcı Sil</h4>
+          <p className="settings-danger-text">
+            Bu işlem geri alınamaz. Hesabın, envanterin, mesajların ve ilişkili oyun verilerin kalıcı olarak silinir.
+          </p>
+          <label className="settings-field-label" htmlFor="settings-account-delete-password">Şifreni tekrar gir</label>
+          <input
+            id="settings-account-delete-password"
+            className="qty-input settings-input"
+            type="password"
+            value={profileAccountForm.deletePassword}
+            onChange={(event) => {
+              setProfileAccountForm((prev) => ({ ...prev, deletePassword: String(event.target.value || '').slice(0, 128) }))
+            }}
+            placeholder="Mevcut şifre"
+            autoComplete="current-password"
+          />
+          <button
+            type="button"
+            className="btn btn-danger settings-action-btn"
+            onClick={() => void deleteOwnAccountAction()}
+            disabled={Boolean(busy)}
+          >
+            {busy === 'profile-delete-account' ? 'Hesap Siliniyor...' : 'Hesabı Kalıcı Sil'}
+          </button>
         </section>
 
         {settingsThemeModalOpen ? (

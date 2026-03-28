@@ -2,8 +2,10 @@
 import { requireAuth } from '../middleware/auth.js'
 import { requireTurkeyAccess } from '../middleware/accessPolicy.js'
 import {
+  deleteAccountPermanentlyForUser,
   changePasswordForUser,
   changeUsernameForUser,
+  getRecentRegisteredPlayers,
   getUserFromAccessToken,
   hasRegisteredUsers,
   loginUser,
@@ -212,6 +214,41 @@ authRouter.post('/change-password', requireAuth, requireTurkeyAccess, async (req
             : result.reason === 'unauthorized'
               ? 401
               : 400
+      res.status(status).json(result)
+      return
+    }
+
+    res.json(result)
+  } catch (error) {
+    next(error)
+  }
+})
+
+authRouter.get('/recent-players', requireAuth, requireTurkeyAccess, async (req, res, next) => {
+  try {
+    const limit = Number(req.query?.limit)
+    const result = await getRecentRegisteredPlayers(limit)
+    res.json(result)
+  } catch (error) {
+    next(error)
+  }
+})
+
+authRouter.post('/delete-account', requireAuth, requireTurkeyAccess, async (req, res, next) => {
+  try {
+    const result = await deleteAccountPermanentlyForUser(req.auth.userId, req.body || {})
+
+    if (!result.success) {
+      const status =
+        result.reason === 'invalid_password'
+          ? 401
+          : result.reason === 'validation'
+            ? 400
+            : result.reason === 'unauthorized'
+              ? 401
+              : result.reason === 'forbidden'
+                ? 403
+                : 400
       res.status(status).json(result)
       return
     }

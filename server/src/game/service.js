@@ -79,6 +79,8 @@ const LEGACY_TEMPLATE_MAP = {
 const COUNTERPARTIES = ['Anka Trade', 'Marmara Lojistik', 'Nova Broker', 'Delta Pazarlama']
 const ORDER_MAX_DURATION_MINUTES = 180
 const SELL_LISTINGS_DAILY_LIMIT = 8
+const SPECIAL_LISTINGS_DAILY_LIMIT = 10
+const SPECIAL_LISTINGS_ACTIVE_LIMIT = 10
 const CONTRACT_MAX_DURATION_MINUTES = 120
 const AUCTION_MIN_DURATION_MINUTES = 5
 const AUCTION_MAX_DURATION_MINUTES = 180
@@ -87,7 +89,12 @@ const MS_MINUTE = 60000
 const MS_HOUR = 60 * MS_MINUTE
 const DAY_MS = 24 * 60 * 60 * 1000
 const DAILY_STORE_RESET_INTERVAL_MS = 12 * MS_HOUR
-const LIMITED_OFFER_RESET_INTERVAL_MS = 7 * DAY_MS
+const LIMITED_OFFER_PURCHASE_RESET_INTERVAL_MS = DAY_MS
+const LIMITED_OFFER_CYCLE_INTERVAL_DAYS = 20
+const LIMITED_OFFER_CYCLE_INTERVAL_MS = LIMITED_OFFER_CYCLE_INTERVAL_DAYS * DAY_MS
+const LIMITED_OFFER_CASH_MAX_REWARD = 50_000_000
+const LIMITED_OFFER_RESOURCE_BASE_REWARD = 2_000
+const LIMITED_OFFER_RESOURCE_MAX_REWARD = 400_000
 const BUILD_SPEEDUP_BASE_DIAMONDS = 40
 const BUILD_SPEEDUP_DIAMONDS_PER_HOUR = 5
 const UPGRADE_SPEEDUP_BASE_DIAMONDS = 55
@@ -313,6 +320,19 @@ const DAILY_STORE_OFFERS = [
     },
   },
 ]
+const DAILY_STORE_RANDOM_RESOURCE_IDS = Object.freeze([
+  'oil',
+  'energy',
+  'brick',
+  'cement',
+  'timber',
+  'spare-parts',
+  'engine-kit',
+  'steel',
+  'gold',
+  'copper',
+  'coal',
+])
 const DAILY_LOGIN_TOTAL_DAYS = 7
 const DAILY_LOGIN_REWARD_TABLE = [
   {
@@ -1027,7 +1047,6 @@ function tickFactories(profile, timestamp) {
       }
       state.upgrading = createDefaultFactoryUpgradeState(template)
       state.updatedAt = timestamp
-      pushNotification(profile, 'factory', `Fabrika yükseltmesi tamamlandı: ${template.name || template.id} (Seviye ${state.level}).`, timestamp)
     } else {
       state.upgrading = normalizeFactoryUpgradeState(upgrading, template)
     }
@@ -1225,16 +1244,6 @@ function normalizeListingTemplateId(templateId) {
   if (!safeTemplateId) return ''
   if (safeTemplateId === 'logistics') return 'logistics'
   return normalizeBusinessTemplateId(safeTemplateId)
-}
-
-/** İkinci el ilan etiketleri: Motor, Araba, Mülk, Tır */
-function assetTypeLabelFromTemplateId(templateId) {
-  const t = String(templateId || '').trim()
-  if (t === 'moto-rental') return 'Motor'
-  if (t === 'auto-rental') return 'Araba'
-  if (t === 'property-rental') return 'Mülk'
-  if (t === 'logistics') return 'Tır'
-  return 'Araç'
 }
 
 function normalizeBusinessUnlocks(value) {
@@ -1698,28 +1707,35 @@ function dailyStoreResetInfoFromIso(timestamp) {
   }
 }
 
-const LIMITED_OFFER_WEEK_BASE_START_MS = Date.UTC(2026, 0, 5, 0, 0, 0, 0) - TURKIYE_UTC_OFFSET_MS
+const LIMITED_OFFER_CYCLE_BASE_START_MS = Date.UTC(2026, 2, 28, 0, 0, 0, 0) - TURKIYE_UTC_OFFSET_MS
 
-function limitedOfferWeekStartMs(timestamp) {
-  const dayStartMs = turkiyeDayStartMs(timestamp)
-  const trDate = new Date(dayStartMs + TURKIYE_UTC_OFFSET_MS)
-  const trDay = trDate.getUTCDay() || 7
-  const mondayOffsetDays = trDay - 1
-  return dayStartMs - (mondayOffsetDays * DAY_MS)
+function limitedOfferCycleStartMs(timestamp) {
+  const todayStartMs = turkiyeDayStartMs(timestamp)
+  if (todayStartMs <= LIMITED_OFFER_CYCLE_BASE_START_MS) {
+    return LIMITED_OFFER_CYCLE_BASE_START_MS
+  }
+  const elapsedMs = todayStartMs - LIMITED_OFFER_CYCLE_BASE_START_MS
+  const elapsedCycles = Math.floor(elapsedMs / LIMITED_OFFER_CYCLE_INTERVAL_MS)
+  return LIMITED_OFFER_CYCLE_BASE_START_MS + (elapsedCycles * LIMITED_OFFER_CYCLE_INTERVAL_MS)
 }
 
 function limitedOfferDayKeyFromIso(timestamp) {
-  const weekStartMs = limitedOfferWeekStartMs(timestamp)
-  const trDate = new Date(weekStartMs + TURKIYE_UTC_OFFSET_MS)
-  const yyyy = trDate.getUTCFullYear()
-  const mm = String(trDate.getUTCMonth() + 1).padStart(2, '0')
-  const dd = String(trDate.getUTCDate()).padStart(2, '0')
-  return `${yyyy}-W${mm}${dd}`
+  const dayStartMs = turkiyeDayStartMs(timestamp)
+  return turkiyeDayKeyFromDayStartMs(dayStartMs)
 }
 
 function limitedOfferResetInfoFromIso(timestamp) {
   const nowMs = createdMs(timestamp) || Date.now()
-  const nextResetMs = limitedOfferWeekStartMs(timestamp) + LIMITED_OFFER_RESET_INTERVAL_MS
+  const nextResetMs = turkiyeDayStartMs(timestamp) + LIMITED_OFFER_PURCHASE_RESET_INTERVAL_MS
+  return {
+    nextResetAt: new Date(nextResetMs).toISOString(),
+    remainingMs: Math.max(0, nextResetMs - nowMs),
+  }
+}
+
+function limitedOfferCycleResetInfoFromIso(timestamp) {
+  const nowMs = createdMs(timestamp) || Date.now()
+  const nextResetMs = limitedOfferCycleStartMs(timestamp) + LIMITED_OFFER_CYCLE_INTERVAL_MS
   return {
     nextResetAt: new Date(nextResetMs).toISOString(),
     remainingMs: Math.max(0, nextResetMs - nowMs),
@@ -1727,28 +1743,28 @@ function limitedOfferResetInfoFromIso(timestamp) {
 }
 
 function limitedOfferMultiplier(timestamp) {
-  const weekStartMs = limitedOfferWeekStartMs(timestamp)
-  const elapsedWeeks = Math.max(
+  const cycleStartMs = limitedOfferCycleStartMs(timestamp)
+  const elapsedCycles = Math.max(
     0,
-    Math.floor((weekStartMs - LIMITED_OFFER_WEEK_BASE_START_MS) / LIMITED_OFFER_RESET_INTERVAL_MS),
+    Math.floor((cycleStartMs - LIMITED_OFFER_CYCLE_BASE_START_MS) / LIMITED_OFFER_CYCLE_INTERVAL_MS),
   )
-  return Math.max(1, Math.pow(2, elapsedWeeks))
+  return Math.max(1, Math.pow(2, elapsedCycles))
+}
+
+function limitedOfferScaledAmount(baseAmount, multiplier, maxAmount = 0) {
+  const safeBase = Math.max(0, asInt(baseAmount, 0))
+  const safeMultiplier = Math.max(1, asInt(multiplier, 1))
+  const scaled = Math.max(0, Math.floor(safeBase * safeMultiplier))
+  const safeMax = Math.max(0, asInt(maxAmount, 0))
+  if (safeMax <= 0) return scaled
+  return Math.min(safeMax, scaled)
 }
 
 function dailyStoreMaterialItemIds(db) {
-  const list = Array.isArray(db?.marketState?.items) ? db.marketState.items : []
-  const ids = new Set()
-  for (const entry of list) {
-    const itemId = normalizeItemId(entry?.id)
-    if (!itemId || !ITEM_BY_ID.has(itemId)) continue
-    ids.add(itemId)
-  }
-  if (ids.size === 0) {
-    for (const fallbackId of ['brick', 'timber', 'cement', 'energy', 'spare-parts', 'engine-kit', 'oil']) {
-      if (ITEM_BY_ID.has(fallbackId)) ids.add(fallbackId)
-    }
-  }
-  return Array.from(ids)
+  void db
+  return DAILY_STORE_RANDOM_RESOURCE_IDS
+    .map((itemId) => normalizeItemId(itemId))
+    .filter((itemId) => itemId && ITEM_BY_ID.has(itemId))
 }
 
 function dailyStoreOfferSnapshot(db, offer, timestamp) {
@@ -1757,26 +1773,36 @@ function dailyStoreOfferSnapshot(db, offer, timestamp) {
   const multiplier = limitedOfferMultiplier(timestamp)
   const safePrice = Math.max(0, asInt(safeOffer.price, 0))
   const baseCash = Math.max(0, asInt(safeOffer?.rewards?.cash, 0))
-  const scaledCash = Math.max(0, Math.floor(baseCash * multiplier))
+  const scaledCash = limitedOfferScaledAmount(
+    baseCash,
+    multiplier,
+    safeOffer.id === 'daily-cash-1m' ? LIMITED_OFFER_CASH_MAX_REWARD : 0,
+  )
 
   if (safeOffer.id === 'daily-materials-pack') {
     const itemIds = dailyStoreMaterialItemIds(db)
-    const eachQuantity = Math.max(1, Math.floor(2000 * multiplier))
-    const items = Object.fromEntries(itemIds.map((itemId) => [itemId, eachQuantity]))
+    const eachQuantity = Math.max(
+      1,
+      limitedOfferScaledAmount(
+        LIMITED_OFFER_RESOURCE_BASE_REWARD,
+        multiplier,
+        LIMITED_OFFER_RESOURCE_MAX_REWARD,
+      ),
+    )
     const names = itemIds.map((itemId) => ITEM_BY_ID.get(itemId)?.name || itemId)
-    const listedNames = names.slice(0, 8).join(', ')
-    const extraCount = Math.max(0, names.length - 8)
-    const nameText = extraCount > 0 ? `${listedNames} ve +${extraCount} kaynak` : listedNames
+    const nameText = names.join(', ')
     return {
       id: safeOffer.id,
       title: safeOffer.title,
-      description: `Pazardaki tüm kaynaklar depoya eklenir (${eachQuantity} adet): ${nameText}.`,
+      description: `Şansına havuzdan 1 kaynak gelir (+${eachQuantity}): ${nameText}.`,
       price: safePrice,
       weekMultiplier: multiplier,
       rewards: {
         cash: 0,
-        items,
+        items: {},
       },
+      randomItemIds: itemIds,
+      randomItemQuantity: eachQuantity,
     }
   }
 
@@ -1826,6 +1852,34 @@ function turkiyeDayStartMsFromDayKey(dayKey) {
   const dayStartMs = Date.UTC(year, month - 1, day, 0, 0, 0, 0) - TURKIYE_UTC_OFFSET_MS
   if (turkiyeDayKeyFromDayStartMs(dayStartMs) !== safeKey) return 0
   return dayStartMs
+}
+
+function specialListingDayKeyFromIso(timestamp) {
+  return turkiyeDayKeyFromDayStartMs(turkiyeDayStartMs(timestamp))
+}
+
+function syncSpecialListingDailyState(profile, timestamp) {
+  if (!profile || typeof profile !== 'object') return
+  const todayKey = specialListingDayKeyFromIso(timestamp)
+  const currentDayKey = String(profile.specialListingsDayKey || '').trim()
+  const safeCount = Math.max(0, asInt(profile.specialListingsCountToday, 0))
+  if (!currentDayKey || currentDayKey !== todayKey) {
+    profile.specialListingsDayKey = todayKey
+    profile.specialListingsCountToday = 0
+    return
+  }
+  profile.specialListingsDayKey = currentDayKey
+  profile.specialListingsCountToday = safeCount
+}
+
+function activeSpecialListingCount(profile) {
+  const listings = Array.isArray(profile?.vehicleListings) ? profile.vehicleListings : []
+  return listings.reduce((count, listing) => {
+    const visibility =
+      String(listing?.visibility || 'public').trim().toLowerCase() === 'custom' ? 'custom' : 'public'
+    if (visibility !== 'custom') return count
+    return count + 1
+  }, 0)
 }
 
 function normalizeDailyLoginState(profile) {
@@ -4702,6 +4756,8 @@ function createDefaultProfile(user, timestamp) {
     limitOrders: [],
     sellListingsDayKey: '',
     sellListingsCountToday: 0,
+    specialListingsDayKey: '',
+    specialListingsCountToday: 0,
     shipments: [],
     logisticsFleet: [],
     lastTruckOrderedAt: '',
@@ -4826,6 +4882,7 @@ function normalizeProfile(profile, timestamp) {
     // Eski enerji telafi yaması kaldırıldı.
     profile.factoryEnergyFixVersion = FACTORY_ENERGY_FIX_PATCH_VERSION
   }
+  syncSpecialListingDailyState(profile, timestamp)
   if (!profile.dailyStore || typeof profile.dailyStore !== 'object') {
     profile.dailyStore = {
       dayKey: limitedOfferDayKeyFromIso(timestamp),
@@ -7611,18 +7668,22 @@ function pushItemView(entry) {
 }
 
 function notificationItemView(entry) {
-  const filter = notificationFilter(entry.type)
+  const safeType = String(entry?.type || 'other').trim() || 'other'
+  const filter = notificationFilter(safeType)
+  const normalizedType = normalizedNotificationType(safeType)
+  const isAnnouncementNotice = ['announcement', 'duyuru'].includes(normalizedType)
   const message = String(entry.message || '').trim()
   return {
     id: `notif:${entry.id}`,
     source: 'notification',
     filter,
-    type: entry.type || 'other',
+    type: safeType,
     title: filter === 'trade' ? 'Ticaret Bildirimi' : filter === 'alert' ? 'Uyar\u0131' : 'Sistem Mesaj\u0131',
     message,
     preview: message.slice(0, 120),
     createdAt: entry.createdAt,
     read: entry.read === true,
+    targetTab: isAnnouncementNotice ? 'announcements' : '',
     canReply: false,
     incoming: true,
     subject: '',
@@ -7684,6 +7745,7 @@ function announcementItemView(entry) {
     preview: message.slice(0, 120),
     createdAt: entry.createdAt,
     read: true,
+    targetTab: 'announcements',
     canReply: false,
     incoming: true,
     subject: '',
@@ -9236,14 +9298,20 @@ export async function createAnnouncement(userId, payload) {
       return db
     }
     const list = db.globalAnnouncements || []
+    const safeTitle = title || 'Duyuru'
     list.unshift({
       id: crypto.randomUUID(),
-      title: title || 'Duyuru',
-      body: body || title,
+      title: safeTitle,
+      body: body || safeTitle,
       createdAt: timestamp,
       createdBy: userId,
     })
     db.globalAnnouncements = list.slice(0, MAX_GLOBAL_ANNOUNCEMENTS)
+    const announcementNotice = `Yeni duyuru yayınlandı: ${safeTitle}`
+    for (const gameProfile of Array.isArray(db.gameProfiles) ? db.gameProfiles : []) {
+      if (!gameProfile || typeof gameProfile !== 'object') continue
+      pushNotification(gameProfile, 'announcement', announcementNotice, timestamp)
+    }
     result = { success: true, message: 'Duyuru yayınlandı.' }
     return db
   })
@@ -9982,13 +10050,6 @@ export async function buyFactory(userId, payload = {}) {
       },
       timestamp,
     )
-    pushNotification(
-      profile,
-      'business',
-      `${template?.name || 'Fabrika'} inşası başladı.`,
-      timestamp,
-    )
-
     result = {
       success: true,
       message: `${template?.name || 'Fabrika'} satın alındı. İnşa süreci başladı.`,
@@ -10135,13 +10196,6 @@ export async function collectFactory(userId, factoryId) {
       },
       timestamp,
     )
-    pushNotification(
-      profile,
-      'business',
-      `${template?.name || 'Fabrika'}: +${outputAmount} ${outputItem?.name || outputItemId}, -${energyCost} ${ITEM_BY_ID.get(energyItemId)?.name || energyItemId}.`,
-      timestamp,
-    )
-
     result = {
       success: true,
       message: `${template?.name || 'Fabrika'} tahsilatı yapıldı.`,
@@ -10278,26 +10332,6 @@ export async function collectFactoriesBulk(userId) {
         detail: `${collectedCount} fabrika için toplu tahsilat tamamlandı.`,
         amount: 0,
       },
-      timestamp,
-    )
-
-    const producedRows = Object.entries(producedByItem).map(([itemId, amount]) => {
-      const itemName = ITEM_BY_ID.get(itemId)?.name || itemId
-      return `+${amount} ${itemName}`
-    })
-    const consumedRows = Object.entries(consumedByItem)
-      .filter(([, amount]) => asInt(amount, 0) > 0)
-      .map(([itemId, amount]) => {
-        const itemName = ITEM_BY_ID.get(itemId)?.name || itemId
-        return `-${amount} ${itemName}`
-      })
-    const notificationParts = []
-    if (producedRows.length) notificationParts.push(producedRows.join(', '))
-    if (consumedRows.length) notificationParts.push(consumedRows.join(', '))
-    pushNotification(
-      profile,
-      'business',
-      `Fabrika toplu tahsilat tamamlandı: ${notificationParts.join(' | ')}`.trim(),
       timestamp,
     )
 
@@ -10474,13 +10508,6 @@ export async function upgradeFactory(userId, factoryId) {
       },
       timestamp,
     )
-    pushNotification(
-      profile,
-      'business',
-      `${template?.name || 'Fabrika'} yükseltmesi başladı. Hedef seviye: ${targetLevel}.`,
-      timestamp,
-    )
-
     result = {
       success: true,
       message: `${template?.name || 'Fabrika'} yükseltmesi başlatıldı.`,
@@ -10579,13 +10606,6 @@ export async function speedupFactoryUpgrade(userId, factoryId) {
       },
       timestamp,
     )
-    pushNotification(
-      profile,
-      'business',
-      `${template?.name || 'Fabrika'} yükseltme süresi %${Math.round(speedupRatio * 100)} azaltıldı.`,
-      timestamp,
-    )
-
     tickFactories(profile, timestamp)
 
     result = {
@@ -10669,13 +10689,6 @@ export async function speedupFactoryBuild(userId, factoryId) {
       },
       timestamp,
     )
-    pushNotification(
-      profile,
-      'business',
-      `${template?.name || 'Fabrika'} inşaat süresi %${Math.round(speedupRatio * 100)} kısaltıldı.`,
-      timestamp,
-    )
-
     tickFactories(profile, timestamp)
 
     result = {
@@ -10799,8 +10812,6 @@ export async function buyBusiness(userId, payload) {
       timestamp,
     )
 
-    pushNotification(profile, 'business', `${unlockEntry.name} işletmesi aktif edildi.`, timestamp)
-
     profile.updatedAt = timestamp
 
     result = {
@@ -10869,13 +10880,6 @@ export async function upgradeBusiness(userId, businessId) {
         detail: `İşletme seviyesi ${profile.companyLevel}. seviyeye yükseltildi.`,
         amount: -cost,
       },
-      timestamp,
-    )
-
-    pushNotification(
-      profile,
-      'business',
-      `İşletme seviyesi ${profile.companyLevel}. seviyeye yükseltildi.`,
       timestamp,
     )
 
@@ -11112,13 +11116,6 @@ export async function produceBusinessVehicle(userId, businessId, payload = {}) {
       timestamp,
     )
 
-    pushNotification(
-      profile,
-      'business',
-      `${template.name} filosuna yeni araç eklendi.`,
-      timestamp,
-    )
-
     result = {
       success: true,
       wallet: profile.wallet,
@@ -11194,6 +11191,30 @@ export async function listBusinessVehicleForSale(userId, businessId, payload = {
     }
 
     runGameTick(db, profile, timestamp)
+    syncSpecialListingDailyState(profile, timestamp)
+    if (visibility === 'custom' && profile.specialListingsCountToday >= SPECIAL_LISTINGS_DAILY_LIMIT) {
+      result = {
+        success: false,
+        reason: 'limit_reached',
+        errors: {
+          global: `Özel ilan günlük limiti doldu (${SPECIAL_LISTINGS_DAILY_LIMIT}/${SPECIAL_LISTINGS_DAILY_LIMIT}). Yeni hak Türkiye saatiyle 00:00 sonrası açılır.`,
+        },
+      }
+      return db
+    }
+    if (visibility === 'custom') {
+      const activeSpecialCount = activeSpecialListingCount(profile)
+      if (activeSpecialCount >= SPECIAL_LISTINGS_ACTIVE_LIMIT) {
+        result = {
+          success: false,
+          reason: 'limit_reached',
+          errors: {
+            global: `Özel ilan açık limitin doldu (${SPECIAL_LISTINGS_ACTIVE_LIMIT}/${SPECIAL_LISTINGS_ACTIVE_LIMIT}). Önce aktif özel ilanlarından birini kapat.`,
+          },
+        }
+        return db
+      }
+    }
     const playerLevel = levelInfoFromXp(profile.xpTotal).level
 
     const business = profile.businesses.find((item) => item.id === safeBusinessId)
@@ -11341,11 +11362,11 @@ export async function listBusinessVehicleForSale(userId, businessId, payload = {
       sellerName: profile.username,
     })
     profile.vehicleListings = profile.vehicleListings.slice(0, 120)
+    if (visibility === 'custom') {
+      syncSpecialListingDailyState(profile, timestamp)
+      profile.specialListingsCountToday = Math.max(0, asInt(profile.specialListingsCountToday, 0)) + 1
+    }
     profile.updatedAt = timestamp
-    const assetTypeLabel = assetTypeLabelFromTemplateId(business.templateId)
-    const vehicleDisplayName = String(listedVehicle?.name || assetTypeLabel).trim() || assetTypeLabel
-    pushNotification(profile, 'business', `${assetTypeLabel} "${vehicleDisplayName}" satışa sunuldu. İlana koyuldu.`, timestamp)
-
     result = {
       success: true,
       message: `${listedVehicle?.name || 'Araç'} satış listene eklendi.`,
@@ -11409,6 +11430,30 @@ export async function listLogisticsTruckForSale(userId, truckId, payload = {}) {
     }
 
     runGameTick(db, profile, timestamp)
+    syncSpecialListingDailyState(profile, timestamp)
+    if (visibility === 'custom' && profile.specialListingsCountToday >= SPECIAL_LISTINGS_DAILY_LIMIT) {
+      result = {
+        success: false,
+        reason: 'limit_reached',
+        errors: {
+          global: `Özel ilan günlük limiti doldu (${SPECIAL_LISTINGS_DAILY_LIMIT}/${SPECIAL_LISTINGS_DAILY_LIMIT}). Yeni hak Türkiye saatiyle 00:00 sonrası açılır.`,
+        },
+      }
+      return db
+    }
+    if (visibility === 'custom') {
+      const activeSpecialCount = activeSpecialListingCount(profile)
+      if (activeSpecialCount >= SPECIAL_LISTINGS_ACTIVE_LIMIT) {
+        result = {
+          success: false,
+          reason: 'limit_reached',
+          errors: {
+            global: `Özel ilan açık limitin doldu (${SPECIAL_LISTINGS_ACTIVE_LIMIT}/${SPECIAL_LISTINGS_ACTIVE_LIMIT}). Önce aktif özel ilanlarından birini kapat.`,
+          },
+        }
+        return db
+      }
+    }
     if (!isLogisticsUnlocked(profile)) {
       result = {
         success: false,
@@ -11533,10 +11578,11 @@ export async function listLogisticsTruckForSale(userId, truckId, payload = {}) {
       sellerName: profile.username,
     })
     profile.vehicleListings = profile.vehicleListings.slice(0, 120)
+    if (visibility === 'custom') {
+      syncSpecialListingDailyState(profile, timestamp)
+      profile.specialListingsCountToday = Math.max(0, asInt(profile.specialListingsCountToday, 0)) + 1
+    }
     profile.updatedAt = timestamp
-    const truckDisplayName = String(truck?.name || 'Tır').trim() || 'Tır'
-    pushNotification(profile, 'business', `Tır "${truckDisplayName}" satışa sunuldu. İlana koyuldu.`, timestamp)
-
     result = {
       success: true,
       message: `${truck?.name || 'Tır'} ikinci el pazarına eklendi.`,
@@ -12965,6 +13011,7 @@ function dailyStoreView(db, profile, timestamp) {
   const purchasedSet = new Set(store.purchased)
 
   const resetInfo = limitedOfferResetInfoFromIso(timestamp)
+  const cycleResetInfo = limitedOfferCycleResetInfoFromIso(timestamp)
   const offerMultiplier = limitedOfferMultiplier(timestamp)
   const offerSnapshots = DAILY_STORE_OFFERS
     .map((offer) => dailyStoreOfferSnapshot(db, offer, timestamp))
@@ -12982,6 +13029,10 @@ function dailyStoreView(db, profile, timestamp) {
     dayKey: store.dayKey,
     nextResetAt: resetInfo.nextResetAt,
     remainingMs: resetInfo.remainingMs,
+    cycleNextResetAt: cycleResetInfo.nextResetAt,
+    cycleRemainingMs: cycleResetInfo.remainingMs,
+    cycleLengthDays: LIMITED_OFFER_CYCLE_INTERVAL_DAYS,
+    cycleMultiplier: offerMultiplier,
     weekMultiplier: offerMultiplier,
     offers,
   }
@@ -13024,7 +13075,7 @@ export async function purchaseDailyOffer(userId, payload = {}) {
     return {
       success: false,
       reason: 'validation',
-      errors: { global: 'Haftalık fırsat seçimi geçersiz.' },
+      errors: { global: 'Sınırlı fırsat seçimi geçersiz.' },
     }
   }
 
@@ -13064,7 +13115,7 @@ export async function purchaseDailyOffer(userId, payload = {}) {
       result = {
         success: false,
         reason: 'validation',
-        errors: { global: 'Haftalık fırsat oluşturulamadı.' },
+        errors: { global: 'Sınırlı fırsat oluşturulamadı.' },
       }
       return db
     }
@@ -13073,7 +13124,7 @@ export async function purchaseDailyOffer(userId, payload = {}) {
       result = {
         success: false,
         reason: 'already_claimed',
-        errors: { global: 'Bu fırsat bu haftalık periyotta zaten kullanıldı.' },
+        errors: { global: 'Bu fırsat bugün zaten kullanıldı. Yeni hak Türkiye saatiyle 00:00 sonrası açılır.' },
       }
       return db
     }
@@ -13093,18 +13144,29 @@ export async function purchaseDailyOffer(userId, payload = {}) {
     if (offer.rewards.cash > 0) {
       profile.wallet += offer.rewards.cash
       const formattedCash = new Intl.NumberFormat('tr-TR').format(offer.rewards.cash)
-      rewardMessage = `Haftalık Para Paketi: +${formattedCash} nakit kazandın.`
+      rewardMessage = `Günlük Para Paketi: +${formattedCash} nakit kazandın.`
     }
     if (offer.id === 'daily-materials-pack') {
-      const itemEntries = Object.entries(offer.rewards.items || {})
-      for (const [itemIdRaw, qty] of itemEntries) {
-        const itemId = normalizeItemId(itemIdRaw)
-        const quantity = Math.max(0, asInt(qty, 0))
-        if (!itemId || quantity <= 0 || !ITEM_BY_ID.has(itemId)) continue
-        addInventory(profile, itemId, quantity)
+      const itemIds = Array.isArray(offer.randomItemIds)
+        ? offer.randomItemIds
+            .map((itemId) => normalizeItemId(itemId))
+            .filter((itemId) => itemId && ITEM_BY_ID.has(itemId))
+        : []
+      const quantity = Math.max(1, asInt(offer.randomItemQuantity, 0))
+      if (itemIds.length <= 0) {
+        profile.reputation += price
+        result = {
+          success: false,
+          reason: 'validation',
+          errors: { global: 'Kaynak paketi havuzu hazır değil. Lütfen tekrar dene.' },
+        }
+        return db
       }
-      const firstQuantity = Math.max(0, asInt(itemEntries[0]?.[1], 0))
-      rewardMessage = `Haftalık Kaynak Paketi: Pazardaki tüm kaynaklar depoya eklendi (her biri +${firstQuantity}).`
+      const randomIndex = Math.floor(Math.random() * itemIds.length)
+      const selectedItemId = itemIds[Math.max(0, Math.min(itemIds.length - 1, randomIndex))]
+      const selectedItemName = ITEM_BY_ID.get(selectedItemId)?.name || selectedItemId
+      addInventory(profile, selectedItemId, quantity)
+      rewardMessage = `Günlük Kaynak Paketi: Şansına ${selectedItemName} çıktı (+${quantity}).`
     } else if (offer.rewards.items && typeof offer.rewards.items === 'object') {
       for (const [itemIdRaw, qty] of Object.entries(offer.rewards.items)) {
         const itemId = String(itemIdRaw || '').trim()
@@ -16364,6 +16426,11 @@ export async function markMessageCenterRead(userId, messageId) {
       return db
     }
 
+    if (rawMessageId.startsWith('ann:')) {
+      result = { success: true }
+      return db
+    }
+
     if (rawMessageId.startsWith('friend_request:')) {
       const requestId = rawMessageId.slice('friend_request:'.length).trim()
       const request = (db.friendRequests || []).find((entry) => String(entry?.id || '').trim() === requestId)
@@ -16403,9 +16470,11 @@ export async function markMessageCenterRead(userId, messageId) {
       return db
     }
 
-    if (target.toUserId === userId) {
-      // Bu DM konuşmasındaki TÜM okunmamış gelen mesajları okundu say
-      const counterpartId = target.fromUserId
+    const counterpartId = target.toUserId === userId
+      ? target.fromUserId
+      : target.toUserId
+    if (counterpartId) {
+      // Bu DM konuşmasındaki tüm okunmamış gelen mesajları okundu say.
       for (const msg of db.directMessages) {
         if (msg.toUserId === userId && msg.fromUserId === counterpartId && !msg.readAt) {
           msg.readAt = timestamp

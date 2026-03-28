@@ -486,6 +486,33 @@ export async function changeCurrentUserPassword(values) {
   })
 }
 
+export async function getRecentRegisteredPlayers(limit = 12) {
+  const safeLimit = Number.isFinite(Number(limit))
+    ? Math.max(1, Math.min(50, Math.trunc(Number(limit))))
+    : 12
+  return request(`/auth/recent-players?limit=${safeLimit}`, {
+    method: 'GET',
+    auth: true,
+  })
+}
+
+export async function deleteCurrentUserAccount(values) {
+  const currentPassword = String(values?.currentPassword || '')
+  if (!currentPassword) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { currentPassword: 'Mevcut şifre zorunludur.' },
+    }
+  }
+
+  return request('/auth/delete-account', {
+    method: 'POST',
+    auth: true,
+    body: { currentPassword },
+  })
+}
+
 export async function getStoredUser() {
   const token = getStoredToken()
   if (!token) {

@@ -465,6 +465,15 @@ function resolveStoredSubnet(user) {
   return subnetFromIp(resolveStoredPublicIp(user))
 }
 
+function removeUserIdFromList(list, userId) {
+  const safeUserId = String(userId || '').trim()
+  if (!safeUserId) return []
+  if (!Array.isArray(list)) return []
+  return list
+    .map((entry) => String(entry || '').trim())
+    .filter((entry) => entry && entry !== safeUserId)
+}
+
 function removeUserDataFromDraft(draft, userId) {
   const safeUserId = String(userId || '').trim()
   if (!safeUserId) return
@@ -477,10 +486,34 @@ function removeUserDataFromDraft(draft, userId) {
   draft.gameProfiles = Array.isArray(draft.gameProfiles)
     ? draft.gameProfiles.filter((item) => item?.userId !== safeUserId)
     : []
+  for (const profile of draft.gameProfiles) {
+    if (!profile || typeof profile !== 'object') continue
+    if (!profile.social || typeof profile.social !== 'object') continue
+    profile.social.friends = removeUserIdFromList(profile.social.friends, safeUserId)
+    profile.social.blockedUserIds = removeUserIdFromList(profile.social.blockedUserIds, safeUserId)
+  }
   draft.directMessages = Array.isArray(draft.directMessages)
     ? draft.directMessages.filter(
         (item) => item?.fromUserId !== safeUserId && item?.toUserId !== safeUserId,
       )
+    : []
+  draft.friendRequests = Array.isArray(draft.friendRequests)
+    ? draft.friendRequests.filter((entry) => (
+      String(entry?.fromUserId || '').trim() !== safeUserId
+      && String(entry?.toUserId || '').trim() !== safeUserId
+    ))
+    : []
+  draft.supportTickets = Array.isArray(draft.supportTickets)
+    ? draft.supportTickets.filter(
+      (entry) => String(entry?.userId || '').trim() !== safeUserId,
+    )
+    : []
+  draft.adminActionRequests = Array.isArray(draft.adminActionRequests)
+    ? draft.adminActionRequests.filter((entry) => {
+      const actorId = String(entry?.userId || entry?.requestedByUserId || '').trim()
+      const targetId = String(entry?.targetUserId || '').trim()
+      return actorId !== safeUserId && targetId !== safeUserId
+    })
     : []
   draft.accountDeletionRequests = Array.isArray(draft.accountDeletionRequests)
     ? draft.accountDeletionRequests.filter(
@@ -553,6 +586,68 @@ function findPendingDeletionRequestByUserId(db, userId) {
   }
 
   return null
+}
+
+function safeRecentPlayersLimit(value) {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return 12
+  return Math.max(1, Math.min(50, Math.trunc(parsed)))
+}
+
+function parseTimestampMs(value) {
+  const safeValue = String(value || '').trim()
+  if (!safeValue) return 0
+  const parsed = new Date(safeValue).getTime()
+  return Number.isFinite(parsed) ? parsed : 0
+}
+
+export async function getRecentRegisteredPlayers(limit = 12) {
+  await processDueAccountDeletions()
+
+  const safeLimit = safeRecentPlayersLimit(limit)
+  const db = await readDb()
+  const profileByUserId = new Map(
+    (Array.isArray(db.gameProfiles) ? db.gameProfiles : [])
+      .map((entry) => [String(entry?.userId || '').trim(), entry]),
+  )
+
+  const players = (Array.isArray(db.users) ? db.users : [])
+    .map((entry) => {
+      if (!entry || typeof entry !== 'object') return null
+      const userId = String(entry.id || '').trim()
+      if (!userId) return null
+      const role = resolveUserRoleForStorage(entry.role, entry.email)
+      if (role !== USER_ROLES.PLAYER) return null
+      const profile = profileByUserId.get(userId)
+      const createdAt =
+        String(entry.createdAt || profile?.createdAt || '').trim() ||
+        new Date(0).toISOString()
+      return {
+        userId,
+        username: String(entry.username || profile?.username || 'Oyuncu').trim() || 'Oyuncu',
+        avatarUrl: String(profile?.avatarUrl || '').trim(),
+        createdAt,
+        createdAtMs: parseTimestampMs(createdAt),
+      }
+    })
+    .filter(Boolean)
+    .sort((left, right) => {
+      const diff = (right?.createdAtMs || 0) - (left?.createdAtMs || 0)
+      if (diff !== 0) return diff
+      return String(left?.username || '').localeCompare(String(right?.username || ''), 'tr')
+    })
+    .slice(0, safeLimit)
+    .map((entry) => ({
+      userId: entry.userId,
+      username: entry.username,
+      avatarUrl: entry.avatarUrl,
+      createdAt: entry.createdAt,
+    }))
+
+  return {
+    success: true,
+    players,
+  }
 }
 
 export async function processDueAccountDeletions() {
@@ -1753,6 +1848,63 @@ export async function deleteAccountForUser(userId, payload) {
       `Hesab\u0131n silinmek \u00fczere planland\u0131. ${ACCOUNT_DELETION_GRACE_DAYS} g\u00fcn i\u00e7inde giri\u015f yapmazsan hesab\u0131n otomatik silinecek.`,
     deleteAt: deleteAtIso,
     graceDays: ACCOUNT_DELETION_GRACE_DAYS,
+  }
+}
+
+export async function deleteAccountPermanentlyForUser(userId, payload) {
+  const currentPassword = String(payload?.currentPassword || '')
+  if (!currentPassword) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { currentPassword: 'Mevcut şifre zorunludur.' },
+    }
+  }
+
+  await processDueAccountDeletions()
+
+  const db = await readDb()
+  const existingUser = db.users.find((item) => item.id === userId)
+  if (!existingUser) {
+    return {
+      success: false,
+      reason: 'unauthorized',
+      errors: { global: 'Oturum bulunamadı.' },
+    }
+  }
+
+  const matches = await comparePasswordSafe(currentPassword, existingUser.passwordHash)
+  if (!matches) {
+    return {
+      success: false,
+      reason: 'invalid_password',
+      errors: { currentPassword: 'Mevcut şifre yanlış.' },
+    }
+  }
+
+  let deleted = false
+  await updateDb((draft) => {
+    const targetUser = Array.isArray(draft.users)
+      ? draft.users.find((item) => String(item?.id || '').trim() === String(userId || '').trim())
+      : null
+    if (!targetUser) return NO_DB_WRITE
+    removeUserDataFromDraft(draft, userId)
+    deleted = true
+    return draft
+  })
+
+  if (!deleted) {
+    return {
+      success: false,
+      reason: 'unauthorized',
+      errors: { global: 'Hesap silinemedi. Oturum bulunamadı.' },
+    }
+  }
+
+  return {
+    success: true,
+    reason: null,
+    message: 'Hesabınız kalıcı olarak silindi. Tüm verileriniz temizlendi.',
   }
 }
 
