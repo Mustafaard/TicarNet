@@ -46,6 +46,7 @@ import {
   setUserBlocked,
   getPushCenterState,
   markMessageCenterItemRead,
+  markMessageCenterNotificationsAsRead,
   purchaseLogisticsTruck,
   listLogisticsTruckForSale,
   getRealtimeMessagesUrl,
@@ -213,6 +214,40 @@ const EMPTY_USER_MODERATION = {
     reason: '',
     remainingMs: 0,
   },
+}
+const EMPTY_MESSAGE_UNREAD = Object.freeze({
+  total: 0,
+  direct: 0,
+  notifications: 0,
+  alerts: 0,
+  friendRequests: 0,
+  announcements: 0,
+  transactions: 0,
+})
+
+function normalizeMessageUnreadCounters(raw) {
+  const source = raw && typeof raw === 'object' ? raw : EMPTY_MESSAGE_UNREAD
+  const sanitize = (value) => {
+    const parsed = Number(value)
+    if (!Number.isFinite(parsed) || parsed <= 0) return 0
+    return Math.max(0, Math.trunc(parsed))
+  }
+  const total = sanitize(source.total)
+  const direct = sanitize(source.direct)
+  const notifications = sanitize(source.notifications)
+  const alerts = sanitize(source.alerts)
+  const friendRequests = sanitize(source.friendRequests)
+  const announcements = sanitize(source.announcements)
+  const transactions = sanitize(source.transactions)
+  return {
+    total,
+    direct,
+    notifications,
+    alerts,
+    friendRequests,
+    announcements,
+    transactions,
+  }
 }
 
 const AVATAR_CROP_PREVIEW_SIZE = 248
@@ -2694,6 +2729,7 @@ function HomePage({ user, onLogout }) {
     filter: 'all',
     counts: { all: 0, message: 0, trade: 0, other: 0, alert: 0 },
     unreadCount: 0,
+    unread: EMPTY_MESSAGE_UNREAD,
     spotlight: null,
     items: [],
     moderation: EMPTY_USER_MODERATION,
@@ -2894,7 +2930,7 @@ function HomePage({ user, onLogout }) {
     bankStateRef.current = bankState
   }, [bankState])
 
-  // BİLDİRİMLER sekmesine girildiğinde mevcut bildirimleri okundu say (DM sayaçları etkilenmez)
+  // BİLDİRİMLER sekmesine girildiğinde tüm bildirimleri toplu okundu yap (DM sayaçları etkilenmez)
   useEffect(() => {
     if (MESSAGES_DISABLED) return
     if (tab !== 'messages' || messageViewTab !== 'bildirimler') {
@@ -2904,14 +2940,8 @@ function HomePage({ user, onLogout }) {
     }
     if (notificationsMarkedRef.current || notificationsMarkingInFlightRef.current) return
 
-    const items = messageCenter?.items || []
-    const unreadNotificationIds = items
-      .filter((item) => !(item?.source === 'direct' || item?.filter === 'message'))
-      .filter((item) => item?.read !== true && item?.id)
-      .map((item) => String(item.id || '').trim())
-      .filter(Boolean)
-
-    if (unreadNotificationIds.length === 0) {
+    const unreadNotifications = Math.max(0, Math.trunc(Number(messageCenter?.unread?.notifications || 0)))
+    if (unreadNotifications <= 0) {
       notificationsMarkedRef.current = true
       return
     }
@@ -2920,11 +2950,8 @@ function HomePage({ user, onLogout }) {
     notificationsMarkingInFlightRef.current = true
     ;(async () => {
       try {
-        const responses = await Promise.all(
-          unreadNotificationIds.map((id) => markMessageCenterItemRead(id)),
-        )
-        const hasFailure = responses.some((response) => !response?.success)
-        if (hasFailure) {
+        const response = await markMessageCenterNotificationsAsRead()
+        if (!response?.success) {
           notificationsMarkedRef.current = false
         }
       } finally {
@@ -2932,7 +2959,7 @@ function HomePage({ user, onLogout }) {
         await loadMessageCenter('all')
       }
     })()
-  }, [MESSAGES_DISABLED, messageViewTab, messageCenter, tab])
+  }, [MESSAGES_DISABLED, loadMessageCenter, messageCenter?.unread?.notifications, messageViewTab, tab])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -3630,6 +3657,7 @@ function HomePage({ user, onLogout }) {
         filter: 'all',
         counts: { all: 0, message: 0, trade: 0, other: 0, alert: 0 },
         unreadCount: 0,
+        unread: EMPTY_MESSAGE_UNREAD,
         spotlight: null,
         items: [],
         moderation: EMPTY_USER_MODERATION,
@@ -3639,10 +3667,20 @@ function HomePage({ user, onLogout }) {
     const targetFilter = String(filter || 'all').trim().toLowerCase() || 'all'
     const response = await getMessageCenterState(targetFilter, 25)
     if (!response?.success) return fail(response, 'Mesaj merkezi y\u00fcklenemedi.')
+    const unreadCounters = normalizeMessageUnreadCounters(response.unread)
+    const unreadTotalRaw = Number(
+      response.unreadCount != null
+        ? response.unreadCount
+        : unreadCounters.total,
+    )
+    const unreadTotal = Number.isFinite(unreadTotalRaw) && unreadTotalRaw > 0
+      ? Math.max(0, Math.trunc(unreadTotalRaw))
+      : 0
     setMessageCenter({
       filter: response.filter || targetFilter,
       counts: response.counts || { all: 0, message: 0, trade: 0, other: 0, alert: 0 },
-      unreadCount: Number(response.unreadCount || 0),
+      unreadCount: unreadTotal,
+      unread: unreadCounters,
       spotlight: response.spotlight || null,
       items: Array.isArray(response.items) ? response.items : [],
       moderation: normalizeUserModeration(response.moderation),
@@ -7848,12 +7886,17 @@ function HomePage({ user, onLogout }) {
   const _messageCounts = MESSAGES_DISABLED
     ? { all: 0, message: 0, trade: 0, other: 0, alert: 0 }
     : (messageCenter?.counts || { all: 0, message: 0, trade: 0, other: 0, alert: 0 })
+  const _messageUnread = MESSAGES_DISABLED
+    ? EMPTY_MESSAGE_UNREAD
+    : normalizeMessageUnreadCounters(messageCenter?.unread)
   const _messageItems = MESSAGES_DISABLED ? [] : (messageCenter?.items || [])
   const messageSpotlight = MESSAGES_DISABLED ? null : (messageCenter?.spotlight || null)
   const _unreadMessageCountRaw = MESSAGES_DISABLED ? 0 : Number(messageCenter?.unreadCount || 0)
   const _unreadMessageCount = Number.isFinite(_unreadMessageCountRaw) && _unreadMessageCountRaw > 0
     ? Math.min(99, Math.max(1, Math.trunc(_unreadMessageCountRaw)))
     : 0
+  const _unreadDirectCount = Math.min(99, Math.max(0, Math.trunc(Number(_messageUnread.direct || 0))))
+  const _unreadNotificationCount = Math.min(99, Math.max(0, Math.trunc(Number(_messageUnread.notifications || 0))))
   const messageFilterResolved = MESSAGES_DISABLED ? messageFilter : (messageCenter?.filter || messageFilter)
   const _messageSpotlightIcon = messageIconMeta(messageSpotlight)
   const [starterDetailOpen, setStarterDetailOpen] = useState(false)
@@ -14708,6 +14751,7 @@ function HomePage({ user, onLogout }) {
             {chatSocketState === 'online' ? 'CANLI' : 'KAPALI'}
           </span>
         </div>
+        <p className="chat-community-tabs-caption">Topluluk Menüsü</p>
         <div className="chat-community-tabs" role="tablist" aria-label="Sohbet menüsü">
           {CHAT_COMMUNITY_TAB_ITEMS.map((entry) => (
             <button
@@ -15053,7 +15097,12 @@ function HomePage({ user, onLogout }) {
               loadMessageCenter('message')
             }}
           >
-            MESAJLAR
+            <span>MESAJLAR</span>
+            {_unreadDirectCount > 0 ? (
+              <span className="message-gold-tab-badge" aria-label={`${_unreadDirectCount} okunmamış DM`}>
+                {_unreadDirectCount}
+              </span>
+            ) : null}
           </button>
           <button
             type="button"
@@ -15067,7 +15116,12 @@ function HomePage({ user, onLogout }) {
             <span className="message-gold-tab-icon" aria-hidden>
               <img src="/home/icons/messages/bildirim.webp" alt="" onError={(e) => { e.target.style.display = 'none' }} />
             </span>
-            BİLDİRİMLER
+            <span>BİLDİRİMLER</span>
+            {_unreadNotificationCount > 0 ? (
+              <span className="message-gold-tab-badge" aria-label={`${_unreadNotificationCount} okunmamış bildirim`}>
+                {_unreadNotificationCount}
+              </span>
+            ) : null}
           </button>
         </div>
         <div className="message-gold-content">

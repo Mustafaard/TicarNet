@@ -50,6 +50,7 @@ import {
   listBusinessVehicleForSale,
   listLogisticsTruckForSale,
   markMessageCenterRead,
+  markMessageCenterNotificationsRead,
   markPushNotificationRead,
   placeLimitOrder,
   placeMarketAuctionBid,
@@ -1081,6 +1082,15 @@ gameRouter.post('/messages/:messageId/read', async (req, res, next) => {
   }
 })
 
+gameRouter.post('/messages/read-notifications', async (req, res, next) => {
+  try {
+    const result = await markMessageCenterNotificationsRead(req.auth.userId)
+    sendResult(res, result)
+  } catch (error) {
+    next(error)
+  }
+})
+
 gameRouter.post('/profile/display-name', async (req, res, next) => {
   try {
     const result = await updateProfileDisplayName(req.auth.userId, req.body || {})
@@ -1219,4 +1229,3 @@ gameRouter.use((req, res) => {
 })
 
 export default gameRouter
-

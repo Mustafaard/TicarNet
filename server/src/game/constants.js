@@ -1,7 +1,7 @@
 export const ITEM_CATALOG = [
   {
     id: 'cement',
-    name: 'Cimento',
+    name: 'Çimento',
     basePrice: 42,
     minPrice: 18,
     maxPrice: 120,
@@ -25,7 +25,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'gold',
-    name: 'Altin',
+    name: 'Altın',
     basePrice: 520,
     minPrice: 300,
     maxPrice: 980,
@@ -49,7 +49,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'copper',
-    name: 'Bakir',
+    name: 'Bakır',
     basePrice: 136,
     minPrice: 58,
     maxPrice: 300,
@@ -60,8 +60,20 @@ export const ITEM_CATALOG = [
     volatility: 0.5,
   },
   {
+    id: 'coal',
+    name: 'Kömür',
+    basePrice: 128,
+    minPrice: 54,
+    maxPrice: 290,
+    targetStock: 1900,
+    minStock: 150,
+    maxStock: 3600,
+    restockPerMinute: 7,
+    volatility: 0.49,
+  },
+  {
     id: 'aluminum',
-    name: 'Aluminyum',
+    name: 'Alüminyum',
     basePrice: 124,
     minPrice: 52,
     maxPrice: 280,
@@ -85,7 +97,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'plastic-granule',
-    name: 'Plastik Granul',
+    name: 'Plastik Granül',
     basePrice: 62,
     minPrice: 24,
     maxPrice: 170,
@@ -121,7 +133,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'spare-parts',
-    name: 'Yedek Parca',
+    name: 'Yedek Parça',
     basePrice: 210,
     minPrice: 92,
     maxPrice: 470,
@@ -145,7 +157,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'microchip',
-    name: 'Mikrocip',
+    name: 'Mikroçip',
     basePrice: 330,
     minPrice: 150,
     maxPrice: 680,
@@ -157,7 +169,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'lithium-cell',
-    name: 'Lityum Hucre',
+    name: 'Lityum Hücre',
     basePrice: 248,
     minPrice: 110,
     maxPrice: 520,
@@ -169,7 +181,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'fertilizer',
-    name: 'Gubre',
+    name: 'Gübre',
     basePrice: 54,
     minPrice: 20,
     maxPrice: 140,
@@ -181,7 +193,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'textile-fiber',
-    name: 'Tekstil Elyafi',
+    name: 'Tekstil Elyafı',
     basePrice: 96,
     minPrice: 40,
     maxPrice: 230,
@@ -193,7 +205,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'pharma-base',
-    name: 'Ilac Hammaddesi',
+    name: 'İlaç Hammaddesi',
     basePrice: 212,
     minPrice: 95,
     maxPrice: 470,
@@ -217,7 +229,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'water-right',
-    name: 'Su Hakki',
+    name: 'Su Hakkı',
     basePrice: 140,
     minPrice: 48,
     maxPrice: 360,
@@ -229,7 +241,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'recycle-scrap',
-    name: 'Geri Donusum Hurda',
+    name: 'Geri Dönüşüm Hurda',
     basePrice: 48,
     minPrice: 18,
     maxPrice: 130,
@@ -1012,7 +1024,7 @@ export const FACTORY_TEMPLATES = [
 export const MINE_TEMPLATES = [
   {
     id: 'gold-mine',
-    name: 'Altin Madeni',
+    name: 'Altın Madeni',
     outputItemId: 'gold',
     digDurationSeconds: 10,
     cooldownMinutes: 30,
@@ -1034,7 +1046,7 @@ export const MINE_TEMPLATES = [
   },
   {
     id: 'copper-mine',
-    name: 'Bakir Madeni',
+    name: 'Bakır Madeni',
     outputItemId: 'copper',
     digDurationSeconds: 10,
     cooldownMinutes: 30,
@@ -1045,7 +1057,7 @@ export const MINE_TEMPLATES = [
   },
   {
     id: 'coal-mine',
-    name: 'Komur Madeni',
+    name: 'Kömür Madeni',
     outputItemId: 'coal',
     digDurationSeconds: 10,
     cooldownMinutes: 30,

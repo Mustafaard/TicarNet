@@ -725,6 +725,12 @@ export async function markMessageCenterItemRead(messageId) {
   })
 }
 
+export async function markMessageCenterNotificationsAsRead() {
+  return gameRequest('/game/messages/read-notifications', {
+    method: 'POST',
+  })
+}
+
 export async function getContractsState() {
   return gameRequest('/game/contracts')
 }

@@ -12458,6 +12458,7 @@ select {
   align-items: center;
   justify-content: center;
   gap: 6px;
+  position: relative;
 }
 
 .message-gold-tab:hover {
@@ -12483,6 +12484,23 @@ select {
   object-fit: contain;
 }
 .message-gold-tab.message-gold-tab-notifications .message-gold-tab-icon { display: inline-flex; }
+
+.message-gold-tab-badge {
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 222, 146, 0.62);
+  background: linear-gradient(180deg, rgba(222, 157, 41, 0.96), rgba(146, 93, 22, 0.98));
+  color: #fff7df;
+  font-size: 11px;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.24);
+}
 
 .message-gold-content {
   padding: 14px;
@@ -24880,21 +24898,37 @@ select {
 }
 
 /* Sohbet sekme: Sohbet / Kurallar / Haberler */
+.chat-community-tabs-caption {
+  margin: 0 0 6px;
+  color: rgba(201, 221, 250, 0.92);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
 .chat-community-tabs {
-  display: grid;
+  display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   margin: 4px 0 10px;
+  padding: 6px;
+  border-radius: 14px;
+  border: 1px solid rgba(100, 166, 245, 0.32);
+  background: linear-gradient(180deg, rgba(7, 22, 45, 0.82), rgba(5, 15, 30, 0.84));
+  position: sticky;
+  top: 0;
+  z-index: 4;
 }
 
 .chat-community-tab {
-  min-height: 40px;
+  min-height: 42px;
   border-radius: 12px;
   border: 1px solid rgba(110, 170, 245, 0.36);
   background: linear-gradient(180deg, rgba(11, 30, 58, 0.92), rgba(8, 20, 40, 0.94));
   color: #d9e9ff;
   font-size: 12px;
-  font-weight: 800;
+  font-weight: 900;
   display: inline-flex;
   align-items: center;
   justify-content: center;

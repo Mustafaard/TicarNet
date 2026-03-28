@@ -7908,14 +7908,17 @@ function messageCenterView(db, profile, currentUserId, options = {}, timestamp =
   }
 
   // Toplam okunmamış: sadece gerçek okunmamış mesaj sayıları (konuşma başına bir kez sayılır)
-  const totalUnreadDirect = Object.values(unreadDirectByCounterpart).reduce((s, n) => s + n, 0)
+  const totalUnreadDirect = Object.values(unreadDirectByCounterpart).reduce((sum, count) => sum + count, 0)
   const unreadFriendRequests = friendRequestItems.filter((entry) => entry.read !== true).length
-  const unreadCount =
-    totalUnreadDirect +
+  const unreadAlerts = alertItems.filter((entry) => entry?.read !== true).length
+  const unreadTransactions = transactionItems.filter((entry) => entry?.read !== true).length
+  const unreadAnnouncements = announcementItems.filter((entry) => entry?.read !== true).length
+  const unreadNotificationCount =
     unreadFriendRequests +
-    alertItems.filter((entry) => entry?.read !== true).length +
-    transactionItems.filter((e) => !e.read).length +
-    announcementItems.filter((e) => !e.read).length
+    unreadAlerts +
+    unreadTransactions +
+    unreadAnnouncements
+  const unreadCount = totalUnreadDirect + unreadNotificationCount
   const spotlight = all.find((entry) => !entry.read) || all[0] || null
   const items =
     filter === 'all'
@@ -7926,6 +7929,15 @@ function messageCenterView(db, profile, currentUserId, options = {}, timestamp =
     filter,
     counts,
     unreadCount,
+    unread: {
+      total: unreadCount,
+      direct: totalUnreadDirect,
+      notifications: unreadNotificationCount,
+      alerts: unreadAlerts,
+      friendRequests: unreadFriendRequests,
+      announcements: unreadAnnouncements,
+      transactions: unreadTransactions,
+    },
     spotlight,
     items,
     moderation,
@@ -16351,6 +16363,73 @@ export async function getDirectMessageThread(userId, payload) {
       items,
     }
 
+    return db
+  })
+
+  return result
+}
+
+export async function markMessageCenterNotificationsRead(userId) {
+  let result
+  await updateDb((db) => {
+    const timestamp = nowIso()
+    ensureGameRoot(db, timestamp)
+
+    const profile = ensureProfile(db, userId, timestamp)
+    if (!profile) {
+      result = {
+        success: false,
+        reason: 'unauthorized',
+        errors: { global: 'Oturum bulunamadı.' },
+      }
+      return db
+    }
+
+    runGameTick(db, profile, timestamp)
+
+    let updatedCount = 0
+    const safeUserId = String(userId || '').trim()
+
+    if (Array.isArray(profile.pushCenter?.inbox)) {
+      for (const item of profile.pushCenter.inbox) {
+        if (item?.read === true) continue
+        item.read = true
+        updatedCount += 1
+      }
+    }
+
+    if (Array.isArray(profile.notifications)) {
+      for (const item of profile.notifications) {
+        if (item?.read === true) continue
+        item.read = true
+        updatedCount += 1
+      }
+    }
+
+    if (safeUserId && Array.isArray(db.friendRequests)) {
+      for (const request of db.friendRequests) {
+        if (!request || typeof request !== 'object') continue
+        if (String(request.status || '').trim().toLowerCase() !== 'pending') continue
+        const fromUserId = String(request.fromUserId || '').trim()
+        const toUserId = String(request.toUserId || '').trim()
+        if (safeUserId !== fromUserId && safeUserId !== toUserId) continue
+        const previousSeenBy = normalizeUniqueUserIdList(request.seenBy)
+        const nextSeenBy = addUserIdToList(previousSeenBy, safeUserId)
+        if (nextSeenBy.length !== previousSeenBy.length) {
+          request.seenBy = nextSeenBy
+          updatedCount += 1
+        }
+      }
+    }
+
+    if (updatedCount > 0) {
+      emitMessageCenterRefresh(userId, 'read_notifications')
+    }
+
+    result = {
+      success: true,
+      updatedCount,
+    }
     return db
   })
 
