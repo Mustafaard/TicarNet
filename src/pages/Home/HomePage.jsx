@@ -11598,7 +11598,7 @@ function HomePage({ user, onLogout }) {
         {factory.owned && !factory.isBuilding ? (
           <div className="factory-upgrade-costs">
             {factory.nextUpgrade?.maxReached ? (
-              <span className="factory-max-label">Maximum oldu (200. seviye)</span>
+              <span className="factory-max-label">Maksimum seviyeye ulaşıldı (200. seviye)</span>
             ) : (
               <>
                 <span className="factory-cost-title">
@@ -11675,7 +11675,7 @@ function HomePage({ user, onLogout }) {
                     : blockedByOtherUpgrade
                       ? 'Başka Yükseltme Aktif'
                       : factory.nextUpgrade?.maxReached
-                        ? 'Maximum oldu'
+                        ? 'Maksimum seviyede'
                         : 'Yükselt'}
               </button>
               {factory.isUpgrading ? (
@@ -11894,7 +11894,7 @@ function HomePage({ user, onLogout }) {
                       onClick={() => !factory.isUpgrading && !blockedByOtherUpgrade && !factory.nextUpgrade?.maxReached && factory.nextUpgrade?.canUpgradeNow && setFactoryUpgradeModalId(factory.id)}
                       disabled={Boolean(busy) || factory.isUpgrading || blockedByOtherUpgrade || factory.nextUpgrade?.maxReached || !factory.nextUpgrade?.canUpgradeNow}
                     >
-                      {busy === busyUpgradeKey ? 'Başlatılıyor...' : factory.isUpgrading ? 'Yükseltiliyor' : blockedByOtherUpgrade ? 'Slot dolu' : factory.nextUpgrade?.maxReached ? 'Maximum oldu' : 'Yükselt'}
+                      {busy === busyUpgradeKey ? 'Başlatılıyor...' : factory.isUpgrading ? 'Yükseltiliyor' : blockedByOtherUpgrade ? 'Yuva dolu' : factory.nextUpgrade?.maxReached ? 'Maksimum seviyede' : 'Yükselt'}
                     </button>
                   </div>
                 </article>
@@ -11973,7 +11973,7 @@ function HomePage({ user, onLogout }) {
               onClick={(e) => e.stopPropagation()}
             >
               <h2 id="factory-purchase-modal-title" className="factory-purchase-modal-title">{factoryPurchaseModal.name}</h2>
-              <p className="factory-purchase-modal-subtitle">Kurulum bilgilerini inceleyip fabrikayı kurabilirsin.</p>
+              <p className="factory-purchase-modal-subtitle">Kurulum maliyetini inceleyip fabrikanın inşaatını başlatabilirsin.</p>
 
               <div className="factory-purchase-modal-preview">
                 <span className="factory-purchase-modal-thumb" data-broken="0">
@@ -12147,22 +12147,22 @@ function HomePage({ user, onLogout }) {
               <h3>Fabrika Yükseltme</h3>
               <p>{factoryUpgradeModal.name} · Seviye {fmt(factoryUpgradeModal.level)} → {fmt(factoryUpgradeModal.nextUpgrade?.nextLevel || factoryUpgradeModal.level + 1)}</p>
               <div className="factory-upgrade-modal-preview">
-                <h4>Yükseltme sonrası kazanç</h4>
+                <h4>Yükseltme tamamlandığında</h4>
                 <p className="fleet-summary-line positive">
                   <img src={factoryUpgradeModal.outputMeta?.icon} alt="" aria-hidden="true" />
-                  Üretim: +{fmt(Math.max(0, Math.trunc(num(factoryUpgradeModal.outputPerCollect || 0) * 2)))} {factoryUpgradeModal.outputMeta?.label} / tahsilat
+                  Üretim geliri: +{fmt(Math.max(0, Math.trunc(num(factoryUpgradeModal.outputPerCollect || 0) * 2)))} {factoryUpgradeModal.outputMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line negative">
                   <img src={factoryUpgradeModal.energyMeta?.icon} alt="" aria-hidden="true" />
-                  Enerji maliyeti: -{fmt(Math.max(0, Math.trunc(num(factoryUpgradeModal.energyCostPerCollect || 0) * 2)))} {factoryUpgradeModal.energyMeta?.label} / tahsilat
+                  Tahsilat gideri: -{fmt(Math.max(0, Math.trunc(num(factoryUpgradeModal.energyCostPerCollect || 0) * 2)))} {factoryUpgradeModal.energyMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line positive">
                   <img src="/home/ui/hud/xp-icon.webp" alt="" aria-hidden="true" />
-                  XP: artacak
+                  Tahsilat XP getirisi de artar
                 </p>
               </div>
               <div className="factory-upgrade-modal-costs">
-                <h4>Yükseltme maliyeti (artmış)</h4>
+                <h4>Gerekli maliyet</h4>
                 <div className="factory-cost-grid">
                   <div className={`factory-cost-chip ${factoryUpgradeModal.missingUpgradeCash > 0 ? 'is-missing' : 'is-ready'}`.trim()}>
                     <img src="/home/icons/depot/cash.webp" alt="" aria-hidden="true" />
@@ -12178,7 +12178,7 @@ function HomePage({ user, onLogout }) {
                 <p className="fleet-gallery-note-hint">Süre: {formatBuildDuration((factoryUpgradeModal.nextUpgrade?.durationMinutes || 0) * 60 * 1000)}</p>
                 {factoryUpgradeModalBlockedBySlot ? (
                   <p className="fleet-gallery-note-hint">
-                    Yükseltme yuvası dolu: Aktif inşaat/yükseltme tamamlanınca yeniden açılır.
+                    Yükseltme yuvası dolu. Aktif inşaat veya yükseltme tamamlandığında yeniden deneyebilirsin.
                   </p>
                 ) : null}
               </div>
@@ -12197,10 +12197,10 @@ function HomePage({ user, onLogout }) {
                   {busy === `factory-upgrade:${factoryUpgradeModal.id}`
                     ? 'Başlatılıyor...'
                     : factoryUpgradeModalBlockedBySlot
-                      ? 'Slot dolu'
+                      ? 'Yuva dolu'
                       : factoryUpgradeModal.nextUpgrade?.maxReached
-                        ? 'Maximum oldu'
-                        : 'Yükselt'}
+                        ? 'Maksimum seviyede'
+                        : 'Yükseltmeyi Başlat'}
                 </button>
                 <button type="button" className="btn btn-danger fleet-modal-close" onClick={() => setFactoryUpgradeModalId('')}>Kapat</button>
               </div>

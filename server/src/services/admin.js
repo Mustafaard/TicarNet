@@ -100,13 +100,36 @@ const ADMIN_PERMS = new Set([
   PERM.ANNOUNCEMENT_MANAGE,
 ])
 
+const ADMIN_RESOURCE_ITEM_IDS = Object.freeze([
+  'gold',
+  'steel',
+  'copper',
+  'coal',
+  'cement',
+  'timber',
+  'brick',
+  'oil',
+  'energy',
+  'spare-parts',
+  'engine-kit',
+])
+const ADMIN_RESOURCE_ITEM_ID_SET = new Set(ADMIN_RESOURCE_ITEM_IDS)
+const ADMIN_RESOURCE_ITEM_ORDER = new Map(
+  ADMIN_RESOURCE_ITEM_IDS.map((itemId, index) => [itemId, index]),
+)
+
 const RESOURCE_CATALOG = Object.freeze(
   ITEM_CATALOG
     .filter((entry) => entry && typeof entry === 'object')
+    .filter((entry) => ADMIN_RESOURCE_ITEM_ID_SET.has(String(entry.id || '').trim()))
     .map((entry) => ({
       id: String(entry.id || '').trim(),
       name: String(entry.name || entry.id || '').trim() || String(entry.id || '').trim(),
     }))
+    .sort((left, right) => (
+      (ADMIN_RESOURCE_ITEM_ORDER.get(left.id) ?? Number.MAX_SAFE_INTEGER) -
+      (ADMIN_RESOURCE_ITEM_ORDER.get(right.id) ?? Number.MAX_SAFE_INTEGER)
+    ))
     .filter((entry) => entry.id),
 )
 const RESOURCE_NAME_BY_ID = new Map(RESOURCE_CATALOG.map((entry) => [entry.id, entry.name]))

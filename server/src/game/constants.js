@@ -48,6 +48,18 @@ export const ITEM_CATALOG = [
     volatility: 0.45,
   },
   {
+    id: 'brick',
+    name: 'Tu\u011fla',
+    basePrice: 76,
+    minPrice: 30,
+    maxPrice: 210,
+    targetStock: 2400,
+    minStock: 200,
+    maxStock: 4500,
+    restockPerMinute: 11,
+    volatility: 0.44,
+  },
+  {
     id: 'copper',
     name: 'Bak\u0131r',
     basePrice: 136,

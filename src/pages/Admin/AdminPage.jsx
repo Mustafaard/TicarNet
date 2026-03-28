@@ -53,6 +53,20 @@ const ANNOUNCEMENT_TYPE_OPTIONS = [
   { value: 'update', label: 'G\u00fcncelleme' },
 ]
 
+const ADMIN_RESOURCE_ICON_BY_ID = Object.freeze({
+  gold: '/home/icons/depot/gold.webp',
+  steel: '/home/icons/depot/steel.webp',
+  copper: '/home/icons/depot/copper.webp',
+  coal: '/home/icons/depot/coal.webp',
+  cement: '/home/icons/depot/cement.webp',
+  timber: '/home/icons/depot/timber.webp',
+  brick: '/home/icons/depot/brick.webp',
+  oil: '/home/icons/depot/oil.webp',
+  energy: '/home/icons/depot/enerji.png',
+  'spare-parts': '/home/icons/depot/yedekparca.webp',
+  'engine-kit': '/home/icons/depot/spare-parts.webp',
+})
+
 function toInt(v, fallback = 0) {
   const n = Number(v)
   return Number.isFinite(n) ? Math.trunc(n) : fallback
@@ -111,6 +125,10 @@ function fmtPenaltyDuration(minutesValue) {
   const hours = Math.floor(minutes / 60)
   const remainMinutes = minutes % 60
   return remainMinutes > 0 ? `${hours} saat ${remainMinutes} dakika` : `${hours} saat`
+}
+
+function adminResourceIcon(itemId) {
+  return ADMIN_RESOURCE_ICON_BY_ID[String(itemId || '').trim()] || '/home/icons/depot/capacity.png'
 }
 
 function AdminPage({ user, onLogout }) {
@@ -1042,7 +1060,7 @@ function AdminPage({ user, onLogout }) {
               type="text"
               value={emailReason}
               onChange={(e) => setEmailReason(e.target.value)}
-              placeholder="E-posta değişim nedeni (opsiyonel)"
+              placeholder="E-posta değişim nedeni (isteğe bağlı)"
               maxLength={160}
             />
             <button
@@ -1073,7 +1091,7 @@ function AdminPage({ user, onLogout }) {
               type="text"
               value={passwordReason}
               onChange={(e) => setPasswordReason(e.target.value)}
-              placeholder="Şifre değişim nedeni (opsiyonel)"
+              placeholder="Şifre değişim nedeni (isteğe bağlı)"
               maxLength={160}
             />
             <button
@@ -1179,9 +1197,9 @@ function AdminPage({ user, onLogout }) {
       ) : null}
 
       {isAdmin && (canCashGrant || canDiaGrant || canCashRevoke || canDiaRevoke || canResourceGrant || canResourceRevoke) ? (
-        <section className="admin-card">
-          <h2>3) Ekonomi İşlemleri</h2>
-          <p className="admin-reason-flag">Neden alanı opsiyoneldir. Dilersen boş bırakabilirsin.</p>
+        <section className="admin-card admin-card-economy">
+          <h2>3) Ekonomi ve Depo İşlemleri</h2>
+          <p className="admin-reason-flag">Açıklama alanı isteğe bağlıdır. Dilersen boş bırakabilirsin.</p>
           <div className="admin-economy-grid">
             {(canCashGrant || canCashRevoke) ? (
               <article className="admin-economy-card">
@@ -1189,14 +1207,14 @@ function AdminPage({ user, onLogout }) {
                 {canCashGrant ? (
                   <div className="admin-row admin-row-compact">
                     <input type="number" value={cashAdd} onChange={(e) => setCashAdd(e.target.value)} placeholder="Eklenecek nakit" />
-                    <input type="text" className="admin-reason-input" value={cashAddReason} onChange={(e) => setCashAddReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
+                    <input type="text" className="admin-reason-input" value={cashAddReason} onChange={(e) => setCashAddReason(e.target.value)} placeholder="İşlem notu (isteğe bağlı)" maxLength={160} />
                     <button type="button" disabled={!selected || busy === 'cash-grant'} onClick={() => void runEconomy('grant', 'cash')}>{busy === 'cash-grant' ? 'İşleniyor...' : 'Nakit Ekle'}</button>
                   </div>
                 ) : null}
                 {canCashRevoke ? (
                   <div className="admin-row admin-row-compact">
                     <input type="number" value={cashSub} onChange={(e) => setCashSub(e.target.value)} placeholder="Düşülecek nakit" />
-                    <input type="text" className="admin-reason-input" value={cashSubReason} onChange={(e) => setCashSubReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
+                    <input type="text" className="admin-reason-input" value={cashSubReason} onChange={(e) => setCashSubReason(e.target.value)} placeholder="İşlem notu (isteğe bağlı)" maxLength={160} />
                     <button type="button" className="btn-danger" disabled={!selected || busy === 'cash-revoke'} onClick={() => void runEconomy('revoke', 'cash')}>{busy === 'cash-revoke' ? 'İşleniyor...' : 'Nakit Düş'}</button>
                   </div>
                 ) : null}
@@ -1209,14 +1227,14 @@ function AdminPage({ user, onLogout }) {
                 {canDiaGrant ? (
                   <div className="admin-row admin-row-compact">
                     <input type="number" value={diaAdd} onChange={(e) => setDiaAdd(e.target.value)} placeholder="Eklenecek elmas" />
-                    <input type="text" className="admin-reason-input" value={diaAddReason} onChange={(e) => setDiaAddReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
+                    <input type="text" className="admin-reason-input" value={diaAddReason} onChange={(e) => setDiaAddReason(e.target.value)} placeholder="İşlem notu (isteğe bağlı)" maxLength={160} />
                     <button type="button" disabled={!selected || busy === 'dia-grant'} onClick={() => void runEconomy('grant', 'diamond')}>{busy === 'dia-grant' ? 'İşleniyor...' : 'Elmas Ekle'}</button>
                   </div>
                 ) : <p className="admin-inline-note">Elmas ekleme bu hesapta kapalı.</p>}
                 {canDiaRevoke ? (
                   <div className="admin-row admin-row-compact">
                     <input type="number" value={diaSub} onChange={(e) => setDiaSub(e.target.value)} placeholder="Düşülecek elmas" />
-                    <input type="text" className="admin-reason-input" value={diaSubReason} onChange={(e) => setDiaSubReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
+                    <input type="text" className="admin-reason-input" value={diaSubReason} onChange={(e) => setDiaSubReason(e.target.value)} placeholder="İşlem notu (isteğe bağlı)" maxLength={160} />
                     <button type="button" className="btn-danger" disabled={!selected || busy === 'dia-revoke'} onClick={() => void runEconomy('revoke', 'diamond')}>{busy === 'dia-revoke' ? 'İşleniyor...' : 'Elmas Düş'}</button>
                   </div>
                 ) : null}
@@ -1229,30 +1247,40 @@ function AdminPage({ user, onLogout }) {
                 {resourceCatalog.length ? (
                   <>
                     <div className="admin-resource-row">
-                      <label htmlFor="admin-resource-item">Kaynak Seçimi</label>
-                      <select
-                        id="admin-resource-item"
-                        value={resourceItemId}
-                        onChange={(event) => setResourceItemId(event.target.value)}
-                      >
-                        {resourceCatalog.map((entry) => (
-                          <option key={entry.id} value={entry.id}>{entry.name} ({entry.id})</option>
-                        ))}
-                      </select>
+                      <span className="admin-resource-label">Kaynak Seçimi</span>
+                      <div id="admin-resource-item" className="admin-resource-chip-grid" role="listbox" aria-label="Depo kaynağı seçimi">
+                        {resourceCatalog.map((entry) => {
+                          const active = resourceItemId === entry.id
+                          return (
+                            <button
+                              key={entry.id}
+                              type="button"
+                              className={`admin-resource-chip ${active ? 'is-selected' : ''}`.trim()}
+                              aria-pressed={active}
+                              onClick={() => setResourceItemId(entry.id)}
+                              title={entry.name}
+                            >
+                              <img src={adminResourceIcon(entry.id)} alt="" aria-hidden="true" />
+                              <span>{entry.name}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                      <p className="admin-resource-help">Sadece oyunda aktif kullanılan depo kaynakları gönderilip düşürülebilir.</p>
                     </div>
 
                     {canResourceGrant ? (
                       <div className="admin-row admin-row-compact">
-                        <input type="number" value={resourceAddAmount} onChange={(e) => setResourceAddAmount(e.target.value)} placeholder="Eklenecek miktar" />
-                        <input type="text" className="admin-reason-input" value={resourceAddReason} onChange={(e) => setResourceAddReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
+                        <input type="number" value={resourceAddAmount} onChange={(e) => setResourceAddAmount(e.target.value)} placeholder="Eklenecek kaynak miktarı" />
+                        <input type="text" className="admin-reason-input" value={resourceAddReason} onChange={(e) => setResourceAddReason(e.target.value)} placeholder="İşlem notu (isteğe bağlı)" maxLength={160} />
                         <button type="button" disabled={!selected || busy === 'resource-grant'} onClick={() => void runResourceInventory('grant')}>{busy === 'resource-grant' ? 'İşleniyor...' : 'Kaynak Ekle'}</button>
                       </div>
                     ) : null}
 
                     {canResourceRevoke ? (
                       <div className="admin-row admin-row-compact">
-                        <input type="number" value={resourceSubAmount} onChange={(e) => setResourceSubAmount(e.target.value)} placeholder="Düşülecek miktar" />
-                        <input type="text" className="admin-reason-input" value={resourceSubReason} onChange={(e) => setResourceSubReason(e.target.value)} placeholder="Neden (opsiyonel)" maxLength={160} />
+                        <input type="number" value={resourceSubAmount} onChange={(e) => setResourceSubAmount(e.target.value)} placeholder="Düşülecek kaynak miktarı" />
+                        <input type="text" className="admin-reason-input" value={resourceSubReason} onChange={(e) => setResourceSubReason(e.target.value)} placeholder="İşlem notu (isteğe bağlı)" maxLength={160} />
                         <button type="button" className="btn-danger" disabled={!selected || busy === 'resource-revoke'} onClick={() => void runResourceInventory('revoke')}>{busy === 'resource-revoke' ? 'İşleniyor...' : 'Kaynak Düş'}</button>
                       </div>
                     ) : null}
@@ -1300,7 +1328,7 @@ function AdminPage({ user, onLogout }) {
           <h2>5) Moderatör Yönetimi</h2>
           <p className="admin-meta">Admin panelinde moderatör listesi ve moderatörlükten Çıkarma işlemi buradan yapılır.</p>
           <div className="admin-row">
-            <input type="text" value={roleReason} onChange={(e) => setRoleReason(e.target.value)} placeholder="Rol değişim nedeni (opsiyonel)" maxLength={160} />
+            <input type="text" value={roleReason} onChange={(e) => setRoleReason(e.target.value)} placeholder="Rol değişim nedeni (isteğe bağlı)" maxLength={160} />
             <div className="admin-role-actions">
               <button type="button" disabled={!selected || roleOf(selected?.role) === 'moderator' || busy === `role:moderator:${selected?.id || ''}`} onClick={() => void changeRole('moderator')}>Moderatör Yap</button>
               <button type="button" className="btn-secondary" disabled={!selected || roleOf(selected?.role) === 'player' || busy === `role:player:${selected?.id || ''}`} onClick={() => void changeRole('player')}>Moderatörlükten Çıkar</button>
@@ -1360,7 +1388,7 @@ function AdminPage({ user, onLogout }) {
               type="text"
               value={announcementTitle}
               onChange={(e) => setAnnouncementTitle(e.target.value)}
-              placeholder="Duyuru başlığı (opsiyonel)"
+              placeholder="Duyuru başlığı (isteğe bağlı)"
               maxLength={80}
             />
             <textarea

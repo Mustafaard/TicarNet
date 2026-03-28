@@ -1080,6 +1080,12 @@ function tickFactories(profile, timestamp) {
       }
       state.upgrading = createDefaultFactoryUpgradeState(template)
       state.updatedAt = timestamp
+      pushNotification(
+        profile,
+        'factory',
+        `${template.name || template.id} yükseltmesi tamamlandı. Fabrika artık seviye ${state.level}.`,
+        timestamp,
+      )
     } else {
       state.upgrading = normalizeFactoryUpgradeState(upgrading, template)
     }
@@ -9902,7 +9908,6 @@ export async function startMineDig(userId, mineId) {
     state.nextDigAt = new Date(nowMs + cooldownMs).toISOString()
     state.collectReadyAt = ''
     state.updatedAt = timestamp
-    pushNotification(profile, 'mine', `${template?.name || 'Maden'} kazısı başlatıldı. Tahsilat süresi dolunca bildirim alacaksınız.`, timestamp)
     result = {
       success: true,
       message: `${template?.name || 'Maden'} kazısı başladı.`,

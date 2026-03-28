@@ -6,6 +6,9 @@
   --panel-border: rgba(123, 152, 183, 0.28);
   --panel-shadow: 0 14px 32px rgba(5, 10, 20, 0.34);
   --action: #2d8cff;
+  --action-deep: #1166d7;
+  --gold: #efc15c;
+  --gold-soft: #ffd98c;
   --danger: #d24646;
   --ok: #3dbb77;
   min-height: 100dvh;
@@ -51,12 +54,25 @@
 }
 
 .admin-card {
-  border: 1px solid var(--panel-border);
-  background: linear-gradient(180deg, rgba(13, 23, 38, 0.92), var(--panel));
+  border: 1px solid rgba(122, 154, 190, 0.26);
+  background:
+    linear-gradient(180deg, rgba(15, 27, 44, 0.96), rgba(8, 15, 26, 0.88)),
+    var(--panel);
   border-radius: 14px;
   padding: 14px;
   margin-bottom: 12px;
   box-shadow: var(--panel-shadow);
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-card::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(239, 193, 92, 0.7), transparent);
+  pointer-events: none;
 }
 
 .admin-card h2 {
@@ -127,7 +143,11 @@
 .admin-reason-flag {
   margin: 2px 2px 8px;
   font-size: 0.82rem;
-  color: #ff9a9a;
+  color: #ffd3d3;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(231, 101, 101, 0.4);
+  background: linear-gradient(180deg, rgba(84, 23, 28, 0.6), rgba(52, 17, 22, 0.45));
 }
 
 .admin-reason-input {
@@ -149,12 +169,15 @@
 }
 
 .admin-economy-card {
-  border: 1px solid rgba(126, 159, 194, 0.3);
-  border-radius: 12px;
-  background: rgba(8, 14, 25, 0.82);
+  border: 1px solid rgba(123, 157, 194, 0.28);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at top right, rgba(239, 193, 92, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(10, 19, 34, 0.94), rgba(7, 13, 24, 0.86));
   padding: 12px;
   display: grid;
   gap: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .admin-economy-head {
@@ -166,6 +189,7 @@
 .admin-economy-head h3 {
   margin: 0;
   font-size: 0.98rem;
+  color: #f6f8ff;
 }
 
 .admin-economy-icon {
@@ -179,9 +203,64 @@
   gap: 6px;
 }
 
-.admin-resource-row label {
+.admin-resource-row label,
+.admin-resource-label {
   font-size: 0.78rem;
-  color: #b9cce4;
+  color: #d5e5f8;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-resource-chip-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+  gap: 8px;
+}
+
+.admin-resource-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border-radius: 14px;
+  border: 1px solid rgba(118, 150, 185, 0.28);
+  background: linear-gradient(180deg, rgba(11, 21, 36, 0.96), rgba(8, 15, 27, 0.88));
+  color: #d9e8fb;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+.admin-resource-chip img {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex: 0 0 18px;
+}
+
+.admin-resource-chip:hover {
+  border-color: rgba(239, 193, 92, 0.52);
+  transform: translateY(-1px);
+}
+
+.admin-resource-chip.is-selected {
+  color: #fff8e6;
+  border-color: rgba(239, 193, 92, 0.74);
+  background:
+    radial-gradient(circle at top, rgba(255, 219, 128, 0.22), transparent 55%),
+    linear-gradient(180deg, rgba(45, 82, 130, 0.95), rgba(22, 44, 79, 0.92));
+  box-shadow: 0 10px 24px rgba(6, 14, 30, 0.3), inset 0 0 0 1px rgba(255, 225, 153, 0.16);
+}
+
+.admin-resource-help {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
 }
 
 .admin-role-actions {
@@ -328,18 +407,20 @@
 
 .admin-page button {
   border: none;
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 10px 13px;
   font-size: 0.84rem;
   font-weight: 700;
-  background: linear-gradient(180deg, #3d9eff, var(--action));
+  background: linear-gradient(180deg, #55a8ff, var(--action-deep));
   color: #f7fbff;
   cursor: pointer;
-  transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+  transition: transform 0.12s ease, filter 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 10px 18px rgba(14, 57, 116, 0.28);
 }
 
 .admin-page button:hover {
   filter: brightness(1.03);
+  box-shadow: 0 12px 22px rgba(14, 57, 116, 0.34);
 }
 
 .admin-page button:active {
@@ -358,6 +439,7 @@
 
 .btn-danger {
   background: linear-gradient(180deg, #df5757, var(--danger));
+  box-shadow: 0 10px 18px rgba(97, 24, 24, 0.22);
 }
 
 .admin-feedback {
@@ -394,8 +476,8 @@
 }
 
 .admin-user-card.is-selected {
-  border-color: rgba(64, 156, 255, 0.92);
-  box-shadow: 0 0 0 1px rgba(64, 156, 255, 0.28);
+  border-color: rgba(239, 193, 92, 0.88);
+  box-shadow: 0 0 0 1px rgba(239, 193, 92, 0.2), 0 18px 34px rgba(6, 14, 26, 0.22);
 }
 
 .admin-user-actions {
