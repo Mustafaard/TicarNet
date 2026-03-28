@@ -12,8 +12,6 @@ const USERNAME_MIN_LENGTH = 3
 const USERNAME_MAX_LENGTH = 15
 const USERNAME_PATTERN =
   /^(?=.{3,15}$)[A-Za-z0-9ÇĞİÖŞÜçğıöşü](?:[A-Za-z0-9ÇĞİÖŞÜçğıöşü ]*[A-Za-z0-9ÇĞİÖŞÜçğıöşü])$/
-const RESERVED_ADMIN_USERNAME = 'admin'
-const RESERVED_ADMIN_OWNER_EMAIL = 'mustafaard76@gmail.com'
 const PASSWORD_MIN_LENGTH = 8
 const PASSWORD_MAX_LENGTH = 64
 
@@ -32,15 +30,6 @@ function isStrongEnoughPassword(password) {
 
 function normalizeComparableSecret(value) {
   return String(value || '').trim().toLowerCase()
-}
-
-function isReservedAdminUsername(username) {
-  const safe = normalizeComparableSecret(username).replace(/\s+/g, '')
-  return safe === RESERVED_ADMIN_USERNAME
-}
-
-function canUseReservedAdminUsername(email) {
-  return normalizeComparableSecret(email) === normalizeComparableSecret(RESERVED_ADMIN_OWNER_EMAIL)
 }
 
 function isPasswordSameAsIdentity(password, ...identities) {
@@ -195,8 +184,6 @@ function validateRegisterInput(values) {
   } else if (!USERNAME_PATTERN.test(username)) {
     errors.username =
       'Kullanıcı adı 3-15 karakter olmalı; harf, rakam ve boşluk dışında karakter içermemelidir.'
-  } else if (isReservedAdminUsername(username) && !canUseReservedAdminUsername(email)) {
-    errors.username = '"admin" kullanıcı adı sadece yetkili hesapta kullanılabilir.'
   }
 
   if (!email) {

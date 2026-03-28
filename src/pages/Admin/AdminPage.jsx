@@ -1005,7 +1005,7 @@ function AdminPage({ user, onLogout }) {
               type="email"
               value={emailNext}
               onChange={(e) => setEmailNext(e.target.value)}
-              placeholder="Yeni e-posta (Gmail / Outlook / Hotmail)"
+              placeholder="Yeni e-posta (herhangi bir sağlayıcı)"
               autoComplete="off"
             />
             <input

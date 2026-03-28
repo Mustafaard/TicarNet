@@ -49,6 +49,17 @@ const REGISTER_FORM_DRAFT_TTL_MS = 30 * 60 * 1000
 const TUTORIAL_PENDING_KEY = 'ticarnet_tutorial_pending'
 const USERNAME_MAX_LENGTH = 15
 
+function sanitizeEmailDraftValue(value) {
+  const safe = String(value || '').replace(/\s+/g, '').toLowerCase()
+  if (!safe) return ''
+  if ((safe.match(/@/g) || []).length > 1) return null
+  for (let index = 0; index < safe.length; index += 1) {
+    const code = safe.charCodeAt(index)
+    if (code <= 31 || code === 127) return null
+  }
+  return safe
+}
+
 function normalizeFeedbackMessage(value) {
   if (typeof value === 'string') {
     const text = value.trim()
@@ -311,12 +322,11 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
     let nextValue = value
 
     if (name === 'email') {
-      const raw = value.replace(/\s+/g, '').toLowerCase()
-      // E-posta alanında sadece geçerli e-posta karakterlerine izin ver.
-      if (!/^[a-z0-9._%+-]*@?[a-z0-9.-]*$/.test(raw)) {
+      const safeEmail = sanitizeEmailDraftValue(value)
+      if (safeEmail === null) {
         return
       }
-      nextValue = raw
+      nextValue = safeEmail
     } else if (name === 'username') {
       // Kullanıcı adı: harf/rakam/boşluk, en fazla 15 karakter.
       nextValue = String(value || '')
@@ -335,8 +345,8 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
 
   const handleForgotChange = (event) => {
     const { name, value } = event.target
-    const sanitized = value.replace(/\s+/g, '').toLowerCase()
-    if (!/^[a-z0-9._%+-]*@?[a-z0-9.-]*$/.test(sanitized)) {
+    const sanitized = sanitizeEmailDraftValue(value)
+    if (sanitized === null) {
       return
     }
 

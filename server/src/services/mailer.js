@@ -19,7 +19,7 @@ function escapeHtml(value) {
 function createSmtpConfigError() {
   const missing = getSmtpMissingEnvVars()
   const error = new Error(
-    `SMTP ayarları eksik: ${missing.join(', ')}. server/.env içinde Gmail için SMTP_USER + SMTP_APP_PASSWORD (uygulama şifresi) + MAIL_FROM tanımlayın.`,
+    `SMTP ayarları eksik: ${missing.join(', ')}. server/.env içinde SMTP_USER + SMTP_APP_PASSWORD + MAIL_FROM tanımlayın.`,
   )
   error.code = 'SMTP_CONFIG_MISSING'
   error.missing = missing
