@@ -2808,6 +2808,7 @@ function HomePage({ user, onLogout }) {
   const [avatarCropFile, setAvatarCropFile] = useState(null)
   const [avatarCropFileName, setAvatarCropFileName] = useState('')
   const [avatarCropMode, setAvatarCropMode] = useState('crop')
+  const [avatarChangeConfirmOpen, setAvatarChangeConfirmOpen] = useState(false)
   const [avatarCropZoom, setAvatarCropZoom] = useState(1)
   const [avatarCropOffsetX, setAvatarCropOffsetX] = useState(0)
   const [avatarCropOffsetY, setAvatarCropOffsetY] = useState(0)
@@ -5791,6 +5792,18 @@ function HomePage({ user, onLogout }) {
       setError(`Avatar değiştirmek için ${AVATAR_CHANGE_COST_DIAMONDS} elmas gerekli.`)
       return
     }
+    setAvatarChangeConfirmOpen(true)
+  }, [busy, overview?.profile?.reputation])
+
+  const confirmAvatarFilePicker = useCallback(() => {
+    if (busy) return
+    const currentDiamonds = Math.max(0, Math.trunc(num(overview?.profile?.reputation || 0)))
+    if (currentDiamonds < AVATAR_CHANGE_COST_DIAMONDS) {
+      setAvatarChangeConfirmOpen(false)
+      setError(`Avatar değiştirmek için ${AVATAR_CHANGE_COST_DIAMONDS} elmas gerekli.`)
+      return
+    }
+    setAvatarChangeConfirmOpen(false)
     avatarFileInputRef.current?.click()
   }, [busy, overview?.profile?.reputation])
 
@@ -5801,8 +5814,6 @@ function HomePage({ user, onLogout }) {
       setError(`Avatar değiştirmek için ${AVATAR_CHANGE_COST_DIAMONDS} elmas gerekli.`)
       return
     }
-    const confirmed = window.confirm('Bunu yapmak istediğinize emin misiniz?')
-    if (!confirmed) return
 
     setBusy('avatar-upload')
     setError('')
@@ -8215,6 +8226,20 @@ function HomePage({ user, onLogout }) {
         }
       }),
     [inventoryById, overview?.profile?.wallet, overview?.profile?.reputation],
+  )
+
+  const warehouseDisplayCards = useMemo(
+    () =>
+      warehouseCards.filter((item) => {
+        const itemId = String(item?.id || '').trim()
+        const shouldHide =
+          item?.fromWallet === true ||
+          item?.fromReputation === true ||
+          itemId === 'cash' ||
+          itemId === 'diamond'
+        return !shouldHide
+      }),
+    [warehouseCards],
   )
 
   const warehouseTotalQuantity = useMemo(
@@ -17752,6 +17777,34 @@ function HomePage({ user, onLogout }) {
           aria-label="Avatar dosyası seç"
         />
 
+        {avatarChangeConfirmOpen ? (
+          <section
+            className="avatar-confirm-overlay"
+            aria-modal="true"
+            role="dialog"
+            onClick={() => setAvatarChangeConfirmOpen(false)}
+          >
+            <article className="avatar-confirm-modal" onClick={(event) => event.stopPropagation()}>
+              <h3>Avatar Değişim Onayı</h3>
+              <p>
+                Bu işlem için <strong>{fmt(AVATAR_CHANGE_COST_DIAMONDS)} elmas</strong> harcanacak.
+                Devam etmek istiyor musunuz?
+              </p>
+              <p className="avatar-confirm-balance">
+                Mevcut elmasınız: <strong>{fmt(Math.max(0, Math.trunc(num(overview?.profile?.reputation || 0))))}</strong>
+              </p>
+              <div className="avatar-confirm-actions">
+                <button type="button" className="btn btn-primary" onClick={confirmAvatarFilePicker}>
+                  Evet
+                </button>
+                <button type="button" className="btn btn-ghost" onClick={() => setAvatarChangeConfirmOpen(false)}>
+                  Hayır
+                </button>
+              </div>
+            </article>
+          </section>
+        ) : null}
+
         {tab === 'home' ? (
           <header className="hud">
             <article className="hero-card">
@@ -18910,7 +18963,7 @@ function HomePage({ user, onLogout }) {
             </div>
 
             <div className="warehouse-grid">
-              {warehouseCards.map((item) => (
+              {warehouseDisplayCards.map((item) => (
                 <article key={item.id} className="warehouse-item">
                   <span className="warehouse-item-icon" data-broken={item.forceEmoji ? '1' : '0'}>
                     {!item.forceEmoji ? (
