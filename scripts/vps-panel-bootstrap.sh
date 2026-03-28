@@ -210,6 +210,7 @@ apt-get update -y
 apt-get install -y git curl ca-certificates
 
 mkdir -p "${APP_BASE_DIR}"
+git config --global --add safe.directory "${APP_DIR}" >/dev/null 2>&1 || true
 
 if [[ -d "${APP_DIR}/.git" ]]; then
   git -C "${APP_DIR}" fetch --all --prune
