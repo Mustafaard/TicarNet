@@ -411,6 +411,20 @@ server {
     try_files \$uri =404;
   }
 
+  location = /index.html {
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
+    try_files \$uri =404;
+  }
+
+  location ~* \.html$ {
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
+    try_files \$uri =404;
+  }
+
   location = /download/ticarnet.apk {
     default_type application/vnd.android.package-archive;
     add_header Content-Disposition 'attachment; filename="ticarnet.apk"' always;
@@ -452,6 +466,9 @@ server {
   }
 
   location / {
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+    add_header Pragma "no-cache" always;
+    add_header Expires "0" always;
     try_files \$uri \$uri/ /index.html;
   }
 }

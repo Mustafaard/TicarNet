@@ -246,6 +246,66 @@ ensure_apk_public_artifacts() {
   echo "[deploy] APK public dosyalari senkronlandi: $dist_download_dir"
 }
 
+ensure_nginx_html_no_cache() {
+  local conf=""
+  for candidate in \
+    "/etc/nginx/sites-available/ticarnet.conf" \
+    "/etc/nginx/sites-enabled/ticarnet.conf"; do
+    if [[ -f "$candidate" ]]; then
+      conf="$candidate"
+      break
+    fi
+  done
+
+  if [[ -z "$conf" ]]; then
+    echo "[deploy] Nginx config bulunamadi, html no-cache adimi atlandi."
+    return 0
+  fi
+
+  if grep -q "location = /index.html" "$conf"; then
+    echo "[deploy] Nginx html no-cache kurali zaten mevcut."
+  else
+    local backup_path="${conf}.bak.$(date +%Y%m%d_%H%M%S)"
+    cp "$conf" "$backup_path"
+    echo "[deploy] Nginx config yedeklendi: $backup_path"
+
+    perl -0777 -i -pe '
+      unless (/location = \/index\.html/s) {
+        s@\n  location / \{\n@
+  location = /index.html {\n
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;\n
+    add_header Pragma "no-cache" always;\n
+    add_header Expires "0" always;\n
+    try_files \$uri =404;\n
+  }\n
+\n
+  location ~* \\.html\$ {\n
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;\n
+    add_header Pragma "no-cache" always;\n
+    add_header Expires "0" always;\n
+    try_files \$uri =404;\n
+  }\n
+\n
+  location / {\n
+    add_header Cache-Control "no-store, no-cache, must-revalidate" always;\n
+    add_header Pragma "no-cache" always;\n
+    add_header Expires "0" always;\n
+@s;
+      }
+    ' "$conf"
+  fi
+
+  if command -v nginx >/dev/null 2>&1; then
+    if nginx -t; then
+      if command -v systemctl >/dev/null 2>&1; then
+        systemctl reload nginx || echo "[deploy] Uyari: nginx reload basarisiz."
+      fi
+    else
+      echo "[deploy] Uyari: Nginx test basarisiz. Config geri kontrol et."
+    fi
+  fi
+}
+
 backup_db_if_exists() {
   local db_file="${1:-}"
   if [[ -z "$db_file" || ! -f "$db_file" ]]; then
@@ -334,6 +394,7 @@ npm run check:production-env
 echo "[deploy] Web build"
 npm run build
 ensure_apk_public_artifacts
+ensure_nginx_html_no_cache
 
 echo "[deploy] PM2 reload"
 pm2 startOrReload "$PROJECT_ROOT/ecosystem.config.cjs" --update-env
