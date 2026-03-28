@@ -43,6 +43,12 @@ Temiz Ubuntu ekrani geldiyse su tek satir yeterlidir:
 apt-get update -y && apt-get install -y curl ca-certificates && bash <(curl -fsSL https://raw.githubusercontent.com/Mustafaard/TicarNet/main/scripts/vps-panel-bootstrap.sh) --non-interactive --domain ticarnet.tr --email mustafaard76@gmail.com --repo-url https://github.com/Mustafaard/TicarNet.git --branch main --smtp-user mustafaard76@gmail.com --support-inbox-email mustafaard76@gmail.com --mail-from "TicarNet Online <mustafaard76@gmail.com>"
 ```
 
+DNS hazir degilse gecici HTTP/IP kurulumu:
+
+```bash
+apt-get update -y && apt-get install -y curl ca-certificates && bash <(curl -fsSL https://raw.githubusercontent.com/Mustafaard/TicarNet/main/scripts/vps-panel-bootstrap.sh) --non-interactive --skip-ssl --domain 178.210.161.210 --public-base-url http://178.210.161.210 --repo-url https://github.com/Mustafaard/TicarNet.git --branch main --smtp-user mustafaard76@gmail.com --support-inbox-email mustafaard76@gmail.com --mail-from "TicarNet Online <mustafaard76@gmail.com>"
+```
+
 ## 2) Ilk Kurulum
 
 ```bash

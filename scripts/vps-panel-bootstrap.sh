@@ -25,6 +25,7 @@ MAIL_FROM_ARG=""
 SMTP_APP_PASSWORD_ARG=""
 FIREBASE_AUTH_ENABLED_ARG=""
 FIREBASE_WEB_API_KEY_ARG=""
+PUBLIC_BASE_URL_ARG=""
 
 ask() {
   local prompt="$1"
@@ -53,6 +54,7 @@ Opsiyonlar:
   --smtp-app-password PASS
   --firebase-auth-enabled true|false
   --firebase-web-api-key KEY
+  --public-base-url URL
   --skip-ssl
   --non-interactive
   -h, --help
@@ -99,6 +101,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --firebase-web-api-key)
       FIREBASE_WEB_API_KEY_ARG="${2:-}"
+      shift 2
+      ;;
+    --public-base-url)
+      PUBLIC_BASE_URL_ARG="${2:-}"
       shift 2
       ;;
     --skip-ssl)
@@ -191,6 +197,15 @@ if [[ "$FIREBASE_AUTH_ENABLED" == "true" && -z "${FIREBASE_WEB_API_KEY:-}" ]]; t
   exit 1
 fi
 
+PUBLIC_BASE_URL="${PUBLIC_BASE_URL_ARG:-}"
+if [[ -z "$PUBLIC_BASE_URL" ]]; then
+  if [[ "$ENABLE_SSL" == "1" ]]; then
+    PUBLIC_BASE_URL="https://${DOMAIN}"
+  else
+    PUBLIC_BASE_URL="http://${DOMAIN}"
+  fi
+fi
+
 apt-get update -y
 apt-get install -y git curl ca-certificates
 
@@ -211,7 +226,7 @@ SETUP_ARGS=(
   --domain "${DOMAIN}"
   --repo-url "${REPO_URL}"
   --branch "${BRANCH}"
-  --public-base-url "https://${DOMAIN}"
+  --public-base-url "${PUBLIC_BASE_URL}"
   --firebase-auth-enabled "${FIREBASE_AUTH_ENABLED}"
   --firebase-web-api-key "${FIREBASE_WEB_API_KEY:-}"
   --smtp-user "${SMTP_USER}"
