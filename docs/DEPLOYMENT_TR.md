@@ -49,6 +49,22 @@ DNS hazir degilse gecici HTTP/IP kurulumu:
 apt-get update -y && apt-get install -y curl ca-certificates && bash <(curl -fsSL https://raw.githubusercontent.com/Mustafaard/TicarNet/main/scripts/vps-panel-bootstrap.sh) --non-interactive --skip-ssl --domain 178.210.161.210 --public-base-url http://178.210.161.210 --repo-url https://github.com/Mustafaard/TicarNet.git --branch main --smtp-user mustafaard76@gmail.com --support-inbox-email mustafaard76@gmail.com --mail-from "TicarNet Online <mustafaard76@gmail.com>"
 ```
 
+VNC terminal uzun argumanlari bozarsa:
+
+```bash
+apt-get update -y
+apt-get install -y git curl ca-certificates
+rm -rf /root/TicarNet
+git clone --depth 1 https://github.com/Mustafaard/TicarNet.git /root/TicarNet
+cd /root/TicarNet
+export DOMAIN=178.210.161.210
+export PUBLIC_BASE_URL=http://178.210.161.210
+export ENABLE_SSL=0
+export NON_INTERACTIVE=1
+export FIREBASE_AUTH_ENABLED=false
+bash scripts/vps-panel-bootstrap.sh
+```
+
 ## 2) Ilk Kurulum
 
 ```bash
