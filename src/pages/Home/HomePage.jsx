@@ -2818,6 +2818,7 @@ function HomePage({ user, onLogout }) {
     avatarUrl: '',
     newPassword: '',
     confirmPassword: '',
+    deleteEmail: '',
     deletePassword: '',
   }))
   const [supportForm, setSupportForm] = useState({
@@ -5931,7 +5932,17 @@ function HomePage({ user, onLogout }) {
 
   const deleteOwnAccountAction = async () => {
     if (busy) return
+    const confirmEmail = String(profileAccountForm.deleteEmail || '').trim()
     const currentPassword = String(profileAccountForm.deletePassword || '')
+    if (!confirmEmail) {
+      setError('Hesabı kalıcı silmek için kayıtlı e-posta adresini girmelisin.')
+      return
+    }
+    const currentAccountEmail = String(user?.email || '').trim().toLowerCase()
+    if (currentAccountEmail && confirmEmail.toLowerCase() !== currentAccountEmail) {
+      setError('Girilen e-posta bu hesapla eşleşmiyor.')
+      return
+    }
     if (!currentPassword) {
       setError('Hesabı kalıcı silmek için mevcut şifreni girmelisin.')
       return
@@ -5941,12 +5952,13 @@ function HomePage({ user, onLogout }) {
 
     setBusy('profile-delete-account')
     setError('')
-    const response = await deleteCurrentUserAccount({ currentPassword })
+    const response = await deleteCurrentUserAccount({ currentPassword, confirmEmail })
     setBusy('')
     if (!response?.success) return fail(response, 'Hesap silinemedi.')
 
     setProfileAccountForm((prev) => ({
       ...prev,
+      deleteEmail: '',
       deletePassword: '',
     }))
     onLogout(response.message || 'Hesabın kalıcı olarak silindi.')
@@ -16204,6 +16216,18 @@ function HomePage({ user, onLogout }) {
           <p className="settings-danger-text">
             Bu işlem geri alınamaz. Hesabın, envanterin, mesajların ve ilişkili oyun verilerin kalıcı olarak silinir.
           </p>
+          <label className="settings-field-label" htmlFor="settings-account-delete-email">Kayıtlı e-postanı tekrar gir</label>
+          <input
+            id="settings-account-delete-email"
+            className="qty-input settings-input"
+            type="email"
+            value={profileAccountForm.deleteEmail}
+            onChange={(event) => {
+              setProfileAccountForm((prev) => ({ ...prev, deleteEmail: String(event.target.value || '').slice(0, 120) }))
+            }}
+            placeholder="Kayıtlı e-posta adresin"
+            autoComplete="email"
+          />
           <label className="settings-field-label" htmlFor="settings-account-delete-password">Şifreni tekrar gir</label>
           <input
             id="settings-account-delete-password"

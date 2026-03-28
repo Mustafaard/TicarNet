@@ -1852,7 +1852,15 @@ export async function deleteAccountForUser(userId, payload) {
 }
 
 export async function deleteAccountPermanentlyForUser(userId, payload) {
+  const confirmEmail = normalize(payload?.confirmEmail)
   const currentPassword = String(payload?.currentPassword || '')
+  if (!confirmEmail) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { confirmEmail: 'Kayıtlı e-posta zorunludur.' },
+    }
+  }
   if (!currentPassword) {
     return {
       success: false,
@@ -1870,6 +1878,13 @@ export async function deleteAccountPermanentlyForUser(userId, payload) {
       success: false,
       reason: 'unauthorized',
       errors: { global: 'Oturum bulunamadı.' },
+    }
+  }
+  if (normalize(existingUser.email) !== confirmEmail) {
+    return {
+      success: false,
+      reason: 'invalid_email',
+      errors: { confirmEmail: 'Kayıtlı e-posta adresi eşleşmiyor.' },
     }
   }
 

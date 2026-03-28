@@ -242,6 +242,8 @@ authRouter.post('/delete-account', requireAuth, requireTurkeyAccess, async (req,
       const status =
         result.reason === 'invalid_password'
           ? 401
+          : result.reason === 'invalid_email'
+          ? 401
           : result.reason === 'validation'
             ? 400
             : result.reason === 'unauthorized'

@@ -497,7 +497,15 @@ export async function getRecentRegisteredPlayers(limit = 12) {
 }
 
 export async function deleteCurrentUserAccount(values) {
+  const confirmEmail = String(values?.confirmEmail || '').trim()
   const currentPassword = String(values?.currentPassword || '')
+  if (!confirmEmail) {
+    return {
+      success: false,
+      reason: 'validation',
+      errors: { confirmEmail: 'Kayıtlı e-posta zorunludur.' },
+    }
+  }
   if (!currentPassword) {
     return {
       success: false,
@@ -509,7 +517,10 @@ export async function deleteCurrentUserAccount(values) {
   return request('/auth/delete-account', {
     method: 'POST',
     auth: true,
-    body: { currentPassword },
+    body: {
+      confirmEmail,
+      currentPassword,
+    },
   })
 }
 
