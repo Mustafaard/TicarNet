@@ -15229,39 +15229,19 @@ function HomePage({ user, onLogout }) {
                     className="message-sohbet-back"
                     onClick={_clearReplyTarget}
                     aria-label="Geri"
+                    title="Mesaj listesine dön"
                   >
-                    <span aria-hidden>←</span>
+                    <span className="message-sohbet-back-icon" aria-hidden>
+                      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                        <path d="M14.8 5.6L8.4 12l6.4 6.4" />
+                        <path d="M9 12h8.2" />
+                      </svg>
+                    </span>
                   </button>
-                  <button
-                    type="button"
-                    className="message-sohbet-avatar-wrap message-sohbet-avatar-trigger"
-                    onClick={() => {
-                      const targetUserId = messageReplyTarget.userId || messageReplyTarget.id
-                      if (!targetUserId) return
-                      void openProfileModal(targetUserId, {
-                        username: messageReplyTarget.username,
-                        displayName: messageReplyTarget.displayName || messageReplyTarget.username,
-                        avatarUrl: messageReplyTarget.avatarUrl,
-                        level: messageReplyTarget.level,
-                        role: messageReplyTarget.role,
-                        roleLabel: messageReplyTarget.roleLabel,
-                        premium: messageReplyTarget.premium,
-                        seasonBadge: messageReplyTarget.seasonBadge || null,
-                      })
-                    }}
-                    aria-label={`${messageReplyTarget.username || 'Oyuncu'} profili`}
-                  >
-                    <img
-                      src={messageReplyTarget.avatarUrl || '/splash/logo.png'}
-                      alt={messageReplyTarget.username}
-                      className="message-sohbet-avatar"
-                      onError={(e) => { e.target.src = '/splash/logo.png' }}
-                    />
-                  </button>
-                  <div className="message-sohbet-info">
+                  <div className="message-sohbet-user">
                     <button
                       type="button"
-                      className="message-sohbet-username"
+                      className="message-sohbet-avatar-wrap message-sohbet-avatar-trigger"
                       onClick={() => {
                         const targetUserId = messageReplyTarget.userId || messageReplyTarget.id
                         if (!targetUserId) return
@@ -15276,12 +15256,37 @@ function HomePage({ user, onLogout }) {
                           seasonBadge: messageReplyTarget.seasonBadge || null,
                         })
                       }}
+                      aria-label={`${messageReplyTarget.username || 'Oyuncu'} profili`}
                     >
-                      {messageReplyTarget.username}
+                      <img
+                        src={messageReplyTarget.avatarUrl || '/splash/logo.png'}
+                        alt={messageReplyTarget.username}
+                        className="message-sohbet-avatar"
+                        onError={(e) => { e.target.src = '/splash/logo.png' }}
+                      />
                     </button>
-                    <span className="message-sohbet-label">
-                      {messageReplyTarget.roleLabel || 'Oyuncu'}
-                    </span>
+                    <div className="message-sohbet-info">
+                      <button
+                        type="button"
+                        className="message-sohbet-username"
+                        onClick={() => {
+                          const targetUserId = messageReplyTarget.userId || messageReplyTarget.id
+                          if (!targetUserId) return
+                          void openProfileModal(targetUserId, {
+                            username: messageReplyTarget.username,
+                            displayName: messageReplyTarget.displayName || messageReplyTarget.username,
+                            avatarUrl: messageReplyTarget.avatarUrl,
+                            level: messageReplyTarget.level,
+                            role: messageReplyTarget.role,
+                            roleLabel: messageReplyTarget.roleLabel,
+                            premium: messageReplyTarget.premium,
+                            seasonBadge: messageReplyTarget.seasonBadge || null,
+                          })
+                        }}
+                      >
+                        {messageReplyTarget.username}
+                      </button>
+                    </div>
                   </div>
                   <div className="message-sohbet-actions">
                     {isStaffUser ? (

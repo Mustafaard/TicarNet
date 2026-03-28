@@ -12839,6 +12839,15 @@ select {
   border-bottom: 1px solid var(--theme-message-header-border);
   background: var(--theme-market-panel-bg);
   flex-shrink: 0;
+  min-width: 0;
+}
+
+.message-sohbet-user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
 }
 
 .message-sohbet-actions {
@@ -12848,6 +12857,7 @@ select {
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  flex-shrink: 0;
 }
 
 .message-sohbet-lock-banner {
@@ -12912,22 +12922,55 @@ select {
 }
 
 .message-sohbet-back {
-  width: 40px;
-  height: 40px;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
-  color: #e8eeff;
-  font-size: 20px;
+  border: 1px solid rgba(122, 176, 239, 0.55);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(243, 198, 93, 0.23), transparent 50%),
+    linear-gradient(180deg, rgba(13, 40, 74, 0.95), rgba(8, 24, 48, 0.97));
+  color: #eef5ff;
   cursor: pointer;
+  box-shadow:
+    0 8px 18px rgba(2, 10, 24, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, color 0.14s ease;
 }
 
 .message-sohbet-back:hover {
-  background: rgba(212, 175, 55, 0.25);
-  color: #d4af37;
+  border-color: rgba(247, 207, 112, 0.72);
+  color: #ffe9b0;
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 22px rgba(2, 10, 24, 0.42),
+    0 0 0 1px rgba(247, 207, 112, 0.2);
+}
+
+.message-sohbet-back:focus-visible {
+  outline: 2px solid rgba(247, 207, 112, 0.86);
+  outline-offset: 2px;
+}
+
+.message-sohbet-back-icon {
+  width: 19px;
+  height: 19px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.message-sohbet-back-icon svg {
+  width: 19px;
+  height: 19px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .message-sohbet-avatar-wrap {
@@ -12961,21 +13004,80 @@ select {
 
 .message-sohbet-info {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: center;
+  justify-content: flex-start;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .message-sohbet-username {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: block;
+  width: 100%;
   font-size: 15px;
   font-weight: 700;
   color: #f0f4ff;
+  text-align: left;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+@media (max-width: 680px) {
+  .message-sohbet-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-areas:
+      'back user'
+      'actions actions';
+    gap: 9px 10px;
+    align-items: center;
+  }
+
+  .message-sohbet-back {
+    grid-area: back;
+    width: 40px;
+    height: 40px;
+  }
+
+  .message-sohbet-user {
+    grid-area: user;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .message-sohbet-actions {
+    grid-area: actions;
+    margin-left: 0;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 7px;
+  }
+
+  .message-sohbet-username {
+    font-size: 14px;
+  }
+}
+
+.message-sohbet-username:hover {
+  color: #fff6df;
+}
+
+.message-sohbet-username:focus-visible {
+  outline: 2px solid rgba(248, 206, 130, 0.85);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 .message-sohbet-label {
-  font-size: 12px;
-  color: rgba(170, 200, 240, 0.75);
+  display: none !important;
 }
 
 .message-sohbet-body {
@@ -14712,6 +14814,21 @@ select {
   min-height: 44px;
 }
 
+.settings-section-card .settings-input,
+.settings-section-card .settings-textarea {
+  border-color: rgba(117, 169, 238, 0.4);
+  background: rgba(4, 13, 30, 0.84);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.settings-section-card .settings-input:focus,
+.settings-section-card .settings-textarea:focus {
+  border-color: rgba(142, 201, 255, 0.86);
+  box-shadow:
+    0 0 0 1px rgba(142, 201, 255, 0.28),
+    0 0 16px rgba(88, 164, 255, 0.16);
+}
+
 .settings-textarea {
   width: 100%;
   min-height: 116px;
@@ -14733,7 +14850,74 @@ select {
 }
 
 .settings-action-btn {
-  min-height: 40px;
+  min-height: 42px;
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 14px;
+}
+
+.settings-action-btn.btn-primary {
+  border: 1px solid rgba(118, 181, 248, 0.58);
+  background: linear-gradient(180deg, rgba(34, 99, 181, 0.96), rgba(17, 58, 121, 0.98));
+  color: #eaf4ff;
+  box-shadow: 0 8px 18px rgba(7, 26, 57, 0.35);
+}
+
+.settings-action-btn.btn-primary:hover:not(:disabled) {
+  border-color: rgba(141, 200, 255, 0.8);
+  background: linear-gradient(180deg, rgba(42, 113, 201, 0.98), rgba(20, 67, 137, 0.98));
+}
+
+.settings-action-btn.btn-ghost {
+  border: 1px solid rgba(130, 185, 246, 0.48);
+  background: linear-gradient(180deg, rgba(13, 38, 74, 0.92), rgba(9, 27, 52, 0.95));
+  color: #dcebff;
+}
+
+.settings-action-btn.btn-danger {
+  border: 1px solid rgba(255, 139, 147, 0.62);
+  background: linear-gradient(180deg, rgba(162, 42, 53, 0.95), rgba(112, 25, 34, 0.97));
+  color: #ffe7ea;
+}
+
+.settings-action-btn.btn-accent {
+  border: 1px solid rgba(245, 199, 96, 0.66);
+  background: linear-gradient(180deg, rgba(211, 159, 54, 0.96), rgba(147, 95, 20, 0.98));
+  color: #fff4dd;
+}
+
+@media (max-width: 680px) {
+  .settings-screen-card {
+    border-radius: 14px;
+    gap: 10px;
+  }
+
+  .settings-screen-head h3 {
+    font-size: clamp(26px, 8vw, 33px);
+  }
+
+  .settings-section-card {
+    border-radius: 12px;
+    padding: 10px;
+    gap: 7px;
+  }
+
+  .settings-section-card h4 {
+    font-size: 19px;
+  }
+
+  .settings-helper-text {
+    font-size: 11px;
+  }
+
+  .settings-action-btn {
+    min-height: 40px;
+    font-size: 13px;
+  }
 }
 
 .settings-security-card {
