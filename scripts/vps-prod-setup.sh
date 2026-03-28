@@ -240,12 +240,23 @@ if [[ "$ENABLE_SSL" == "1" && -z "$LETSENCRYPT_EMAIL" ]]; then
 fi
 
 if [[ -z "$PUBLIC_BASE_URL" ]]; then
-  PUBLIC_BASE_URL="https://${DOMAIN}"
+  if [[ "$ENABLE_SSL" == "1" ]]; then
+    PUBLIC_BASE_URL="https://${DOMAIN}"
+  else
+    PUBLIC_BASE_URL="http://${DOMAIN}"
+  fi
 fi
 
-if [[ "$PUBLIC_BASE_URL" != https://* ]]; then
-  echo "[vps-setup] --public-base-url https:// ile baslamali. Mevcut: $PUBLIC_BASE_URL" >&2
-  exit 1
+if [[ "$ENABLE_SSL" == "1" ]]; then
+  if [[ "$PUBLIC_BASE_URL" != https://* ]]; then
+    echo "[vps-setup] SSL acikken --public-base-url https:// ile baslamali. Mevcut: $PUBLIC_BASE_URL" >&2
+    exit 1
+  fi
+else
+  if [[ "$PUBLIC_BASE_URL" != https://* && "$PUBLIC_BASE_URL" != http://* ]]; then
+    echo "[vps-setup] SSL kapaliyken --public-base-url http:// veya https:// ile baslamali. Mevcut: $PUBLIC_BASE_URL" >&2
+    exit 1
+  fi
 fi
 
 if ! [[ "$API_PORT" =~ ^[0-9]+$ ]]; then
