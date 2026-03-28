@@ -2970,37 +2970,6 @@ function HomePage({ user, onLogout }) {
     bankStateRef.current = bankState
   }, [bankState])
 
-  // BİLDİRİMLER sekmesine girildiğinde tüm bildirimleri toplu okundu yap (DM sayaçları etkilenmez)
-  useEffect(() => {
-    if (MESSAGES_DISABLED) return
-    if (tab !== 'messages' || messageViewTab !== 'bildirimler') {
-      notificationsMarkedRef.current = false
-      notificationsMarkingInFlightRef.current = false
-      return
-    }
-    if (notificationsMarkedRef.current || notificationsMarkingInFlightRef.current) return
-
-    const unreadNotifications = Math.max(0, Math.trunc(Number(messageCenter?.unread?.notifications || 0)))
-    if (unreadNotifications <= 0) {
-      notificationsMarkedRef.current = true
-      return
-    }
-
-    notificationsMarkedRef.current = true
-    notificationsMarkingInFlightRef.current = true
-    ;(async () => {
-      try {
-        const response = await markMessageCenterNotificationsAsRead()
-        if (!response?.success) {
-          notificationsMarkedRef.current = false
-        }
-      } finally {
-        notificationsMarkingInFlightRef.current = false
-        await loadMessageCenter('all')
-      }
-    })()
-  }, [MESSAGES_DISABLED, loadMessageCenter, messageCenter?.unread?.notifications, messageViewTab, tab])
-
   useEffect(() => {
     if (typeof window === 'undefined') return
     try {
@@ -3375,54 +3344,6 @@ function HomePage({ user, onLogout }) {
   }, [error, notice])
 
   useEffect(() => {
-    if (!mineDigModal) return undefined
-    if (mineCollectResult) return undefined
-    if (mineDigCountdownSec <= 0) {
-      if (mineDigCollectedRef.current) return undefined
-      mineDigCollectedRef.current = true
-      const mineId = mineDigModal.mine?.id
-      if (!mineId) {
-        mineDigCollectedRef.current = false
-        setMineDigModal(null)
-        setMineDigCountdownSec(10)
-        return undefined
-      }
-      let cancelled = false
-      collectMine(mineId).then((response) => {
-        if (cancelled) return
-        if (response?.success && response?.collected) {
-          setMineCollectResult(response.collected)
-          setMines((prev) => (response.mines ? { ...prev, mines: response.mines, updatedAt: response.updatedAt } : prev))
-          const label = factoryItemMeta(response.collected.itemId)?.label || response.collected.itemId
-          setNoticeIsSuccess(true)
-          setNotice(`Elde ettiğin kaynak: ${response.collected.quantity} ${label} depoya aktarıldı.`)
-          loadProfile().catch(() => {})
-          loadOverview().catch(() => {})
-        } else {
-          fail(response, response?.errors?.global || 'Tahsilat alınamadı.')
-          setMineDigModal(null)
-        }
-        setMineDigCountdownSec(10)
-      }).catch(() => {
-        if (!cancelled) setMineDigModal(null)
-        setMineDigCountdownSec(10)
-      })
-      const t = window.setTimeout(() => {
-        if (!cancelled) {
-          setMineDigModal(null)
-          setMineCollectResult(null)
-          mineDigCollectedRef.current = false
-        }
-      }, 2500)
-      return () => { cancelled = true; window.clearTimeout(t) }
-    }
-    const interval = window.setInterval(() => {
-      setMineDigCountdownSec((s) => Math.max(0, s - 1))
-    }, 1000)
-    return () => window.clearInterval(interval)
-  }, [mineDigModal, mineDigCountdownSec, mineCollectResult])
-
-  useEffect(() => {
     if (tab !== 'mines' || !Array.isArray(mines?.mines) || mines.mines.length === 0) return undefined
     const interval = window.setInterval(() => setMinesClockTick((t) => t + 1), 1000)
     return () => window.clearInterval(interval)
@@ -3559,6 +3480,54 @@ function HomePage({ user, onLogout }) {
     }
     return true
   }, [fail, user?.id])
+
+  useEffect(() => {
+    if (!mineDigModal) return undefined
+    if (mineCollectResult) return undefined
+    if (mineDigCountdownSec <= 0) {
+      if (mineDigCollectedRef.current) return undefined
+      mineDigCollectedRef.current = true
+      const mineId = mineDigModal.mine?.id
+      if (!mineId) {
+        mineDigCollectedRef.current = false
+        setMineDigModal(null)
+        setMineDigCountdownSec(10)
+        return undefined
+      }
+      let cancelled = false
+      collectMine(mineId).then((response) => {
+        if (cancelled) return
+        if (response?.success && response?.collected) {
+          setMineCollectResult(response.collected)
+          setMines((prev) => (response.mines ? { ...prev, mines: response.mines, updatedAt: response.updatedAt } : prev))
+          const label = factoryItemMeta(response.collected.itemId)?.label || response.collected.itemId
+          setNoticeIsSuccess(true)
+          setNotice(`Elde ettiğin kaynak: ${response.collected.quantity} ${label} depoya aktarıldı.`)
+          loadProfile().catch(() => {})
+          loadOverview().catch(() => {})
+        } else {
+          fail(response, response?.errors?.global || 'Tahsilat alınamadı.')
+          setMineDigModal(null)
+        }
+        setMineDigCountdownSec(10)
+      }).catch(() => {
+        if (!cancelled) setMineDigModal(null)
+        setMineDigCountdownSec(10)
+      })
+      const t = window.setTimeout(() => {
+        if (!cancelled) {
+          setMineDigModal(null)
+          setMineCollectResult(null)
+          mineDigCollectedRef.current = false
+        }
+      }, 2500)
+      return () => { cancelled = true; window.clearTimeout(t) }
+    }
+    const interval = window.setInterval(() => {
+      setMineDigCountdownSec((s) => Math.max(0, s - 1))
+    }, 1000)
+    return () => window.clearInterval(interval)
+  }, [fail, loadOverview, loadProfile, mineDigCountdownSec, mineDigModal, mineCollectResult])
 
   const triggerLiveStateRefresh = useCallback(() => {
     const runRefresh = async () => {
@@ -3727,6 +3696,37 @@ function HomePage({ user, onLogout }) {
     })
     return true
   }, [fail])
+
+  // BİLDİRİMLER sekmesine girildiğinde tüm bildirimleri toplu okundu yap (DM sayaçları etkilenmez)
+  useEffect(() => {
+    if (MESSAGES_DISABLED) return
+    if (tab !== 'messages' || messageViewTab !== 'bildirimler') {
+      notificationsMarkedRef.current = false
+      notificationsMarkingInFlightRef.current = false
+      return
+    }
+    if (notificationsMarkedRef.current || notificationsMarkingInFlightRef.current) return
+
+    const unreadNotifications = Math.max(0, Math.trunc(Number(messageCenter?.unread?.notifications || 0)))
+    if (unreadNotifications <= 0) {
+      notificationsMarkedRef.current = true
+      return
+    }
+
+    notificationsMarkedRef.current = true
+    notificationsMarkingInFlightRef.current = true
+    ;(async () => {
+      try {
+        const response = await markMessageCenterNotificationsAsRead()
+        if (!response?.success) {
+          notificationsMarkedRef.current = false
+        }
+      } finally {
+        notificationsMarkingInFlightRef.current = false
+        await loadMessageCenter('all')
+      }
+    })()
+  }, [MESSAGES_DISABLED, loadMessageCenter, messageCenter?.unread?.notifications, messageViewTab, tab])
 
   const loadDirectMessageThread = useCallback(async (username) => {
     if (MESSAGES_DISABLED) {
