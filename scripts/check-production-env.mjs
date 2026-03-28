@@ -57,7 +57,12 @@ function isLocalHost(hostname) {
   return safe === 'localhost' || safe === '127.0.0.1' || safe === '0.0.0.0'
 }
 
-function parseOrigin(name, value, errors) {
+function isIpAddress(hostname) {
+  const safe = String(hostname || '').trim()
+  return /^\d{1,3}(\.\d{1,3}){3}$/.test(safe)
+}
+
+function parseOrigin(name, value, errors, options = {}) {
   const raw = normalize(value)
   if (!raw) {
     errors.push(`${name} bos birakilamaz.`)
@@ -72,12 +77,19 @@ function parseOrigin(name, value, errors) {
     return ''
   }
 
+  const allowInsecureHttp = options.allowInsecureHttp === true
   if (parsed.protocol !== 'https:') {
-    errors.push(`${name} production icin https:// ile baslamali: ${raw}`)
+    if (!(allowInsecureHttp && parsed.protocol === 'http:')) {
+      errors.push(`${name} production icin https:// ile baslamali: ${raw}`)
+    }
   }
 
   if (isLocalHost(parsed.hostname)) {
     errors.push(`${name} production icin localhost/127.0.0.1 olamaz: ${raw}`)
+  }
+
+  if (allowInsecureHttp && parsed.protocol === 'http:' && !isIpAddress(parsed.hostname)) {
+    errors.push(`${name} http:// ile kullaniliyorsa hostname public IP olmali: ${raw}`)
   }
 
   return parsed.origin
@@ -134,8 +146,11 @@ async function main() {
     errors.push(`API_PORT gecerli bir port olmali. Mevcut: ${process.env.API_PORT || '(bos)'}`)
   }
 
-  const clientOrigin = parseOrigin('CLIENT_URL', process.env.CLIENT_URL, errors)
-  const resetOrigin = parseOrigin('RESET_LINK_BASE_URL', process.env.RESET_LINK_BASE_URL, errors)
+  const allowInsecurePublicBaseUrl = parseBoolean(process.env.ALLOW_INSECURE_PUBLIC_BASE_URL, false)
+  const originParseOptions = { allowInsecureHttp: allowInsecurePublicBaseUrl }
+
+  const clientOrigin = parseOrigin('CLIENT_URL', process.env.CLIENT_URL, errors, originParseOptions)
+  const resetOrigin = parseOrigin('RESET_LINK_BASE_URL', process.env.RESET_LINK_BASE_URL, errors, originParseOptions)
 
   const corsOrigins = normalize(process.env.CORS_ALLOWED_ORIGINS)
     .split(',')
@@ -148,7 +163,7 @@ async function main() {
 
   const normalizedCorsOrigins = []
   for (const origin of corsOrigins) {
-    const parsed = parseOrigin('CORS_ALLOWED_ORIGINS', origin, errors)
+    const parsed = parseOrigin('CORS_ALLOWED_ORIGINS', origin, errors, originParseOptions)
     if (parsed) normalizedCorsOrigins.push(parsed)
   }
 
@@ -178,12 +193,16 @@ async function main() {
   const firebaseAuthEnabled = parseBoolean(process.env.FIREBASE_AUTH_ENABLED, false)
   const firebaseWebApiKey = normalize(process.env.FIREBASE_WEB_API_KEY || process.env.FIREBASE_API_KEY)
   const smtpReady = !isPlaceholder(smtpUser) && !isPlaceholder(smtpPass) && !isPlaceholder(mailFrom)
+  const smtpPartiallyConfigured =
+    (!isPlaceholder(smtpUser) && (isPlaceholder(smtpPass) || isPlaceholder(mailFrom)))
+    || (!isPlaceholder(smtpPass) && (isPlaceholder(smtpUser) || isPlaceholder(mailFrom)))
+    || (!isPlaceholder(mailFrom) && (isPlaceholder(smtpUser) || isPlaceholder(smtpPass)))
 
   if (firebaseAuthEnabled && isPlaceholder(firebaseWebApiKey)) {
     errors.push('FIREBASE_WEB_API_KEY placeholder/missing (Firebase Auth acik).')
   }
 
-  if (!firebaseAuthEnabled || smtpReady) {
+  if (smtpReady || smtpPartiallyConfigured) {
     if (!smtpHost) {
       errors.push('SMTP_HOST bos birakilamaz.')
     }
@@ -205,9 +224,13 @@ async function main() {
     if (isPlaceholder(mailFrom)) {
       errors.push('MAIL_FROM placeholder/missing.')
     }
-  } else {
+  } else if (firebaseAuthEnabled) {
     warnings.push(
       'SMTP ayarlari eksik. Firebase Auth ile giris/sifre reset calisir ama destek e-postalari queued kalabilir.',
+    )
+  } else {
+    warnings.push(
+      'SMTP ayarlari eksik. Giris calisir ancak sifre reset ve destek e-postasi gonderimi devre disi kalir.',
     )
   }
 

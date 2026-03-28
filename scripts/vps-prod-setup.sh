@@ -545,6 +545,20 @@ sync_code() {
 
 configure_env() {
   local public_base_url="$PUBLIC_BASE_URL"
+  local allow_insecure_public_base_url="false"
+  local smtp_user_value="${SMTP_USER:-}"
+  local smtp_pass_value="${SMTP_APP_PASSWORD:-}"
+  local mail_from_value="${MAIL_FROM_VALUE:-}"
+
+  if [[ "$ENABLE_SSL" != "1" ]]; then
+    allow_insecure_public_base_url="true"
+  fi
+
+  if [[ -z "$smtp_user_value" || -z "$smtp_pass_value" || -z "$mail_from_value" ]]; then
+    smtp_user_value=""
+    smtp_pass_value=""
+    mail_from_value=""
+  fi
 
   if [[ ! -f "$ENV_FILE" ]]; then
     cp "${APP_DIR}/server/.env.example" "$ENV_FILE"
@@ -558,6 +572,7 @@ configure_env() {
   upsert_env "CLIENT_URL" "$public_base_url" "$ENV_FILE"
   upsert_env "RESET_LINK_BASE_URL" "$public_base_url" "$ENV_FILE"
   upsert_env "CORS_ALLOWED_ORIGINS" "$public_base_url" "$ENV_FILE"
+  upsert_env "ALLOW_INSECURE_PUBLIC_BASE_URL" "$allow_insecure_public_base_url" "$ENV_FILE"
   upsert_env "FIREBASE_AUTH_ENABLED" "$FIREBASE_AUTH_ENABLED_VALUE" "$ENV_FILE"
   if [[ -n "$FIREBASE_WEB_API_KEY" ]]; then
     upsert_env "FIREBASE_WEB_API_KEY" "$FIREBASE_WEB_API_KEY" "$ENV_FILE"
@@ -575,24 +590,13 @@ configure_env() {
   upsert_env "DB_ROLLING_BACKUP_FILE_PATH" "${DATA_DIR}/backups/db-rolling.json" "$ENV_FILE"
   upsert_env "DB_BACKUP_RETENTION_DAYS" "0" "$ENV_FILE"
 
-  if [[ -n "$SMTP_USER" ]]; then
-    upsert_env "SMTP_USER" "$SMTP_USER" "$ENV_FILE"
-  fi
-  if [[ -n "$SMTP_APP_PASSWORD" ]]; then
-    upsert_env "SMTP_APP_PASSWORD" "$SMTP_APP_PASSWORD" "$ENV_FILE"
-  fi
+  upsert_env "SMTP_USER" "$smtp_user_value" "$ENV_FILE"
+  upsert_env "SMTP_APP_PASSWORD" "$smtp_pass_value" "$ENV_FILE"
+  upsert_env "SMTP_PASS" "$smtp_pass_value" "$ENV_FILE"
   upsert_env "SMTP_CONNECTION_TIMEOUT_MS" "10000" "$ENV_FILE"
   upsert_env "SMTP_GREETING_TIMEOUT_MS" "10000" "$ENV_FILE"
   upsert_env "SMTP_SOCKET_TIMEOUT_MS" "15000" "$ENV_FILE"
-  if [[ -n "$MAIL_FROM_VALUE" ]]; then
-    upsert_env "MAIL_FROM" "$MAIL_FROM_VALUE" "$ENV_FILE"
-  elif [[ -n "$SMTP_USER" ]]; then
-    local existing_mail_from
-    existing_mail_from="$(read_env_value "MAIL_FROM" "$ENV_FILE" || true)"
-    if is_placeholder_value "$existing_mail_from"; then
-      upsert_env "MAIL_FROM" "\"TicarNet Online <${SMTP_USER}>\"" "$ENV_FILE"
-    fi
-  fi
+  upsert_env "MAIL_FROM" "$mail_from_value" "$ENV_FILE"
   if [[ -n "$SUPPORT_INBOX_EMAIL" ]]; then
     upsert_env "SUPPORT_INBOX_EMAIL" "$SUPPORT_INBOX_EMAIL" "$ENV_FILE"
   fi

@@ -5,9 +5,9 @@ DEFAULT_DOMAIN="${DEFAULT_DOMAIN:-ticarnet.tr}"
 DEFAULT_EMAIL="${DEFAULT_EMAIL:-mustafaard76@gmail.com}"
 DEFAULT_REPO="${DEFAULT_REPO:-https://github.com/Mustafaard/TicarNet.git}"
 DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
-DEFAULT_SMTP_USER="${DEFAULT_SMTP_USER:-mustafaard76@gmail.com}"
+DEFAULT_SMTP_USER="${DEFAULT_SMTP_USER:-}"
 DEFAULT_SUPPORT_INBOX="${DEFAULT_SUPPORT_INBOX:-mustafaard76@gmail.com}"
-DEFAULT_MAIL_FROM="${DEFAULT_MAIL_FROM:-TicarNet Online <mustafaard76@gmail.com>}"
+DEFAULT_MAIL_FROM="${DEFAULT_MAIL_FROM:-}"
 DEFAULT_FIREBASE_AUTH_ENABLED="${DEFAULT_FIREBASE_AUTH_ENABLED:-true}"
 
 APP_BASE_DIR="/var/www/ticarnet"
@@ -246,5 +246,5 @@ bash scripts/vps-prod-setup.sh \
 
 echo "[panel-bootstrap] Tamamlandi."
 echo "[panel-bootstrap] Kontrol: curl -fsS http://127.0.0.1:8787/api/health"
-echo "[panel-bootstrap] APK: https://${DOMAIN}/download/ticarnet.apk"
+echo "[panel-bootstrap] APK: ${PUBLIC_BASE_URL}/download/ticarnet.apk"
 echo "[panel-bootstrap] Sonraki guncelleme: cd ${APP_DIR} && bash scripts/vps-update.sh"
