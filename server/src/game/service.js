@@ -740,6 +740,39 @@ function normalizeFactoriesState(rawFactories, timestamp) {
 // --- Madenler (Mines) ---
 const MS_SECOND = 1000
 const MINE_PREMIUM_MULTIPLIER = 2
+const MINE_NAME_BY_ID = Object.freeze({
+  'gold-mine': 'Alt\u0131n Madeni',
+  'steel-mine': 'Demir Madeni',
+  'copper-mine': 'Bak\u0131r Madeni',
+  'coal-mine': 'K\u00f6m\u00fcr Madeni',
+})
+const MINE_OUTPUT_NAME_BY_ITEM_ID = Object.freeze({
+  gold: 'Alt\u0131n',
+  steel: 'Demir',
+  copper: 'Bak\u0131r',
+  coal: 'K\u00f6m\u00fcr',
+})
+
+function mineDisplayName(templateOrMineId) {
+  const mineId = typeof templateOrMineId === 'string'
+    ? String(templateOrMineId || '').trim()
+    : String(templateOrMineId?.id || '').trim()
+  const fallbackName = typeof templateOrMineId === 'string'
+    ? ''
+    : String(templateOrMineId?.name || '').trim()
+  if (MINE_NAME_BY_ID[mineId]) return MINE_NAME_BY_ID[mineId]
+  return fallbackName || mineId || 'Maden'
+}
+
+function mineOutputDisplayName(itemId, fallback = '') {
+  const safeItemId = normalizeItemId(itemId || '')
+  if (MINE_OUTPUT_NAME_BY_ITEM_ID[safeItemId]) return MINE_OUTPUT_NAME_BY_ITEM_ID[safeItemId]
+  const fallbackName = String(fallback || '').trim()
+  if (fallbackName) return fallbackName
+  const itemName = String(ITEM_BY_ID.get(safeItemId)?.name || '').trim()
+  if (itemName) return itemName
+  return safeItemId || 'kaynak'
+}
 
 function createMineState(mineId, timestamp) {
   return {
@@ -841,9 +874,9 @@ function minesView(profile, timestamp) {
     const maxOutput = Math.min(Math.max(minOutput, asInt(template.maxOutput, 500)), 500)
     return {
       id: template.id,
-      name: template.name || template.id,
+      name: mineDisplayName(template),
       outputItemId,
-      outputItemName: outputItem?.name || outputItemId,
+      outputItemName: mineOutputDisplayName(outputItemId, outputItem?.name || outputItemId),
       minOutput,
       maxOutput,
       digDurationSeconds: Math.max(1, asInt(template.digDurationSeconds, 10)),

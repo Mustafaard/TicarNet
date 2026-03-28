@@ -1,7 +1,7 @@
 export const ITEM_CATALOG = [
   {
     id: 'cement',
-    name: 'Çimento',
+    name: '\u00c7imento',
     basePrice: 42,
     minPrice: 18,
     maxPrice: 120,
@@ -25,7 +25,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'gold',
-    name: 'Altın',
+    name: 'Alt\u0131n',
     basePrice: 520,
     minPrice: 300,
     maxPrice: 980,
@@ -49,7 +49,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'copper',
-    name: 'Bakır',
+    name: 'Bak\u0131r',
     basePrice: 136,
     minPrice: 58,
     maxPrice: 300,
@@ -61,7 +61,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'coal',
-    name: 'Kömür',
+    name: 'K\u00f6m\u00fcr',
     basePrice: 128,
     minPrice: 54,
     maxPrice: 290,
@@ -73,7 +73,7 @@ export const ITEM_CATALOG = [
   },
   {
     id: 'aluminum',
-    name: 'Alüminyum',
+    name: 'Al\u00fcminyum',
     basePrice: 124,
     minPrice: 52,
     maxPrice: 280,

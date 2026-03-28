@@ -5698,15 +5698,44 @@
     0 12px 24px rgba(4, 11, 22, 0.3);
 }
 
+.mines-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+.mines-title {
+  margin: 0;
+  color: #f8fbff;
+  font-size: clamp(22px, 3.2vw, 28px);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  text-shadow:
+    0 0 10px rgba(114, 188, 255, 0.22),
+    0 1px 0 rgba(0, 0, 0, 0.36);
+}
+
+.mines-summary {
+  margin-top: 4px;
+  color: #c7dcf8;
+  line-height: 1.45;
+}
+
 .mines-screen > .card > .muted {
   color: #bfd4f0;
 }
 
-.mines-screen .btn.btn-ghost.btn-sm {
+.mines-screen .btn.btn-ghost.btn-sm,
+.mines-back-btn {
   border-color: rgba(255, 207, 109, 0.78);
   background: linear-gradient(180deg, rgba(211, 161, 53, 0.95), rgba(137, 92, 18, 0.95));
   color: #fff6de;
   font-weight: 800;
+  box-shadow:
+    0 10px 18px rgba(60, 37, 8, 0.36),
+    inset 0 1px 0 rgba(255, 240, 200, 0.28);
 }
 
 .mines-screen .mines-grid {
@@ -5800,11 +5829,13 @@
 .mine-card-name {
   margin: 0;
   font-size: clamp(14px, 2vw, 17px);
-  font-weight: 800;
-  color: #f4f8ff;
+  font-weight: 900;
+  color: #f8fbff;
   text-align: center;
   line-height: 1.2;
-  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.42);
+  text-shadow:
+    0 0 12px rgba(111, 181, 255, 0.2),
+    0 1px 0 rgba(0, 0, 0, 0.42);
 }
 
 .mine-card-hint {
@@ -5814,6 +5845,21 @@
   text-align: center;
   line-height: 1.25;
   min-height: 1.25em;
+}
+
+.mine-card-hint-digging {
+  color: #ffe0ae;
+  font-weight: 700;
+}
+
+.mine-card-hint-ready {
+  color: #a4f4ce;
+  font-weight: 700;
+}
+
+.mine-card-hint-start {
+  color: #c7defd;
+  font-weight: 600;
 }
 
 .mine-card-hint-inner {
@@ -5870,10 +5916,16 @@
 }
 
 .mine-card-actions .btn {
-  min-height: 46px;
+  min-height: 48px;
   border-radius: 12px;
-  font-weight: 800;
-  letter-spacing: 0.12px;
+  border-width: 1px;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 10px 20px rgba(4, 12, 26, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
@@ -5883,35 +5935,52 @@
 
 .mine-card-actions .btn:not(:disabled):hover {
   transform: translateY(-1px);
+  box-shadow:
+    0 12px 24px rgba(3, 10, 22, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.mine-card-actions .btn:not(:disabled):active {
+  transform: translateY(0);
+  filter: brightness(0.98);
 }
 
 .mine-card-actions .btn.btn-primary {
-  border-color: rgba(114, 190, 255, 0.74);
-  background: linear-gradient(180deg, rgba(36, 109, 189, 0.98), rgba(20, 59, 112, 0.98));
-  color: #eef7ff;
+  border-color: rgba(132, 201, 255, 0.82);
+  background:
+    linear-gradient(180deg, rgba(48, 132, 218, 0.98), rgba(24, 72, 128, 0.98)),
+    radial-gradient(circle at 100% 0%, rgba(255, 212, 118, 0.22), transparent 52%);
+  color: #f3f9ff;
   box-shadow:
-    inset 0 1px 0 rgba(196, 230, 255, 0.22),
-    0 8px 16px rgba(7, 24, 50, 0.34);
+    inset 0 1px 0 rgba(214, 238, 255, 0.28),
+    0 10px 18px rgba(7, 24, 50, 0.36);
 }
 
 .mine-card-actions .btn.btn-accent {
-  border-color: rgba(255, 212, 117, 0.82);
-  background: linear-gradient(180deg, rgba(211, 161, 55, 0.98), rgba(140, 94, 18, 0.98));
+  border-color: rgba(255, 221, 138, 0.9);
+  background:
+    linear-gradient(180deg, rgba(228, 178, 67, 0.98), rgba(152, 103, 20, 0.98)),
+    radial-gradient(circle at 0% 0%, rgba(159, 223, 255, 0.18), transparent 56%);
   color: #fff8e6;
   box-shadow:
-    inset 0 1px 0 rgba(255, 239, 197, 0.26),
-    0 8px 16px rgba(54, 36, 8, 0.32);
+    inset 0 1px 0 rgba(255, 243, 210, 0.36),
+    0 10px 18px rgba(54, 36, 8, 0.34);
 }
 
 .mine-card-actions .btn.btn-ghost {
-  border-color: rgba(107, 175, 246, 0.56);
-  background: linear-gradient(180deg, rgba(17, 43, 80, 0.88), rgba(11, 29, 56, 0.9));
-  color: #cfe5ff;
+  border-color: rgba(123, 190, 255, 0.66);
+  background:
+    linear-gradient(180deg, rgba(24, 58, 104, 0.92), rgba(12, 33, 64, 0.94)),
+    radial-gradient(circle at 90% 0%, rgba(246, 202, 106, 0.1), transparent 54%);
+  color: #d7ebff;
 }
 
 .mine-card-actions .btn:disabled {
   filter: saturate(0.82);
-  opacity: 0.78;
+  opacity: 0.8;
+  box-shadow:
+    0 6px 12px rgba(3, 10, 20, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* Maden kazı modalı (10 sn bekleyin + tamamlandı) */
@@ -6162,10 +6231,15 @@
 }
 
 .mine-confirm-actions .btn {
-  min-height: 46px;
+  min-height: 48px;
   border-radius: 12px;
-  font-weight: 800;
+  font-weight: 900;
+  letter-spacing: 0.01em;
   min-width: 140px;
+  box-shadow:
+    0 10px 18px rgba(4, 12, 26, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
 }
 
 .mine-confirm-actions .btn.btn-primary {
@@ -6185,6 +6259,14 @@
 
 .mine-confirm-actions .btn:not(:disabled):hover {
   transform: translateY(-1px);
+  box-shadow:
+    0 12px 22px rgba(3, 10, 22, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+.mine-confirm-actions .btn:not(:disabled):active {
+  transform: translateY(0);
+  filter: brightness(0.98);
 }
 
 @media (max-width: 520px) {

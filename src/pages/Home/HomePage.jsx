@@ -813,6 +813,20 @@ const MINE_IMAGE_BY_ID = {
   'coal-mine': '/home/icons/mines/kömürmaden.png',
 }
 
+const MINE_NAME_BY_ID = Object.freeze({
+  'gold-mine': 'Altın Madeni',
+  'steel-mine': 'Demir Madeni',
+  'copper-mine': 'Bakır Madeni',
+  'coal-mine': 'Kömür Madeni',
+})
+
+const MINE_OUTPUT_LABEL_BY_ITEM_ID = Object.freeze({
+  gold: 'Altın',
+  steel: 'Demir',
+  copper: 'Bakır',
+  coal: 'Kömür',
+})
+
 const resolveMineImage = (mine) => {
   const safeId = String(mine?.id || '').trim()
   if (MINE_IMAGE_BY_ID[safeId]) return MINE_IMAGE_BY_ID[safeId]
@@ -827,6 +841,31 @@ const factoryItemMeta = (itemId) => {
     label: safeId || 'Kaynak',
     icon: '/home/icons/depot/cash.webp',
   }
+}
+
+const normalizeMineLabel = (value) => String(value || '')
+  .trim()
+  .replace(/AltÄ±n/gi, 'Altın')
+  .replace(/BakÄ±r/gi, 'Bakır')
+  .replace(/KÃ¶mÃ¼r/gi, 'Kömür')
+  .replace(/\bAltin\b/gi, 'Altın')
+  .replace(/\bBakir\b/gi, 'Bakır')
+  .replace(/\bKomur\b/gi, 'Kömür')
+  .replace(/\bKazi\b/gi, 'Kazı')
+
+const mineDisplayName = (mine) => {
+  const safeId = String(mine?.id || '').trim()
+  if (MINE_NAME_BY_ID[safeId]) return MINE_NAME_BY_ID[safeId]
+  const normalized = normalizeMineLabel(mine?.name)
+  return normalized || 'Maden'
+}
+
+const mineOutputLabel = (mine) => {
+  const outputItemId = String(mine?.outputItemId || '').trim()
+  if (MINE_OUTPUT_LABEL_BY_ITEM_ID[outputItemId]) return MINE_OUTPUT_LABEL_BY_ITEM_ID[outputItemId]
+  const normalizedApiName = normalizeMineLabel(mine?.outputItemName)
+  if (normalizedApiName) return normalizedApiName
+  return factoryItemMeta(outputItemId).label
 }
 
 const resolveFactoryShopImage = (factory) => {
@@ -8559,12 +8598,12 @@ function HomePage({ user, onLogout }) {
   const minesView = (
     <section className="panel-stack home-sections mines-screen">
       <article className="card">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h3 style={{ margin: 0 }}>Madenler</h3>
-          <button type="button" className="btn btn-ghost btn-sm" onClick={() => void openTab('home', { tab: 'home' })}>Şehir</button>
+        <div className="mines-head">
+          <h3 className="mines-title">Madenler</h3>
+          <button type="button" className="btn btn-ghost btn-sm mines-back-btn" onClick={() => void openTab('home', { tab: 'home' })}>Şehir</button>
         </div>
-        <p className="muted" style={{ marginTop: 4 }}>
-          Her maden 10 sn kazı, 30 dk bekleme. Standart üyeler 10-500 arası, Premium üyeler 20-1000 arası rastgele kaynak kazanır. Nakit maliyeti kartta; yetersizse uyarı verilir.
+        <p className="muted mines-summary">
+          Her maden için kazı süresi 10 saniye, bekleme süresi 30 dakikadır. Standart üyeler 10-500, Premium üyeler 20-1000 arası rastgele kaynak kazanır. Yetersiz nakitte işlem başlatılmaz.
         </p>
         {minesList.length === 0 ? (
           <p className="empty" style={{ marginTop: 16 }}>Yükleniyor...</p>
@@ -8572,6 +8611,7 @@ function HomePage({ user, onLogout }) {
           <div className="mines-grid">
             {minesList.map((mine) => {
               const meta = factoryItemMeta(mine.outputItemId)
+              const safeMineName = mineDisplayName(mine)
               const busyDig = busy === `mine-dig:${mine.id}`
               const busyCollect = busy === `mine-collect:${mine.id}`
               const isBusy = busyDig || busyCollect
@@ -8593,15 +8633,15 @@ function HomePage({ user, onLogout }) {
                       </span>
                     </div>
                   </div>
-                  <h4 className="mine-card-name">{mine.name}</h4>
+                  <h4 className="mine-card-name">{safeMineName}</h4>
                   {mine.isDigging && (
-                    <p className="mine-card-hint">
-                      Kazı sürüyor · Kalan <span style={{ color: '#dc2626', fontWeight: 600 }}>{formatCollectionCountdown(mine.digRemainingMs)}</span>
+                    <p className="mine-card-hint mine-card-hint-digging">
+                      Kazı sürüyor · Kalan <span style={{ color: '#ffd28d', fontWeight: 700 }}>{formatCollectionCountdown(mine.digRemainingMs)}</span>
                     </p>
                   )}
-                  {mine.canCollect && <p className="mine-card-hint">Tahsilat hazır</p>}
+                  {mine.canCollect && <p className="mine-card-hint mine-card-hint-ready">Tahsilat hazır</p>}
                   {!mine.isDigging && !mine.canCollect && liveNextDigRemainingMs <= 0 && (
-                    <p className="mine-card-hint">Kazı Başlat&apos;a tıkla</p>
+                    <p className="mine-card-hint mine-card-hint-start">Kazıyı başlatmak için dokun.</p>
                   )}
                   {!mine.isDigging && !mine.canCollect && liveNextDigRemainingMs > 0 && (
                     <div className="mine-card-countdown">
@@ -8610,7 +8650,7 @@ function HomePage({ user, onLogout }) {
                   )}
                   <div className="mine-card-actions">
                     {mine.isDigging ? (
-                      <button type="button" className="btn btn-ghost mine-card-action-full" disabled>Bekle</button>
+                      <button type="button" className="btn btn-ghost mine-card-action-full" disabled>Kazı Sürüyor</button>
                     ) : null}
                     {mine.canCollect ? (
                       <button
@@ -8628,8 +8668,8 @@ function HomePage({ user, onLogout }) {
                         className="btn btn-accent mine-card-action-full"
                         onClick={() => {
                           if (mine && !mine.hasEnoughCash) {
-                            fail(null, `Yetersiz nakit. ${mine.name} kazısı için ${fmt(mine.costCash)} nakit gerekir.`)
-                            setError(`Yetersiz nakit. ${mine.name} kazısı için ${fmt(mine.costCash)} nakit gerekir.`)
+                            fail(null, `Yetersiz nakit. ${safeMineName} kazısı için ${fmt(mine.costCash)} nakit gerekir.`)
+                            setError(`Yetersiz nakit. ${safeMineName} kazısı için ${fmt(mine.costCash)} nakit gerekir.`)
                             return
                           }
                           if (mine && !mine.canStartDig) return
@@ -8637,7 +8677,7 @@ function HomePage({ user, onLogout }) {
                         }}
                         disabled={Boolean(isBusy) || !mine.canStartDig}
                       >
-                        {!mine.hasEnoughCash ? `Yetersiz nakit (${fmt(mine.costCash)})` : 'Kazı Başlat'}
+                        {!mine.hasEnoughCash ? `Yetersiz nakit (${fmt(mine.costCash)})` : 'Kazıyı Başlat'}
                       </button>
                     ) : null}
                   </div>
@@ -17342,7 +17382,7 @@ function HomePage({ user, onLogout }) {
       {mineConfirmModal && createPortal(
         <section className="mine-dig-overlay" aria-modal="true" role="dialog" onClick={() => setMineConfirmModal(null)}>
           <article className="mine-confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="mine-confirm-title">{mineConfirmModal.name}</h3>
+            <h3 className="mine-confirm-title">{mineDisplayName(mineConfirmModal)}</h3>
             <div className="mine-confirm-hero">
               <img src={resolveMineImage(mineConfirmModal)} alt="" />
             </div>
@@ -17364,7 +17404,7 @@ function HomePage({ user, onLogout }) {
                     </span>
                   )}
                   <img src={factoryItemMeta(mineConfirmModal.outputItemId)?.icon || '/home/icons/depot/cash.webp'} alt="" className="mine-confirm-row-icon" aria-hidden />
-                  {premiumActive ? mineConfirmModal.minOutput * 2 : mineConfirmModal.minOutput} – {premiumActive ? mineConfirmModal.maxOutput * 2 : mineConfirmModal.maxOutput} {mineConfirmModal.outputItemName} (rastgele)
+                  {premiumActive ? mineConfirmModal.minOutput * 2 : mineConfirmModal.minOutput} – {premiumActive ? mineConfirmModal.maxOutput * 2 : mineConfirmModal.maxOutput} {mineOutputLabel(mineConfirmModal)} (rastgele)
                 </strong>
               </p>
               <p className="mine-confirm-row">
