@@ -27304,3 +27304,143 @@ select {
     display: none;
   }
 }
+
+/* Single mobile shell hardening */
+.home-page .panel-stack,
+.home-page .tab-content-layer,
+.home-page .home-sections,
+.home-page .business-screen,
+.home-page .factory-screen,
+.home-page .mines-screen,
+.home-page .bank-screen,
+.home-page .settings-screen-card,
+.home-page .rules-screen,
+.home-page .weekly-events-screen,
+.home-page .announcements-screen,
+.home-page .announcements-board,
+.home-page .announcements-board-scroll,
+.home-page .city-menu-stack,
+.home-page .city-menu-stack .module-card,
+.home-page .city-menu-stack .module-grid,
+.home-page .city-menu-stack .module-btn,
+.home-page .city-menu-stack .module-copy {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.city-menu-stack .module-btn.module-btn-settings {
+  grid-column: auto !important;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn {
+  overflow: hidden;
+  align-items: center;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-copy,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-copy {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-label,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-desc,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-desc {
+  min-width: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-desc.module-desc-sub,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-desc.module-desc-sub {
+  -webkit-line-clamp: 1;
+  opacity: 0.94;
+}
+
+.mobile-nav,
+.mobile-nav-grid,
+.mobile-nav button {
+  min-width: 0;
+}
+
+.mobile-nav button {
+  touch-action: manipulation;
+}
+
+.mobile-nav-label,
+.mobile-nav-hint {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.business-screen :where(h3, h4, p, strong, small, span),
+.factory-screen :where(h3, h4, p, strong, small, span),
+.mines-screen :where(h3, h4, p, strong, small, span),
+.bank-screen :where(h3, h4, p, strong, small, span),
+.settings-screen-card :where(h3, h4, p, strong, small, span),
+.rules-screen :where(h3, h4, p, strong, small, span),
+.weekly-events-screen :where(h3, h4, p, strong, small, span),
+.announcements-screen :where(h3, h4, p, strong, small, span),
+.city-menu-stack :where(h3, h4, p, strong, small, span) {
+  overflow-wrap: anywhere;
+}
+
+.season-rewards-modal,
+.mine-dig-modal,
+.mine-confirm-modal,
+.tutorial-modal,
+.tutorial-resume-chip,
+.avatar-confirm-modal,
+.chat-report-modal,
+.dm-report-modal,
+.player-profile-modal,
+.leaderboard-search-modal {
+  width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
+  max-width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
+  min-width: min(320px, calc(100vw - 12px));
+  margin-inline: auto !important;
+}
+
+.season-rewards-modal,
+.mine-dig-modal,
+.mine-confirm-modal,
+.tutorial-modal,
+.avatar-confirm-modal,
+.chat-report-modal,
+.dm-report-modal,
+.player-profile-modal {
+  max-height: min(calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 860px) !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tutorial-resume-chip {
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(76px + env(safe-area-inset-bottom));
+}
+
+.tutorial-overlay,
+.avatar-confirm-overlay,
+.chat-report-overlay,
+.mine-dig-overlay,
+.player-profile-overlay {
+  padding:
+    calc(8px + env(safe-area-inset-top))
+    8px
+    calc(8px + env(safe-area-inset-bottom));
+}
