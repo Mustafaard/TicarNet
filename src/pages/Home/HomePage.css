@@ -29744,9 +29744,18 @@ select {
 .factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-name {
   font-size: clamp(11.6px, 3.2vw, 14px);
   min-height: 2.3em;
+  display: block !important;
+  width: 100%;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.16;
+  text-align: center;
 }
 
 .factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-hint {
+  display: block;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
@@ -29762,6 +29771,11 @@ select {
   font-size: clamp(10.2px, 2.8vw, 12px);
   white-space: normal;
   text-wrap: balance;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-open-wrap {
+  width: 100%;
+  min-width: 0;
 }
 
 .factory-level-badge {

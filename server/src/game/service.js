@@ -847,7 +847,30 @@ function tickMines(profile, timestamp) {
   for (const template of MINE_TEMPLATES) {
     const state = profile.mines[template.id] || createMineState(template.id, timestamp)
     profile.mines[template.id] = state
-    const digEndsMs = createdMs(state.digEndsAt)
+    const digDurationMs = mineDigDurationMs(template)
+    const cooldownMs = mineCooldownMs(template)
+    const stateUpdatedMs = createdMs(state.updatedAt)
+    let digEndsMs = createdMs(state.digEndsAt)
+    const nextDigMs = createdMs(state.nextDigAt)
+
+    // Geçmiş sürümlerde başlatılmış (10 sn / 30 dk) kazıları yeni kurala (5 sn / 15 dk) düşür.
+    // Böylece kullanıcı eski uzun bekleme süresinde takılı kalmaz.
+    if (stateUpdatedMs > 0) {
+      const maxDigEndsMs = stateUpdatedMs + digDurationMs
+      const maxNextDigMs = stateUpdatedMs + cooldownMs
+
+      if (digEndsMs > maxDigEndsMs) {
+        digEndsMs = maxDigEndsMs
+        state.digEndsAt = new Date(maxDigEndsMs).toISOString()
+        state.updatedAt = timestamp
+      }
+
+      if (nextDigMs > maxNextDigMs) {
+        state.nextDigAt = new Date(maxNextDigMs).toISOString()
+        state.updatedAt = timestamp
+      }
+    }
+
     if (digEndsMs > 0 && nowMs >= digEndsMs) {
       state.collectReadyAt = timestamp
       state.digEndsAt = ''
