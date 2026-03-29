@@ -11373,7 +11373,7 @@ function HomePage({ user, onLogout }) {
             </span>
           </button>
           <button
-            className="module-btn module-btn-marketplace module-btn-bank module-btn-stack"
+            className="module-btn module-btn-marketplace module-btn-bank"
             onClick={() => void openTab('bank', { tab: 'bank' })}
             disabled={Boolean(busy)}
           >
@@ -11436,7 +11436,7 @@ function HomePage({ user, onLogout }) {
             </span>
           </button>
           <button
-            className="module-btn module-btn-events module-btn-stack"
+            className="module-btn module-btn-events"
             onClick={() => void openTab('events', { tab: 'events' })}
             disabled={Boolean(busy)}
           >

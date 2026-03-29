@@ -28896,6 +28896,150 @@ select {
   }
 }
 
+/* 2026-03-30 city + business + modal alignment pass */
+.city-menu-stack .module-grid.city-module-grid > .module-btn.module-btn-bank,
+.city-menu-stack .module-grid.city-module-grid > .module-btn.module-btn-events {
+  grid-column: auto !important;
+}
+
+.city-menu-stack .module-grid.city-module-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.business-screen .fleet-active-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 7px;
+}
+
+.business-screen .fleet-active-tile {
+  min-height: 182px;
+  border-radius: 12px;
+}
+
+.business-screen.is-focused .fleet-fullscreen-card {
+  width: min(100%, 372px);
+  max-width: 372px;
+  margin-inline: auto;
+}
+
+.business-screen .fleet-detail-card.fleet-fullscreen-card {
+  border-radius: 12px;
+  padding: 9px !important;
+}
+
+.business-screen .fleet-detail-card.fleet-fullscreen-card .fleet-subheader {
+  border-radius: 10px;
+  padding: 7px 8px;
+}
+
+.business-screen .fleet-detail-card.fleet-fullscreen-card .fleet-detail-hero {
+  border-radius: 10px;
+}
+
+.warehouse-modal.fleet-modal.fleet-bulk-modal,
+.warehouse-modal.fleet-modal.factory-bulk-modal {
+  width: min(352px, calc(100vw - 16px)) !important;
+  max-width: min(352px, calc(100vw - 16px)) !important;
+  max-height: min(calc(100dvh - 18px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 680px) !important;
+  border-radius: 14px !important;
+  padding: 10px !important;
+  margin-inline: auto !important;
+}
+
+.warehouse-modal.fleet-modal.fleet-bulk-modal .fleet-modal-actions-bulk,
+.warehouse-modal.fleet-modal.factory-bulk-modal .fleet-modal-actions-bulk {
+  display: flex;
+  justify-content: center;
+}
+
+.warehouse-modal.fleet-modal.fleet-bulk-modal .btn-collect-main,
+.warehouse-modal.fleet-modal.factory-bulk-modal .btn-collect-main {
+  width: min(100%, 304px) !important;
+  min-height: 36px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.warehouse-modal.fleet-modal.fleet-bulk-modal .fleet-bulk-kpis {
+  max-width: 304px;
+  margin-inline: auto;
+}
+
+.warehouse-modal.fleet-modal.fleet-bulk-modal .fleet-bulk-summary,
+.warehouse-modal.fleet-modal.factory-bulk-modal .fleet-bulk-summary {
+  padding: 10px;
+  border-radius: 10px;
+}
+
+.warehouse-modal.fleet-modal.fleet-bulk-modal .fleet-summary-line,
+.warehouse-modal.fleet-modal.factory-bulk-modal .fleet-summary-line {
+  min-height: 34px;
+  padding: 7px 8px;
+  font-size: 10.8px;
+}
+
+.warehouse-modal.fleet-modal.fleet-bulk-modal .fleet-modal-close,
+.warehouse-modal.fleet-modal.factory-bulk-modal .fleet-modal-close {
+  justify-self: center;
+  min-width: 116px;
+}
+
+.factory-screen .factory-grid.factory-grid-owned,
+.factory-screen .factory-grid.factory-grid-shop {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px;
+}
+
+.factory-screen .factory-card.is-owned .factory-owned-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px;
+}
+
+.factory-screen .factory-card.is-owned .factory-owned-actions .factory-buy-btn {
+  min-height: 34px;
+  border-radius: 9px;
+  font-size: 10.6px;
+  line-height: 1.12;
+}
+
+@media (max-width: 390px) {
+  .business-screen.is-focused .fleet-fullscreen-card {
+    width: min(100%, 356px);
+    max-width: 356px;
+  }
+
+  .warehouse-modal.fleet-modal.fleet-bulk-modal,
+  .warehouse-modal.fleet-modal.factory-bulk-modal {
+    width: min(336px, calc(100vw - 14px)) !important;
+    max-width: min(336px, calc(100vw - 14px)) !important;
+  }
+
+  .city-menu-stack .module-grid.city-module-grid {
+    gap: 7px;
+  }
+}
+
+@media (max-width: 360px) {
+  .city-menu-stack .module-grid.city-module-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .business-screen .fleet-active-tile {
+    min-height: 172px;
+  }
+
+  .business-screen.is-focused .fleet-fullscreen-card {
+    width: min(100%, 330px);
+    max-width: 330px;
+  }
+
+  .factory-screen .factory-grid.factory-grid-owned,
+  .factory-screen .factory-grid.factory-grid-shop {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px;
+  }
+}
+
 /* Final mobile parity patch (business + market + factory) */
 .business-screen .fleet-overview-head {
   grid-template-columns: minmax(0, 1fr);
