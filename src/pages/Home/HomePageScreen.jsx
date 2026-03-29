@@ -5203,12 +5203,6 @@ function HomePage({ user, onLogout }) {
 
   const confirmListingModal = async () => {
     if (busy || !listingDraft) return
-    const listingLimit = Math.max(1, Math.trunc(num(market?.sellListingsLimit ?? 8)))
-    const listingUsed = Math.max(0, Math.trunc(num(market?.sellListingsUsedToday ?? 0)))
-    if (listingUsed >= listingLimit) {
-      setError('İlan limitine ulaştın. Limit Türkiye saatine göre her 12 saatte bir yenilenir.')
-      return
-    }
     const minPrice = Math.max(1, Math.trunc(num(listingDraft.minPrice || 1)))
     const maxPrice = Math.max(minPrice + 1, Math.trunc(num(listingDraft.maxPrice || minPrice + 1)))
     const rawPrice = Math.max(0, Math.trunc(num(String(listingDraft.price || '').replace(/[^\d]/g, ''))))
@@ -10237,28 +10231,9 @@ function HomePage({ user, onLogout }) {
           <div className="marketplace-tab-content marketplace-section marketplace-section-content">
           <div className="marketplace-block marketplace-sell-form card">
               <h4 className="marketplace-sell-form-title"><span className="marketplace-tab-emoji" aria-hidden>🏷️</span> Ürün Satışa Koy</h4>
-              {(() => {
-                const sellLimit = market?.sellListingsLimit ?? 8
-                const sellUsed = market?.sellListingsUsedToday ?? 0
-                const remaining = Math.max(0, sellLimit - sellUsed)
-                const limitReached = remaining <= 0
-                const nextReset = market?.sellListingsNextResetAt
-                let resetLabel = 'Limit Türkiye saatine göre her 12 saatte bir (00:00 / 12:00) yenilenir.'
-                if (nextReset) {
-                  try {
-                    const d = new Date(nextReset)
-                    resetLabel = `Limit ${d.toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })} (Türkiye) yenilenir.`
-                  } catch (_) {}
-                }
-                return (
-                  <p className="marketplace-sell-limit-hint">
-                    Kalan satış ilanı: <strong>{remaining}/{sellLimit}</strong>. {resetLabel}
-                    {limitReached && (
-                      <span className="marketplace-sell-limit-reached" role="alert"> Limit bitti.</span>
-                    )}
-                  </p>
-                )
-              })()}
+              <p className="marketplace-sell-limit-hint">
+                Genel ilanda limit yok. Özel ilanda aynı anda en fazla <strong>10 aktif ilan</strong> açabilirsin.
+              </p>
               <div className="marketplace-sell-form-row">
                 <label className="marketplace-sell-form-label">Ürün</label>
                 <select
@@ -10338,13 +10313,9 @@ function HomePage({ user, onLogout }) {
               <button
                 type="button"
                 className="btn marketplace-sell-submit"
-                disabled={marketplaceNoCapacity || !sellForm.itemId || !String(sellForm.quantity).trim() || !String(sellForm.unitPrice).trim() || busy === 'marketplace-sell' || (Math.trunc(num(sellForm.quantity)) || 0) > marketplaceMaxQty || ((market?.sellListingsUsedToday ?? 0) >= (market?.sellListingsLimit ?? 8))}
+                disabled={marketplaceNoCapacity || !sellForm.itemId || !String(sellForm.quantity).trim() || !String(sellForm.unitPrice).trim() || busy === 'marketplace-sell' || (Math.trunc(num(sellForm.quantity)) || 0) > marketplaceMaxQty}
                 onClick={async () => {
                   if (busy || !sellForm.itemId) return
-                  if ((market?.sellListingsUsedToday ?? 0) >= (market?.sellListingsLimit ?? 8)) {
-                    fail(null, 'Satış ilanı limitine ulaştınız. Limit Türkiye saatine göre her 12 saatte bir (00:00 / 12:00) yenilenir.')
-                    return
-                  }
                   const qty = Math.max(1, Math.min(marketplaceMaxQty, Math.trunc(num(sellForm.quantity)) || 1))
                   const stock = Math.max(0, Math.trunc(num(inventoryById[sellForm.itemId] || 0)))
                   if (qty > stock) {
@@ -12088,9 +12059,9 @@ function HomePage({ user, onLogout }) {
                   onClick={() => void speedupFactoryUpgradeAction(factory.id)}
                   disabled={Boolean(busy) || !canSpeedupNow}
                 >
-                  {busy === busySpeedupKey
-                    ? 'Hızlandırılıyor...'
-                    : `%${Math.round((factory?.upgrading?.speedupRatio ?? 0.15) * 100)} Hızlandır (${fmt(factory.speedupDiamondCost)} elmas)`}
+                    {busy === busySpeedupKey
+                      ? 'Hızlandırılıyor...'
+                      : `%15 Hızlandır (${fmt(factory.speedupDiamondCost)} elmas)`}
                 </button>
               ) : null}
             </>
@@ -12144,7 +12115,7 @@ function HomePage({ user, onLogout }) {
                 onClick={() => void speedupFactoryBuildAction(buildingFactory.id)}
                 disabled={Boolean(busy) || premiumDiamond < Math.max(0, buildingFactory.buildSpeedupDiamondCost || 0)}
               >
-                {busy === `factory-speedup-build:${buildingFactory.id}` ? 'Hızlandırılıyor...' : `%${Math.round((buildingFactory.buildSpeedupRatio || 0.15) * 100)} Hızlandır (${fmt(buildingFactory.buildSpeedupDiamondCost || 80)} elmas)`}
+                {busy === `factory-speedup-build:${buildingFactory.id}` ? 'Hızlandırılıyor...' : `%15 Hızlandır (${fmt(buildingFactory.buildSpeedupDiamondCost || 80)} elmas)`}
               </button>
             </div>
           </div>
@@ -12168,7 +12139,7 @@ function HomePage({ user, onLogout }) {
                 onClick={() => void speedupFactoryUpgradeAction(upgradingFactory.id)}
                 disabled={Boolean(busy) || premiumDiamond < Math.max(0, upgradingFactory.speedupDiamondCost || 0)}
               >
-                {busy === `factory-speedup:${upgradingFactory.id}` ? 'Hızlandırılıyor...' : `%${Math.round((upgradingFactory?.upgrading?.speedupRatio ?? 0.15) * 100)} Hızlandır (${fmt(upgradingFactory.speedupDiamondCost || 80)} elmas)`}
+                {busy === `factory-speedup:${upgradingFactory.id}` ? 'Hızlandırılıyor...' : `%15 Hızlandır (${fmt(upgradingFactory.speedupDiamondCost || 80)} elmas)`}
               </button>
             </div>
           </div>
@@ -14396,16 +14367,12 @@ function HomePage({ user, onLogout }) {
               ) : null}
             </label>
             {(() => {
-              const sellLimit = Math.max(1, Math.trunc(num(market?.sellListingsLimit ?? 8)))
-              const sellUsed = Math.max(0, Math.trunc(num(market?.sellListingsUsedToday ?? 0)))
-              const sellRemaining = Math.max(0, sellLimit - sellUsed)
-              const visibilityLabel = String(listingDraft?.visibility || 'public').toLowerCase() === 'custom'
-                ? 'Özel ilan'
-                : 'Genel ilan'
+              const customVisibility = String(listingDraft?.visibility || 'public').toLowerCase() === 'custom'
               return (
                 <p className="fleet-listing-limit-hint">
-                  {visibilityLabel} limiti: <strong>{fmt(sellRemaining)}/{fmt(sellLimit)}</strong>
-                  {sellRemaining <= 0 ? ' (limit dolu)' : ''}
+                  {customVisibility
+                    ? 'Özel ilanda aynı anda en fazla 10 aktif ilan açabilirsin.'
+                    : 'Genel ilanda limit yok.'}
                 </p>
               )
             })()}
@@ -14427,7 +14394,6 @@ function HomePage({ user, onLogout }) {
               onClick={() => void confirmListingModal()}
               disabled={
                 Boolean(busy) ||
-                ((market?.sellListingsUsedToday ?? 0) >= (market?.sellListingsLimit ?? 8)) ||
                 (String(listingDraft?.visibility || 'public').trim().toLowerCase() === 'custom' &&
                   (!String(listingDraft?.recipientUserId || '').trim() || listingFriendsLoading))
               }
@@ -14436,9 +14402,7 @@ function HomePage({ user, onLogout }) {
                 ? `listlog:${listingDraft.truckId}`
                 : `listbiz:${listingDraft.businessId}:${listingDraft.vehicleId}`)
                 ? 'İlana ekleniyor...'
-                : ((market?.sellListingsUsedToday ?? 0) >= (market?.sellListingsLimit ?? 8))
-                  ? 'İlan Limiti Dolu'
-                  : 'Satışa Koy'}
+                : 'Satışa Koy'}
             </button>
             <button className="btn btn-danger fleet-modal-close fleet-modal-cta-back" onClick={() => setBusinessModal('vehicle-actions')}>Kapat</button>
           </article>

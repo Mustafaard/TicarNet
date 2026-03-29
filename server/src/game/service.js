@@ -78,8 +78,8 @@ const LEGACY_TEMPLATE_MAP = {
 }
 const COUNTERPARTIES = ['Anka Trade', 'Marmara Lojistik', 'Nova Broker', 'Delta Pazarlama']
 const ORDER_MAX_DURATION_MINUTES = 180
-const SELL_LISTINGS_DAILY_LIMIT = 8
-const SPECIAL_LISTINGS_DAILY_LIMIT = 10
+// Genel ilanlar için limit kaldırıldı; eski kontrol noktalarıyla uyumluluk için çok yüksek tutulur.
+const SELL_LISTINGS_DAILY_LIMIT = Number.MAX_SAFE_INTEGER
 const SPECIAL_LISTINGS_ACTIVE_LIMIT = 10
 const CONTRACT_MAX_DURATION_MINUTES = 120
 const AUCTION_MIN_DURATION_MINUTES = 5
@@ -997,8 +997,9 @@ function computeUpgradeSpeedupDiamondCost(template, remainingMs) {
   return Math.max(1, Math.round(rawCost * FACTORY_SPEEDUP_DIAMOND_MULTIPLIER))
 }
 
-function factorySpeedupRatio(template) {
-  return clamp(Number(template?.upgrade?.speedupRatio ?? FACTORY_DEFAULT_SPEEDUP_RATIO), 0.05, 0.9)
+function factorySpeedupRatio() {
+  // Tüm fabrika inşaat/yükseltme hızlandırmaları sabit %15.
+  return FACTORY_DEFAULT_SPEEDUP_RATIO
 }
 
 function factoryOutputPerCollect(template, level) {
@@ -11507,16 +11508,6 @@ export async function listBusinessVehicleForSale(userId, businessId, payload = {
 
     runGameTick(db, profile, timestamp)
     syncSpecialListingDailyState(profile, timestamp)
-    if (visibility === 'custom' && profile.specialListingsCountToday >= SPECIAL_LISTINGS_DAILY_LIMIT) {
-      result = {
-        success: false,
-        reason: 'limit_reached',
-        errors: {
-          global: `Özel ilan günlük limiti doldu (${SPECIAL_LISTINGS_DAILY_LIMIT}/${SPECIAL_LISTINGS_DAILY_LIMIT}). Yeni hak Türkiye saatiyle 00:00 sonrası açılır.`,
-        },
-      }
-      return db
-    }
     if (visibility === 'custom') {
       const activeSpecialCount = activeSpecialListingCount(profile)
       if (activeSpecialCount >= SPECIAL_LISTINGS_ACTIVE_LIMIT) {
@@ -11677,10 +11668,6 @@ export async function listBusinessVehicleForSale(userId, businessId, payload = {
       sellerName: profile.username,
     })
     profile.vehicleListings = profile.vehicleListings.slice(0, 120)
-    if (visibility === 'custom') {
-      syncSpecialListingDailyState(profile, timestamp)
-      profile.specialListingsCountToday = Math.max(0, asInt(profile.specialListingsCountToday, 0)) + 1
-    }
     profile.updatedAt = timestamp
     result = {
       success: true,
@@ -11746,16 +11733,6 @@ export async function listLogisticsTruckForSale(userId, truckId, payload = {}) {
 
     runGameTick(db, profile, timestamp)
     syncSpecialListingDailyState(profile, timestamp)
-    if (visibility === 'custom' && profile.specialListingsCountToday >= SPECIAL_LISTINGS_DAILY_LIMIT) {
-      result = {
-        success: false,
-        reason: 'limit_reached',
-        errors: {
-          global: `Özel ilan günlük limiti doldu (${SPECIAL_LISTINGS_DAILY_LIMIT}/${SPECIAL_LISTINGS_DAILY_LIMIT}). Yeni hak Türkiye saatiyle 00:00 sonrası açılır.`,
-        },
-      }
-      return db
-    }
     if (visibility === 'custom') {
       const activeSpecialCount = activeSpecialListingCount(profile)
       if (activeSpecialCount >= SPECIAL_LISTINGS_ACTIVE_LIMIT) {
@@ -11893,10 +11870,6 @@ export async function listLogisticsTruckForSale(userId, truckId, payload = {}) {
       sellerName: profile.username,
     })
     profile.vehicleListings = profile.vehicleListings.slice(0, 120)
-    if (visibility === 'custom') {
-      syncSpecialListingDailyState(profile, timestamp)
-      profile.specialListingsCountToday = Math.max(0, asInt(profile.specialListingsCountToday, 0)) + 1
-    }
     profile.updatedAt = timestamp
     result = {
       success: true,
@@ -16878,3 +16851,4 @@ export async function markMessageCenterRead(userId, messageId) {
 
   return result
 }
+
