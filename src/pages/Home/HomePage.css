@@ -28568,3 +28568,92 @@ select {
     margin-inline: 0;
   }
 }
+
+/* Mission + modal + factory button stabilization */
+.missions-grid-pro {
+  grid-template-columns: 1fr !important;
+  gap: 10px !important;
+}
+
+.mission-card-pro {
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions {
+  gap: 6px;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions .factory-buy-btn {
+  min-height: 40px;
+  padding-inline: 6px;
+  font-size: clamp(10px, 2.8vw, 12px);
+  line-height: 1.15;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+  text-align: center;
+}
+
+.fleet-upgrade-modal,
+.fleet-setup-modal,
+.fleet-accountant-modal {
+  border-radius: 18px !important;
+  padding: 10px !important;
+}
+
+.fleet-upgrade-modal .fleet-upgrade-metrics {
+  gap: 6px;
+}
+
+.fleet-upgrade-modal .fleet-upgrade-metric > span {
+  font-size: 10px;
+}
+
+.fleet-upgrade-modal .fleet-upgrade-metric > strong {
+  font-size: 15px;
+}
+
+.fleet-upgrade-modal .fleet-modal-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fleet-upgrade-modal .fleet-modal-actions .btn,
+.fleet-setup-modal .unlock-node .btn {
+  min-height: 40px;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+.fleet-setup-modal .fleet-subheader-actions .btn {
+  min-height: 36px;
+  font-size: 11px;
+  padding-inline: 8px;
+}
+
+.fleet-accountant-modal .btn-collect-inline {
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.fleet-accountant-summary .fleet-summary-line {
+  min-height: 42px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+@media (max-width: 360px) {
+  .fleet-upgrade-modal .fleet-modal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .fleet-accountant-modal .btn-collect-inline {
+    min-height: 44px;
+    font-size: 11px;
+  }
+}
