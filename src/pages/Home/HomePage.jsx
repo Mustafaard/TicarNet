@@ -12010,7 +12010,7 @@ function HomePage({ user, onLogout }) {
                 >
                   {busy === busySpeedupKey
                     ? 'Hızlandırılıyor...'
-                    : `%30 Hızlandır (${fmt(factory.speedupDiamondCost)} elmas)`}
+                    : `%${Math.round((factory?.upgrading?.speedupRatio ?? 0.15) * 100)} Hızlandır (${fmt(factory.speedupDiamondCost)} elmas)`}
                 </button>
               ) : null}
             </>
@@ -12064,7 +12064,7 @@ function HomePage({ user, onLogout }) {
                 onClick={() => void speedupFactoryBuildAction(buildingFactory.id)}
                 disabled={Boolean(busy) || premiumDiamond < Math.max(0, buildingFactory.buildSpeedupDiamondCost || 0)}
               >
-                {busy === `factory-speedup-build:${buildingFactory.id}` ? 'Hızlandırılıyor...' : `%${Math.round((buildingFactory.buildSpeedupRatio || 0.3) * 100)} Hızlandır (${fmt(buildingFactory.buildSpeedupDiamondCost || 40)} elmas)`}
+                {busy === `factory-speedup-build:${buildingFactory.id}` ? 'Hızlandırılıyor...' : `%${Math.round((buildingFactory.buildSpeedupRatio || 0.15) * 100)} Hızlandır (${fmt(buildingFactory.buildSpeedupDiamondCost || 80)} elmas)`}
               </button>
             </div>
           </div>
@@ -12088,7 +12088,7 @@ function HomePage({ user, onLogout }) {
                 onClick={() => void speedupFactoryUpgradeAction(upgradingFactory.id)}
                 disabled={Boolean(busy) || premiumDiamond < Math.max(0, upgradingFactory.speedupDiamondCost || 0)}
               >
-                {busy === `factory-speedup:${upgradingFactory.id}` ? 'Hızlandırılıyor...' : `%30 Hızlandır (${fmt(upgradingFactory.speedupDiamondCost || 40)} elmas)`}
+                {busy === `factory-speedup:${upgradingFactory.id}` ? 'Hızlandırılıyor...' : `%${Math.round((upgradingFactory?.upgrading?.speedupRatio ?? 0.15) * 100)} Hızlandır (${fmt(upgradingFactory.speedupDiamondCost || 80)} elmas)`}
               </button>
             </div>
           </div>

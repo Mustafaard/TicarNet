@@ -824,7 +824,7 @@ export const FACTORY_TEMPLATES = [
       },
       growthMultiplier: 2,
       speedupDiamondCost: 40,
-      speedupRatio: 0.3,
+      speedupRatio: 0.15,
     },
   },
   {
@@ -858,7 +858,7 @@ export const FACTORY_TEMPLATES = [
       },
       growthMultiplier: 2,
       speedupDiamondCost: 40,
-      speedupRatio: 0.3,
+      speedupRatio: 0.15,
     },
   },
   {
@@ -892,7 +892,7 @@ export const FACTORY_TEMPLATES = [
       },
       growthMultiplier: 2,
       speedupDiamondCost: 40,
-      speedupRatio: 0.3,
+      speedupRatio: 0.15,
     },
   },
   {
@@ -926,7 +926,7 @@ export const FACTORY_TEMPLATES = [
       },
       growthMultiplier: 2,
       speedupDiamondCost: 40,
-      speedupRatio: 0.3,
+      speedupRatio: 0.15,
     },
   },
   {
@@ -960,7 +960,7 @@ export const FACTORY_TEMPLATES = [
       },
       growthMultiplier: 2,
       speedupDiamondCost: 40,
-      speedupRatio: 0.3,
+      speedupRatio: 0.15,
     },
   },
   {
@@ -994,7 +994,7 @@ export const FACTORY_TEMPLATES = [
       },
       growthMultiplier: 2,
       speedupDiamondCost: 40,
-      speedupRatio: 0.3,
+      speedupRatio: 0.15,
     },
   },
   {
@@ -1028,7 +1028,7 @@ export const FACTORY_TEMPLATES = [
       },
       growthMultiplier: 2,
       speedupDiamondCost: 40,
-      speedupRatio: 0.3,
+      speedupRatio: 0.15,
     },
   },
 ]

@@ -559,8 +559,9 @@ function createDefaultBusinessUnlocks() {
 const FACTORY_MIN_LEVEL = 1
 const FACTORY_UNCAPPED_MAX_LEVEL = 1000000000
 const FACTORY_DEFAULT_MAX_LEVEL = 200
-const FACTORY_DEFAULT_SPEEDUP_RATIO = 0.3
+const FACTORY_DEFAULT_SPEEDUP_RATIO = 0.15
 const FACTORY_DEFAULT_SPEEDUP_DIAMONDS = 40
+const FACTORY_SPEEDUP_DIAMOND_MULTIPLIER = 2
 const FACTORY_MAX_SLOTS_DEFAULT = 1
 const FACTORY_MAX_SLOTS_PREMIUM = 2
 
@@ -953,7 +954,8 @@ function factoryUpgradeResourceCost(template, targetLevel, options = {}) {
 }
 
 function factorySpeedupDiamondCost(template) {
-  return Math.max(1, asInt(template?.upgrade?.speedupDiamondCost, FACTORY_DEFAULT_SPEEDUP_DIAMONDS))
+  const base = Math.max(1, asInt(template?.upgrade?.speedupDiamondCost, FACTORY_DEFAULT_SPEEDUP_DIAMONDS))
+  return Math.max(1, Math.round(base * FACTORY_SPEEDUP_DIAMOND_MULTIPLIER))
 }
 
 /** İnşaat hızlandırma maliyeti: kalan süre arttıkça artar. */
@@ -961,7 +963,8 @@ function computeBuildSpeedupDiamondCost(template, remainingMs) {
   const base = Math.max(1, asInt(template?.upgrade?.speedupDiamondCost, BUILD_SPEEDUP_BASE_DIAMONDS))
   const hours = Math.max(0, remainingMs) / MS_HOUR
   const extra = Math.floor(hours * BUILD_SPEEDUP_DIAMONDS_PER_HOUR)
-  return Math.min(SPEEDUP_DIAMOND_CAP, Math.max(base, base + extra))
+  const rawCost = Math.min(SPEEDUP_DIAMOND_CAP, Math.max(base, base + extra))
+  return Math.max(1, Math.round(rawCost * FACTORY_SPEEDUP_DIAMOND_MULTIPLIER))
 }
 
 /** Yükseltme hızlandırma maliyeti: inşaattan daha pahalı, kalan süre arttıkça artar. */
@@ -969,7 +972,8 @@ function computeUpgradeSpeedupDiamondCost(template, remainingMs) {
   const base = Math.max(UPGRADE_SPEEDUP_BASE_DIAMONDS, asInt(template?.upgrade?.speedupDiamondCost, FACTORY_DEFAULT_SPEEDUP_DIAMONDS) + 15)
   const hours = Math.max(0, remainingMs) / MS_HOUR
   const extra = Math.floor(hours * UPGRADE_SPEEDUP_DIAMONDS_PER_HOUR)
-  return Math.min(SPEEDUP_DIAMOND_CAP, Math.max(base, base + extra))
+  const rawCost = Math.min(SPEEDUP_DIAMOND_CAP, Math.max(base, base + extra))
+  return Math.max(1, Math.round(rawCost * FACTORY_SPEEDUP_DIAMOND_MULTIPLIER))
 }
 
 function factorySpeedupRatio(template) {
