@@ -664,7 +664,7 @@ export const STARTER_XP = 0
 export const STARTER_ENERGY = 100
 
 export const MAX_TRANSACTION_HISTORY = 15
-export const MAX_NOTIFICATION_HISTORY = 25
+export const MAX_NOTIFICATION_HISTORY = 15
 
 export const ORDER_BOOK_DEPTH = 8
 
@@ -790,7 +790,7 @@ export const LEAGUE_SEASON_REWARD = {
 
 export const MAX_PUSH_HISTORY = 25
 export const MAX_PUSH_DEVICE_TOKENS = 8
-export const MESSAGE_CENTER_MAX_ITEMS = 25
+export const MESSAGE_CENTER_MAX_ITEMS = 15
 
 export const FACTORY_TEMPLATES = [
   {

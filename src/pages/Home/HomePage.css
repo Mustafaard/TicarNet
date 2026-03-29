@@ -12086,16 +12086,16 @@ select {
 /* Sohbet: PC'de ortada, makul genişlik; telefonda tam genişlik */
 @media (min-width: 640px) {
   .chat-screen-pro {
-    align-items: center;
+    align-items: stretch;
   }
   .chat-screen-pro .chat-card.chat-card-pro.chat-card-clean {
-    max-width: 580px;
+    max-width: none;
     width: 100%;
-    margin: 0 auto;
+    margin: 0;
     border-radius: 16px;
   }
   .home-shell.chat-only-shell .chat-screen-pro .chat-card.chat-card-pro.chat-card-clean {
-    max-width: 580px;
+    max-width: none;
   }
   .chat-thread-clean {
     padding: 14px 8px 16px;
@@ -12832,9 +12832,10 @@ select {
 }
 
 .message-sohbet-header {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--theme-message-header-border);
   background: var(--theme-market-panel-bg);
@@ -12848,16 +12849,25 @@ select {
   gap: 10px;
   flex: 1;
   min-width: 0;
+  overflow: hidden;
 }
 
 .message-sohbet-actions {
-  margin-left: auto;
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   justify-content: flex-end;
   flex-shrink: 0;
+  min-width: 0;
+  max-width: min(56vw, 360px);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.message-sohbet-actions::-webkit-scrollbar {
+  display: none;
 }
 
 .message-sohbet-lock-banner {
@@ -12898,11 +12908,14 @@ select {
   letter-spacing: 0.04em;
   text-transform: uppercase;
   cursor: pointer;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 .message-sohbet-chip-secondary {
   border-color: rgba(235, 205, 130, 0.7);
   background: linear-gradient(135deg, rgba(60, 45, 18, 0.95), rgba(38, 28, 10, 0.98));
+  margin-left: auto;
 }
 
 .message-sohbet-chip-danger {
@@ -12922,13 +12935,13 @@ select {
 }
 
 .message-sohbet-back {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid rgba(122, 176, 239, 0.55);
-  border-radius: 12px;
+  border: 1px solid rgba(132, 188, 250, 0.58);
+  border-radius: 999px;
   background:
     radial-gradient(circle at 100% 0%, rgba(243, 198, 93, 0.23), transparent 50%),
     linear-gradient(180deg, rgba(13, 40, 74, 0.95), rgba(8, 24, 48, 0.97));
@@ -13024,7 +13037,7 @@ select {
   color: #f0f4ff;
   text-align: left;
   line-height: 1.2;
-  white-space: nowrap;
+  white-space: nowrap !important;
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
@@ -13033,36 +13046,35 @@ select {
 @media (max-width: 680px) {
   .message-sohbet-header {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    grid-template-areas:
-      'back user'
-      'actions actions';
-    gap: 9px 10px;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 8px;
     align-items: center;
+    padding: 10px 12px;
   }
 
   .message-sohbet-back {
-    grid-area: back;
-    width: 40px;
-    height: 40px;
+    width: 38px;
+    height: 38px;
   }
 
   .message-sohbet-user {
-    grid-area: user;
     width: 100%;
     min-width: 0;
   }
 
   .message-sohbet-actions {
-    grid-area: actions;
-    margin-left: 0;
-    justify-content: flex-start;
-    width: 100%;
-    gap: 7px;
+    justify-content: flex-end;
+    max-width: 58vw;
+    gap: 6px;
   }
 
   .message-sohbet-username {
     font-size: 14px;
+  }
+
+  .message-sohbet-chip {
+    padding: 5px 8px;
+    font-size: 11px;
   }
 }
 
@@ -25435,7 +25447,7 @@ select {
 
 .chat-community-tabs {
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
   margin: 4px 0 10px;
   padding: 6px;
@@ -25475,6 +25487,12 @@ select {
   box-shadow:
     0 8px 18px rgba(4, 11, 24, 0.44),
     inset 0 1px 0 rgba(255, 239, 187, 0.12);
+}
+
+.chat-community-tab-city {
+  border-color: rgba(244, 197, 96, 0.58);
+  background: linear-gradient(180deg, rgba(44, 63, 96, 0.94), rgba(22, 38, 64, 0.95));
+  color: #ffe9b8;
 }
 
 .chat-community-tab-icon {

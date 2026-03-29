@@ -139,9 +139,11 @@ const NAV = [
 const MARKET_TABS = ['buy', 'sell', 'orderbook', 'auction', 'chart']
 const BUSINESS_DETAIL_TABS = ['garage', 'market']
 const CHAT_ROOM = 'global'
-const CHAT_PRUNE_TRIGGER = 25
-const CHAT_PRUNE_KEEP_COUNT = 25
+const CHAT_PRUNE_TRIGGER = 15
+const CHAT_PRUNE_KEEP_COUNT = 15
 const DEFAULT_CHAT_AVATAR = '/splash/logo.webp'
+const MARKETPLACE_SELL_MIN_PRICE_MULTIPLIER = 0.6
+const MARKETPLACE_SELL_MAX_PRICE_MULTIPLIER = 12
 const MESSAGE_FILTERS = [
   { id: 'all', label: 'Hepsi' },
   { id: 'message', label: 'Mesaj' },
@@ -9970,8 +9972,8 @@ function HomePage({ user, onLogout }) {
                 {sellForm.itemId && (() => {
                   const marketItem = market?.items?.find((i) => i.id === sellForm.itemId)
                   const price = marketItem?.price != null ? Math.max(1, Math.trunc(num(marketItem.price))) : 100
-                  const minP = Math.max(1, Math.round(price * 0.6))
-                  const maxP = Math.max(minP, Math.round(price * 1.5))
+                  const minP = Math.max(1, Math.round(price * MARKETPLACE_SELL_MIN_PRICE_MULTIPLIER))
+                  const maxP = Math.max(minP, Math.round(price * MARKETPLACE_SELL_MAX_PRICE_MULTIPLIER))
                   return <span className="marketplace-sell-form-hint">Adet başı min: {fmt(minP)} Nakit · max: {fmt(maxP)} Nakit</span>
                 })()}
               </div>
@@ -9998,6 +10000,17 @@ function HomePage({ user, onLogout }) {
                     return
                   }
                   const unitPrice = Math.max(1, Math.trunc(num(sellForm.unitPrice) || 0))
+                  const marketItem = market?.items?.find((i) => i.id === sellForm.itemId)
+                  const marketUnitPrice = marketItem?.price != null ? Math.max(1, Math.trunc(num(marketItem.price))) : 100
+                  const minAllowed = Math.max(1, Math.round(marketUnitPrice * MARKETPLACE_SELL_MIN_PRICE_MULTIPLIER))
+                  const maxAllowed = Math.max(minAllowed, Math.round(marketUnitPrice * MARKETPLACE_SELL_MAX_PRICE_MULTIPLIER))
+                  if (unitPrice < minAllowed || unitPrice > maxAllowed) {
+                    fail(
+                      null,
+                      `Adet fiyatı ${fmt(minAllowed)} ile ${fmt(maxAllowed)} arasında olmalı.`,
+                    )
+                    return
+                  }
                   setBusy('marketplace-sell')
                   try {
                     const response = await placeOrderBookOrder({
@@ -10836,7 +10849,7 @@ function HomePage({ user, onLogout }) {
             <p className="bank-empty-state">Henüz tamamlanan vadeli işlemin yok.</p>
           ) : (
             <div className="bank-history-list">
-              {bankHistoryRows.slice(0, 10).map((row, index) => {
+              {bankHistoryRows.slice(0, 15).map((row, index) => {
                 const claimedAtLabel = formatDateTime(row?.claimedAt || row?.unlockAt || row?.openedAt || '')
                 const rowPrincipal = Math.max(0, Math.trunc(num(row?.principal || 0)))
                 const rowPayout = Math.max(0, Math.trunc(num(row?.payout || 0)))
@@ -14855,6 +14868,16 @@ function HomePage({ user, onLogout }) {
               <span>{entry.label}</span>
             </button>
           ))}
+          <button
+            type="button"
+            className="chat-community-tab chat-community-tab-city"
+            onClick={() => { void openTab('rules', { tab: 'rules' }) }}
+            aria-label="Şehir kurallarına git"
+            title="Şehir kurallarını aç"
+          >
+            <span className="chat-community-tab-icon" aria-hidden>🌍</span>
+            <span>Şehir</span>
+          </button>
         </div>
         {chatCommunityTab === 'sohbet' ? (
           <>

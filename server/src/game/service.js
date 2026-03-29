@@ -106,6 +106,8 @@ const LOGISTICS_TRUCK_ORDER_COOLDOWN_MS = 4 * 60 * MS_MINUTE
 const LOGISTICS_MAX_TRUCK_COUNT = 1000
 const COLLECTION_TAX_RATE = 0.01
 const MARKET_TAX_RATE = 0.10
+const MARKET_BOT_RESTOCK_DELAY_MS = 3 * MS_HOUR
+const MARKET_BOT_RESTOCK_STOCK = 5000
 const WEEKLY_EVENT_TIMEZONE = 'Europe/Istanbul'
 const WEEKLY_EVENT_XP_MULTIPLIER = 2
 const WEEKLY_EVENT_COST_DISCOUNT_RATE = 0.25
@@ -231,7 +233,7 @@ const BANK_DEPOSIT_FEE_RATE = 0.05
 const BANK_WITHDRAW_FEE_RATE = 0
 const BANK_TERM_MAX_PRINCIPAL = 200_000_000
 const BANK_TERM_MAX_TOTAL_RATE_PCT = 10
-const BANK_TERM_HISTORY_LIMIT = 30
+const BANK_TERM_HISTORY_LIMIT = 15
 const BANK_TERM_OPTIONS = [
   { days: 1, dailyRatePct: 2 },
   { days: 2, dailyRatePct: 3 },
@@ -402,7 +404,7 @@ const LEGACY_ITEM_MAP = {
 const AVATAR_PUBLIC_PREFIX = `${String(config.avatarPublicBase || '/api/uploads/avatars').replace(/\/+$/, '')}/`
 const AVATAR_MAX_URL_LENGTH = 600
 const DIRECT_MESSAGE_MAX_LENGTH = 320
-const DIRECT_MESSAGE_HISTORY_LIMIT = Math.max(1, MESSAGE_CENTER_MAX_ITEMS || 25)
+const DIRECT_MESSAGE_HISTORY_LIMIT = 200
 const DIRECT_MESSAGE_REPORT_REASON_MIN_LENGTH = 5
 const DIRECT_MESSAGE_REPORT_REASON_MAX_LENGTH = 500
 const DIRECT_MESSAGE_REPORT_DUPLICATE_WINDOW_MS = 24 * 60 * 60 * 1000
@@ -2392,10 +2394,8 @@ function levelInfoFromXp(xpTotal) {
   }
 }
 
-function calculateMarketPrice(itemDef, stock) {
-  const scarcity = (itemDef.targetStock - stock) / itemDef.targetStock
-  const rawPrice = itemDef.basePrice * (1 + scarcity * itemDef.volatility)
-  return clamp(Math.round(rawPrice), itemDef.minPrice, itemDef.maxPrice)
+function marketStockCap() {
+  return MARKET_BOT_RESTOCK_STOCK
 }
 
 function createInitialMarketState(timestamp) {
@@ -2403,10 +2403,12 @@ function createInitialMarketState(timestamp) {
     lastUpdatedAt: timestamp,
     items: ITEM_CATALOG.map((item) => ({
       id: item.id,
-      stock: item.targetStock,
-      price: item.basePrice,
-      lastPrice: item.basePrice,
+      stock: MARKET_BOT_RESTOCK_STOCK,
+      price: item.maxPrice,
+      lastPrice: item.maxPrice,
       updatedAt: timestamp,
+      depletedAt: '',
+      lastRestockedAt: timestamp,
     })),
   }
 }
@@ -2423,13 +2425,14 @@ function normalizeMarketState(marketState, timestamp) {
 
   const items = ITEM_CATALOG.map((itemDef) => {
     const source = byId.get(itemDef.id)
+    const stockCap = marketStockCap()
     const stock = clamp(
-      asInt(source?.stock, itemDef.targetStock),
-      itemDef.minStock,
-      itemDef.maxStock,
+      asInt(source?.stock, MARKET_BOT_RESTOCK_STOCK),
+      0,
+      stockCap,
     )
     const price = clamp(
-      asInt(source?.price, calculateMarketPrice(itemDef, stock)),
+      asInt(source?.price, itemDef.maxPrice),
       itemDef.minPrice,
       itemDef.maxPrice,
     )
@@ -2445,6 +2448,8 @@ function normalizeMarketState(marketState, timestamp) {
       price,
       lastPrice,
       updatedAt: typeof source?.updatedAt === 'string' ? source.updatedAt : timestamp,
+      depletedAt: typeof source?.depletedAt === 'string' ? source.depletedAt : '',
+      lastRestockedAt: typeof source?.lastRestockedAt === 'string' ? source.lastRestockedAt : '',
     }
   })
 
@@ -5797,27 +5802,58 @@ function tickShipments(profile, timestamp) {
 
 function tickMarket(marketState, timestamp) {
   const nowMs = new Date(timestamp).getTime()
-  const lastMs = new Date(marketState.lastUpdatedAt || timestamp).getTime()
-  const elapsedMinutes = Math.max(0, (nowMs - lastMs) / 60000)
-
-  if (elapsedMinutes <= 0.01) return
 
   for (const marketItem of marketState.items) {
     const def = ITEM_BY_ID.get(marketItem.id)
     if (!def) continue
 
-    const restock = def.restockPerMinute * elapsedMinutes
-    const rebalance = (def.targetStock - marketItem.stock) * 0.016 * elapsedMinutes
+    const stockCap = marketStockCap()
+    const currentStock = clamp(asInt(marketItem.stock, MARKET_BOT_RESTOCK_STOCK), 0, stockCap)
+    marketItem.stock = currentStock
 
-    marketItem.stock = clamp(
-      Math.round(marketItem.stock + restock + rebalance),
-      def.minStock,
-      def.maxStock,
-    )
+    const currentPrice = clamp(asInt(marketItem.price, def.maxPrice), def.minPrice, def.maxPrice)
+    marketItem.price = currentPrice
 
-    marketItem.lastPrice = marketItem.price
-    marketItem.price = calculateMarketPrice(def, marketItem.stock)
-    marketItem.updatedAt = timestamp
+    if (currentStock > 0) {
+      if (marketItem.depletedAt) {
+        marketItem.depletedAt = ''
+      }
+      if (marketItem.price !== def.maxPrice) {
+        marketItem.lastPrice = marketItem.price
+        marketItem.price = def.maxPrice
+      } else {
+        marketItem.lastPrice = def.maxPrice
+      }
+      marketItem.updatedAt = timestamp
+      continue
+    }
+
+    const depletedAtRaw = typeof marketItem.depletedAt === 'string' ? marketItem.depletedAt : ''
+    if (!depletedAtRaw) {
+      marketItem.depletedAt = timestamp
+      marketItem.lastPrice = marketItem.price
+      marketItem.price = def.maxPrice
+      marketItem.updatedAt = timestamp
+      continue
+    }
+
+    const depletedAtMs = new Date(depletedAtRaw).getTime()
+    if (!Number.isFinite(depletedAtMs)) {
+      marketItem.depletedAt = timestamp
+      marketItem.lastPrice = marketItem.price
+      marketItem.price = def.maxPrice
+      marketItem.updatedAt = timestamp
+      continue
+    }
+
+    if (nowMs - depletedAtMs >= MARKET_BOT_RESTOCK_DELAY_MS) {
+      marketItem.stock = MARKET_BOT_RESTOCK_STOCK
+      marketItem.lastPrice = marketItem.price
+      marketItem.price = def.maxPrice
+      marketItem.updatedAt = timestamp
+      marketItem.depletedAt = ''
+      marketItem.lastRestockedAt = timestamp
+    }
   }
 
   marketState.lastUpdatedAt = timestamp
@@ -9145,11 +9181,11 @@ export async function buyMarketItem(userId, payload) {
     profile.wallet -= totalCost
     marketItem.stock = clamp(
       marketItem.stock - quantity,
-      itemDef.minStock,
-      itemDef.maxStock,
+      0,
+      marketStockCap(),
     )
     marketItem.lastPrice = marketItem.price
-    marketItem.price = calculateMarketPrice(itemDef, marketItem.stock)
+    marketItem.price = itemDef.maxPrice
     marketItem.updatedAt = timestamp
 
     addInventory(profile, itemId, quantity)
@@ -9444,11 +9480,11 @@ export async function sellMarketItem(userId, payload) {
     profile.wallet += totalGain
     marketItem.stock = clamp(
       marketItem.stock + quantity,
-      itemDef.minStock,
-      itemDef.maxStock,
+      0,
+      marketStockCap(),
     )
     marketItem.lastPrice = marketItem.price
-    marketItem.price = calculateMarketPrice(itemDef, marketItem.stock)
+    marketItem.price = itemDef.maxPrice
     marketItem.updatedAt = timestamp
 
     applyMissionProgress(profile.missions, { type: 'sell_value', value: totalGain }, timestamp)
@@ -14036,7 +14072,8 @@ export async function placeLimitOrder(userId, payload) {
     }
 
     const marketItem = db.marketState.items.find((entry) => entry.id === itemId)
-    if (!marketItem || !ITEM_BY_ID.get(itemId)) {
+    const itemDef = ITEM_BY_ID.get(itemId)
+    if (!marketItem || !itemDef) {
       result = {
         success: false,
         reason: 'not_found',
@@ -14059,6 +14096,19 @@ export async function placeLimitOrder(userId, payload) {
     }
 
     if (side === 'sell') {
+      const marketUnitPrice = Math.max(1, asInt(marketItem.price, itemDef.basePrice))
+      const minAllowedPrice = Math.max(1, Math.round(marketUnitPrice * 0.6))
+      const maxAllowedPrice = Math.max(minAllowedPrice, Math.round(marketUnitPrice * 12))
+      if (limitPrice < minAllowedPrice || limitPrice > maxAllowedPrice) {
+        result = {
+          success: false,
+          reason: 'validation',
+          errors: {
+            global: `Adet fiyatı ${minAllowedPrice.toLocaleString('tr-TR')} ile ${maxAllowedPrice.toLocaleString('tr-TR')} arasında olmalı.`,
+          },
+        }
+        return db
+      }
       const todayKey = dailyStoreDayKeyFromIso(timestamp)
       if (profile.sellListingsDayKey !== todayKey) {
         profile.sellListingsDayKey = todayKey
