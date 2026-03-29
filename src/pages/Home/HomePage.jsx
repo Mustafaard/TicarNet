@@ -169,6 +169,7 @@ const CHAT_COMMUNITY_TAB_ITEMS = [
   { id: 'sehir', label: 'Şehrim', icon: '🌍', iconSrc: '/home/icons/sehir.webp', type: 'route-home' },
 ]
 const CHAT_NEWS_MAX_ITEMS = 50
+const MARKETPLACE_SYSTEM_STOCK_CAP = 5000
 
 const CHAT_SEED = {
   global: [],
@@ -9900,8 +9901,8 @@ function HomePage({ user, onLogout }) {
                       orderId: '',
                       itemId: item.id,
                       itemName: item.name || meta?.label || item.id,
-                      price: Math.max(1, Math.trunc(num(item?.price || item?.buyPrice || 0))),
-                      stock: Math.max(0, Math.trunc(num(item?.stock || 0))),
+                      price: Math.max(1, Math.trunc(num(item?.buyPrice || item?.price || 0))),
+                      stock: Math.min(MARKETPLACE_SYSTEM_STOCK_CAP, Math.max(0, Math.trunc(num(item?.stock || 0)))),
                       sellerName: 'Sistem Pazarı',
                       sellerUserId: '',
                       isSystem: true,
@@ -9911,6 +9912,8 @@ function HomePage({ user, onLogout }) {
                   }
                   for (const o of ordersForItem) {
                     const isSystemOrder = Boolean(o?.isSystem) || String(o?.source || '').trim().toLowerCase() === 'system'
+                    const rawStock = Math.max(0, Math.trunc(num(o?.quantity || 0)))
+                    const stock = isSystemOrder ? Math.min(MARKETPLACE_SYSTEM_STOCK_CAP, rawStock) : rawStock
                     rows.push({
                       type: isSystemOrder ? 'market' : 'order',
                       key: o.orderId || `${isSystemOrder ? 'system' : 'order'}:${o.itemId}`,
@@ -9918,7 +9921,7 @@ function HomePage({ user, onLogout }) {
                       itemId: o.itemId,
                       itemName: o.itemName || meta?.label || o.itemId,
                       price: o.limitPrice,
-                      stock: o.quantity,
+                      stock,
                       sellerName: o.sellerName,
                       sellerUserId: o.sellerUserId,
                       isSystem: isSystemOrder,
@@ -9926,6 +9929,18 @@ function HomePage({ user, onLogout }) {
                     })
                   }
                 }
+                rows.sort((left, right) => {
+                  const leftSystem = left?.isSystem === true
+                  const rightSystem = right?.isSystem === true
+                  if (leftSystem !== rightSystem) return leftSystem ? 1 : -1
+                  const priceDiff = Math.max(0, Math.trunc(num(left?.price || 0))) - Math.max(0, Math.trunc(num(right?.price || 0)))
+                  if (priceDiff !== 0) return priceDiff
+                  const itemDiff = String(left?.itemId || '').localeCompare(String(right?.itemId || ''), 'tr')
+                  if (itemDiff !== 0) return itemDiff
+                  const stockDiff = Math.max(0, Math.trunc(num(right?.stock || 0))) - Math.max(0, Math.trunc(num(left?.stock || 0)))
+                  if (stockDiff !== 0) return stockDiff
+                  return String(left?.sellerName || '').localeCompare(String(right?.sellerName || ''), 'tr')
+                })
                 if (rows.length === 0) {
                   return (
                     <div className="marketplace-list-empty card">
@@ -11983,7 +11998,7 @@ function HomePage({ user, onLogout }) {
           </div>
           <button
             type="button"
-            className="btn btn-primary factory-hub-collect-btn"
+            className="btn btn-primary factory-hub-collect-btn factory-btn-bulk"
             onClick={() => factoriesReadyCount > 0 && openFactoryBulkCollectModal()}
             disabled={Boolean(busy) || factoriesReadyCount <= 0}
           >
@@ -12065,7 +12080,7 @@ function HomePage({ user, onLogout }) {
                   <div className="factory-owned-actions">
                     <button
                       type="button"
-                      className="btn btn-primary factory-action-btn factory-buy-btn"
+                      className="btn btn-primary factory-action-btn factory-buy-btn factory-btn-collect"
                       onClick={() => factory.canCollectNow && openFactoryCollectModal(factory.id)}
                       disabled={Boolean(busy) || !factory.canCollectNow}
                     >
@@ -12073,7 +12088,7 @@ function HomePage({ user, onLogout }) {
                     </button>
                     <button
                       type="button"
-                      className="btn btn-secondary factory-action-btn factory-buy-btn"
+                      className="btn btn-secondary factory-action-btn factory-buy-btn factory-btn-upgrade"
                       onClick={() => !factory.isUpgrading && !factory.nextUpgrade?.maxReached && setFactoryUpgradeModalId(factory.id)}
                       disabled={Boolean(busy) || factory.isUpgrading || factory.nextUpgrade?.maxReached}
                     >
@@ -12246,7 +12261,7 @@ function HomePage({ user, onLogout }) {
               </section>
               <div className="fleet-modal-actions fleet-modal-actions-bulk">
                 <button
-                  className="btn btn-success btn-collect-main"
+                  className="btn btn-success btn-collect-main factory-modal-primary-btn"
                   onClick={() => void confirmFactoryBulkCollectFromModal()}
                   disabled={Boolean(busy) || factoriesReadyCount <= 0}
                 >
@@ -12287,7 +12302,7 @@ function HomePage({ user, onLogout }) {
                   ) : null
                 })}
               </article>
-              <button type="button" className="btn btn-danger fleet-modal-close" onClick={closeFactoryBulkCollectModal}>Kapat</button>
+              <button type="button" className="btn btn-danger fleet-modal-close factory-modal-close-btn" onClick={closeFactoryBulkCollectModal}>Kapat</button>
             </article>
           </section>,
           document.body
@@ -12306,7 +12321,7 @@ function HomePage({ user, onLogout }) {
               ) : null}
               <div className="fleet-accountant-cta-card">
                 <button
-                  className="btn btn-success full btn-collect-inline"
+                  className="btn btn-success full btn-collect-inline factory-modal-primary-btn"
                   onClick={() => void confirmFactoryCollectFromModal()}
                   disabled={Boolean(busy) || !factoryCollectModal.canCollectNow}
                 >
@@ -12340,7 +12355,7 @@ function HomePage({ user, onLogout }) {
                 <small className="fleet-accountant-footnote">Depodaki {factoryCollectModal.energyMeta?.label}: {fmt(inventoryById[factoryCollectModal.energyItemId] || 0)}</small>
               </article>
               <div className="fleet-accountant-footer">
-                <button type="button" className="btn btn-danger fleet-modal-close fleet-accountant-close" onClick={closeFactoryCollectModal}>Kapat</button>
+                <button type="button" className="btn btn-danger fleet-modal-close fleet-accountant-close factory-modal-close-btn" onClick={closeFactoryCollectModal}>Kapat</button>
               </div>
             </article>
           </section>,
@@ -14992,8 +15007,9 @@ function HomePage({ user, onLogout }) {
         avatarUrl,
         createdAt,
         createdAtMs: safeCreatedAtMs,
-        title: "TicarNet'e yeni oyuncu katıldı! 👋",
+        title: "TicarNet'e yeni oyuncu katıldı.",
         subtitle: 'Bakmak için dokun.',
+        welcomeNote: 'Hoş geldin, iyi eğlenceler.',
         timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
         dateLabel: formatDateTime(createdAt),
       }
@@ -15250,7 +15266,10 @@ function HomePage({ user, onLogout }) {
                 chatNewsFeed.map((entry) => (
                   <article key={entry.id} className="chat-news-item chat-news-row">
                     <p className="chat-news-title chat-news-row-title">{entry.title}</p>
-                    <p className="chat-news-text chat-news-row-subtitle">{entry.subtitle}</p>
+                    <p className="chat-news-text chat-news-row-subtitle">
+                      <span>{entry.subtitle}</span>
+                      <span className="chat-news-welcome-note">{entry.welcomeNote || 'Hoş geldin!'}</span>
+                    </p>
                     <p className="chat-news-text chat-news-row-player">
                       Oyuncu:{' '}
                       {entry.userId ? (

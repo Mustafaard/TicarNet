@@ -8308,12 +8308,8 @@ export async function getMarket(userId) {
       if (!itemId) continue
       const itemDef = ITEM_BY_ID.get(itemId)
       if (!itemDef) continue
-      const stock = clamp(asInt(marketItem?.stock, 0), 0, marketStockCap())
-      const systemPrice = clamp(
-        asInt(marketItem?.price, marketSystemPriceCap(itemDef)),
-        itemDef.minPrice,
-        marketSystemPriceCap(itemDef),
-      )
+      const systemPrice = marketSystemPriceCap(itemDef)
+      const stock = clamp(asInt(marketItem?.stock, MARKET_BOT_RESTOCK_STOCK), 0, MARKET_BOT_RESTOCK_STOCK)
       sellOrders.push({
         orderId: `system:${itemId}`,
         itemId,
@@ -8326,7 +8322,18 @@ export async function getMarket(userId) {
         isSystem: true,
       })
     }
-    sellOrders.sort((a, b) => (a.itemId === b.itemId ? a.limitPrice - b.limitPrice : (a.itemId || '').localeCompare(b.itemId || '')))
+    sellOrders.sort((left, right) => {
+      const leftSystem = left?.isSystem === true
+      const rightSystem = right?.isSystem === true
+      if (leftSystem !== rightSystem) return leftSystem ? 1 : -1
+      const priceDiff = Math.max(0, asInt(left?.limitPrice, 0)) - Math.max(0, asInt(right?.limitPrice, 0))
+      if (priceDiff !== 0) return priceDiff
+      const itemDiff = String(left?.itemId || '').localeCompare(String(right?.itemId || ''), 'tr')
+      if (itemDiff !== 0) return itemDiff
+      const quantityDiff = Math.max(0, asInt(right?.quantity, 0)) - Math.max(0, asInt(left?.quantity, 0))
+      if (quantityDiff !== 0) return quantityDiff
+      return String(left?.sellerName || '').localeCompare(String(right?.sellerName || ''), 'tr')
+    })
 
     const todayKey = dailyStoreDayKeyFromIso(timestamp)
     if (profile.sellListingsDayKey !== todayKey) {

@@ -10166,6 +10166,59 @@
   font-weight: 700;
 }
 
+.factory-bulk-modal .fleet-modal-actions-bulk {
+  display: grid;
+  width: 100%;
+}
+
+.factory-bulk-modal .fleet-modal-close,
+.factory-collect-modal .fleet-modal-close {
+  justify-self: stretch;
+  min-width: 0;
+}
+
+.factory-modal-primary-btn {
+  width: 100%;
+  min-height: 56px;
+  border-radius: 15px;
+  border: 1px solid rgba(140, 220, 171, 0.72);
+  background: linear-gradient(180deg, rgba(39, 158, 95, 0.98), rgba(20, 112, 66, 0.98));
+  color: #effff5;
+  font-weight: 900;
+  box-shadow:
+    inset 0 1px 0 rgba(220, 255, 236, 0.3),
+    0 12px 22px rgba(7, 37, 24, 0.34);
+}
+
+.factory-modal-primary-btn .btn-label {
+  font-size: 15px;
+}
+
+.factory-modal-primary-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.factory-modal-primary-btn:disabled {
+  opacity: 0.68;
+  filter: saturate(0.75);
+  box-shadow: none;
+}
+
+.factory-modal-close-btn {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 175, 175, 0.64);
+  background: linear-gradient(180deg, rgba(165, 58, 72, 0.95), rgba(116, 36, 48, 0.95));
+  color: #ffeef1;
+  font-weight: 800;
+}
+
+.factory-modal-close-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
 .fleet-bulk-kpis {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -25785,7 +25838,23 @@ select {
 }
 
 .chat-news-row-subtitle {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  text-align: left;
+}
+
+.chat-news-welcome-note {
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(126, 184, 247, 0.46);
+  background: rgba(18, 44, 76, 0.74);
+  color: #d8ebff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  white-space: nowrap;
 }
 
 .chat-news-row-player {
@@ -26129,18 +26198,34 @@ select {
     linear-gradient(172deg, rgba(9, 28, 56, 0.92), rgba(5, 17, 34, 0.95));
 }
 
-.factory-screen .factory-action-btn,
-.factory-screen .factory-buy-btn,
-.factory-screen .factory-hub-collect-btn {
-  border-color: rgba(245, 199, 98, 0.7) !important;
-  background: linear-gradient(180deg, rgba(220, 166, 57, 0.97), rgba(153, 101, 24, 0.97)) !important;
-  color: #fff4d8 !important;
+.factory-screen .factory-btn-collect {
+  border-color: rgba(141, 224, 175, 0.78) !important;
+  background: linear-gradient(180deg, rgba(44, 172, 106, 0.98), rgba(24, 120, 73, 0.98)) !important;
+  color: #ecfff4 !important;
 }
 
-.factory-screen .factory-action-btn:hover:not(:disabled),
-.factory-screen .factory-buy-btn:hover:not(:disabled),
-.factory-screen .factory-hub-collect-btn:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(236, 183, 75, 0.98), rgba(170, 114, 27, 0.98)) !important;
+.factory-screen .factory-btn-collect:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(62, 189, 122, 0.98), rgba(28, 136, 83, 0.98)) !important;
+}
+
+.factory-screen .factory-btn-upgrade {
+  border-color: rgba(129, 185, 248, 0.82) !important;
+  background: linear-gradient(180deg, rgba(51, 125, 214, 0.98), rgba(30, 84, 156, 0.98)) !important;
+  color: #eaf4ff !important;
+}
+
+.factory-screen .factory-btn-upgrade:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(67, 141, 229, 0.98), rgba(37, 96, 172, 0.98)) !important;
+}
+
+.factory-screen .factory-btn-bulk {
+  border-color: rgba(246, 201, 102, 0.8) !important;
+  background: linear-gradient(180deg, rgba(227, 174, 63, 0.98), rgba(161, 109, 29, 0.98)) !important;
+  color: #fff5dc !important;
+}
+
+.factory-screen .factory-btn-bulk:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(238, 188, 78, 0.98), rgba(175, 121, 37, 0.98)) !important;
 }
 
 .business-screen .fleet-subheader,
@@ -26263,5 +26348,61 @@ select {
 
   .chat-thread-pro.chat-thread-clean {
     padding: 8px;
+  }
+}
+
+@media (max-width: 900px) {
+  .marketplace-buy-list.marketplace-buy-list-clean {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-card-clean {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    grid-template-areas:
+      'icon info'
+      'price price'
+      'action action';
+    align-items: start;
+    gap: 8px;
+    padding: 11px 10px;
+    height: 100%;
+  }
+
+  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-card-clean-icon {
+    grid-area: icon;
+    width: 32px;
+    height: 32px;
+  }
+
+  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-card-clean-info {
+    grid-area: info;
+  }
+
+  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-card-clean-price-wrap {
+    grid-area: price;
+    width: 100%;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+
+  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-btn-clean {
+    grid-area: action;
+    width: 100%;
+    min-height: 42px;
+  }
+}
+
+@media (max-width: 520px) {
+  .chat-news-row-subtitle {
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .chat-news-welcome-note {
+    font-size: 9px;
   }
 }
