@@ -5800,7 +5800,23 @@ function tickShipments(profile, timestamp) {
   }
 }
 
-function tickMarket(marketState, timestamp) {
+function hasOpenSellLimitOrderForItem(db, itemId) {
+  const safeItemId = String(itemId || '').trim()
+  if (!safeItemId) return false
+  const profiles = Array.isArray(db?.gameProfiles) ? db.gameProfiles : []
+  for (const profile of profiles) {
+    const orders = Array.isArray(profile?.limitOrders) ? profile.limitOrders : []
+    for (const order of orders) {
+      if (!order || order.status !== 'open' || order.side !== 'sell') continue
+      if (String(order.itemId || '').trim() !== safeItemId) continue
+      if (orderRemainingQuantity(order) <= 0) continue
+      return true
+    }
+  }
+  return false
+}
+
+function tickMarket(db, marketState, timestamp) {
   const nowMs = new Date(timestamp).getTime()
 
   for (const marketItem of marketState.items) {
@@ -5814,46 +5830,35 @@ function tickMarket(marketState, timestamp) {
     const currentPrice = clamp(asInt(marketItem.price, def.maxPrice), def.minPrice, def.maxPrice)
     marketItem.price = currentPrice
 
-    if (currentStock > 0) {
-      if (marketItem.depletedAt) {
-        marketItem.depletedAt = ''
-      }
-      if (marketItem.price !== def.maxPrice) {
-        marketItem.lastPrice = marketItem.price
-        marketItem.price = def.maxPrice
-      } else {
-        marketItem.lastPrice = def.maxPrice
-      }
-      marketItem.updatedAt = timestamp
-      continue
-    }
+    const hasOpenPlayerSellOrder = hasOpenSellLimitOrderForItem(db, marketItem.id)
+    const lastRestockedAtRaw = typeof marketItem.lastRestockedAt === 'string' ? marketItem.lastRestockedAt : ''
+    const lastRestockedAtMs = new Date(lastRestockedAtRaw).getTime()
+    const restockDelayPassed = !Number.isFinite(lastRestockedAtMs) || (nowMs - lastRestockedAtMs >= MARKET_BOT_RESTOCK_DELAY_MS)
 
-    const depletedAtRaw = typeof marketItem.depletedAt === 'string' ? marketItem.depletedAt : ''
-    if (!depletedAtRaw) {
-      marketItem.depletedAt = timestamp
-      marketItem.lastPrice = marketItem.price
-      marketItem.price = def.maxPrice
-      marketItem.updatedAt = timestamp
-      continue
-    }
-
-    const depletedAtMs = new Date(depletedAtRaw).getTime()
-    if (!Number.isFinite(depletedAtMs)) {
-      marketItem.depletedAt = timestamp
-      marketItem.lastPrice = marketItem.price
-      marketItem.price = def.maxPrice
-      marketItem.updatedAt = timestamp
-      continue
-    }
-
-    if (nowMs - depletedAtMs >= MARKET_BOT_RESTOCK_DELAY_MS) {
+    if (!hasOpenPlayerSellOrder && currentStock < stockCap && restockDelayPassed) {
       marketItem.stock = MARKET_BOT_RESTOCK_STOCK
       marketItem.lastPrice = marketItem.price
       marketItem.price = def.maxPrice
       marketItem.updatedAt = timestamp
       marketItem.depletedAt = ''
       marketItem.lastRestockedAt = timestamp
+      continue
     }
+
+    if (currentStock > 0) {
+      if (marketItem.depletedAt) {
+        marketItem.depletedAt = ''
+      }
+    } else {
+      const depletedAtRaw = typeof marketItem.depletedAt === 'string' ? marketItem.depletedAt : ''
+      if (!depletedAtRaw || !Number.isFinite(new Date(depletedAtRaw).getTime())) {
+        marketItem.depletedAt = timestamp
+      }
+    }
+
+    marketItem.lastPrice = marketItem.price
+    marketItem.price = def.maxPrice
+    marketItem.updatedAt = timestamp
   }
 
   marketState.lastUpdatedAt = timestamp
@@ -6731,7 +6736,7 @@ function tickContracts(profile, timestamp) {
 function runGameTick(db, profile, timestamp) {
   normalizeAllProfiles(db, timestamp)
   normalizeLeagueState(profile, timestamp)
-  tickMarket(db.marketState, timestamp)
+  tickMarket(db, db.marketState, timestamp)
   const forexTickResult = tickForex(db.forexState, timestamp)
   if (forexTickResult?.updated) {
     notifyAllProfilesForexUpdated(db, timestamp)

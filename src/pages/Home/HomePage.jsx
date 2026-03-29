@@ -166,7 +166,6 @@ const MESSAGE_ICONS = {
 const CHAT_COMMUNITY_TAB_ITEMS = [
   { id: 'sohbet', label: 'Sohbet', icon: '💬' },
   { id: 'haberler', label: 'Haberler', icon: '✨' },
-  { id: 'kurallar', label: 'Kurallar', icon: '📜' },
 ]
 
 const CHAT_SEED = {
@@ -4557,7 +4556,26 @@ function HomePage({ user, onLogout }) {
       )
       return
     }
-    if (!factory?.nextUpgrade?.canUpgradeNow || factory?.nextUpgrade?.maxReached) return
+    if (factory?.nextUpgrade?.maxReached) return
+    if (!factory?.nextUpgrade?.canUpgradeNow) {
+      const missingRows = []
+      const missingCash = Math.max(0, Math.trunc(num(factory?.missingUpgradeCash || 0)))
+      if (missingCash > 0) {
+        missingRows.push(`Nakit: ${fmt(missingCash)}`)
+      }
+      for (const row of Array.isArray(factory?.upgradeCostRows) ? factory.upgradeCostRows : []) {
+        const missing = Math.max(0, Math.trunc(num(row?.missing || 0)))
+        if (missing <= 0) continue
+        const itemLabel = String(row?.meta?.label || row?.itemId || 'Kaynak').trim()
+        missingRows.push(`${itemLabel}: ${fmt(missing)}`)
+      }
+      setError(
+        missingRows.length > 0
+          ? `Yükseltme için kaynaklar yetersiz. Eksikler: ${missingRows.join(', ')}`
+          : 'Yükseltme şartları henüz sağlanmadı.',
+      )
+      return
+    }
     setFactoryUpgradeModalId('')
     await upgradeFactoryAction(id)
   }
@@ -8117,6 +8135,31 @@ function HomePage({ user, onLogout }) {
     !factoryUpgradeModal.isUpgrading &&
     !canStartAnotherFactoryUpgrade,
   )
+  const factoryUpgradeModalMissingRows = factoryUpgradeModal
+    ? [
+      ...(Math.max(0, Math.trunc(num(factoryUpgradeModal.missingUpgradeCash || 0))) > 0
+        ? [
+          {
+            key: 'cash',
+            label: 'Nakit',
+            missing: Math.max(0, Math.trunc(num(factoryUpgradeModal.missingUpgradeCash || 0))),
+          },
+        ]
+        : []),
+      ...((Array.isArray(factoryUpgradeModal.upgradeCostRows) ? factoryUpgradeModal.upgradeCostRows : [])
+        .map((row, index) => ({
+          row,
+          index,
+        }))
+        .filter(({ row }) => Math.max(0, Math.trunc(num(row?.missing || 0))) > 0)
+        .map(({ row, index }) => ({
+          key: `${String(row?.itemId || row?.meta?.label || 'resource')}-${index}`,
+          label: String(row?.meta?.label || row?.itemId || 'Kaynak').trim(),
+          missing: Math.max(0, Math.trunc(num(row?.missing || 0))),
+        }))),
+    ]
+    : []
+  const factoryUpgradeModalHasMissingCost = factoryUpgradeModalMissingRows.length > 0
   const factoryPurchaseModalCanBuyNow = Boolean(
     factoryPurchaseModal &&
     canStartAnotherFactoryBuild &&
@@ -11716,8 +11759,8 @@ function HomePage({ user, onLogout }) {
               <button
                 type="button"
                 className="btn btn-secondary factory-action-btn"
-                onClick={() => void upgradeFactoryAction(factory.id)}
-                disabled={Boolean(busy) || blockedByOtherUpgrade || factory.nextUpgrade?.maxReached || factory.isUpgrading || !factory.nextUpgrade?.canUpgradeNow}
+                onClick={() => setFactoryUpgradeModalId(factory.id)}
+                disabled={Boolean(busy) || factory.nextUpgrade?.maxReached || factory.isUpgrading}
               >
                 {busy === busyUpgradeKey
                   ? 'Başlatılıyor...'
@@ -11942,8 +11985,8 @@ function HomePage({ user, onLogout }) {
                     <button
                       type="button"
                       className="btn btn-secondary factory-action-btn factory-buy-btn"
-                      onClick={() => !factory.isUpgrading && !blockedByOtherUpgrade && !factory.nextUpgrade?.maxReached && factory.nextUpgrade?.canUpgradeNow && setFactoryUpgradeModalId(factory.id)}
-                      disabled={Boolean(busy) || factory.isUpgrading || blockedByOtherUpgrade || factory.nextUpgrade?.maxReached || !factory.nextUpgrade?.canUpgradeNow}
+                      onClick={() => !factory.isUpgrading && !factory.nextUpgrade?.maxReached && setFactoryUpgradeModalId(factory.id)}
+                      disabled={Boolean(busy) || factory.isUpgrading || factory.nextUpgrade?.maxReached}
                     >
                       {busy === busyUpgradeKey ? 'Başlatılıyor...' : factory.isUpgrading ? 'Yükseltiliyor' : blockedByOtherUpgrade ? 'Yuva dolu' : factory.nextUpgrade?.maxReached ? 'Maksimum seviyede' : 'Yükselt'}
                     </button>
@@ -12232,6 +12275,13 @@ function HomePage({ user, onLogout }) {
                   ))}
                 </div>
                 <p className="fleet-gallery-note-hint">Süre: {formatBuildDuration((factoryUpgradeModal.nextUpgrade?.durationMinutes || 0) * 60 * 1000)}</p>
+                {factoryUpgradeModalHasMissingCost ? (
+                  <p className="factory-upgrade-note is-missing">
+                    Eksik kaynak: {factoryUpgradeModalMissingRows.map((row) => `${row.label} ${fmt(row.missing)}`).join(' • ')}
+                  </p>
+                ) : (
+                  <p className="factory-upgrade-note is-ready">Yükseltme için tüm maliyetler hazır.</p>
+                )}
                 {factoryUpgradeModalBlockedBySlot ? (
                   <p className="fleet-gallery-note-hint">
                     Yükseltme yuvası dolu. Aktif inşaat veya yükseltme tamamlandığında yeniden deneyebilirsin.
@@ -12246,7 +12296,6 @@ function HomePage({ user, onLogout }) {
                   disabled={
                     Boolean(busy) ||
                     factoryUpgradeModalBlockedBySlot ||
-                    !factoryUpgradeModal.nextUpgrade?.canUpgradeNow ||
                     factoryUpgradeModal.nextUpgrade?.maxReached
                   }
                 >
@@ -14820,17 +14869,8 @@ function HomePage({ user, onLogout }) {
     } catch (_) { return '' }
   }
 
-  const chatRulesDigest = CITY_RULES_GUIDE.groups
-    .map((group) => ({
-      id: group.id,
-      icon: group.icon,
-      title: group.title,
-      subtitle: group.description,
-      rules: Array.isArray(group.rules) ? group.rules : [],
-    }))
-
   const chatNewsFeed = Array.isArray(chatRecentPlayers)
-    ? chatRecentPlayers.map((entry) => {
+    ? chatRecentPlayers.slice(0, 15).map((entry) => {
       const userId = String(entry?.userId || '').trim()
       const username = String(entry?.username || 'Oyuncu').trim() || 'Oyuncu'
       const avatarUrl = String(entry?.avatarUrl || '').trim()
@@ -14871,9 +14911,9 @@ function HomePage({ user, onLogout }) {
           <button
             type="button"
             className="chat-community-tab chat-community-tab-city"
-            onClick={() => { void openTab('rules', { tab: 'rules' }) }}
-            aria-label="Şehir kurallarına git"
-            title="Şehir kurallarını aç"
+            onClick={() => { void openTab('home', { tab: 'home' }) }}
+            aria-label="Şehir ekranına dön"
+            title="Şehir ekranını aç"
           >
             <span className="chat-community-tab-icon" aria-hidden>🌍</span>
             <span>Şehir</span>
@@ -15070,39 +15110,6 @@ function HomePage({ user, onLogout }) {
               </form>
             ) : null}
           </>
-        ) : null}
-        {chatCommunityTab === 'kurallar' ? (
-          <section className="chat-side-panel chat-rules-panel" aria-label="Sohbet kuralları">
-            <header className="chat-side-panel-head">
-              <h4 className="chat-side-panel-title">Sohbet Kuralları</h4>
-              <p className="chat-side-panel-sub">Şehir kurallarındaki güncel maddeler burada aynen gösterilir.</p>
-            </header>
-            <div className="chat-rules-list">
-              {chatRulesDigest.map((group) => (
-                <article key={group.id} className="chat-rules-group">
-                  <header className="chat-rules-group-head">
-                    <span className="chat-rules-group-icon" aria-hidden>{group.icon}</span>
-                    <div>
-                      <strong className="chat-rules-group-title">{group.title}</strong>
-                      <p className="chat-rules-group-sub">{group.subtitle}</p>
-                    </div>
-                  </header>
-                  <div className="chat-rules-items">
-                    {group.rules.map((rule, index) => (
-                      <p key={`${group.id}-rule-${index + 1}`} className="chat-rules-item">
-                        <span>{rule.text}</span>
-                        <small className="chat-rules-penalty">{rule.penalty}</small>
-                        {rule.note ? <small className="chat-rules-note">{rule.note}</small> : null}
-                      </p>
-                    ))}
-                  </div>
-                </article>
-              ))}
-              <article className="chat-rules-group chat-rules-group-final">
-                <p className="chat-rules-final-text">{CITY_RULES_GUIDE.finalNote}</p>
-              </article>
-            </div>
-          </section>
         ) : null}
         {chatCommunityTab === 'haberler' ? (
           <section className="chat-side-panel chat-news-panel" aria-label="Yeni oyuncular">
