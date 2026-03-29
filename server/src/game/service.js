@@ -820,12 +820,12 @@ function normalizeMinesState(rawMines, timestamp) {
 }
 
 function mineDigDurationMs(template) {
-  const sec = Math.max(1, asInt(template?.digDurationSeconds, 10))
+  const sec = Math.max(1, asInt(template?.digDurationSeconds, 5))
   return sec * MS_SECOND
 }
 
 function mineCooldownMs(template) {
-  return Math.max(1, asInt(template?.cooldownMinutes, 30)) * MS_MINUTE
+  return Math.max(1, asInt(template?.cooldownMinutes, 15)) * MS_MINUTE
 }
 
 function mineCostCash(template) {
@@ -885,8 +885,8 @@ function minesView(profile, timestamp) {
       outputItemName: mineOutputDisplayName(outputItemId, outputItem?.name || outputItemId),
       minOutput,
       maxOutput,
-      digDurationSeconds: Math.max(1, asInt(template.digDurationSeconds, 10)),
-      cooldownMinutes: Math.max(1, asInt(template.cooldownMinutes, 30)),
+      digDurationSeconds: Math.max(1, asInt(template.digDurationSeconds, 5)),
+      cooldownMinutes: Math.max(1, asInt(template.cooldownMinutes, 15)),
       costCash,
       xpPerCollect: Math.max(0, asInt(template.xpPerCollect, 10)),
       canStartDig,

@@ -29510,3 +29510,112 @@ select {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* 2026-03-30 final compact pass: owned factories + mine start modals */
+.factory-screen .factory-grid.factory-grid-owned {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned.is-shop-summary-card {
+  padding: 8px 8px 10px;
+  gap: 7px;
+  grid-template-rows: auto auto auto;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-hero {
+  aspect-ratio: 16 / 9;
+  min-height: clamp(90px, 24vw, 108px);
+  max-height: clamp(90px, 24vw, 108px);
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  padding: 1px;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-name {
+  font-size: clamp(11.8px, 3vw, 14px);
+  min-height: 2.2em;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-hint {
+  font-size: clamp(10px, 2.6vw, 11px);
+  min-height: 1.25em;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions .factory-buy-btn {
+  min-height: 36px;
+  border-radius: 10px;
+  font-size: clamp(10.4px, 2.8vw, 12px);
+  line-height: 1.08;
+  padding: 0 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal {
+  width: min(336px, calc(100vw - 18px)) !important;
+  max-width: min(336px, calc(100vw - 18px)) !important;
+  max-height: min(calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 620px) !important;
+  padding: 10px !important;
+}
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal .fleet-modal-actions .btn {
+  min-height: 34px;
+  font-size: 10.8px;
+}
+
+.mine-confirm-modal,
+.mine-dig-modal {
+  width: min(336px, calc(100vw - 18px)) !important;
+  max-width: min(336px, calc(100vw - 18px)) !important;
+  max-height: min(calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 620px) !important;
+  border-radius: 16px !important;
+  padding: 14px 12px 12px !important;
+}
+
+.mine-confirm-title,
+.mine-dig-modal-title {
+  font-size: clamp(17px, 5vw, 20px);
+}
+
+.mine-confirm-hero,
+.mine-dig-modal-hero {
+  max-width: 170px;
+  height: 96px;
+  margin-bottom: 10px;
+}
+
+.mine-confirm-details {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+}
+
+.mine-confirm-note,
+.mine-dig-note,
+.mine-dig-modal-msg,
+.mine-dig-modal-done {
+  font-size: 11px;
+  line-height: 1.32;
+}
+
+.mine-confirm-actions {
+  gap: 8px;
+}
+
+.mine-confirm-actions .btn,
+.mine-dig-modal-close {
+  min-height: 36px;
+  font-size: 11px;
+}

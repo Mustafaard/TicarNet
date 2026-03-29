@@ -2813,6 +2813,8 @@ function HomePage({ user, onLogout }) {
   const [tab, setTab] = useState('home')
   const [marketTab, setMarketTab] = useState('buy')
   const [profileTab, setProfileTab] = useState('profile')
+  const DEFAULT_MINE_DIG_DURATION_SEC = 5
+  const DEFAULT_MINE_COOLDOWN_MINUTES = 15
   const role = normalizeRoleValue(user?.role)
   const isStaffUser = role === 'admin' || role === 'moderator'
   const selfRoleLabel = roleLabelFromValue(role, user?.roleLabel || '')
@@ -2854,7 +2856,7 @@ function HomePage({ user, onLogout }) {
   const [factories, setFactories] = useState(null)
   const [mines, setMines] = useState(null)
   const [mineDigModal, setMineDigModal] = useState(null)
-  const [mineDigCountdownSec, setMineDigCountdownSec] = useState(10)
+  const [mineDigCountdownSec, setMineDigCountdownSec] = useState(DEFAULT_MINE_DIG_DURATION_SEC)
   const [mineCollectResult, setMineCollectResult] = useState(null)
   const [mineConfirmModal, setMineConfirmModal] = useState(null)
   const [_minesClockTick, setMinesClockTick] = useState(0)
@@ -3669,7 +3671,7 @@ function HomePage({ user, onLogout }) {
       if (!mineId) {
         mineDigCollectedRef.current = false
         setMineDigModal(null)
-        setMineDigCountdownSec(10)
+        setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
         return undefined
       }
       let cancelled = false
@@ -3687,10 +3689,10 @@ function HomePage({ user, onLogout }) {
           fail(response, response?.errors?.global || 'Tahsilat alınamadı.')
           setMineDigModal(null)
         }
-        setMineDigCountdownSec(10)
+        setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
       }).catch(() => {
         if (!cancelled) setMineDigModal(null)
-        setMineDigCountdownSec(10)
+        setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
       })
       const t = window.setTimeout(() => {
         if (!cancelled) {
@@ -3705,7 +3707,7 @@ function HomePage({ user, onLogout }) {
       setMineDigCountdownSec((s) => Math.max(0, s - 1))
     }, 1000)
     return () => window.clearInterval(interval)
-  }, [fail, loadOverview, loadProfile, mineDigCountdownSec, mineDigModal, mineCollectResult])
+  }, [DEFAULT_MINE_DIG_DURATION_SEC, fail, loadOverview, loadProfile, mineDigCountdownSec, mineDigModal, mineCollectResult])
 
   const triggerLiveStateRefresh = useCallback(() => {
     const runRefresh = async () => {
@@ -8901,6 +8903,14 @@ function HomePage({ user, onLogout }) {
   }, [leaderboardRowsSeason, profileModalData, profileModalUserId])
 
   const minesList = Array.isArray(mines?.mines) ? mines.mines : []
+  const minesDigDurationSeconds = Math.max(
+    1,
+    Math.trunc(num(minesList[0]?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)),
+  )
+  const minesCooldownMinutes = Math.max(
+    1,
+    Math.trunc(num(minesList[0]?.cooldownMinutes || DEFAULT_MINE_COOLDOWN_MINUTES)),
+  )
   const mineDigAction = async (mineId) => {
     const mine = minesList.find((m) => m.id === mineId)
     if (mine && !mine.hasEnoughCash) {
@@ -8920,8 +8930,12 @@ function HomePage({ user, onLogout }) {
       if (response.wallet != null) loadOverview().catch(() => {})
       mineDigCollectedRef.current = false
       setMineCollectResult(null)
-      setMineDigCountdownSec(10)
       const updatedMine = response.mines?.find((m) => m.id === mineId) || mine || minesList.find((m) => m.id === mineId)
+      const nextDigDurationSec = Math.max(
+        1,
+        Math.trunc(num(updatedMine?.digDurationSeconds || mine?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)),
+      )
+      setMineDigCountdownSec(nextDigDurationSec)
       setMineDigModal(updatedMine ? { mine: updatedMine } : null)
     } finally {
       setBusy('')
@@ -8949,7 +8963,7 @@ function HomePage({ user, onLogout }) {
           <button type="button" className="btn btn-ghost btn-sm mines-back-btn" onClick={() => void openTab('home', { tab: 'home' })}>Şehir</button>
         </div>
         <p className="muted mines-summary">
-          Her maden için kazı süresi 10 saniye, bekleme süresi 30 dakikadır. Standart üyeler 10-500, Premium üyeler 20-1000 arası rastgele kaynak kazanır. Yetersiz nakitte işlem başlatılmaz.
+          Her maden için kazı süresi {fmt(minesDigDurationSeconds)} saniye, bekleme süresi {fmt(minesCooldownMinutes)} dakikadır. Standart üyeler 10-500, Premium üyeler 20-1000 arası rastgele kaynak kazanır. Yetersiz nakitte işlem başlatılmaz.
         </p>
         {minesList.length === 0 ? (
           <p className="empty" style={{ marginTop: 16 }}>Yükleniyor...</p>
@@ -12239,6 +12253,22 @@ function HomePage({ user, onLogout }) {
               const busyCollectKey = `factory-collect:${factory.id}`
               const busyUpgradeKey = `factory-upgrade:${factory.id}`
               const blockedByOtherUpgrade = !factory.isUpgrading && !canStartAnotherFactoryUpgrade
+              const upgradeButtonLabel = busy === busyUpgradeKey
+                ? 'Başlıyor...'
+                : factory.isUpgrading
+                  ? 'Yükseliyor'
+                  : blockedByOtherUpgrade
+                    ? 'Yuva Dolu'
+                    : factory.nextUpgrade?.maxReached
+                      ? 'Maksimum'
+                      : 'Yükselt'
+              const upgradeButtonTitle = factory.isUpgrading
+                ? 'Bu fabrikanın yükseltmesi devam ediyor.'
+                : blockedByOtherUpgrade
+                  ? 'Aynı anda yalnızca bir fabrika yükseltilebilir.'
+                  : factory.nextUpgrade?.maxReached
+                    ? 'Bu fabrika maksimum seviyeye ulaştı.'
+                    : 'Fabrikayı bir üst seviyeye yükselt.'
               const hint = factory.isUpgrading
                 ? `Yükseltiliyor · ${formatCollectionCountdown(factory.upgradeRemainingMs)}`
                 : factory.canCollectNow
@@ -12280,10 +12310,11 @@ function HomePage({ user, onLogout }) {
                     <button
                       type="button"
                       className="btn btn-secondary factory-action-btn factory-buy-btn factory-btn-upgrade"
-                      onClick={() => !factory.isUpgrading && !factory.nextUpgrade?.maxReached && setFactoryUpgradeModalId(factory.id)}
-                      disabled={Boolean(busy) || factory.isUpgrading || factory.nextUpgrade?.maxReached}
+                      onClick={() => !factory.isUpgrading && !blockedByOtherUpgrade && !factory.nextUpgrade?.maxReached && setFactoryUpgradeModalId(factory.id)}
+                      title={upgradeButtonTitle}
+                      disabled={Boolean(busy) || factory.isUpgrading || blockedByOtherUpgrade || factory.nextUpgrade?.maxReached}
                     >
-                      {busy === busyUpgradeKey ? 'Başlatılıyor...' : factory.isUpgrading ? 'Yükseltiliyor' : blockedByOtherUpgrade ? 'Yuva dolu' : factory.nextUpgrade?.maxReached ? 'Maksimum seviyede' : 'Yükselt'}
+                      {upgradeButtonLabel}
                     </button>
                   </div>
                 </article>
@@ -18090,6 +18121,14 @@ function HomePage({ user, onLogout }) {
   )
 
   const dailyRewardResultRows = dailyRewardResult ? dailyLoginRewardEntries(dailyRewardResult) : []
+  const mineDigDurationForModal = Math.max(
+    1,
+    Math.trunc(num(mineDigModal?.mine?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)),
+  )
+  const mineDigProgressPercent = Math.min(
+    100,
+    Math.max(0, ((mineDigDurationForModal - mineDigCountdownSec) / mineDigDurationForModal) * 100),
+  )
   const dailyRewardResultModal = dailyRewardResult && createPortal(
     <section className="warehouse-overlay daily-login-result-overlay" onClick={() => setDailyRewardResult(null)}>
       <article className="warehouse-modal daily-login-result-modal" onClick={(event) => event.stopPropagation()}>
@@ -18172,7 +18211,7 @@ function HomePage({ user, onLogout }) {
               ) : (
                 'Premium ile kazı başına 2× kaynak kazanırsın. '
               )}
-              Kazıyı başlattıktan sonra 10 saniyelik işlem gösterilir. Süre tamamlanınca kaynak otomatik olarak depoya aktarılır.
+              Kazıyı başlattıktan sonra {Math.max(1, Math.trunc(num(mineConfirmModal?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)))} saniyelik işlem gösterilir. Süre tamamlanınca kaynak otomatik olarak depoya aktarılır.
             </p>
             <div className="mine-confirm-footer">
               <div className="mine-confirm-actions">
@@ -18221,10 +18260,10 @@ function HomePage({ user, onLogout }) {
                 <h3 className="mine-dig-modal-title">Lütfen bekleyin</h3>
                 <p className="mine-dig-modal-msg">Kazı yapılıyor... Sayfayı kapatmayın.</p>
                 <div className="mine-dig-progress-wrap">
-                  <div className="mine-dig-progress" style={{ width: `${Math.max(0, 10 - mineDigCountdownSec) * 10}%` }} />
+                  <div className="mine-dig-progress" style={{ width: `${mineDigProgressPercent}%` }} />
                 </div>
                 <p className="mine-dig-countdown">Kalan süre <strong>{mineDigCountdownSec} sn</strong></p>
-                <p className="mine-dig-note">Not: Süre dolmadan işlem tamamlanmaz. (10 saniye beklemeniz zorunludur.)</p>
+                <p className="mine-dig-note">Not: Süre dolmadan işlem tamamlanmaz. ({mineDigDurationForModal} saniye beklemeniz zorunludur.)</p>
               </>
             )}
           </article>
