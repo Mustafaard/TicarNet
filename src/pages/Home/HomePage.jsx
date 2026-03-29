@@ -139,7 +139,7 @@ const NAV = [
 const MARKET_TABS = ['buy', 'sell', 'orderbook', 'auction', 'chart']
 const BUSINESS_DETAIL_TABS = ['garage', 'market']
 const CHAT_ROOM = 'global'
-const CHAT_PRUNE_KEEP_COUNT = 15
+const CHAT_PRUNE_KEEP_COUNT = 30
 const DEFAULT_CHAT_AVATAR = '/splash/logo.webp'
 const MARKETPLACE_SELL_MIN_PRICE_MULTIPLIER = 0.6
 const MARKETPLACE_SELL_MAX_PRICE_MULTIPLIER = 12
@@ -15037,7 +15037,7 @@ function HomePage({ user, onLogout }) {
         promptLabel: 'Dokun',
         detailIntro: 'Aramıza katılan oyuncu:',
         timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
-        dateLabel: formatDateTime(createdAt),
+        dateLabel: '',
       }
     })
 
@@ -15060,17 +15060,17 @@ function HomePage({ user, onLogout }) {
         promptLabel: 'Dokun',
         detailIntro: detailBody,
         timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
-        dateLabel: formatDateTime(createdAt),
+        dateLabel: '',
       }
     })
 
   const chatNewsFeed = [...chatPlayerNewsFeed, ...chatAnnouncementFeed]
     .sort((left, right) => {
-      const diff = (right?.createdAtMs || 0) - (left?.createdAtMs || 0)
+      const diff = (left?.createdAtMs || 0) - (right?.createdAtMs || 0)
       if (diff !== 0) return diff
       return String(left?.id || '').localeCompare(String(right?.id || ''), 'tr')
     })
-    .slice(0, CHAT_NEWS_MAX_ITEMS)
+    .slice(-CHAT_NEWS_MAX_ITEMS)
 
   useEffect(() => {
     if (!chatNewsExpandedId) return
@@ -15086,10 +15086,11 @@ function HomePage({ user, onLogout }) {
     : chatCommunityTab === 'kurallar'
       ? 'Kurallar'
       : 'Sohbet'
+  const isSohbetCommunityTab = chatCommunityTab === 'sohbet'
 
   const chatView = (
     <section className="panel-stack chat-screen chat-screen-pro">
-      <article className="card chat-card chat-card-pro chat-card-clean">
+      <article className={`card chat-card chat-card-pro chat-card-clean chat-community-surface ${isSohbetCommunityTab ? 'is-sohbet' : ''}`.trim()}>
         <header className="chat-community-topbar">
           <button
             type="button"
@@ -15301,7 +15302,7 @@ function HomePage({ user, onLogout }) {
               )}
             </div>
             {!MESSAGES_DISABLED ? (
-              <form className="chat-send-form chat-send-form-clean" onSubmit={_sendChat}>
+              <form className={`chat-send-form chat-send-form-clean ${isSohbetCommunityTab ? 'is-sohbet' : ''}`.trim()} onSubmit={_sendChat}>
                 <input
                   type="text"
                   className="chat-send-input chat-send-input-clean"
@@ -15396,12 +15397,10 @@ function HomePage({ user, onLogout }) {
                           {isJoinNews ? (
                             <p className="chat-news-meta chat-news-row-meta">
                               {entry.timeLabel}
-                              {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
                             </p>
                           ) : (
                             <p className="chat-news-meta chat-news-row-meta">
                               {safeUsername} • {entry.timeLabel}
-                              {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
                             </p>
                           )}
                         </div>

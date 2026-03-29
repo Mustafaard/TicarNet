@@ -25858,12 +25858,12 @@ select {
 
 .chat-news-list {
   display: grid;
-  gap: 6px;
+  gap: 5px;
 }
 
 .chat-news-item {
   display: grid;
-  gap: 4px;
+  gap: 0;
   border-radius: 10px;
   border: 0;
   background: transparent;
@@ -25874,9 +25874,9 @@ select {
   width: 100%;
   border: 1px solid rgba(96, 158, 231, 0.36);
   background: linear-gradient(180deg, rgba(5, 18, 36, 0.95), rgba(5, 14, 28, 0.97));
-  border-radius: 10px;
-  padding: 7px 9px;
-  min-height: 36px;
+  border-radius: 9px;
+  padding: 6px 9px;
+  min-height: 34px;
   color: inherit;
   display: flex;
   align-items: center;
@@ -25899,13 +25899,13 @@ select {
 .chat-news-brief-main {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   min-width: 0;
 }
 
 .chat-news-strip-icon {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   border-radius: 7px;
   border: 1px solid rgba(110, 173, 243, 0.44);
   background: rgba(16, 44, 80, 0.9);
@@ -25915,8 +25915,8 @@ select {
 }
 
 .chat-news-strip-icon img {
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   object-fit: contain;
   display: block;
 }
@@ -25936,9 +25936,9 @@ select {
   border: 1px solid rgba(255, 131, 131, 0.68);
   background: linear-gradient(180deg, rgba(167, 48, 58, 0.96), rgba(120, 31, 39, 0.98));
   color: #ffe4e4;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 800;
-  padding: 3px 9px;
+  padding: 2px 8px;
 }
 
 .chat-news-strip-action.is-open {
@@ -25950,7 +25950,7 @@ select {
 .chat-news-title {
   margin: 0;
   color: #ecf4ff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 800;
   line-height: 1.2;
   text-align: left;
@@ -25964,28 +25964,28 @@ select {
 .chat-news-text {
   margin: 0;
   color: rgba(197, 219, 244, 0.96);
-  font-size: 11px;
-  line-height: 1.32;
+  font-size: 10px;
+  line-height: 1.3;
   text-align: left;
 }
 
 .chat-news-meta {
   margin: 0;
-  color: rgba(248, 169, 169, 0.9);
-  font-size: 10px;
+  color: rgba(174, 202, 236, 0.9);
+  font-size: 9px;
   text-align: left;
 }
 
 .chat-news-expanded-wrap {
-  display: grid;
-  grid-template-rows: 0fr;
+  max-height: 0;
+  overflow: hidden;
   opacity: 0;
-  transform: translateY(-2px);
-  transition: grid-template-rows 0.2s ease, opacity 0.16s ease, transform 0.16s ease;
+  transform: translateY(-1px);
+  transition: max-height 0.2s ease, opacity 0.14s ease, transform 0.14s ease;
 }
 
 .chat-news-expanded-wrap.is-open {
-  grid-template-rows: 1fr;
+  max-height: 72px;
   opacity: 1;
   transform: translateY(0);
 }
@@ -26011,21 +26011,21 @@ select {
 
 .chat-news-expanded {
   display: grid;
-  gap: 4px;
-  border-radius: 10px;
-  border: 1px solid rgba(108, 170, 243, 0.26);
-  background: linear-gradient(180deg, rgba(6, 20, 38, 0.86), rgba(5, 16, 31, 0.9));
-  padding: 6px 9px;
+  gap: 2px;
+  border-radius: 0 0 9px 9px;
+  border: 1px solid rgba(108, 170, 243, 0.2);
+  border-top: 0;
+  background: rgba(5, 17, 33, 0.76);
+  padding: 5px 9px 6px;
   min-height: 0;
   overflow: hidden;
 }
 
 .chat-news-row-subtitle {
   text-align: left;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-news-row-player {
@@ -26040,6 +26040,7 @@ select {
 
 .chat-news-row-meta {
   text-align: left;
+  font-weight: 600;
 }
 
 .chat-news-name-link {
@@ -26175,13 +26176,17 @@ select {
   }
 
   .chat-news-brief {
-    padding: 6px 7px;
-    min-height: 32px;
+    padding: 5px 7px;
+    min-height: 30px;
   }
 
   .chat-news-strip-action {
-    font-size: 10px;
-    padding: 2px 8px;
+    font-size: 9px;
+    padding: 2px 7px;
+  }
+
+  .chat-news-expanded-wrap.is-open {
+    max-height: 66px;
   }
 }
 
@@ -26260,13 +26265,10 @@ select {
 }
 
 .chat-screen-pro .chat-card.chat-card-pro.chat-card-clean {
-  border: 1px solid rgba(116, 182, 250, 0.42);
-  border-radius: 18px;
-  background:
-    radial-gradient(circle at 0% 0%, rgba(61, 151, 255, 0.2), transparent 45%),
-    radial-gradient(circle at 100% 100%, rgba(239, 191, 81, 0.13), transparent 46%),
-    linear-gradient(178deg, rgba(8, 28, 58, 0.94), rgba(4, 16, 35, 0.96));
-  box-shadow: 0 18px 34px rgba(3, 10, 22, 0.52);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
 }
 
 .chat-feed-head-pro.chat-feed-head-clean {
@@ -26275,10 +26277,10 @@ select {
 }
 
 .chat-thread-pro.chat-thread-clean {
-  border: 1px solid rgba(105, 168, 239, 0.26);
-  border-radius: 14px;
-  background: rgba(3, 15, 33, 0.5);
-  padding: 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 6px 2px 8px;
 }
 
 .chat-msg-clean-bubble {
@@ -26293,10 +26295,10 @@ select {
 }
 
 .chat-send-form-clean {
-  border: 1px solid rgba(101, 166, 240, 0.32);
-  border-radius: 14px;
-  background: rgba(4, 18, 38, 0.72);
-  padding: 8px;
+  border: 1px solid rgba(101, 166, 240, 0.28);
+  border-radius: 12px;
+  background: rgba(4, 18, 38, 0.66);
+  padding: 6px;
   gap: 8px;
 }
 
@@ -26315,6 +26317,25 @@ select {
 
 .chat-send-btn-clean:hover:not(:disabled) {
   background: linear-gradient(180deg, rgba(236, 183, 74, 0.98), rgba(167, 113, 28, 0.98));
+}
+
+.chat-community-surface.is-sohbet .chat-thread-pro.chat-thread-clean {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.home-page.chat-tab-active .chat-screen-pro .chat-card.chat-card-pro.chat-card-clean.chat-community-surface.is-sohbet {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.chat-community-surface.is-sohbet .chat-send-form-clean.is-sohbet {
+  border: 1px solid rgba(101, 166, 240, 0.22);
+  border-radius: 12px;
+  background: rgba(6, 20, 40, 0.56);
 }
 
 .message-gold-card {
