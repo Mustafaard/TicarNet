@@ -29619,3 +29619,292 @@ select {
   min-height: 36px;
   font-size: 11px;
 }
+
+/* 2026-03-30 final mobile-first parity pass */
+.business-screen .fleet-company-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+  align-items: stretch;
+}
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 74px !important;
+  border-radius: 10px;
+  padding: 7px 5px !important;
+  gap: 3px;
+}
+
+.business-screen .fleet-company-actions .fleet-company-cta.is-setup {
+  grid-column: auto !important;
+}
+
+.business-screen .fleet-company-cta-title-wrap {
+  padding-right: 24px;
+}
+
+.business-screen .fleet-company-cta-title {
+  font-size: clamp(9.8px, 2.65vw, 11px);
+  line-height: 1.1;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.business-screen .fleet-company-cta-value {
+  font-size: clamp(8.8px, 2.45vw, 10px);
+  line-height: 1.1;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.business-screen .fleet-company-cta-meta {
+  font-size: clamp(7px, 2vw, 8px);
+  line-height: 1.08;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.business-screen .fleet-company-cta-badge {
+  min-width: 22px;
+  min-height: 13px;
+  font-size: 6.7px;
+  padding: 0 4px;
+}
+
+.business-screen .fleet-company-actions .fleet-company-cta.is-bulk {
+  border-color: rgba(92, 222, 168, 0.86) !important;
+  background: linear-gradient(170deg, rgba(26, 143, 102, 0.88), rgba(13, 65, 48, 0.96)) !important;
+}
+
+.business-screen .fleet-detail-main .fleet-collect-action,
+.fleet-bulk-modal .btn-collect-main,
+.fleet-accountant-modal .btn-collect-inline,
+.factory-bulk-modal .btn-collect-main,
+.factory-collect-modal .btn-collect-inline,
+.factory-screen .factory-btn-collect {
+  border-color: rgba(96, 227, 170, 0.72) !important;
+  background: linear-gradient(180deg, rgba(36, 178, 122, 0.97), rgba(24, 126, 89, 0.98)) !important;
+  color: #eafff5 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(206, 255, 233, 0.2),
+    0 8px 18px rgba(4, 39, 29, 0.26) !important;
+}
+
+.business-screen .fleet-detail-main .fleet-collect-action:disabled,
+.fleet-bulk-modal .btn-collect-main:disabled,
+.fleet-accountant-modal .btn-collect-inline:disabled,
+.factory-bulk-modal .btn-collect-main:disabled,
+.factory-collect-modal .btn-collect-inline:disabled,
+.factory-screen .factory-btn-collect:disabled {
+  opacity: 0.66;
+  filter: grayscale(0.08);
+}
+
+.business-screen.is-focused .fleet-fullscreen-card {
+  width: min(100%, 366px) !important;
+  max-width: 366px !important;
+  margin-inline: auto;
+}
+
+.warehouse-modal.fleet-modal.fleet-upgrade-modal,
+.warehouse-modal.fleet-modal.fleet-setup-modal,
+.warehouse-modal.fleet-modal.fleet-accountant-modal,
+.warehouse-modal.fleet-modal.factory-collect-modal {
+  width: min(338px, calc(100vw - 16px)) !important;
+  max-width: min(338px, calc(100vw - 16px)) !important;
+  max-height: min(calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 640px) !important;
+  border-radius: 15px !important;
+  padding: 10px !important;
+  margin-inline: auto !important;
+}
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal {
+  width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
+  max-width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
+  max-height: min(calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 860px) !important;
+  border-radius: 16px !important;
+  padding: 12px !important;
+  margin-inline: auto !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.factory-upgrade-modal > h3 {
+  font-size: clamp(20px, 5.4vw, 24px);
+}
+
+.factory-upgrade-modal > p {
+  font-size: clamp(10.4px, 2.8vw, 11.6px);
+}
+
+.factory-upgrade-modal .factory-cost-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-name {
+  font-size: clamp(11.6px, 3.2vw, 14px);
+  min-height: 2.3em;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-hint {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.4em;
+  font-size: clamp(9.8px, 2.7vw, 11px);
+  line-height: 1.18;
+}
+
+.factory-screen .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions .factory-buy-btn {
+  min-height: 36px;
+  font-size: clamp(10.2px, 2.8vw, 12px);
+  white-space: normal;
+  text-wrap: balance;
+}
+
+.factory-level-badge {
+  border-color: rgba(255, 220, 145, 0.86) !important;
+  background: linear-gradient(180deg, rgba(178, 136, 45, 0.94), rgba(123, 91, 26, 0.97)) !important;
+  color: #fff4d3 !important;
+}
+
+.city-menu-stack .module-grid.city-module-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn.module-btn-bank,
+.city-menu-stack .module-grid.city-module-grid > .module-btn.module-btn-forex,
+.city-menu-stack .module-grid.city-module-grid > .module-btn.module-btn-events,
+.city-menu-stack .module-grid.city-module-grid > .module-btn.module-btn-announcements {
+  grid-column: auto !important;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn {
+  min-width: 0;
+}
+
+.home-page .chat-community-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.home-page .chat-community-tab {
+  min-height: 42px;
+  font-size: 11px;
+  padding: 0 8px;
+}
+
+.chat-side-panel {
+  width: min(338px, calc(100vw - 16px)) !important;
+  max-width: min(338px, calc(100vw - 16px)) !important;
+  max-height: min(calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 640px) !important;
+  overflow-y: auto;
+}
+
+.settings-screen-card {
+  padding: 10px !important;
+  border-radius: 14px;
+}
+
+.settings-screen-card .settings-section-card {
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.settings-screen-card .settings-action-btn,
+.settings-screen-card .settings-inline-btn,
+.settings-theme-option,
+.settings-theme-close {
+  min-height: 38px;
+  font-size: 11px;
+}
+
+.diamond-market-screen {
+  width: 100%;
+  max-width: min(var(--app-max-content-width), 100%);
+  margin-inline: auto;
+}
+
+.diamond-market-screen .diamond-market-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.diamond-market-screen .diamond-pack {
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.diamond-market-screen .diamond-pack-name {
+  font-size: clamp(11px, 2.95vw, 12.8px);
+}
+
+.diamond-market-screen .diamond-pack-amount {
+  font-size: clamp(18px, 5.4vw, 24px);
+}
+
+.player-profile-modal {
+  width: min(338px, calc(100vw - 16px)) !important;
+  max-width: min(338px, calc(100vw - 16px)) !important;
+  max-height: min(calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 760px) !important;
+  margin-inline: auto !important;
+}
+
+.player-profile-body {
+  gap: 10px;
+}
+
+.player-profile-header {
+  padding: 10px;
+}
+
+.home-daily-claim-strip,
+.daily-login-claim-btn {
+  border-color: rgba(255, 214, 120, 0.84) !important;
+  background:
+    linear-gradient(180deg, rgba(228, 170, 50, 0.98), rgba(176, 122, 31, 0.99)) !important;
+  color: #fff7e2 !important;
+}
+
+.daily-login-claim-btn:hover,
+.daily-login-claim-btn:focus-visible {
+  border-color: rgba(255, 230, 155, 0.9) !important;
+  background:
+    linear-gradient(180deg, rgba(241, 184, 67, 0.99), rgba(192, 137, 37, 1)) !important;
+}
+
+.daily-login-day-card.is-available {
+  border-color: rgba(101, 228, 170, 0.64);
+  box-shadow:
+    0 0 0 1px rgba(132, 246, 194, 0.24),
+    inset 0 0 0 1px rgba(177, 255, 221, 0.14);
+}
+
+.business-screen,
+.factory-screen,
+.mines-screen,
+.chat-screen-pro,
+.message-screen,
+.settings-screen-card,
+.diamond-market-screen {
+  overflow-x: clip;
+}
+
+@media (max-width: 360px) {
+  .business-screen .fleet-company-actions .fleet-company-cta {
+    min-height: 70px !important;
+    padding: 6px 4px !important;
+  }
+
+  .factory-upgrade-modal .factory-cost-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-page .chat-community-tab {
+    min-height: 40px;
+    font-size: 10.6px;
+    padding: 0 6px;
+  }
+}

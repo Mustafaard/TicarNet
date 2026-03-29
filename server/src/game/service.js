@@ -633,11 +633,7 @@ function normalizeFactoryUpgradeState(value, template) {
   const active = source.active === true
   const fromLevel = Math.max(0, asInt(source.fromLevel, fallback.fromLevel))
   const toLevel = Math.max(0, asInt(source.toLevel, fallback.toLevel))
-  const speedupRatio = clamp(
-    Number(source.speedupRatio ?? fallback.speedupRatio),
-    0.05,
-    0.9,
-  )
+  const speedupRatio = factorySpeedupRatio(template)
   const speedupDiamondCost = Math.max(
     1,
     asInt(source.speedupDiamondCost, fallback.speedupDiamondCost),
@@ -913,7 +909,8 @@ function factoryUpgradeDurationMs(template, targetLevel) {
   const baseMinutes = Math.max(1, asInt(template?.upgrade?.baseDurationMinutes, 30))
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  return Math.max(1, Math.round(baseMinutes * Math.pow(4, levelStep))) * MS_MINUTE
+  const growth = 1.3
+  return Math.max(1, Math.round(baseMinutes * Math.pow(growth, levelStep))) * MS_MINUTE
 }
 
 const FACTORY_UPGRADE_MIN_CASH = 5000000
@@ -924,10 +921,11 @@ function factoryUpgradeCashCost(template, targetLevel, options = {}) {
   const baseCash = Math.max(FACTORY_UPGRADE_MIN_CASH, configuredBaseCash > 0 ? configuredBaseCash : fallbackBaseCash)
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  const growth = 4
-  const calculated = Math.max(FACTORY_UPGRADE_MIN_CASH, Math.round(baseCash * Math.pow(growth, levelStep)))
+  const growth = 1.3
+  const calculated = Math.max(1, Math.round(baseCash * Math.pow(growth, levelStep)))
+  const discounted = Math.max(1, Math.round(calculated / 1.5))
   return weeklyEventCostValue(
-    calculated,
+    discounted,
     options?.timestamp || '',
     options?.weeklyEvents || null,
     { minPositive: 1 },
@@ -940,7 +938,7 @@ function factoryUpgradeResourceCost(template, targetLevel, options = {}) {
     : {}
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  const growth = 4
+  const growth = 1.3
   const multiplier = Math.pow(growth, levelStep)
   const nextCost = {}
   for (const [itemId, amount] of Object.entries(base)) {
@@ -13256,13 +13254,6 @@ export async function claimDailyLoginReward(userId) {
         detail: message,
         amount: cashReward,
       },
-      timestamp,
-    )
-
-    pushNotification(
-      profile,
-      'system',
-      message,
       timestamp,
     )
 
