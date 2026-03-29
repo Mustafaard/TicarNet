@@ -1,6 +1,6 @@
 import fs from 'node:fs'
 import path from 'node:path'
-import admin from 'firebase-admin'
+import { createRequire } from 'node:module'
 import { config } from '../config.js'
 
 const INVALID_TOKEN_CODES = new Set([
@@ -12,6 +12,25 @@ const INVALID_TOKEN_CODES = new Set([
 let initialized = false
 let messaging = null
 let initFailed = false
+let adminSdk = null
+let adminLoadTried = false
+
+const require = createRequire(import.meta.url)
+
+function loadFirebaseAdminSdk() {
+  if (adminLoadTried) return adminSdk
+  adminLoadTried = true
+
+  try {
+    const loaded = require('firebase-admin')
+    adminSdk = loaded?.default || loaded
+  } catch (error) {
+    console.warn('[FCM] firebase-admin paketi bulunamadi. Mobil push devre disi birakildi.', error?.code || '')
+    adminSdk = null
+  }
+
+  return adminSdk
+}
 
 function parseServiceAccountJson(raw) {
   const safeRaw = String(raw || '').trim()
@@ -68,6 +87,12 @@ function ensureMessaging() {
   if (messaging || initFailed) return messaging
 
   if (!config.firebase.enabled) {
+    initFailed = true
+    return null
+  }
+
+  const admin = loadFirebaseAdminSdk()
+  if (!admin) {
     initFailed = true
     return null
   }
@@ -190,7 +215,7 @@ export async function sendMobilePushToTokens(tokens, payload) {
       skipped: false,
     }
   } catch (error) {
-    console.error('[FCM] Push gönderimi başarısız:', error)
+    console.error('[FCM] Push gonderimi basarisiz:', error)
     return {
       sent: 0,
       failed: safeTokens.length,
