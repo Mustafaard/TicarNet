@@ -26355,9 +26355,15 @@ select {
 }
 
 .chat-community-surface.is-sohbet .chat-send-form-clean.is-sohbet {
-  border: 1px solid rgba(101, 166, 240, 0.22);
-  border-radius: 12px;
-  background: rgba(6, 20, 40, 0.56);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 8px 0 calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+.chat-community-surface.is-sohbet .chat-send-input-clean {
+  background: transparent;
+  border-color: rgba(116, 180, 248, 0.48);
 }
 
 .message-gold-card {
@@ -26366,30 +26372,38 @@ select {
 }
 
 .message-sohbet-penceresi {
-  border: 1px solid rgba(109, 170, 241, 0.42);
-  box-shadow: 0 14px 28px rgba(2, 9, 20, 0.48);
+  border: 1px solid rgba(112, 176, 246, 0.42);
+  background:
+    radial-gradient(circle at top right, rgba(244, 198, 93, 0.12), transparent 42%),
+    linear-gradient(180deg, rgba(7, 24, 50, 0.9), rgba(5, 16, 34, 0.94));
+  box-shadow: 0 14px 28px rgba(2, 9, 20, 0.44);
 }
 
 .message-sohbet-header {
-  border-bottom: 1px solid rgba(116, 178, 245, 0.34);
-  background:
-    radial-gradient(circle at 100% 0%, rgba(241, 194, 87, 0.16), transparent 42%),
-    linear-gradient(180deg, rgba(12, 35, 65, 0.72), rgba(8, 23, 44, 0.64));
+  border-bottom: 1px solid rgba(116, 178, 245, 0.3);
+  background: linear-gradient(180deg, rgba(11, 33, 62, 0.76), rgba(8, 23, 44, 0.58));
 }
 
 .message-sohbet-bubble-inner {
-  border: 1px solid rgba(112, 176, 246, 0.34);
-  box-shadow: 0 10px 20px rgba(2, 10, 22, 0.38);
+  border: 1px solid rgba(112, 176, 246, 0.3);
+  background: linear-gradient(168deg, rgba(9, 30, 57, 0.92), rgba(6, 20, 40, 0.95));
+  box-shadow: 0 8px 18px rgba(2, 10, 22, 0.34);
 }
 
 .message-sohbet-bubble.own .message-sohbet-bubble-inner {
-  border-color: rgba(246, 197, 92, 0.58);
-  background: linear-gradient(170deg, rgba(84, 60, 22, 0.93), rgba(44, 31, 10, 0.95));
+  border-color: rgba(246, 197, 92, 0.52);
+  background: linear-gradient(170deg, rgba(79, 58, 22, 0.9), rgba(43, 31, 11, 0.94));
+}
+
+.message-sohbet-form {
+  border-top: 1px solid rgba(116, 178, 245, 0.24);
+  background: transparent;
+  padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
 }
 
 .message-sohbet-input {
-  border: 1px solid rgba(111, 173, 242, 0.38);
-  background: rgba(8, 29, 55, 0.74);
+  border: 1px solid rgba(111, 173, 242, 0.4);
+  background: transparent;
 }
 
 .message-sohbet-input:focus {
@@ -26399,8 +26413,8 @@ select {
 }
 
 .message-sohbet-send {
-  border: 1px solid rgba(247, 205, 102, 0.7);
-  background: linear-gradient(180deg, rgba(216, 161, 52, 0.98), rgba(150, 98, 20, 0.98));
+  border: 1px solid rgba(247, 205, 102, 0.64);
+  background: linear-gradient(180deg, rgba(218, 163, 54, 0.96), rgba(148, 98, 22, 0.96));
   color: #fff4d9;
 }
 

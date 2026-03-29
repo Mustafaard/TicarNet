@@ -3730,6 +3730,11 @@ function HomePage({ user, onLogout }) {
     return true
   }, [fail])
 
+  useEffect(() => {
+    if (MESSAGES_DISABLED || tab !== 'chat') return
+    void loadMessageCenter('all')
+  }, [MESSAGES_DISABLED, loadMessageCenter, tab])
+
   // BİLDİRİMLER sekmesine girildiğinde tüm bildirimleri toplu okundu yap (DM sayaçları etkilenmez)
   useEffect(() => {
     if (MESSAGES_DISABLED) return
@@ -15041,6 +15046,59 @@ function HomePage({ user, onLogout }) {
       }
     })
 
+  const chatActivityNewsFeed = pruneNewsRecords(_messageItems, CHAT_NEWS_MAX_ITEMS)
+    .map((entry, index) => {
+      const source = String(entry?.source || '').trim().toLowerCase()
+      if (source !== 'transaction') return null
+      const type = String(entry?.type || '').trim().toLowerCase()
+      const rawTitle = normalizeMojibakeText(String(entry?.title || '').trim())
+      const rawDetail = normalizeMojibakeText(
+        String(entry?.message ?? entry?.detail ?? entry?.preview ?? '').trim(),
+      )
+      const titleLower = rawTitle.toLocaleLowerCase('tr')
+      const detailLower = rawDetail.toLocaleLowerCase('tr')
+      const isMarketBuy = type === 'market'
+        && (/al[ıi]m/.test(titleLower) || /sat[ıi]n al[ıi]nd[ıi]/.test(detailLower))
+      const isMarketSell = type === 'market'
+        && (/sat[ıi][şs]/.test(titleLower) || /sat[ıi]ld[ıi]/.test(detailLower))
+      const isFactoryUpgrade = type === 'factory' && /y[üu]kselt/.test(detailLower)
+      if (!isMarketBuy && !isMarketSell && !isFactoryUpgrade) return null
+
+      const createdAt = String(entry?.createdAt || '').trim()
+      const createdAtMs = Date.parse(createdAt)
+      const safeCreatedAtMs = Number.isFinite(createdAtMs) ? createdAtMs : 0
+      const detailIntro = rawDetail || (isFactoryUpgrade
+        ? 'Fabrika seviyesi yükseltildi.'
+        : isMarketSell
+          ? 'Pazar satım işlemi tamamlandı.'
+          : 'Pazar alım işlemi tamamlandı.')
+      const activityTitle = isFactoryUpgrade
+        ? 'Fabrika seviyesi yükseltildi!'
+        : isMarketSell
+          ? 'Pazarda satım işlemi gerçekleşti!'
+          : 'Pazarda alım işlemi gerçekleşti!'
+
+      return {
+        id: `activity:${String(entry?.id || index)}`,
+        kind: isFactoryUpgrade
+          ? 'activity-factory-upgrade'
+          : isMarketSell
+            ? 'activity-market-sell'
+            : 'activity-market-buy',
+        userId: '',
+        username: 'TicarNet',
+        avatarUrl: '',
+        createdAt,
+        createdAtMs: safeCreatedAtMs,
+        title: activityTitle,
+        promptLabel: 'Dokun',
+        detailIntro,
+        timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
+        dateLabel: '',
+      }
+    })
+    .filter(Boolean)
+
   const chatAnnouncementFeed = pruneNewsRecords(cityAnnouncements, CHAT_NEWS_MAX_ITEMS)
     .map((entry, index) => {
       const createdAt = String(entry?.createdAt || '').trim()
@@ -15064,7 +15122,7 @@ function HomePage({ user, onLogout }) {
       }
     })
 
-  const chatNewsFeed = [...chatPlayerNewsFeed, ...chatAnnouncementFeed]
+  const chatNewsFeed = [...chatPlayerNewsFeed, ...chatActivityNewsFeed, ...chatAnnouncementFeed]
     .sort((left, right) => {
       const diff = (right?.createdAtMs || 0) - (left?.createdAtMs || 0)
       if (diff !== 0) return diff
