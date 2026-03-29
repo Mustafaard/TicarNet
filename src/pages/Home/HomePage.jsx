@@ -15005,7 +15005,7 @@ function HomePage({ user, onLogout }) {
     } catch (_) { return '' }
   }
 
-  const chatNewsFeed = (Array.isArray(chatRecentPlayers) ? chatRecentPlayers : [])
+  const chatPlayerNewsFeed = (Array.isArray(chatRecentPlayers) ? chatRecentPlayers : [])
     .map((entry, index) => {
       const userId = String(entry?.userId || '').trim()
       const username = normalizeMojibakeText(String(entry?.username || 'Oyuncu').trim() || 'Oyuncu')
@@ -15013,9 +15013,10 @@ function HomePage({ user, onLogout }) {
       const createdAt = String(entry?.createdAt || '').trim()
       const createdAtMs = Date.parse(createdAt)
       const safeCreatedAtMs = Number.isFinite(createdAtMs) ? createdAtMs : 0
-      const itemId = `${userId || 'anon'}:${createdAt || index}`
+      const itemId = `join:${userId || 'anon'}:${createdAt || index}`
       return {
         id: itemId,
+        kind: 'join',
         userId,
         username,
         avatarUrl,
@@ -15028,10 +15029,35 @@ function HomePage({ user, onLogout }) {
         dateLabel: formatDateTime(createdAt),
       }
     })
+
+  const chatAnnouncementFeed = cityAnnouncements
+    .map((entry, index) => {
+      const createdAt = String(entry?.createdAt || '').trim()
+      const createdAtMs = Date.parse(createdAt)
+      const safeCreatedAtMs = Number.isFinite(createdAtMs) ? createdAtMs : 0
+      const title = normalizeMojibakeText(String(entry?.title || '').trim() || 'TicarNet oyun haberi')
+      const detailBody = normalizeMojibakeText(String(entry?.body || '').trim() || title)
+      return {
+        id: `announcement:${String(entry?.id || index)}`,
+        kind: 'announcement',
+        userId: '',
+        username: normalizeMojibakeText(String(entry?.createdByUsername || 'Yönetim').trim() || 'Yönetim'),
+        avatarUrl: '',
+        createdAt,
+        createdAtMs: safeCreatedAtMs,
+        title,
+        promptLabel: 'Dokun',
+        detailIntro: detailBody,
+        timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
+        dateLabel: formatDateTime(createdAt),
+      }
+    })
+
+  const chatNewsFeed = [...chatPlayerNewsFeed, ...chatAnnouncementFeed]
     .sort((left, right) => {
       const diff = (right?.createdAtMs || 0) - (left?.createdAtMs || 0)
       if (diff !== 0) return diff
-      return String(left?.username || '').localeCompare(String(right?.username || ''), 'tr')
+      return String(left?.id || '').localeCompare(String(right?.id || ''), 'tr')
     })
     .slice(0, CHAT_NEWS_MAX_ITEMS)
 
@@ -15051,7 +15077,8 @@ function HomePage({ user, onLogout }) {
             aria-label="Şehre dön"
             onClick={() => void openTab('home', { tab: 'home' })}
           >
-            ◀
+            <span className="chat-community-topbar-back-icon" aria-hidden>◀</span>
+            <span className="chat-community-topbar-back-label">Şehir</span>
           </button>
           <h3 className="chat-community-topbar-title">{chatCommunityTitle}</h3>
           <span className="chat-community-topbar-spacer" aria-hidden />
@@ -15278,15 +15305,16 @@ function HomePage({ user, onLogout }) {
           </>
         ) : null}
         {chatCommunityTab === 'haberler' ? (
-          <section className="chat-side-panel chat-news-panel" aria-label="Yeni oyuncu haberleri">
+          <section className="chat-side-panel chat-news-panel" aria-label="Oyun haberleri">
             <div className="chat-news-list">
-              {chatRecentPlayersLoading ? (
-                <p className="chat-news-empty">Yeni oyuncu akışı yükleniyor...</p>
+              {chatRecentPlayersLoading && chatNewsFeed.length === 0 ? (
+                <p className="chat-news-empty">Haber akışı yükleniyor...</p>
               ) : chatNewsFeed.length === 0 ? (
-                <p className="chat-news-empty">Henüz yeni oyuncu kaydı görünmüyor.</p>
+                <p className="chat-news-empty">Henüz haber kaydı görünmüyor.</p>
               ) : (
                 chatNewsFeed.map((entry) => {
                   const isExpanded = String(chatNewsExpandedId || '') === String(entry.id || '')
+                  const isJoinNews = String(entry?.kind || '') === 'join'
                   return (
                     <article key={entry.id} className={`chat-news-item chat-news-row ${isExpanded ? 'is-expanded' : ''}`.trim()}>
                       <button
@@ -15298,7 +15326,11 @@ function HomePage({ user, onLogout }) {
                       >
                         <span className="chat-news-brief-main">
                           <span className="chat-news-strip-icon" aria-hidden>
-                            <img src="/home/icons/messages/bildirim.webp" alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />
+                            <img
+                              src={isJoinNews ? '/home/icons/messages/bildirim.webp' : '/home/icons/custom/duyuruu.webp'}
+                              alt=""
+                              onError={(event) => { event.currentTarget.style.display = 'none' }}
+                            />
                             <span className="chat-news-strip-icon-fallback">📰</span>
                           </span>
                           <span className="chat-news-title chat-news-row-title">{entry.title}</span>
@@ -15307,31 +15339,42 @@ function HomePage({ user, onLogout }) {
                       </button>
                       {isExpanded ? (
                         <div className="chat-news-expanded">
-                          <p className="chat-news-text chat-news-row-subtitle">{entry.detailIntro || 'Hoş geldin, iyi eğlenceler.'}</p>
-                          <p className="chat-news-text chat-news-row-player">
-                            Yeni katılan oyuncunun adı{' '}
-                            {entry.userId ? (
-                              <button
-                                type="button"
-                                className="chat-news-name-link chat-news-name-highlight"
-                                onClick={() => {
-                                  void openProfileModal(entry.userId, {
-                                    username: entry.username,
-                                    displayName: entry.username,
-                                    avatarUrl: entry.avatarUrl,
-                                  })
-                                }}
-                              >
-                                {entry.username}
-                              </button>
-                            ) : (
-                              <span className="chat-news-name-highlight">{entry.username}</span>
-                            )}
-                          </p>
-                          <p className="chat-news-meta chat-news-row-meta">
-                            ({entry.timeLabel})
-                            {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
-                          </p>
+                          {isJoinNews ? (
+                            <p className="chat-news-text chat-news-row-player">
+                              Oyuncu:{' '}
+                              {entry.userId ? (
+                                <button
+                                  type="button"
+                                  className="chat-news-name-link chat-news-name-highlight"
+                                  onClick={() => {
+                                    void openProfileModal(entry.userId, {
+                                      username: entry.username,
+                                      displayName: entry.username,
+                                      avatarUrl: entry.avatarUrl,
+                                    })
+                                  }}
+                                >
+                                  {entry.username}
+                                </button>
+                              ) : (
+                                <span className="chat-news-name-highlight">{entry.username}</span>
+                              )}
+                              {' • '}
+                              {entry.timeLabel}
+                            </p>
+                          ) : (
+                            <p className="chat-news-text chat-news-row-subtitle">{entry.detailIntro || 'Detay bulunamadı.'}</p>
+                          )}
+                          {isJoinNews ? (
+                            entry.dateLabel && entry.dateLabel !== '-' ? (
+                              <p className="chat-news-meta chat-news-row-meta">{entry.dateLabel}</p>
+                            ) : null
+                          ) : (
+                            <p className="chat-news-meta chat-news-row-meta">
+                              {entry.username} • {entry.timeLabel}
+                              {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
+                            </p>
+                          )}
                         </div>
                       ) : null}
                     </article>
