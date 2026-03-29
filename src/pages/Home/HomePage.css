@@ -26908,3 +26908,228 @@ select {
   max-height: min(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom), 860px) !important;
   border-radius: 18px !important;
 }
+
+/* Unified mobile layout pass for business, factory, mines, bank, settings */
+.home-page {
+  --mobile-touch-target: 44px;
+}
+
+.business-screen,
+.factory-screen,
+.mines-screen,
+.bank-screen,
+.settings-screen-card,
+.settings-theme-modal {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.business-screen .fleet-company-card,
+.business-screen .fleet-overview-card,
+.business-screen .fleet-detail-card {
+  padding: clamp(10px, 2.8vw, 14px);
+}
+
+.business-screen .fleet-info-btn {
+  min-height: var(--mobile-touch-target);
+  min-width: 72px;
+  padding-inline: 14px;
+  border-radius: 12px;
+  font-size: 13px;
+}
+
+.business-screen .fleet-company-actions {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 108px), 1fr));
+  gap: 8px;
+}
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 104px;
+  padding: 10px 8px 9px;
+}
+
+.business-screen .fleet-company-cta-meta {
+  font-size: 9.5px;
+  line-height: 1.2;
+}
+
+.factory-screen .factory-build-banner,
+.factory-screen .factory-upgrade-banner,
+.factory-screen .factory-hub-toolbar {
+  grid-template-columns: 1fr;
+}
+
+.factory-screen .factory-banner-right {
+  align-items: stretch;
+}
+
+.factory-screen .factory-build-countdown {
+  min-width: 0;
+  width: 100%;
+  justify-items: start;
+}
+
+.factory-screen .factory-build-speedup-btn,
+.factory-screen .factory-hub-collect-btn,
+.factory-screen .factory-action-btn,
+.factory-screen .factory-buy-btn,
+.factory-screen .factory-shop-card-open,
+.factory-screen .factory-purchase-modal-actions .btn {
+  min-height: var(--mobile-touch-target);
+}
+
+.factory-screen .factory-build-speedup-btn {
+  padding: 0 12px;
+  border-radius: 11px;
+  font-size: 12.5px;
+  line-height: 1.2;
+  white-space: normal;
+  text-align: center;
+}
+
+.factory-screen .factory-grid.factory-grid-owned,
+.factory-screen .factory-grid.factory-grid-shop {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 164px), 1fr)) !important;
+  gap: 10px;
+}
+
+.factory-screen .factory-shop-list-item {
+  min-height: 68px;
+  padding: 12px;
+}
+
+.mines-screen .mines-head {
+  flex-wrap: wrap;
+}
+
+.mines-screen .mines-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.mines-screen .mines-back-btn,
+.mines-screen .btn.btn-ghost.btn-sm {
+  min-height: var(--mobile-touch-target);
+  padding-inline: 12px;
+}
+
+.mines-screen .mine-card {
+  padding: clamp(10px, 2.8vw, 13px);
+}
+
+.mines-screen .mine-card-name,
+.mines-screen .mine-card-hint {
+  overflow-wrap: anywhere;
+}
+
+.bank-screen .bank-hero {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.bank-screen .bank-hero-main,
+.bank-screen .bank-hero-actions {
+  width: 100%;
+}
+
+.bank-screen .bank-hero-actions {
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bank-screen .bank-stats-grid,
+.bank-screen .bank-preview-grid,
+.bank-screen .bank-preview-grid.bank-preview-grid-term,
+.bank-screen .bank-term-live-grid,
+.bank-screen .bank-history-grid,
+.bank-screen .bank-field-row,
+.bank-screen .bank-term-form-grid,
+.bank-screen .bank-term-actions {
+  grid-template-columns: 1fr;
+}
+
+.bank-screen .bank-term-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.bank-screen .bank-field-input {
+  min-height: var(--mobile-touch-target);
+  height: var(--mobile-touch-target);
+  font-size: 16px;
+}
+
+.bank-screen .bank-max-btn {
+  width: 100%;
+  min-height: var(--mobile-touch-target);
+}
+
+.bank-screen .bank-block .btn,
+.bank-screen .bank-term-actions .btn,
+.bank-screen .bank-hero-actions .btn {
+  min-height: var(--mobile-touch-target);
+}
+
+.bank-screen .bank-stat-card strong {
+  font-size: clamp(15px, 4.6vw, 21px);
+}
+
+.bank-screen .bank-preview-card strong {
+  font-size: clamp(12px, 3.8vw, 14px);
+}
+
+.bank-screen .bank-term-live-grid article strong,
+.bank-screen .bank-history-grid strong {
+  font-size: clamp(11px, 3.5vw, 13px);
+}
+
+.settings-screen-card {
+  gap: 12px;
+}
+
+.settings-screen-card .settings-section-card {
+  padding: clamp(10px, 2.6vw, 14px);
+  gap: 9px;
+}
+
+.settings-screen-card .settings-action-btn,
+.settings-screen-card .settings-inline-btn,
+.settings-theme-close,
+.settings-theme-option {
+  min-height: var(--mobile-touch-target);
+}
+
+.settings-theme-option {
+  padding: 11px 12px;
+}
+
+.settings-theme-option-state {
+  min-height: 34px;
+}
+
+.settings-security-row {
+  min-height: 44px;
+  padding: 10px 12px;
+}
+
+.settings-textarea {
+  min-height: 124px;
+}
+
+.settings-theme-overlay {
+  align-items: end;
+  padding:
+    calc(8px + env(safe-area-inset-top))
+    8px
+    calc(8px + env(safe-area-inset-bottom));
+}
+
+.settings-theme-modal {
+  width: min(var(--app-max-content-width), calc(100vw - 12px));
+  max-width: min(var(--app-max-content-width), calc(100vw - 12px));
+  max-height: min(calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 620px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
