@@ -166,7 +166,7 @@ const MESSAGE_ICONS = {
 const CHAT_COMMUNITY_TAB_ITEMS = [
   { id: 'sohbet', label: 'Sohbet', icon: '💬', iconSrc: '/home/icons/sohbet.png', type: 'panel' },
   { id: 'haberler', label: 'Haberler', icon: '📰', iconSrc: '/home/icons/messages/bildirim.webp', type: 'panel' },
-  { id: 'sehir', label: 'Şehrim', icon: '🌍', iconSrc: '/home/icons/sehir.webp', type: 'route-home' },
+  { id: 'kurallar', label: 'Kurallar', icon: '📜', iconSrc: '/home/icons/custom/kurallarim.webp', type: 'panel' },
 ]
 const CHAT_NEWS_MAX_ITEMS = 70
 const MARKETPLACE_SYSTEM_STOCK_CAP = 5000
@@ -15035,30 +15035,38 @@ function HomePage({ user, onLogout }) {
     })
     .slice(0, CHAT_NEWS_MAX_ITEMS)
 
+  const chatCommunityTitle = chatCommunityTab === 'haberler'
+    ? 'Haberler'
+    : chatCommunityTab === 'kurallar'
+      ? 'Kurallar'
+      : 'Sohbet'
+
   const chatView = (
     <section className="panel-stack chat-screen chat-screen-pro">
       <article className="card chat-card chat-card-pro chat-card-clean">
+        <header className="chat-community-topbar">
+          <button
+            type="button"
+            className="chat-community-topbar-back"
+            aria-label="Şehre dön"
+            onClick={() => void openTab('home', { tab: 'home' })}
+          >
+            ◀
+          </button>
+          <h3 className="chat-community-topbar-title">{chatCommunityTitle}</h3>
+          <span className="chat-community-topbar-spacer" aria-hidden />
+        </header>
         <div className="chat-community-tabs" role="tablist" aria-label="Oyun sohbet menüsü">
           {CHAT_COMMUNITY_TAB_ITEMS.map((entry) => {
-            const isPanel = entry.type === 'panel'
-            const isCityRoute = entry.type === 'route-home'
-            const isActive = isPanel && chatCommunityTab === entry.id
+            const isActive = chatCommunityTab === entry.id
             return (
               <button
                 key={entry.id}
                 type="button"
-                role={isPanel ? 'tab' : undefined}
-                aria-selected={isPanel ? isActive : undefined}
-                className={`chat-community-tab ${isActive ? 'is-active' : ''} ${isCityRoute ? 'chat-community-tab-city' : ''}`.trim()}
-                onClick={() => {
-                  if (isCityRoute) {
-                    void openTab('home', { tab: 'home' })
-                    return
-                  }
-                  if (isPanel) {
-                    setChatCommunityTab(entry.id)
-                  }
-                }}
+                role="tab"
+                aria-selected={isActive}
+                className={`chat-community-tab ${isActive ? 'is-active' : ''}`.trim()}
+                onClick={() => setChatCommunityTab(entry.id)}
               >
                 <span className="chat-community-tab-icon" aria-hidden>
                   {entry.iconSrc ? (
@@ -15330,6 +15338,41 @@ function HomePage({ user, onLogout }) {
                   )
                 })
               )}
+            </div>
+          </section>
+        ) : null}
+        {chatCommunityTab === 'kurallar' ? (
+          <section className="chat-side-panel chat-rules-panel" aria-label="Kurallar özeti">
+            <div className="chat-side-panel-head">
+              <h4 className="chat-side-panel-title">Kurallar</h4>
+              <p className="chat-side-panel-sub">
+                Şehir ekranındaki kurallar menüsünün özet sürümü.
+              </p>
+            </div>
+            <div className="chat-rules-list">
+              {(CITY_RULES_GUIDE.groups || []).map((group) => (
+                <article key={group.id} className="chat-rules-group">
+                  <header className="chat-rules-group-head">
+                    <span className="chat-rules-group-icon" aria-hidden>{group.icon || '📌'}</span>
+                    <div>
+                      <strong className="chat-rules-group-title">{group.title}</strong>
+                      <p className="chat-rules-group-sub">{group.description}</p>
+                    </div>
+                  </header>
+                  <div className="chat-rules-items">
+                    {(group.rules || []).slice(0, 3).map((rule, index) => (
+                      <p key={`${group.id}:${index}`} className="chat-rules-item">
+                        {rule.text}
+                        <span className="chat-rules-penalty">{rule.penalty}</span>
+                        {rule.note ? <span className="chat-rules-note">{rule.note}</span> : null}
+                      </p>
+                    ))}
+                  </div>
+                </article>
+              ))}
+              <article className="chat-rules-group chat-rules-group-final">
+                <p className="chat-rules-final-text">{CITY_RULES_GUIDE.finalNote}</p>
+              </article>
             </div>
           </section>
         ) : null}
