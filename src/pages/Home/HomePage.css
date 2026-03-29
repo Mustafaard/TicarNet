@@ -10179,7 +10179,7 @@
 
 .factory-modal-primary-btn {
   width: 100%;
-  min-height: 56px;
+  min-height: 50px;
   border-radius: 15px;
   border: 1px solid rgba(140, 220, 171, 0.72);
   background: linear-gradient(180deg, rgba(39, 158, 95, 0.98), rgba(20, 112, 66, 0.98));
@@ -10207,7 +10207,7 @@
 
 .factory-modal-close-btn {
   width: 100%;
-  min-height: 48px;
+  min-height: 44px;
   border-radius: 14px;
   border: 1px solid rgba(255, 175, 175, 0.64);
   background: linear-gradient(180deg, rgba(165, 58, 72, 0.95), rgba(116, 36, 48, 0.95));
@@ -10554,22 +10554,23 @@
 }
 
 .factory-upgrade-modal .fleet-modal-actions .btn {
-  min-height: 52px;
-  border-radius: 16px;
-  font-size: 0.95rem;
+  min-height: 46px;
+  border-radius: 14px;
+  font-size: 0.9rem;
   font-weight: 800;
 }
 
 .factory-upgrade-modal .fleet-modal-actions .btn-success {
-  background: linear-gradient(180deg, #f6cf76, #c69324);
-  color: #1e1504;
-  box-shadow: 0 14px 24px rgba(157, 110, 18, 0.24);
+  background: linear-gradient(180deg, #2ab36d, #1a7b4b);
+  color: #ecfff4;
+  border: 1px solid rgba(128, 223, 168, 0.72);
+  box-shadow: 0 10px 18px rgba(13, 56, 34, 0.32);
 }
 
 .factory-upgrade-modal .fleet-modal-actions .btn-danger {
-  background: linear-gradient(180deg, #1d3556, #11233d);
-  color: #ecf4ff;
-  border: 1px solid rgba(120, 177, 235, 0.34);
+  background: linear-gradient(180deg, #a13f4f, #6f2532);
+  color: #fff0f3;
+  border: 1px solid rgba(255, 167, 167, 0.64);
 }
 
 .fleet-collect-premium-hint {
@@ -25774,11 +25775,11 @@ select {
 
 .chat-news-item {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   border-radius: 12px;
   border: 1px solid rgba(95, 154, 226, 0.36);
   background: rgba(6, 23, 42, 0.95);
-  padding: 8px 10px;
+  padding: 6px 8px;
 }
 
 .chat-news-brief {
@@ -25786,7 +25787,7 @@ select {
   border: 0;
   background: rgba(8, 26, 48, 0.92);
   border-radius: 10px;
-  padding: 9px 10px;
+  padding: 7px 8px;
   color: inherit;
   display: flex;
   align-items: center;
@@ -25835,15 +25836,15 @@ select {
   border: 1px solid rgba(246, 205, 112, 0.62);
   background: linear-gradient(180deg, rgba(195, 146, 51, 0.92), rgba(136, 93, 25, 0.94));
   color: #ffecc5;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  padding: 4px 10px;
+  padding: 3px 8px;
 }
 
 .chat-news-title {
   margin: 0;
   color: #ecf4ff;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 800;
   line-height: 1.3;
   text-align: left;
@@ -25852,15 +25853,15 @@ select {
 .chat-news-text {
   margin: 0;
   color: rgba(197, 219, 244, 0.96);
-  font-size: 12px;
-  line-height: 1.45;
+  font-size: 11px;
+  line-height: 1.35;
   text-align: left;
 }
 
 .chat-news-meta {
   margin: 0;
   color: rgba(248, 169, 169, 0.9);
-  font-size: 11px;
+  font-size: 10px;
   text-align: right;
 }
 
@@ -26253,23 +26254,35 @@ select {
 }
 
 .factory-screen .factory-btn-upgrade {
-  border-color: rgba(129, 185, 248, 0.82) !important;
-  background: linear-gradient(180deg, rgba(51, 125, 214, 0.98), rgba(30, 84, 156, 0.98)) !important;
-  color: #eaf4ff !important;
+  border-color: rgba(141, 224, 175, 0.78) !important;
+  background: linear-gradient(180deg, rgba(44, 172, 106, 0.98), rgba(24, 120, 73, 0.98)) !important;
+  color: #ecfff4 !important;
 }
 
 .factory-screen .factory-btn-upgrade:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(67, 141, 229, 0.98), rgba(37, 96, 172, 0.98)) !important;
+  background: linear-gradient(180deg, rgba(62, 189, 122, 0.98), rgba(28, 136, 83, 0.98)) !important;
 }
 
 .factory-screen .factory-btn-bulk {
-  border-color: rgba(246, 201, 102, 0.8) !important;
-  background: linear-gradient(180deg, rgba(227, 174, 63, 0.98), rgba(161, 109, 29, 0.98)) !important;
-  color: #fff5dc !important;
+  border-color: rgba(141, 224, 175, 0.78) !important;
+  background: linear-gradient(180deg, rgba(44, 172, 106, 0.98), rgba(24, 120, 73, 0.98)) !important;
+  color: #ecfff4 !important;
 }
 
 .factory-screen .factory-btn-bulk:hover:not(:disabled) {
-  background: linear-gradient(180deg, rgba(238, 188, 78, 0.98), rgba(175, 121, 37, 0.98)) !important;
+  background: linear-gradient(180deg, rgba(62, 189, 122, 0.98), rgba(28, 136, 83, 0.98)) !important;
+}
+
+.factory-screen .factory-buy-btn.btn-success,
+.factory-screen .factory-buy-btn.btn-gold {
+  border-color: rgba(141, 224, 175, 0.78) !important;
+  background: linear-gradient(180deg, rgba(44, 172, 106, 0.98), rgba(24, 120, 73, 0.98)) !important;
+  color: #ecfff4 !important;
+}
+
+.factory-screen .factory-buy-btn.btn-success:hover:not(:disabled),
+.factory-screen .factory-buy-btn.btn-gold:hover:not(:disabled) {
+  background: linear-gradient(180deg, rgba(62, 189, 122, 0.98), rgba(28, 136, 83, 0.98)) !important;
 }
 
 .business-screen .fleet-subheader,
@@ -26294,6 +26307,31 @@ select {
 .business-screen .btn.btn-success:hover:not(:disabled),
 .business-screen .btn.btn-accent:hover:not(:disabled) {
   background: linear-gradient(180deg, rgba(235, 182, 74, 0.98), rgba(171, 115, 29, 0.98));
+}
+
+.fleet-modal-close,
+.fleet-modal-close.btn-danger,
+.btn.btn-danger.fleet-modal-close {
+  border-color: rgba(255, 167, 167, 0.72) !important;
+  background: linear-gradient(180deg, rgba(165, 58, 72, 0.96), rgba(108, 31, 44, 0.96)) !important;
+  color: #fff0f4 !important;
+}
+
+.factory-build-countdown small,
+.factory-build-countdown strong,
+.factory-status-line strong,
+.factory-shop-card-hint,
+.fleet-live-countdown,
+.mine-card-countdown,
+.mine-dig-countdown,
+.mine-dig-countdown strong,
+.weekly-event-inline-countdown,
+.home-weekly-event-countdown,
+.weekly-events-countdown,
+.weekly-event-day-countdown,
+.profile-event-countdown,
+.leaderboard-countdown-slot strong {
+  color: #ff8d9a !important;
 }
 
 .bank-screen .bank-stat-card,

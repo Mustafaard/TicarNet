@@ -12242,7 +12242,7 @@ function HomePage({ user, onLogout }) {
                 >
                   {busy === factoryPurchaseBusyKey ? 'Kuruluyor...' : !canStartAnotherFactoryBuild ? 'Fabrika kurulurken başka fabrika kurulamaz' : factoryPurchaseModal.canPurchaseNow ? 'Fabrikayı Kur' : 'Maliyet Yetersiz'}
                 </button>
-                <button type="button" className="btn btn-ghost" onClick={closeFactoryPurchaseModal}>Kapat</button>
+                <button type="button" className="btn btn-danger" onClick={closeFactoryPurchaseModal}>Kapat</button>
               </div>
             </article>
           </section>,
@@ -17155,7 +17155,7 @@ function HomePage({ user, onLogout }) {
           {leaderboardSearchError ? <p className="leaderboard-search-error">{leaderboardSearchError}</p> : null}
           <div className="leaderboard-search-actions">
             <button type="submit" className="btn btn-primary full">Ara</button>
-            <button type="button" className="btn btn-ghost full" onClick={() => setLeaderboardSearchOpen(false)}>Kapat</button>
+            <button type="button" className="btn btn-danger full" onClick={() => setLeaderboardSearchOpen(false)}>Kapat</button>
           </div>
         </form>
       </article>
