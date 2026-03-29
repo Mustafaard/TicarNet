@@ -15066,11 +15066,11 @@ function HomePage({ user, onLogout }) {
 
   const chatNewsFeed = [...chatPlayerNewsFeed, ...chatAnnouncementFeed]
     .sort((left, right) => {
-      const diff = (left?.createdAtMs || 0) - (right?.createdAtMs || 0)
+      const diff = (right?.createdAtMs || 0) - (left?.createdAtMs || 0)
       if (diff !== 0) return diff
       return String(left?.id || '').localeCompare(String(right?.id || ''), 'tr')
     })
-    .slice(-CHAT_NEWS_MAX_ITEMS)
+    .slice(0, CHAT_NEWS_MAX_ITEMS)
 
   useEffect(() => {
     if (!chatNewsExpandedId) return
