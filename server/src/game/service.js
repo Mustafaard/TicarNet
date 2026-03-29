@@ -7715,6 +7715,8 @@ function transactionTitle(kind) {
   if (kind === 'market_sell') return 'Sat\u0131\u015f \u0130\u015flemi'
   if (kind === 'forex_buy') return 'D\u00f6viz Al\u0131m\u0131'
   if (kind === 'forex_sell') return 'D\u00f6viz Bozumu'
+  if (kind === 'factory_buy') return 'Fabrika Kurulumu'
+  if (kind === 'factory_upgrade_start') return 'Fabrika Y\u00fckseltmesi'
   if (kind === 'shipment_claim') return 'Tahsilat'
   if (kind === 'business_collect') return '\u00dcretim Tahsilat\u0131'
   if (kind === 'business_collect_bulk') return 'Toplu Tahsilat'
@@ -7942,12 +7944,18 @@ function transactionSourceType(kind) {
   return 'other'
 }
 
+const HIDDEN_MESSAGE_CENTER_TRANSACTION_KINDS = new Set([
+  'factory_upgrade_speedup',
+  'factory_build_speedup',
+])
+
 function transactionItemView(entry) {
   if (entry.kind === 'system_init') return null
   const detail = String(entry.detail || '').trim()
   const amount = asInt(entry.amount, 0)
   const amountLabel = amount >= 0 ? `+${amount}` : `${amount}`
   const kind = String(entry.kind || '').trim().toLowerCase()
+  if (HIDDEN_MESSAGE_CENTER_TRANSACTION_KINDS.has(kind)) return null
   return {
     id: `txn:${entry.id}`,
     source: 'transaction',

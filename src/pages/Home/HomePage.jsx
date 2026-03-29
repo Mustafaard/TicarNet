@@ -1935,6 +1935,55 @@ function dedupeFeedEntries(list, limit = CHAT_NEWS_MAX_ITEMS) {
   return deduped
 }
 
+const NEWS_HIDDEN_TRANSACTION_KINDS = new Set([
+  'factory_upgrade_speedup',
+  'factory_build_speedup',
+])
+
+function isHiddenNewsTransactionKind(kind) {
+  return NEWS_HIDDEN_TRANSACTION_KINDS.has(String(kind || '').trim().toLowerCase())
+}
+
+function parseFactoryNewsMeta(rawDetail) {
+  const safeDetail = String(rawDetail || '').replace(/\s+/g, ' ').trim()
+  if (!safeDetail) {
+    return { factoryName: 'Fabrika', fromLevel: null, toLevel: null }
+  }
+
+  const normalized = safeDetail
+    .replace(/[“”"']/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const nameMatch = normalized.match(
+    /^(.+?)\s+(?:sat[ıi]n\s+al[ıi]nd[ıi]|kuruldu|y[üu]kseltmesi|y[üu]kseltme)/i,
+  )
+  const fallbackName = normalized
+    .split(/[.(]/)[0]
+    .replace(/\s+/g, ' ')
+    .trim()
+  const factoryName = String(nameMatch?.[1] || fallbackName || 'Fabrika').trim() || 'Fabrika'
+
+  const levelTransitionMatch = normalized.match(/seviye\s*(\d+)\s*[^0-9]{1,8}\s*(\d+)/i)
+  const fromLevel = levelTransitionMatch ? Math.max(1, Math.trunc(num(levelTransitionMatch[1]))) : null
+  const toLevel = levelTransitionMatch ? Math.max(1, Math.trunc(num(levelTransitionMatch[2]))) : null
+
+  return {
+    factoryName,
+    fromLevel: Number.isFinite(fromLevel) ? fromLevel : null,
+    toLevel: Number.isFinite(toLevel) ? toLevel : null,
+  }
+}
+
+function extractForexRateLabel(rawDetail) {
+  const safeDetail = String(rawDetail || '').replace(/\s+/g, ' ').trim()
+  if (!safeDetail) return ''
+  const explicitMatch = safeDetail.match(/yeni\s+kur\s*:\s*([^.]*)/i)
+  if (explicitMatch?.[1]) return explicitMatch[1].trim()
+  const fallbackMatch = safeDetail.match(/kur\s*:\s*([^.]*)/i)
+  if (fallbackMatch?.[1]) return fallbackMatch[1].trim()
+  return ''
+}
+
 function safeIsoDate(value) {
   const parsed = parseSafeDate(value)
   return parsed ? parsed.toISOString() : ''
@@ -8099,7 +8148,12 @@ function HomePage({ user, onLogout }) {
     [_messageItems],
   )
   const messageNotificationItems = useMemo(() => {
-    const rows = _messageItems.filter((item) => !(item?.source === 'direct' || item?.filter === 'message'))
+    const rows = _messageItems
+      .filter((item) => !(item?.source === 'direct' || item?.filter === 'message'))
+      .filter((item) => {
+        if (String(item?.source || '').trim().toLowerCase() !== 'transaction') return true
+        return !isHiddenNewsTransactionKind(item?.kind)
+      })
     return dedupeFeedEntries(rows, Math.max(1, rows.length || 1))
   }, [_messageItems])
   const messageSpotlight = MESSAGES_DISABLED ? null : (messageCenter?.spotlight || null)
@@ -15114,10 +15168,12 @@ function HomePage({ user, onLogout }) {
         const inferredKind = (() => {
           if (kindRaw) return kindRaw
           if (type === 'market') {
+            if (/d[öo]viz\s+kuru\s+g[üu]ncellendi|yeni\s+kur/.test(detailLower)) return 'forex_rate_update'
             if (/sat[ıi][şs]|sat[ıi]ld[ıi]/.test(detailLower)) return 'market_sell'
             if (/al[ıi]m|sat[ıi]n al[ıi]nd[ıi]/.test(detailLower)) return 'market_buy'
           }
           if (type === 'factory') {
+            if (/h[ıi]zland[ıi]r/.test(detailLower)) return 'factory_speedup'
             if (/sat[ıi]n al[ıi]nd[ıi]|kuruld/.test(detailLower)) return 'factory_buy'
             if (/y[üu]kselt/.test(detailLower)) return 'factory_upgrade_start'
           }
@@ -15137,6 +15193,8 @@ function HomePage({ user, onLogout }) {
         let userId = currentChatProfileUserId
 
         if (source === 'transaction') {
+          if (isHiddenNewsTransactionKind(inferredKind) || inferredKind === 'factory_speedup') return null
+          const factoryMeta = parseFactoryNewsMeta(rawDetail)
           if (inferredKind === 'market_buy') {
             newsKind = 'activity-market-buy'
             title = 'Pazarda alım işlemi yapıldı!'
@@ -15168,6 +15226,16 @@ function HomePage({ user, onLogout }) {
             detailIntro = detailIntro
               ? `${currentChatProfileName}: ${detailIntro}`
               : `${currentChatProfileName} pazarda satış işlemi yaptı.`
+          } else if (inferredKind === 'factory_buy') {
+            detailIntro = `${currentChatProfileName}, ${factoryMeta.factoryName} kurdu (Seviye 1).`
+          } else if (inferredKind === 'factory_upgrade_start') {
+            if (factoryMeta.fromLevel && factoryMeta.toLevel) {
+              detailIntro = `${currentChatProfileName}, ${factoryMeta.factoryName} seviyesini ${factoryMeta.fromLevel}'den ${factoryMeta.toLevel}'ye yükseltti.`
+            } else if (factoryMeta.toLevel) {
+              detailIntro = `${currentChatProfileName}, ${factoryMeta.factoryName} seviyesini ${factoryMeta.toLevel}. seviyeye yükseltti.`
+            } else {
+              detailIntro = `${currentChatProfileName}, ${factoryMeta.factoryName} seviyesini yükseltti.`
+            }
           } else {
             detailIntro = detailIntro
               ? `${currentChatProfileName}: ${detailIntro}`
@@ -15176,11 +15244,21 @@ function HomePage({ user, onLogout }) {
         } else if (source === 'notification' || source === 'push') {
           const isMineEvent = type === 'mine' || /maden|kaz[ıi]/.test(detailLower)
           const isMessagePenalty = /mesaj engeli|sustur|k[üu]f[üu]r/.test(detailLower)
+          const isForexRateUpdate = type === 'market' && /d[öo]viz\s+kuru\s+g[üu]ncellendi|yeni\s+kur/.test(detailLower)
           if (isMineEvent) {
             newsKind = 'activity-mine'
             title = 'Maden üretimi tamamlandı!'
             username = currentChatProfileName
             userId = currentChatProfileUserId
+          } else if (isForexRateUpdate) {
+            const rateLabel = extractForexRateLabel(rawDetail)
+            newsKind = 'activity-forex-update'
+            title = 'Döviz kuru yenilendi!'
+            username = 'Pazar'
+            userId = ''
+            detailIntro = rateLabel
+              ? `Güncel kur: ${rateLabel}`
+              : (detailIntro || 'Döviz kuru bilgisi güncellendi.')
           } else if (isMessagePenalty) {
             newsKind = 'activity-message-penalty'
             title = 'Mesaj engeli bildirimi geldi!'
@@ -15194,7 +15272,7 @@ function HomePage({ user, onLogout }) {
           return null
         }
 
-        if (hasAmount) {
+        if (hasAmount && ['market_buy', 'market_sell', 'vehicle_market_sell'].includes(inferredKind)) {
           const cashLabel = amountInt > 0
             ? `Kazanılan nakit: +${fmt(amountInt)}`
             : `Harcanan nakit: -${fmt(Math.abs(amountInt))}`
