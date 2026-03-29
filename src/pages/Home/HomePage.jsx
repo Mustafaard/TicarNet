@@ -139,8 +139,8 @@ const NAV = [
 const MARKET_TABS = ['buy', 'sell', 'orderbook', 'auction', 'chart']
 const BUSINESS_DETAIL_TABS = ['garage', 'market']
 const CHAT_ROOM = 'global'
-const CHAT_PRUNE_TRIGGER = 15
-const CHAT_PRUNE_KEEP_COUNT = 15
+const CHAT_PRUNE_TRIGGER = 40
+const CHAT_PRUNE_KEEP_COUNT = 40
 const DEFAULT_CHAT_AVATAR = '/splash/logo.webp'
 const MARKETPLACE_SELL_MIN_PRICE_MULTIPLIER = 0.6
 const MARKETPLACE_SELL_MAX_PRICE_MULTIPLIER = 12
@@ -168,7 +168,7 @@ const CHAT_COMMUNITY_TAB_ITEMS = [
   { id: 'haberler', label: 'Haberler', icon: '📰', iconSrc: '/home/icons/messages/bildirim.webp', type: 'panel' },
   { id: 'sehir', label: 'Şehrim', icon: '🌍', iconSrc: '/home/icons/sehir.webp', type: 'route-home' },
 ]
-const CHAT_NEWS_MAX_ITEMS = 50
+const CHAT_NEWS_MAX_ITEMS = 70
 const MARKETPLACE_SYSTEM_STOCK_CAP = 5000
 
 const CHAT_SEED = {
@@ -2770,6 +2770,7 @@ function HomePage({ user, onLogout }) {
   const [chatClockMs, setChatClockMs] = useState(() => new Date().getTime())
   const [chatRecentPlayers, setChatRecentPlayers] = useState([])
   const [chatRecentPlayersLoading, setChatRecentPlayersLoading] = useState(false)
+  const [chatNewsExpandedId, setChatNewsExpandedId] = useState('')
   const [, setMessageSocketState] = useState('offline')
   const [messageCenter, setMessageCenter] = useState({
     filter: 'all',
@@ -2780,6 +2781,19 @@ function HomePage({ user, onLogout }) {
     items: [],
     moderation: EMPTY_USER_MODERATION,
   })
+
+  useEffect(() => {
+    if (!chatNewsExpandedId) return
+    const hasExpandedItem = (Array.isArray(chatRecentPlayers) ? chatRecentPlayers : []).some((entry, index) => {
+      const userId = String(entry?.userId || '').trim()
+      const createdAt = String(entry?.createdAt || '').trim()
+      const itemId = `${userId || 'anon'}:${createdAt || index}`
+      return itemId === chatNewsExpandedId
+    })
+    if (!hasExpandedItem) {
+      setChatNewsExpandedId('')
+    }
+  }, [chatNewsExpandedId, chatRecentPlayers])
   const [messageThread, setMessageThread] = useState([])
   const [messageForm, setMessageForm] = useState({ toUsername: '', text: '' })
   const [messageReplyTarget, setMessageReplyTarget] = useState(null)
@@ -15007,9 +15021,9 @@ function HomePage({ user, onLogout }) {
         avatarUrl,
         createdAt,
         createdAtMs: safeCreatedAtMs,
-        title: "TicarNet'e yeni oyuncu katıldı.",
-        subtitle: 'Bakmak için dokun.',
-        welcomeNote: 'Hoş geldin, iyi eğlenceler.',
+        title: "TicarNet'e yeni oyuncu katıldı!",
+        promptLabel: 'Dokun',
+        detailIntro: 'Hoş geldin, iyi eğlenceler.',
         timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
         dateLabel: formatDateTime(createdAt),
       }
@@ -15263,39 +15277,58 @@ function HomePage({ user, onLogout }) {
               ) : chatNewsFeed.length === 0 ? (
                 <p className="chat-news-empty">Henüz yeni oyuncu kaydı görünmüyor.</p>
               ) : (
-                chatNewsFeed.map((entry) => (
-                  <article key={entry.id} className="chat-news-item chat-news-row">
-                    <p className="chat-news-title chat-news-row-title">{entry.title}</p>
-                    <p className="chat-news-text chat-news-row-subtitle">
-                      <span>{entry.subtitle}</span>
-                      <span className="chat-news-welcome-note">{entry.welcomeNote || 'Hoş geldin!'}</span>
-                    </p>
-                    <p className="chat-news-text chat-news-row-player">
-                      Oyuncu:{' '}
-                      {entry.userId ? (
-                        <button
-                          type="button"
-                          className="chat-news-name-link"
-                          onClick={() => {
-                            void openProfileModal(entry.userId, {
-                              username: entry.username,
-                              displayName: entry.username,
-                              avatarUrl: entry.avatarUrl,
-                            })
-                          }}
-                        >
-                          {entry.username}
-                        </button>
-                      ) : (
-                        <span>{entry.username}</span>
-                      )}
-                    </p>
-                    <p className="chat-news-meta chat-news-row-meta">
-                      ({entry.timeLabel})
-                      {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
-                    </p>
-                  </article>
-                ))
+                chatNewsFeed.map((entry) => {
+                  const isExpanded = String(chatNewsExpandedId || '') === String(entry.id || '')
+                  return (
+                    <article key={entry.id} className={`chat-news-item chat-news-row ${isExpanded ? 'is-expanded' : ''}`.trim()}>
+                      <button
+                        type="button"
+                        className="chat-news-brief"
+                        onClick={() => {
+                          setChatNewsExpandedId((prev) => (String(prev || '') === String(entry.id || '') ? '' : String(entry.id || '')))
+                        }}
+                      >
+                        <span className="chat-news-brief-main">
+                          <span className="chat-news-strip-icon" aria-hidden>
+                            <img src="/home/icons/messages/bildirim.webp" alt="" onError={(event) => { event.currentTarget.style.display = 'none' }} />
+                            <span className="chat-news-strip-icon-fallback">📰</span>
+                          </span>
+                          <span className="chat-news-title chat-news-row-title">{entry.title}</span>
+                        </span>
+                        <span className="chat-news-strip-action">{isExpanded ? 'Gizle' : (entry.promptLabel || 'Dokun')}</span>
+                      </button>
+                      {isExpanded ? (
+                        <div className="chat-news-expanded">
+                          <p className="chat-news-text chat-news-row-subtitle">{entry.detailIntro || 'Hoş geldin, iyi eğlenceler.'}</p>
+                          <p className="chat-news-text chat-news-row-player">
+                            Yeni katılan oyuncunun adı{' '}
+                            {entry.userId ? (
+                              <button
+                                type="button"
+                                className="chat-news-name-link chat-news-name-highlight"
+                                onClick={() => {
+                                  void openProfileModal(entry.userId, {
+                                    username: entry.username,
+                                    displayName: entry.username,
+                                    avatarUrl: entry.avatarUrl,
+                                  })
+                                }}
+                              >
+                                {entry.username}
+                              </button>
+                            ) : (
+                              <span className="chat-news-name-highlight">{entry.username}</span>
+                            )}
+                          </p>
+                          <p className="chat-news-meta chat-news-row-meta">
+                            ({entry.timeLabel})
+                            {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
+                          </p>
+                        </div>
+                      ) : null}
+                    </article>
+                  )
+                })
               )}
             </div>
           </section>

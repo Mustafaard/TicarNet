@@ -488,7 +488,7 @@ export async function changeCurrentUserPassword(values) {
 
 export async function getRecentRegisteredPlayers(limit = 12) {
   const safeLimit = Number.isFinite(Number(limit))
-    ? Math.max(1, Math.min(50, Math.trunc(Number(limit))))
+    ? Math.max(1, Math.min(70, Math.trunc(Number(limit))))
     : 12
   return request(`/auth/recent-players?limit=${safeLimit}`, {
     method: 'GET',

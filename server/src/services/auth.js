@@ -591,7 +591,7 @@ function findPendingDeletionRequestByUserId(db, userId) {
 function safeRecentPlayersLimit(value) {
   const parsed = Number(value)
   if (!Number.isFinite(parsed)) return 12
-  return Math.max(1, Math.min(50, Math.trunc(parsed)))
+  return Math.max(1, Math.min(70, Math.trunc(parsed)))
 }
 
 function parseTimestampMs(value) {

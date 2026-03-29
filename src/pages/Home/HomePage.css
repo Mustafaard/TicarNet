@@ -21545,7 +21545,7 @@ select {
 }
 
 .factory-grid.factory-grid-owned {
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .factory-grid.factory-grid-shop {
@@ -21623,7 +21623,7 @@ select {
 
 @media (max-width: 767px) {
   .factory-grid.factory-grid-owned {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .factory-grid.factory-grid-shop {
@@ -21857,7 +21857,7 @@ select {
   }
 
   .factory-grid.factory-grid-owned {
-    grid-template-columns: 1fr !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
   }
 
   .factory-card {
@@ -21938,7 +21938,7 @@ select {
   }
 
   .factory-grid.factory-grid-owned {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .factory-grid.factory-grid-owned .factory-card {
@@ -25769,51 +25769,97 @@ select {
 
 .chat-news-list {
   display: grid;
-  gap: 8px;
+  gap: 9px;
 }
 
 .chat-news-item {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 4px;
-  border-radius: 11px;
-  border: 1px solid rgba(93, 148, 216, 0.34);
-  background: rgba(6, 23, 42, 0.94);
-  padding: 10px 12px;
+  gap: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(95, 154, 226, 0.36);
+  background: rgba(6, 23, 42, 0.95);
+  padding: 8px 10px;
 }
 
-.chat-news-avatar {
+.chat-news-brief {
+  width: 100%;
+  border: 0;
+  background: rgba(8, 26, 48, 0.92);
+  border-radius: 10px;
+  padding: 9px 10px;
+  color: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.chat-news-brief-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.chat-news-strip-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  border: 1px solid rgba(110, 173, 243, 0.44);
+  background: rgba(16, 44, 80, 0.9);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.chat-news-strip-icon img {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+  display: block;
+}
+
+.chat-news-strip-icon img + .chat-news-strip-icon-fallback {
   display: none;
 }
 
-.chat-news-avatar img {
-  display: none;
+.chat-news-strip-icon-fallback {
+  font-size: 11px;
+  line-height: 1;
 }
 
-.chat-news-copy {
-  display: none;
+.chat-news-strip-action {
+  flex-shrink: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(246, 205, 112, 0.62);
+  background: linear-gradient(180deg, rgba(195, 146, 51, 0.92), rgba(136, 93, 25, 0.94));
+  color: #ffecc5;
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
 }
 
 .chat-news-title {
   margin: 0;
   color: #ecf4ff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
-  line-height: 1.25;
-  text-align: center;
+  line-height: 1.3;
+  text-align: left;
 }
 
 .chat-news-text {
   margin: 0;
-  color: rgba(187, 211, 240, 0.94);
+  color: rgba(197, 219, 244, 0.96);
   font-size: 12px;
-  line-height: 1.3;
-  text-align: center;
+  line-height: 1.45;
+  text-align: left;
 }
 
 .chat-news-meta {
   margin: 0;
-  color: rgba(248, 158, 158, 0.9);
+  color: rgba(248, 169, 169, 0.9);
   font-size: 11px;
   text-align: right;
 }
@@ -25834,32 +25880,25 @@ select {
 }
 
 .chat-news-row-title {
-  text-align: center;
-}
-
-.chat-news-row-subtitle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
   text-align: left;
 }
 
-.chat-news-welcome-note {
-  flex-shrink: 0;
-  border-radius: 999px;
-  border: 1px solid rgba(126, 184, 247, 0.46);
-  background: rgba(18, 44, 76, 0.74);
-  color: #d8ebff;
-  font-size: 10px;
-  font-weight: 700;
-  padding: 3px 8px;
-  white-space: nowrap;
+.chat-news-expanded {
+  display: grid;
+  gap: 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(108, 170, 243, 0.26);
+  background: rgba(6, 19, 35, 0.72);
+  padding: 8px 10px;
+}
+
+.chat-news-row-subtitle {
+  text-align: left;
 }
 
 .chat-news-row-player {
-  text-align: center;
-  color: #dcecff;
+  text-align: left;
+  color: #d8eaff;
   font-weight: 700;
 }
 
@@ -25881,6 +25920,11 @@ select {
 
 .chat-news-name-link:hover {
   color: #ffe9bd;
+}
+
+.chat-news-name-highlight {
+  color: #ffd57f;
+  font-weight: 900;
 }
 
 /* DM gorunumu: daha temiz mavi-altin cam */
@@ -25972,13 +26016,13 @@ select {
     border-radius: 14px;
   }
 
-  .chat-news-item {
-    grid-template-columns: 42px minmax(0, 1fr);
+  .chat-news-brief {
+    padding: 8px 9px;
   }
 
-  .chat-news-chip {
-    grid-column: 1 / -1;
-    justify-self: start;
+  .chat-news-strip-action {
+    font-size: 10px;
+    padding: 3px 9px;
   }
 }
 
@@ -26352,57 +26396,17 @@ select {
 }
 
 @media (max-width: 900px) {
-  .marketplace-buy-list.marketplace-buy-list-clean {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-card-clean {
-    display: grid;
-    grid-template-columns: 36px 1fr;
-    grid-template-areas:
-      'icon info'
-      'price price'
-      'action action';
-    align-items: start;
+  .factory-grid.factory-grid-owned {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     gap: 8px;
-    padding: 11px 10px;
-    height: 100%;
   }
 
-  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-card-clean-icon {
-    grid-area: icon;
-    width: 32px;
-    height: 32px;
+  .factory-grid.factory-grid-owned .factory-card {
+    min-width: 0;
   }
 
-  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-card-clean-info {
-    grid-area: info;
-  }
-
-  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-card-clean-price-wrap {
-    grid-area: price;
-    width: 100%;
-    justify-content: flex-start;
-    align-items: flex-start;
-  }
-
-  .marketplace-buy-list.marketplace-buy-list-clean .marketplace-buy-btn-clean {
-    grid-area: action;
-    width: 100%;
-    min-height: 42px;
-  }
-}
-
-@media (max-width: 520px) {
-  .chat-news-row-subtitle {
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: center;
-  }
-
-  .chat-news-welcome-note {
-    font-size: 9px;
+  .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions {
+    grid-template-columns: 1fr;
+    gap: 6px;
   }
 }
