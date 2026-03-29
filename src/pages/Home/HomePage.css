@@ -25749,6 +25749,14 @@ select {
   gap: 8px;
 }
 
+.chat-news-panel {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 2px 0 0;
+  gap: 0;
+}
+
 .chat-side-panel-head {
   display: grid;
   gap: 4px;
@@ -25857,15 +25865,18 @@ select {
 }
 
 .chat-news-list {
-  display: grid;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
   gap: 4px;
 }
 
 .chat-news-item {
   display: block;
-  border-radius: 9px;
-  border: 1px solid rgba(92, 154, 224, 0.34);
-  background: linear-gradient(180deg, rgba(6, 20, 39, 0.95), rgba(4, 14, 29, 0.96));
+  border-radius: 10px;
+  border: 1px solid rgba(83, 144, 214, 0.3);
+  background: linear-gradient(180deg, rgba(5, 17, 33, 0.96), rgba(4, 13, 26, 0.97));
   padding: 0;
   overflow: hidden;
   transition: border-color 0.16s ease, background 0.16s ease;
@@ -25876,7 +25887,7 @@ select {
 }
 
 .chat-news-item.is-expanded {
-  border-color: rgba(242, 157, 157, 0.58);
+  border-color: rgba(231, 170, 114, 0.52);
 }
 
 .chat-news-brief {
@@ -25884,8 +25895,8 @@ select {
   border: 0;
   background: transparent;
   border-radius: 0;
-  padding: 6px 8px;
-  min-height: 32px;
+  padding: 6px 9px;
+  min-height: 34px;
   color: inherit;
   display: flex;
   align-items: center;
@@ -25897,11 +25908,11 @@ select {
 
 .chat-news-brief:hover {
   transform: none;
-  background: rgba(8, 25, 45, 0.58);
+  background: rgba(8, 26, 47, 0.56);
 }
 
 .chat-news-item.is-expanded .chat-news-brief {
-  background: rgba(10, 24, 44, 0.62);
+  background: rgba(9, 28, 49, 0.62);
 }
 
 .chat-news-brief-main {
@@ -25947,7 +25958,7 @@ select {
   font-size: 9px;
   font-weight: 800;
   line-height: 1;
-  padding: 3px 7px;
+  padding: 2px 7px;
 }
 
 .chat-news-strip-action.is-open {
@@ -26008,8 +26019,8 @@ select {
   display: grid;
   gap: 2px;
   border-top: 1px solid rgba(105, 165, 236, 0.22);
-  background: rgba(5, 18, 35, 0.78);
-  padding: 4px 8px 6px;
+  background: rgba(5, 18, 35, 0.8);
+  padding: 4px 9px 6px;
   animation: chat-news-inline-open 0.16s ease;
 }
 
@@ -26184,6 +26195,10 @@ select {
   .chat-side-panel {
     padding: 8px;
     border-radius: 14px;
+  }
+
+  .chat-news-panel {
+    padding: 0;
   }
 
   .chat-news-brief {
