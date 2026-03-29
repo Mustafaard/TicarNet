@@ -26564,6 +26564,77 @@ select {
   background: linear-gradient(180deg, rgba(188, 71, 86, 0.97), rgba(122, 38, 54, 0.97)) !important;
 }
 
+/* Global panel skin: apply mine-style blue/gold glass look to all major game panels/modals */
+.warehouse-modal,
+.warehouse-modal-fullscreen,
+.fleet-modal,
+.fleet-sub-modal,
+.fleet-listing-modal,
+.fleet-filter-modal,
+.fleet-market-detail-modal,
+.fleet-market-purchase-modal,
+.fleet-bulk-modal,
+.fleet-accountant-modal,
+.factory-bulk-modal,
+.factory-collect-modal,
+.factory-upgrade-modal,
+.factory-purchase-modal,
+.factory-upgrade-costs.factory-upgrade-costs-modal,
+.marketplace-panel,
+.marketplace-buy-modal,
+.marketplace-capacity-warning-modal,
+.player-profile-modal,
+.starter-detail-modal,
+.settings-theme-modal,
+.season-chests-modal,
+.daily-login-modal,
+.daily-login-result-modal,
+.tutorial-modal,
+.chat-side-panel,
+.bank-panel,
+.forex-panel.forex-panel-solo,
+.garage-teklif-panel,
+.chat-report-modal,
+.dm-report-modal,
+.avatar-crop-modal,
+.avatar-confirm-modal,
+.leaderboard-search-modal {
+  border: 1px solid rgba(112, 184, 255, 0.42) !important;
+  background:
+    radial-gradient(circle at top right, rgba(255, 205, 94, 0.18), transparent 33%),
+    radial-gradient(circle at top left, rgba(56, 126, 223, 0.26), transparent 42%),
+    linear-gradient(180deg, rgba(9, 26, 52, 0.98), rgba(8, 16, 34, 0.99)) !important;
+  box-shadow:
+    0 24px 52px rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 rgba(234, 248, 255, 0.08) !important;
+}
+
+.marketplace-panel .marketplace-block,
+.marketplace-buy-card-clean,
+.marketplace-list-empty,
+.fleet-note-panel,
+.fleet-bulk-kpi,
+.fleet-bulk-summary,
+.fleet-accountant-cta-card,
+.fleet-accountant-summary,
+.fleet-accountant-footer,
+.factory-purchase-modal-preview,
+.factory-purchase-modal-stats,
+.factory-purchase-modal-costs,
+.factory-upgrade-modal .factory-upgrade-modal-preview,
+.factory-upgrade-modal .factory-upgrade-modal-costs,
+.bank-screen .bank-stat-card,
+.bank-screen .bank-block,
+.bank-screen .bank-preview-card,
+.bank-screen .bank-term-live-card,
+.bank-screen .bank-history-row,
+.garage-teklif-panel .fleet-note-panel {
+  border-color: rgba(132, 189, 246, 0.24) !important;
+  background:
+    radial-gradient(circle at 100% 0%, rgba(242, 196, 91, 0.1), transparent 44%),
+    linear-gradient(180deg, rgba(16, 34, 60, 0.9), rgba(9, 20, 38, 0.86)) !important;
+}
+
 @media (max-width: 640px) {
   .avatar-confirm-actions {
     grid-template-columns: 1fr;
