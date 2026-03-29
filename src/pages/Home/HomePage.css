@@ -28374,3 +28374,197 @@ select {
     height: 68px;
   }
 }
+
+/* Final mobile parity + typography stability pass */
+.home-page {
+  --city-card-min-height: clamp(76px, 21vw, 88px);
+  --city-icon-wrap-size: clamp(38px, 10.2vw, 43px);
+  --city-icon-size: clamp(24px, 6.7vw, 28px);
+  --city-title-size: clamp(12px, 3.05vw, 13.2px);
+  --city-desc-size: clamp(9.6px, 2.5vw, 10.8px);
+  --city-grid-gap: clamp(6px, 1.8vw, 8px);
+}
+
+.city-menu-stack .module-card.module-card-split {
+  border: 1px solid rgba(106, 170, 244, 0.22);
+  border-radius: 14px;
+  padding: 8px 6px 6px;
+  background:
+    linear-gradient(180deg, rgba(10, 22, 45, 0.42), rgba(8, 16, 33, 0.34)),
+    radial-gradient(circle at 92% 4%, rgba(118, 182, 255, 0.12), transparent 50%);
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn {
+  min-width: 0;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn.module-btn-stack,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn.module-btn-stack {
+  grid-column: 1 / -1;
+  min-height: clamp(80px, 22vw, 92px);
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-copy,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-copy {
+  min-width: 0;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-label,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-label,
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-desc,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-desc {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.business-screen .fleet-company-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px;
+}
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 96px;
+  padding: 8px 7px;
+}
+
+.business-screen .fleet-company-meta,
+.business-screen .fleet-company-meta p,
+.business-screen .fleet-company-cta-title,
+.business-screen .fleet-company-cta-value,
+.business-screen .fleet-company-cta-meta,
+.business-screen .fleet-owned-mainline strong,
+.business-screen .fleet-owned-subline,
+.business-screen .fleet-market-copy strong,
+.business-screen .fleet-market-copy small,
+.business-screen .fleet-market-copy p {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.business-screen .fleet-company-cta-title {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.business-screen .fleet-company-cta-value {
+  font-size: clamp(10.5px, 2.9vw, 12px);
+  line-height: 1.24;
+}
+
+.business-screen .fleet-company-cta-meta {
+  font-size: 9.6px;
+  line-height: 1.25;
+}
+
+.business-screen .fleet-market-row,
+.business-screen .fleet-owned-row,
+.business-screen .fleet-compact-row {
+  grid-template-columns: minmax(0, 92px) 1fr;
+}
+
+.business-screen .fleet-market-row .fleet-compact-thumb,
+.business-screen .fleet-market-row .fleet-owned-thumb,
+.business-screen .fleet-compact-row .fleet-compact-thumb,
+.business-screen .fleet-owned-row .fleet-owned-thumb {
+  width: 92px;
+  height: 64px;
+}
+
+.mines-screen .mines-grid {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.mines-screen .mine-card {
+  border-radius: 12px;
+  padding: 8px;
+  gap: 6px;
+}
+
+.mines-screen .mine-card-hero {
+  border-radius: 10px;
+  min-height: 80px;
+}
+
+.mines-screen .mine-card-name {
+  font-size: clamp(12px, 3.3vw, 14px);
+  text-align: left;
+  line-height: 1.2;
+}
+
+.mines-screen .mine-card-hint {
+  min-height: 0;
+  font-size: clamp(10px, 2.7vw, 11px);
+  text-align: left;
+}
+
+.mines-screen .mine-card-countdown {
+  margin: 0;
+  font-size: 11px;
+  padding: 5px 8px;
+}
+
+.mines-screen .mine-card-actions .btn {
+  min-height: 40px;
+  font-size: 11px;
+}
+
+.fleet-market-lifetime::before {
+  content: '•';
+}
+
+.fleet-listing-limit-hint {
+  margin: 0;
+  color: #c9dffd;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.fleet-listing-limit-hint strong {
+  color: #f7de9b;
+  font-weight: 800;
+}
+
+.private-listings-screen .fleet-market-list > h4 {
+  margin: 6px 0 2px;
+  font-size: 14px;
+}
+
+.private-listings-screen .fleet-market-row {
+  min-height: 88px;
+}
+
+.premium-screen,
+.diamond-market-screen {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 360px) {
+  .business-screen .fleet-company-actions {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .business-screen .fleet-company-actions .fleet-company-cta {
+    min-height: 88px;
+    padding: 7px 6px;
+  }
+
+  .business-screen .fleet-market-row,
+  .business-screen .fleet-owned-row,
+  .business-screen .fleet-compact-row,
+  .business-screen .fleet-owned-row.fleet-owned-row-modal {
+    grid-template-columns: minmax(0, 84px) 1fr;
+  }
+
+  .business-screen .fleet-market-row .fleet-compact-thumb,
+  .business-screen .fleet-market-row .fleet-owned-thumb,
+  .business-screen .fleet-compact-row .fleet-compact-thumb,
+  .business-screen .fleet-owned-row .fleet-owned-thumb {
+    width: 84px;
+    height: 58px;
+    margin-inline: 0;
+  }
+}

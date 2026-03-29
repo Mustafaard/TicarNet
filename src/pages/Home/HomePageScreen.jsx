@@ -2818,7 +2818,6 @@ function HomePage({ user, onLogout }) {
   const selfRoleLabel = roleLabelFromValue(role, user?.roleLabel || '')
   const leaderboardMetricSafe = 'season'
   const [leaderboardPage, setLeaderboardPage] = useState(1)
-  const [leaderboardTick, setLeaderboardTick] = useState(0)
   const [leaderboardSearchOpen, setLeaderboardSearchOpen] = useState(false)
   const [leaderboardSearchQuery, setLeaderboardSearchQuery] = useState('')
   const [leaderboardSearchError, setLeaderboardSearchError] = useState('')
@@ -5201,6 +5200,12 @@ function HomePage({ user, onLogout }) {
 
   const confirmListingModal = async () => {
     if (busy || !listingDraft) return
+    const listingLimit = Math.max(1, Math.trunc(num(market?.sellListingsLimit ?? 8)))
+    const listingUsed = Math.max(0, Math.trunc(num(market?.sellListingsUsedToday ?? 0)))
+    if (listingUsed >= listingLimit) {
+      setError('İlan limitine ulaştın. Limit Türkiye saatine göre her 12 saatte bir yenilenir.')
+      return
+    }
     const minPrice = Math.max(1, Math.trunc(num(listingDraft.minPrice || 1)))
     const maxPrice = Math.max(minPrice + 1, Math.trunc(num(listingDraft.maxPrice || minPrice + 1)))
     const rawPrice = Math.max(0, Math.trunc(num(String(listingDraft.price || '').replace(/[^\d]/g, ''))))
@@ -8729,50 +8734,6 @@ function HomePage({ user, onLogout }) {
     )
   }, [leagueSeasonPrizes.openedChests])
   useEffect(() => {
-    if (tab !== 'profile' || profileTab !== 'leaderboard') return undefined
-    const id = window.setInterval(() => setLeaderboardTick((t) => (t + 1) % 1_000_000), 1000)
-    return () => window.clearInterval(id)
-  }, [tab, profileTab])
-
-  const leaderboardSeasonReset = useMemo(() => {
-    void leaderboardTick
-    const tz = 'Europe/Istanbul'
-    const fmtParts = (d) => {
-      const parts = new Intl.DateTimeFormat('tr-TR', {
-        timeZone: tz,
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hourCycle: 'h23',
-      }).formatToParts(d)
-      const get = (type) => parts.find((p) => p.type === type)?.value
-      return {
-        year: Number(get('year') || 0),
-        month: Number(get('month') || 1),
-        day: Number(get('day') || 1),
-        hour: Number(get('hour') || 0),
-        minute: Number(get('minute') || 0),
-        second: Number(get('second') || 0),
-      }
-    }
-    const nowParts = fmtParts(new Date())
-    const nowPseudo = Date.UTC(nowParts.year, nowParts.month - 1, nowParts.day, nowParts.hour, nowParts.minute, nowParts.second)
-    const nextMonthYear = nowParts.month === 12 ? nowParts.year + 1 : nowParts.year
-    const nextMonth = nowParts.month === 12 ? 1 : nowParts.month + 1
-    const targetPseudo = Date.UTC(nextMonthYear, nextMonth - 1, 1, 0, 0, 0)
-    const diffMs = Math.max(0, targetPseudo - nowPseudo)
-    const totalSeconds = Math.floor(diffMs / 1000)
-    const days = Math.floor(totalSeconds / 86400)
-    const hours = Math.floor((totalSeconds % 86400) / 3600)
-    const minutes = Math.floor((totalSeconds % 3600) / 60)
-    const seconds = totalSeconds % 60
-    return { days, hours, minutes, seconds }
-  }, [leaderboardTick])
-
-  useEffect(() => {
     setLeaderboardPage(1)
   }, [leaderboardMetricSafe])
 
@@ -10316,7 +10277,7 @@ function HomePage({ user, onLogout }) {
                 Toplam: <strong><NakitLabel value={(() => { const q = Math.max(0, Math.min(marketplaceMaxQty, Math.trunc(num(sellForm.quantity)) || 0)); const p = Math.max(0, Math.trunc(num(sellForm.unitPrice) || 0)); return q * p; })()} /></strong>
               </div>
               <p className="marketplace-sell-form-tax">
-                Uyari: Ilan eslesince yuzde 10 vergi kesilir. Ilan, Ilanlarim sekmesinden kaldirilabilir.
+                Uyarı: İlan eşleşince yüzde 10 vergi kesilir. İlan, İlanlarım sekmesinden kaldırılabilir.
               </p>
               <button
                 type="button"
@@ -11294,7 +11255,7 @@ function HomePage({ user, onLogout }) {
             </span>
           </button>
           <button
-            className="module-btn module-btn-business"
+            className="module-btn module-btn-business module-btn-stack"
             onClick={() => void openTab('missions', { tab: 'missions' })}
             disabled={Boolean(busy)}
           >
@@ -11370,7 +11331,7 @@ function HomePage({ user, onLogout }) {
             </span>
           </button>
           <button
-            className="module-btn module-btn-marketplace module-btn-bank"
+            className="module-btn module-btn-marketplace module-btn-bank module-btn-stack"
             onClick={() => void openTab('bank', { tab: 'bank' })}
             disabled={Boolean(busy)}
           >
@@ -11433,7 +11394,7 @@ function HomePage({ user, onLogout }) {
             </span>
           </button>
           <button
-            className="module-btn module-btn-events"
+            className="module-btn module-btn-events module-btn-stack"
             onClick={() => void openTab('events', { tab: 'events' })}
             disabled={Boolean(busy)}
           >
@@ -14361,6 +14322,20 @@ function HomePage({ user, onLogout }) {
                 </select>
               ) : null}
             </label>
+            {(() => {
+              const sellLimit = Math.max(1, Math.trunc(num(market?.sellListingsLimit ?? 8)))
+              const sellUsed = Math.max(0, Math.trunc(num(market?.sellListingsUsedToday ?? 0)))
+              const sellRemaining = Math.max(0, sellLimit - sellUsed)
+              const visibilityLabel = String(listingDraft?.visibility || 'public').toLowerCase() === 'custom'
+                ? 'Özel ilan'
+                : 'Genel ilan'
+              return (
+                <p className="fleet-listing-limit-hint">
+                  {visibilityLabel} limiti: <strong>{fmt(sellRemaining)}/{fmt(sellLimit)}</strong>
+                  {sellRemaining <= 0 ? ' (limit dolu)' : ''}
+                </p>
+              )
+            })()}
             <label className="fleet-listing-price-field">
               <span>Satış fiyatı</span>
               <input
@@ -14379,6 +14354,7 @@ function HomePage({ user, onLogout }) {
               onClick={() => void confirmListingModal()}
               disabled={
                 Boolean(busy) ||
+                ((market?.sellListingsUsedToday ?? 0) >= (market?.sellListingsLimit ?? 8)) ||
                 (String(listingDraft?.visibility || 'public').trim().toLowerCase() === 'custom' &&
                   (!String(listingDraft?.recipientUserId || '').trim() || listingFriendsLoading))
               }
@@ -14387,7 +14363,9 @@ function HomePage({ user, onLogout }) {
                 ? `listlog:${listingDraft.truckId}`
                 : `listbiz:${listingDraft.businessId}:${listingDraft.vehicleId}`)
                 ? 'İlana ekleniyor...'
-                : 'Satışa Koy'}
+                : ((market?.sellListingsUsedToday ?? 0) >= (market?.sellListingsLimit ?? 8))
+                  ? 'İlan Limiti Dolu'
+                  : 'Satışa Koy'}
             </button>
             <button className="btn btn-danger fleet-modal-close fleet-modal-cta-back" onClick={() => setBusinessModal('vehicle-actions')}>Kapat</button>
           </article>
@@ -16994,30 +16972,6 @@ function HomePage({ user, onLogout }) {
                 Oyuncu Ara
               </button>
             </div>
-          </div>
-
-          <div className="leaderboard-hero-row">
-            <section className="leaderboard-countdown-card" aria-label="Aylık sezon bitimine kalan">
-              <p className="leaderboard-countdown-title">AYLIK SEZON BİTİMİNE KALAN</p>
-              <p className="leaderboard-countdown-sub">Ayın 1'i 00:00 (TR) sıfırlanır</p>
-              <div className="leaderboard-countdown-grid">
-                <div className="leaderboard-countdown-slot"><strong>{String(leaderboardSeasonReset.days).padStart(2, '0')}</strong><span>GÜN</span></div>
-                <div className="leaderboard-countdown-slot"><strong>{String(leaderboardSeasonReset.hours).padStart(2, '0')}</strong><span>SAAT</span></div>
-                <div className="leaderboard-countdown-slot"><strong>{String(leaderboardSeasonReset.minutes).padStart(2, '0')}</strong><span>DAKİKA</span></div>
-                <div className="leaderboard-countdown-slot"><strong>{String(leaderboardSeasonReset.seconds).padStart(2, '0')}</strong><span>SANİYE</span></div>
-              </div>
-            </section>
-
-            <button
-              type="button"
-              className="leaderboard-rewards-btn"
-              onClick={async () => {
-                await _loadLeague().catch(() => {})
-                setSeasonRewardsOpen(true)
-              }}
-            >
-              🎁 Ödüller
-            </button>
           </div>
 
           {leaderboardRowsResolved.length ? (
