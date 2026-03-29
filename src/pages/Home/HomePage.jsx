@@ -2700,7 +2700,9 @@ function HomePage({ user, onLogout }) {
   const [businessModal, setBusinessModal] = useState('')
   const [factoryPurchaseModalId, setFactoryPurchaseModalId] = useState('')
   const [factoryBulkModalOpen, setFactoryBulkModalOpen] = useState(false)
+  const [factoryBulkModalError, setFactoryBulkModalError] = useState('')
   const [factoryCollectModalId, setFactoryCollectModalId] = useState('')
+  const [factoryCollectModalError, setFactoryCollectModalError] = useState('')
   const [factoryUpgradeModalId, setFactoryUpgradeModalId] = useState('')
   const [listingDraft, setListingDraft] = useState(null)
   const [listingFriends, setListingFriends] = useState([])
@@ -4509,39 +4511,70 @@ function HomePage({ user, onLogout }) {
     await Promise.all([loadOverview(), loadFactories(), loadProfile(), loadMarket()])
   }
 
-  const collectFactoryAction = async (factoryId) => {
-    if (busy) return
+  const collectFactoryAction = async (factoryId, options = {}) => {
+    if (busy) return { success: false, reason: 'busy' }
+    const silent = options?.silent === true
     const safeFactoryId = String(factoryId || '').trim()
-    if (!safeFactoryId) return
+    if (!safeFactoryId) return { success: false, reason: 'validation' }
     setBusy(`factory-collect:${safeFactoryId}`)
     const response = await collectFactory(safeFactoryId)
     setBusy('')
-    if (!response?.success) return fail(response, 'Fabrika tahsilatı yapılamadı.')
+    if (!response?.success) {
+      if (!silent) {
+        fail(response, 'Fabrika tahsilatı yapılamadı.')
+      }
+      return { success: false, response }
+    }
     setNotice(response.message || 'Fabrika tahsilatı tamamlandı.')
     await Promise.all([loadFactories(), loadProfile(), loadOverview(), loadMarket()])
+    return { success: true, response }
   }
 
-  const collectFactoriesBulkAction = async () => {
-    if (busy) return
+  const collectFactoriesBulkAction = async (options = {}) => {
+    if (busy) return { success: false, reason: 'busy' }
+    const silent = options?.silent === true
     setBusy('factory-collect-bulk')
     const response = await collectFactoriesBulk()
     setBusy('')
-    if (!response?.success) return fail(response, 'Fabrikalar için toplu tahsilat yapılamadı.')
+    if (!response?.success) {
+      if (!silent) {
+        fail(response, 'Fabrikalar için toplu tahsilat yapılamadı.')
+      }
+      return { success: false, response }
+    }
     const collectedCount = Math.max(0, Math.trunc(num(response?.collected?.count || 0)))
     setNotice(response.message || `Fabrika toplu tahsilat tamamlandı (${fmt(collectedCount)}).`)
     await Promise.all([loadFactories(), loadProfile(), loadOverview(), loadMarket()])
+    return { success: true, response }
   }
 
-  const confirmFactoryBulkCollectFromModal = () => {
+  const confirmFactoryBulkCollectFromModal = async () => {
+    if (busy) return
+    setFactoryBulkModalError('')
+    const result = await collectFactoriesBulkAction({ silent: true })
+    if (!result?.success) {
+      const message = errText(result?.response?.errors, 'Fabrikalar için toplu tahsilat yapılamadı.')
+      setFactoryBulkModalError(message)
+      setError(message)
+      return
+    }
     setFactoryBulkModalOpen(false)
-    void collectFactoriesBulkAction()
+    setFactoryBulkModalError('')
   }
 
   const confirmFactoryCollectFromModal = async () => {
     const id = String(factoryCollectModalId || '').trim()
     if (!id || busy) return
+    setFactoryCollectModalError('')
+    const result = await collectFactoryAction(id, { silent: true })
+    if (!result?.success) {
+      const message = errText(result?.response?.errors, 'Fabrika tahsilatı yapılamadı.')
+      setFactoryCollectModalError(message)
+      setError(message)
+      return
+    }
     setFactoryCollectModalId('')
-    await collectFactoryAction(id)
+    setFactoryCollectModalError('')
   }
 
   const confirmFactoryUpgradeFromModal = async () => {
@@ -4622,6 +4655,28 @@ function HomePage({ user, onLogout }) {
     const safeFactoryId = String(factoryId || '').trim()
     if (!safeFactoryId) return
     setFactoryPurchaseModalId(safeFactoryId)
+  }
+
+  const openFactoryBulkCollectModal = () => {
+    setFactoryBulkModalError('')
+    setFactoryBulkModalOpen(true)
+  }
+
+  const closeFactoryBulkCollectModal = () => {
+    setFactoryBulkModalOpen(false)
+    setFactoryBulkModalError('')
+  }
+
+  const openFactoryCollectModal = (factoryId) => {
+    const safeFactoryId = String(factoryId || '').trim()
+    if (!safeFactoryId) return
+    setFactoryCollectModalError('')
+    setFactoryCollectModalId(safeFactoryId)
+  }
+
+  const closeFactoryCollectModal = () => {
+    setFactoryCollectModalId('')
+    setFactoryCollectModalError('')
   }
 
   const closeFactoryPurchaseModal = () => {
@@ -8086,6 +8141,9 @@ function HomePage({ user, onLogout }) {
 
   const factoriesOwnedCount = factoryRows.filter((entry) => entry.owned).length
   const factoriesReadyCount = factoryRows.filter((entry) => entry.canCollectNow).length
+  const factoriesEnergyBlockedCount = factoryRows.filter(
+    (entry) => entry.owned && !entry.isBuilding && !entry.isUpgrading && entry.collectRemainingMs <= 0 && entry.collectEnergyMissing > 0,
+  ).length
   const factoriesUpgradingCount = factoryRows.filter((entry) => entry.isUpgrading).length
   const factoryBulkPreview = useMemo(() => {
     const ready = factoryRows.filter((entry) => entry.canCollectNow)
@@ -8131,6 +8189,14 @@ function HomePage({ user, onLogout }) {
   const factoryPurchaseModalMissingRows = factoryPurchaseModalRows.filter((row) => row.missing > 0)
   const factoryPurchaseBusyKey = factoryPurchaseModal ? `factory-buy:${factoryPurchaseModal.id}` : ''
   const factoryCollectModal = factoryRows.find((f) => String(f?.id || '') === String(factoryCollectModalId || '').trim()) || null
+  const factoryCollectModalBusyKey = factoryCollectModal ? `factory-collect:${factoryCollectModal.id}` : ''
+  const factoryCollectModalBlockedReason = factoryCollectModal
+    ? (factoryCollectModal.collectRemainingMs > 0
+      ? `Tahsilat henüz hazır değil. Kalan süre: ${formatCollectionCountdown(factoryCollectModal.collectRemainingMs)}`
+      : factoryCollectModal.collectEnergyMissing > 0
+        ? `${factoryCollectModal.energyMeta?.label || 'Enerji'} yetersiz. Eksik: ${fmt(factoryCollectModal.collectEnergyMissing)}`
+        : '')
+    : ''
   const factoryUpgradeModal = factoryRows.find((f) => String(f?.id || '') === String(factoryUpgradeModalId || '').trim()) || null
   const factoryUpgradeModalBlockedBySlot = Boolean(
     factoryUpgradeModal &&
@@ -9827,6 +9893,22 @@ function HomePage({ user, onLogout }) {
                 for (const item of items) {
                   const meta = tradeableDepotItems.find((t) => t.id === item.id)
                   const ordersForItem = sellOrders.filter((o) => o.itemId === item.id)
+                  if (!ordersForItem.length) {
+                    rows.push({
+                      type: 'market',
+                      key: `system-fallback:${item.id}`,
+                      orderId: '',
+                      itemId: item.id,
+                      itemName: item.name || meta?.label || item.id,
+                      price: Math.max(1, Math.trunc(num(item?.price || item?.buyPrice || 0))),
+                      stock: Math.max(0, Math.trunc(num(item?.stock || 0))),
+                      sellerName: 'Sistem Pazarı',
+                      sellerUserId: '',
+                      isSystem: true,
+                      icon: meta?.png,
+                    })
+                    continue
+                  }
                   for (const o of ordersForItem) {
                     const isSystemOrder = Boolean(o?.isSystem) || String(o?.source || '').trim().toLowerCase() === 'system'
                     rows.push({
@@ -11902,7 +11984,7 @@ function HomePage({ user, onLogout }) {
           <button
             type="button"
             className="btn btn-primary factory-hub-collect-btn"
-            onClick={() => factoriesReadyCount > 0 && setFactoryBulkModalOpen(true)}
+            onClick={() => factoriesReadyCount > 0 && openFactoryBulkCollectModal()}
             disabled={Boolean(busy) || factoriesReadyCount <= 0}
           >
             {factoriesReadyCount > 0
@@ -11984,7 +12066,7 @@ function HomePage({ user, onLogout }) {
                     <button
                       type="button"
                       className="btn btn-primary factory-action-btn factory-buy-btn"
-                      onClick={() => factory.canCollectNow && setFactoryCollectModalId(factory.id)}
+                      onClick={() => factory.canCollectNow && openFactoryCollectModal(factory.id)}
                       disabled={Boolean(busy) || !factory.canCollectNow}
                     >
                       {busy === busyCollectKey ? 'Tahsilat...' : factory.canCollectNow ? 'Tahsilat Yap' : 'Bekle'}
@@ -12139,11 +12221,19 @@ function HomePage({ user, onLogout }) {
         )}
 
         {factoryBulkModalOpen && createPortal(
-          <section className="warehouse-overlay" onClick={() => setFactoryBulkModalOpen(false)}>
-            <article className="warehouse-modal fleet-modal fleet-bulk-modal" onClick={(e) => e.stopPropagation()}>
+          <section className="warehouse-overlay" onClick={closeFactoryBulkCollectModal}>
+            <article className="warehouse-modal fleet-modal fleet-bulk-modal factory-bulk-modal" onClick={(e) => e.stopPropagation()}>
               <h3>Fabrika Toplu Tahsilat</h3>
               <p className="fleet-bulk-intro">Tahsilat süresi dolan fabrikalardan üretim kaynağı ve XP toplayabilirsin.</p>
               <p className="fleet-bulk-note">Bu ekranda toplanacak kaynaklar, deneyim ve enerji maliyeti görünür.</p>
+              {factoriesEnergyBlockedCount > 0 ? (
+                <p className="factory-modal-note">
+                  Enerji yetersizliği nedeniyle {fmt(factoriesEnergyBlockedCount)} fabrikada tahsilat beklemede.
+                </p>
+              ) : null}
+              {factoryBulkModalError ? (
+                <p className="factory-modal-error" role="alert">{factoryBulkModalError}</p>
+              ) : null}
               <section className="fleet-bulk-kpis" aria-label="Toplu tahsilat özeti">
                 <article className="fleet-bulk-kpi">
                   <span>Hazır Fabrika</span>
@@ -12197,28 +12287,38 @@ function HomePage({ user, onLogout }) {
                   ) : null
                 })}
               </article>
-              <button type="button" className="btn btn-danger fleet-modal-close" onClick={() => setFactoryBulkModalOpen(false)}>Kapat</button>
+              <button type="button" className="btn btn-danger fleet-modal-close" onClick={closeFactoryBulkCollectModal}>Kapat</button>
             </article>
           </section>,
           document.body
         )}
 
         {factoryCollectModal && createPortal(
-          <section className="warehouse-overlay" onClick={() => setFactoryCollectModalId('')}>
-            <article className="warehouse-modal fleet-modal fleet-accountant-modal" onClick={(e) => e.stopPropagation()}>
+          <section className="warehouse-overlay" onClick={closeFactoryCollectModal}>
+            <article className="warehouse-modal fleet-modal fleet-accountant-modal factory-collect-modal" onClick={(e) => e.stopPropagation()}>
               <h3 className="fleet-accountant-title">Muhasebeci</h3>
               <p className="fleet-accountant-subtitle">{factoryCollectModal.name} için tahsilat özeti hazır.</p>
+              {factoryCollectModalBlockedReason ? (
+                <p className="factory-modal-note">{factoryCollectModalBlockedReason}</p>
+              ) : null}
+              {factoryCollectModalError ? (
+                <p className="factory-modal-error" role="alert">{factoryCollectModalError}</p>
+              ) : null}
               <div className="fleet-accountant-cta-card">
                 <button
                   className="btn btn-success full btn-collect-inline"
                   onClick={() => void confirmFactoryCollectFromModal()}
-                  disabled={Boolean(busy)}
+                  disabled={Boolean(busy) || !factoryCollectModal.canCollectNow}
                 >
                   <span className="btn-icon">
                     <img src={premiumActive && factoryBulkPreview.is2x ? '/home/icons/depot/diamond.webp' : factoryCollectModal.outputMeta?.icon || '/home/icons/depot/cash.webp'} alt="" aria-hidden="true" />
                   </span>
                   <span className="btn-label">
-                    {busy === `factory-collect:${factoryCollectModal.id}` ? 'Kasaya aktarılıyor...' : `Tahsilatı Topla (+${fmt(factoryCollectModal.outputPerCollect || 0)} ${factoryCollectModal.outputMeta?.label || ''})`}
+                    {busy === factoryCollectModalBusyKey
+                      ? 'Kasaya aktarılıyor...'
+                      : !factoryCollectModal.canCollectNow
+                        ? 'Tahsilat Hazır Değil'
+                        : `Tahsilatı Topla (+${fmt(factoryCollectModal.outputPerCollect || 0)} ${factoryCollectModal.outputMeta?.label || ''})`}
                   </span>
                 </button>
               </div>
@@ -12240,7 +12340,7 @@ function HomePage({ user, onLogout }) {
                 <small className="fleet-accountant-footnote">Depodaki {factoryCollectModal.energyMeta?.label}: {fmt(inventoryById[factoryCollectModal.energyItemId] || 0)}</small>
               </article>
               <div className="fleet-accountant-footer">
-                <button type="button" className="btn btn-danger fleet-modal-close fleet-accountant-close" onClick={() => setFactoryCollectModalId('')}>Kapat</button>
+                <button type="button" className="btn btn-danger fleet-modal-close fleet-accountant-close" onClick={closeFactoryCollectModal}>Kapat</button>
               </div>
             </article>
           </section>,
@@ -14892,8 +14992,8 @@ function HomePage({ user, onLogout }) {
         avatarUrl,
         createdAt,
         createdAtMs: safeCreatedAtMs,
-        title: "Yeni bir oyuncu AEA'ya katıldı!",
-        subtitle: `Yeni katılan oyuncunun adı ${username.toLocaleUpperCase('tr-TR')}`,
+        title: "TicarNet'e yeni oyuncu katıldı! 👋",
+        subtitle: 'Bakmak için dokun.',
         timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
         dateLabel: formatDateTime(createdAt),
       }
@@ -15150,8 +15250,9 @@ function HomePage({ user, onLogout }) {
                 chatNewsFeed.map((entry) => (
                   <article key={entry.id} className="chat-news-item chat-news-row">
                     <p className="chat-news-title chat-news-row-title">{entry.title}</p>
-                    <p className="chat-news-text chat-news-row-subtitle">
-                      Yeni katılan oyuncu:{' '}
+                    <p className="chat-news-text chat-news-row-subtitle">{entry.subtitle}</p>
+                    <p className="chat-news-text chat-news-row-player">
+                      Oyuncu:{' '}
                       {entry.userId ? (
                         <button
                           type="button"
