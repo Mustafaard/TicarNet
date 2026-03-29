@@ -370,6 +370,40 @@ const SEASON_CHESTS_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/sandiklarim.webp
 const SEASON_CHESTS_MENU_ICON_FALLBACK_SRC = '/home/icons/leaderboard/chest-gold.webp'
 const RULES_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/kurallarim.webp'
 const RULES_MENU_ICON_FALLBACK_SRC = '/home/icons/v2/nav-uyari.png'
+const HOME_CRITICAL_ASSET_SOURCES = [
+  '/home/backgrounds/game-main-bg.webp',
+  '/home/icons/depot/premium.webp',
+  '/home/icons/liderlik.webp',
+  '/home/icons/sehir.webp',
+  '/home/icons/mesajlar.webp',
+  '/home/icons/sohbet.png',
+  '/home/icons/depom.webp',
+  '/home/icons/isletmeler.webp',
+  '/home/icons/businesses/fabrikam.webp',
+  '/home/icons/madenler.webp',
+  '/home/icons/pazaryeri.webp',
+  '/home/icons/ozel-ilanlar.png',
+  '/home/icons/ayarlar.webp',
+  '/home/icons/depot/cash.webp',
+  '/home/icons/depot/diamond.webp',
+  '/home/icons/depot/cash.png',
+  '/home/ui/hud/level-icon.webp',
+  '/home/ui/hud/level-icon.png',
+  FOREX_MENU_ICON_PRIMARY_SRC,
+  FOREX_MENU_ICON_FALLBACK_SRC,
+  BANK_MENU_ICON_PRIMARY_SRC,
+  BANK_MENU_ICON_FALLBACK_SRC,
+  EVENTS_MENU_ICON_PRIMARY_SRC,
+  EVENTS_MENU_ICON_FALLBACK_SRC,
+  ANNOUNCEMENTS_MENU_ICON_PRIMARY_SRC,
+  ANNOUNCEMENTS_MENU_ICON_FALLBACK_SRC,
+  DIAMOND_MARKET_MENU_ICON_PRIMARY_SRC,
+  DIAMOND_MARKET_MENU_ICON_FALLBACK_SRC,
+  SEASON_CHESTS_MENU_ICON_PRIMARY_SRC,
+  SEASON_CHESTS_MENU_ICON_FALLBACK_SRC,
+  RULES_MENU_ICON_PRIMARY_SRC,
+  RULES_MENU_ICON_FALLBACK_SRC,
+]
 const ANNOUNCEMENT_TYPE_ANNOUNCEMENT = 'announcement'
 const ANNOUNCEMENT_TYPE_UPDATE = 'update'
 const TUTORIAL_PENDING_KEY = 'ticarnet_tutorial_pending'
@@ -850,8 +884,11 @@ const factoryItemMeta = (itemId) => {
 const normalizeMineLabel = (value) => String(value || '')
   .trim()
   .replace(/AltÄ±n/gi, 'Altın')
+  .replace(/AltÃ„Â±n/gi, 'Altın')
   .replace(/BakÄ±r/gi, 'Bakır')
+  .replace(/BakÃ„Â±r/gi, 'Bakır')
   .replace(/KÃ¶mÃ¼r/gi, 'Kömür')
+  .replace(/KÃƒÂ¶mÃƒÂ¼r/gi, 'Kömür')
   .replace(/\bAltin\b/gi, 'Altın')
   .replace(/\bBakir\b/gi, 'Bakır')
   .replace(/\bKomur\b/gi, 'Kömür')
@@ -2755,6 +2792,23 @@ function resolveMobileViewportWidth() {
   return Math.min(MOBILE_LAYOUT_MAX_WIDTH, Math.max(320, viewportWidth))
 }
 
+function preloadCriticalAssets(sources) {
+  if (typeof window === 'undefined' || typeof Image === 'undefined') return () => {}
+  const uniqueSources = Array.from(new Set((Array.isArray(sources) ? sources : [])
+    .map((entry) => String(entry || '').trim())
+    .filter(Boolean)))
+  const buffered = []
+  for (const src of uniqueSources) {
+    const image = new Image()
+    image.decoding = 'async'
+    image.src = src
+    buffered.push(image)
+  }
+  return () => {
+    buffered.length = 0
+  }
+}
+
 function HomePage({ user, onLogout }) {
   const [tab, setTab] = useState('home')
   const [marketTab, setMarketTab] = useState('buy')
@@ -2822,6 +2876,8 @@ function HomePage({ user, onLogout }) {
   const [listingFriendsLoading, setListingFriendsLoading] = useState(false)
   const [marketDetailDraft, setMarketDetailDraft] = useState(null)
   const [marketPurchaseResult, setMarketPurchaseResult] = useState(null)
+
+  useEffect(() => preloadCriticalAssets(HOME_CRITICAL_ASSET_SOURCES), [])
 
   useEffect(() => {
     if (!listingDraft || String(listingDraft.visibility || 'public').trim().toLowerCase() !== 'custom') return
@@ -18429,6 +18485,9 @@ function HomePage({ user, onLogout }) {
                     className={avatarIsGif ? 'is-gif' : ''}
                     src={avatarDisplaySrc}
                     alt={name}
+                    loading="eager"
+                    decoding="async"
+                    fetchPriority="high"
                     onError={() => {
                       if (avatarSrc !== DEFAULT_CHAT_AVATAR) setAvatarFailedSrc(avatarSrc)
                     }}

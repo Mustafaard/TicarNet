@@ -27537,3 +27537,323 @@ select {
     min-height: 82px;
   }
 }
+
+/* Final mobile density + two-column normalization */
+.home-page {
+  --city-card-min-height: clamp(84px, 23.5vw, 96px);
+  --city-icon-wrap-size: clamp(42px, 11vw, 46px);
+  --city-icon-size: clamp(28px, 7.2vw, 31px);
+  --city-title-size: clamp(12.4px, 3.25vw, 13.8px);
+  --city-desc-size: clamp(9.8px, 2.6vw, 11px);
+  --city-grid-gap: clamp(6px, 1.9vw, 8px);
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+}
+
+.home-page::before {
+  background:
+    linear-gradient(180deg, rgba(7, 21, 57, 0.24), rgba(4, 11, 34, 0.44)),
+    radial-gradient(circle at 6% 14%, rgba(120, 179, 255, 0.15), transparent 40%),
+    radial-gradient(circle at 94% 86%, rgba(120, 179, 255, 0.12), transparent 39%);
+}
+
+.city-menu-stack,
+.city-menu-stack .module-card,
+.city-menu-stack .module-grid,
+.city-menu-stack .module-grid.city-module-grid-single {
+  background: transparent !important;
+}
+
+.city-menu-stack .menu-section-title {
+  font-size: clamp(11px, 2.8vw, 12.2px);
+  letter-spacing: 0.09em;
+  gap: 6px;
+}
+
+.city-menu-stack .menu-section-title::before {
+  width: 8px;
+  height: 8px;
+}
+
+.city-menu-stack .module-grid.city-module-grid,
+.city-menu-stack .module-grid.city-module-grid-single {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--city-grid-gap);
+  margin-top: 6px;
+}
+
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn {
+  grid-column: 1;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn {
+  min-height: var(--city-card-min-height);
+  border-radius: 14px;
+  padding: 9px 8px;
+  grid-template-columns: var(--city-icon-wrap-size) minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-icon,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-icon {
+  width: var(--city-icon-wrap-size);
+  height: var(--city-icon-wrap-size);
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-icon img,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-icon img {
+  width: var(--city-icon-size);
+  height: var(--city-icon-size);
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-copy,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-copy {
+  gap: 2px;
+  min-height: 0;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-label,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-label {
+  font-size: var(--city-title-size);
+  line-height: 1.14;
+  -webkit-line-clamp: 2;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-desc,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-desc {
+  font-size: var(--city-desc-size);
+  line-height: 1.2;
+  -webkit-line-clamp: 2;
+}
+
+.city-menu-stack .module-grid.city-module-grid > .module-btn .module-desc.module-desc-sub,
+.city-menu-stack .module-grid.city-module-grid-single > .module-btn .module-desc.module-desc-sub {
+  -webkit-line-clamp: 1;
+}
+
+.missions-grid-pro {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mission-card-pro {
+  border-radius: 12px;
+  padding: 8px;
+  gap: 7px;
+}
+
+.mission-card-title {
+  font-size: 12.6px;
+}
+
+.mission-card-desc,
+.mission-progress-meta,
+.mission-reward-amount,
+.mission-money-pill > span {
+  font-size: 11px;
+}
+
+.mission-status-chip,
+.mission-slot-timer {
+  font-size: 9.4px;
+  padding: 3px 7px;
+}
+
+.mission-claim-btn {
+  width: 100%;
+  min-width: 0;
+  min-height: 34px;
+  font-size: 11px;
+}
+
+.weekly-events-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.weekly-event-day-card,
+.weekly-event-range-card {
+  padding: 8px;
+  gap: 6px;
+}
+
+.premium-daily-grid,
+.premium-plan-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.premium-daily-offer,
+.premium-plan {
+  min-height: 0;
+  border-radius: 11px;
+  padding: 8px;
+}
+
+.premium-daily-main strong,
+.premium-plan-head strong {
+  font-size: 12.5px;
+}
+
+.premium-daily-main p,
+.premium-plan-copy,
+.premium-daily-reset {
+  font-size: 10.4px;
+}
+
+.premium-daily-price,
+.premium-plan-price {
+  font-size: 14px;
+  gap: 6px;
+}
+
+.premium-daily-title img,
+.premium-daily-price img,
+.premium-plan-price img {
+  width: 24px;
+  height: 24px;
+}
+
+.premium-gold-btn,
+.premium-daily-offer .btn.full,
+.premium-plan .btn.full {
+  min-height: 30px;
+  font-size: 10.5px;
+}
+
+.business-screen .fleet-fullscreen-card,
+.factory-screen .factory-hub-card,
+.factory-screen .factory-section,
+.factory-screen .factory-card,
+.marketplace-panel,
+.bank-panel,
+.settings-screen-card,
+.message-gold-card,
+.leaderboard-card-modern {
+  padding: 10px !important;
+  border-radius: 14px;
+}
+
+.business-screen .fleet-company-actions,
+.factory-screen .factory-grid.factory-grid-owned,
+.factory-screen .factory-grid.factory-grid-shop,
+.bank-screen .bank-stats-grid,
+.bank-screen .bank-preview-grid,
+.bank-screen .bank-term-live-grid,
+.bank-screen .bank-history-grid,
+.bank-screen .bank-term-actions {
+  gap: 8px;
+}
+
+.business-screen .fleet-company-actions,
+.factory-screen .factory-grid.factory-grid-owned,
+.factory-screen .factory-grid.factory-grid-shop,
+.bank-screen .bank-term-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+}
+
+.marketplace-buy-list-clean,
+.marketplace-listings-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.marketplace-buy-card-clean,
+.marketplace-listing-card {
+  min-height: 92px;
+  padding: 9px;
+}
+
+.marketplace-buy-card-clean-name,
+.marketplace-listing-name {
+  font-size: 13px;
+}
+
+.marketplace-buy-card-clean-stock,
+.marketplace-listing-date,
+.marketplace-listing-price-label,
+.marketplace-buy-card-warning,
+.marketplace-buy-card-hint {
+  font-size: 10.2px;
+}
+
+.leaderboard-row-modern {
+  padding: 8px 9px;
+  min-height: 66px;
+}
+
+.leaderboard-row-avatar {
+  width: 30px;
+  height: 30px;
+}
+
+.leaderboard-username {
+  font-size: 12px;
+}
+
+.leaderboard-row-score {
+  font-size: 14px;
+}
+
+.message-sohbet-body {
+  padding: 10px;
+}
+
+.message-sohbet-form {
+  padding: 7px 8px calc(10px + env(safe-area-inset-bottom, 0px));
+}
+
+.message-sohbet-input,
+.message-sohbet-send {
+  min-height: 40px;
+}
+
+@media (max-width: 390px) {
+  .city-menu-stack .module-grid.city-module-grid,
+  .city-menu-stack .module-grid.city-module-grid-single {
+    gap: 6px;
+  }
+
+  .city-menu-stack .module-grid.city-module-grid > .module-btn,
+  .city-menu-stack .module-grid.city-module-grid-single > .module-btn {
+    min-height: 82px;
+    padding: 8px 7px;
+    gap: 7px;
+  }
+
+  .missions-grid-pro,
+  .weekly-events-grid,
+  .premium-daily-grid,
+  .premium-plan-grid {
+    gap: 6px;
+  }
+
+  .mission-card-pro,
+  .weekly-event-day-card,
+  .weekly-event-range-card,
+  .premium-daily-offer,
+  .premium-plan {
+    padding: 7px;
+  }
+
+  .marketplace-buy-card-clean,
+  .marketplace-listing-card {
+    padding: 8px;
+    min-height: 88px;
+  }
+}
+
+@media (max-width: 360px) {
+  .marketplace-buy-list-clean,
+  .marketplace-listings-list,
+  .business-screen .fleet-company-actions,
+  .factory-screen .factory-grid.factory-grid-owned,
+  .factory-screen .factory-grid.factory-grid-shop,
+  .bank-screen .bank-term-actions {
+    grid-template-columns: 1fr !important;
+  }
+}

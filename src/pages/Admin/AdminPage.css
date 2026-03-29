@@ -600,3 +600,67 @@
     width: 100%;
   }
 }
+
+/* Mobile-first compact pass for admin + moderator */
+.admin-page {
+  --admin-touch-target: 40px;
+}
+
+.admin-card {
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.admin-card h2 {
+  font-size: 0.96rem;
+}
+
+.admin-header h1 {
+  font-size: 1.34rem;
+}
+
+.admin-header p,
+.admin-meta,
+.admin-inline-note,
+.admin-announcement-body,
+.admin-user-main p,
+.admin-log-meta-item strong {
+  font-size: 0.8rem;
+}
+
+.admin-economy-grid,
+.admin-user-grid,
+.admin-log-grid,
+.admin-resource-chip-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.admin-page button {
+  min-height: var(--admin-touch-target);
+  padding: 8px 10px;
+  font-size: 0.78rem;
+}
+
+.admin-page input:not([type='checkbox']),
+.admin-page select,
+.admin-page textarea {
+  min-height: var(--admin-touch-target);
+  padding: 8px 10px;
+  font-size: 0.84rem;
+}
+
+.admin-resource-chip {
+  min-height: 40px;
+  padding: 8px 9px;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 360px) {
+  .admin-economy-grid,
+  .admin-user-grid,
+  .admin-log-grid,
+  .admin-resource-chip-grid {
+    grid-template-columns: 1fr;
+  }
+}

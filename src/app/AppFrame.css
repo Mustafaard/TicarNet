@@ -96,7 +96,10 @@
   transform: translateZ(0);
   margin: 0 auto;
   overflow-x: clip;
-  background: #050d1d;
+  background:
+    linear-gradient(180deg, rgba(7, 20, 44, 0.9), rgba(5, 12, 30, 0.96)),
+    url('/home/backgrounds/game-main-bg.webp') center top / cover no-repeat,
+    #050d1d;
   box-shadow: 0 0 0 1px rgba(112, 170, 255, 0.08);
 }
 
