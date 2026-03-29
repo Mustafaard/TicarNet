@@ -10,9 +10,9 @@ import { USER_ROLES, normalizeUserRole } from '../services/roles.js'
 
 const CHAT_ROOMS = ['global', 'trade', 'clan']
 const CHAT_ROOM_SET = new Set(CHAT_ROOMS)
-const CHAT_PRUNE_TRIGGER = 15
-const CHAT_PRUNE_KEEP_COUNT = 15
-const CHAT_MAX_HISTORY = 15
+const CHAT_PRUNE_TRIGGER = 40
+const CHAT_PRUNE_KEEP_COUNT = 40
+const CHAT_MAX_HISTORY = 40
 const CHAT_MAX_LENGTH = 280
 const CHAT_ROOM_LIMIT = CHAT_PRUNE_TRIGGER
 const CHAT_COOLDOWN_MS = 5000

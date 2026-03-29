@@ -17,6 +17,18 @@ const gradleExternalBuildRoot = path.join(
 const npmCmd = isWindows ? "npm.cmd" : "npm";
 const npxCmd = isWindows ? "npx.cmd" : "npx";
 const gradleCmd = isWindows ? "gradlew.bat" : "./gradlew";
+const LIVE_URL_KEYS = [
+  "CAP_SERVER_URL",
+  "VITE_NATIVE_API_BASE_URL",
+  "VITE_API_BASE_URL",
+  "PUBLIC_BASE_URL",
+  "CLIENT_URL",
+];
+const LIVE_URL_ENV_FILES = [
+  path.join(projectRoot, ".env.production"),
+  path.join(projectRoot, ".env.local"),
+  path.join(projectRoot, ".env"),
+];
 
 function fail(message) {
   console.error(`\n[apk:build:demo] ${message}`);
@@ -91,6 +103,68 @@ function resolveLatestApkPath() {
   return existing[0].candidate;
 }
 
+function normalizeLiveUrl(value) {
+  const raw = String(value || "").trim();
+  if (!raw) return "";
+
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return "";
+    parsed.hash = "";
+    parsed.search = "";
+    parsed.pathname = parsed.pathname.replace(/\/+$/, "") || "/";
+    return parsed.toString().replace(/\/$/, "");
+  } catch {
+    return "";
+  }
+}
+
+function parseEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return {};
+
+  const out = {};
+  const raw = fs.readFileSync(filePath, "utf8");
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const eqIndex = trimmed.indexOf("=");
+    if (eqIndex <= 0) continue;
+
+    const key = trimmed.slice(0, eqIndex).trim();
+    let value = trimmed.slice(eqIndex + 1).trim();
+    if (!key) continue;
+
+    if (
+      (value.startsWith("\"") && value.endsWith("\"")) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    out[key] = value;
+  }
+  return out;
+}
+
+function resolveLiveUrl() {
+  for (const key of LIVE_URL_KEYS) {
+    const value = normalizeLiveUrl(process.env[key]);
+    if (value) return { value, source: `env:${key}` };
+  }
+
+  for (const envFile of LIVE_URL_ENV_FILES) {
+    const envMap = parseEnvFile(envFile);
+    for (const key of LIVE_URL_KEYS) {
+      const value = normalizeLiveUrl(envMap[key]);
+      if (value) return { value, source: `${path.basename(envFile)}:${key}` };
+    }
+  }
+
+  fail(
+    "Canli sunucu URL bulunamadi. CAP_SERVER_URL veya VITE_NATIVE_API_BASE_URL tanimlayin.\n" +
+      "Ornek: CAP_SERVER_URL=https://senin-domainin.com npm run apk:build:demo",
+  );
+}
+
 function writeMinimalLiveShell(liveUrl) {
   const distDir = path.join(projectRoot, "dist");
   fs.rmSync(distDir, { recursive: true, force: true });
@@ -130,7 +204,8 @@ function buildVersionMeta(now = new Date()) {
 }
 
 function main() {
-  const liveUrl = process.env.CAP_SERVER_URL || "https://ticarnet.tr";
+  const liveUrlResolved = resolveLiveUrl();
+  const liveUrl = liveUrlResolved.value;
   const { versionCode, versionName } = buildVersionMeta();
   run("node", ["scripts/write-capacitor-config.mjs", "live", liveUrl]);
   writeMinimalLiveShell(liveUrl);
@@ -162,6 +237,7 @@ function main() {
 
   console.log("\n[apk:build:demo] Tamamlandi.");
   console.log(`[apk:build:demo] Mod: live (${liveUrl})`);
+  console.log(`[apk:build:demo] URL kaynagi: ${liveUrlResolved.source}`);
   console.log(`[apk:build:demo] Android versionCode: ${versionCode}`);
   console.log(`[apk:build:demo] Android versionName: ${versionName}`);
   console.log(`[apk:build:demo] Kaynak debug APK: ${debugApkPath}`);

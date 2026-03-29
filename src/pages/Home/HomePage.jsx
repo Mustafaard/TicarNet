@@ -17203,7 +17203,7 @@ function HomePage({ user, onLogout }) {
               Sezon sonunda ilk 3 oyuncu özel sandık ve sezon rozeti kazanır. 4-25 sıralaması Sıradan Sandık alır. Sandıklarını sınırsız biriktirip istediğin zaman tek tek açabilirsin.
             </p>
           </div>
-          <button type="button" className="btn btn-ghost season-modal-close" onClick={() => setSeasonRewardsOpen(false)}>
+          <button type="button" className="btn btn-danger season-modal-close" onClick={() => setSeasonRewardsOpen(false)}>
             Kapat
           </button>
         </header>
@@ -17311,7 +17311,7 @@ function HomePage({ user, onLogout }) {
               Sandıklarını burada sınırsız biriktirebilir, istediğin sırada tek tek açabilirsin.
             </p>
           </div>
-          <button type="button" className="btn btn-ghost season-modal-close" onClick={() => setSeasonChestsOpen(false)}>
+          <button type="button" className="btn btn-danger season-modal-close" onClick={() => setSeasonChestsOpen(false)}>
             Kapat
           </button>
         </header>
@@ -17897,7 +17897,7 @@ function HomePage({ user, onLogout }) {
                   <div className="tutorial-head-actions">
                     <button
                       type="button"
-                      className="btn btn-ghost"
+                      className="btn btn-danger"
                       onClick={goTutorialPrev}
                       disabled={tutorialStepSafeIndex <= 0 || tutorialNavPending}
                     >

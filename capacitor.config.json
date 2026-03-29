@@ -1,9 +1,5 @@
 {
   "appId": "com.ticarnet.app",
   "appName": "TicarNet Online",
-  "webDir": "dist",
-  "server": {
-    "url": "https://ticarnet.tr",
-    "cleartext": false
-  }
+  "webDir": "dist"
 }
