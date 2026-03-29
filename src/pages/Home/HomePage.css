@@ -26956,6 +26956,37 @@ select {
     grid-template-columns: 1fr;
   }
 
+  .home-page.chat-tab-active .chat-card-pro {
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 10px 8px;
+  }
+
+  .chat-community-topbar {
+    min-height: 34px;
+    margin-top: 2px;
+    margin-bottom: 3px;
+  }
+
+  .chat-community-topbar-back {
+    min-height: 28px;
+    padding: 0 10px;
+    border-radius: 10px;
+    gap: 5px;
+  }
+
+  .chat-community-topbar-back-label {
+    display: inline !important;
+    font-size: 10px;
+  }
+
+  .chat-community-topbar-title {
+    font-size: clamp(19px, 4.8vw, 22px);
+    line-height: 1.1;
+  }
+
+  .chat-community-tabs {
+    margin-top: 2px;
+  }
+
   .chat-thread-pro.chat-thread-clean {
     padding: 8px;
   }
@@ -26972,7 +27003,40 @@ select {
   }
 
   .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
+  }
+
+  .factory-grid.factory-grid-owned .factory-card.is-owned.is-shop-summary-card {
+    padding: 9px 8px 10px;
+    gap: 8px;
+  }
+
+  .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-name {
+    font-size: clamp(14px, 3.3vw, 18px);
+    min-height: 2.35em;
+  }
+
+  .factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-hint {
+    font-size: 12px;
+    min-height: 2.4em;
+  }
+
+  .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions .factory-buy-btn {
+    min-height: 42px;
+    font-size: 12px;
+    padding-inline: 8px;
+  }
+}
+
+@media (max-width: 390px) {
+  .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions {
+    gap: 5px;
+  }
+
+  .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions .factory-buy-btn {
+    min-height: 40px;
+    font-size: 11.5px;
+    padding-inline: 6px;
   }
 }
