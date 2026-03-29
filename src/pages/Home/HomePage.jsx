@@ -164,10 +164,11 @@ const MESSAGE_ICONS = {
   otherFallback: '/home/icons/v2/nav-message.png',
 }
 const CHAT_COMMUNITY_TAB_ITEMS = [
-  { id: 'mesajlar', label: 'Mesajlar', icon: '✉️', type: 'route' },
-  { id: 'haberler', label: 'Haberler', icon: '📰', type: 'panel' },
-  { id: 'sohbet', label: 'Sohbet', icon: '💬', type: 'panel' },
+  { id: 'sohbet', label: 'Sohbet', icon: '💬', iconSrc: '/home/icons/sohbet.png', type: 'panel' },
+  { id: 'haberler', label: 'Haberler', icon: '📰', iconSrc: '/home/icons/messages/bildirim.webp', type: 'panel' },
+  { id: 'sehir', label: 'Şehir', icon: '🌍', iconSrc: '/home/icons/sehir.webp', type: 'route-home' },
 ]
+const CHAT_NEWS_MAX_ITEMS = 50
 
 const CHAT_SEED = {
   global: [],
@@ -2761,11 +2762,12 @@ function HomePage({ user, onLogout }) {
   const [chatReplyTarget, setChatReplyTarget] = useState(null)
   const [chatFirstUnreadId, setChatFirstUnreadId] = useState('')
   const [chatCommunityTab, setChatCommunityTab] = useState('sohbet')
-  const [, setChatSocketState] = useState('offline')
+  const [chatSocketState, setChatSocketState] = useState('offline')
   const [chatRestrictions, setChatRestrictions] = useState(EMPTY_CHAT_RESTRICTIONS)
   const [chatClockMs, setChatClockMs] = useState(() => new Date().getTime())
   const [chatRecentPlayers, setChatRecentPlayers] = useState([])
   const [chatRecentPlayersLoading, setChatRecentPlayersLoading] = useState(false)
+  const [chatNewsExpandedId, setChatNewsExpandedId] = useState('')
   const [, setMessageSocketState] = useState('offline')
   const [messageCenter, setMessageCenter] = useState({
     filter: 'all',
@@ -3639,7 +3641,7 @@ function HomePage({ user, onLogout }) {
     if (shouldShowLoading) {
       setChatRecentPlayersLoading(true)
     }
-    const response = await getRecentRegisteredPlayers(20)
+    const response = await getRecentRegisteredPlayers(CHAT_NEWS_MAX_ITEMS)
     if (!response?.success) {
       if (shouldShowLoading) {
         setChatRecentPlayersLoading(false)
@@ -9827,9 +9829,10 @@ function HomePage({ user, onLogout }) {
                   const meta = tradeableDepotItems.find((t) => t.id === item.id)
                   const ordersForItem = sellOrders.filter((o) => o.itemId === item.id)
                   for (const o of ordersForItem) {
+                    const isSystemOrder = Boolean(o?.isSystem) || String(o?.source || '').trim().toLowerCase() === 'system'
                     rows.push({
-                      type: 'order',
-                      key: o.orderId,
+                      type: isSystemOrder ? 'market' : 'order',
+                      key: o.orderId || `${isSystemOrder ? 'system' : 'order'}:${o.itemId}`,
                       orderId: o.orderId,
                       itemId: o.itemId,
                       itemName: o.itemName || meta?.label || o.itemId,
@@ -9837,6 +9840,7 @@ function HomePage({ user, onLogout }) {
                       stock: o.quantity,
                       sellerName: o.sellerName,
                       sellerUserId: o.sellerUserId,
+                      isSystem: isSystemOrder,
                       icon: meta?.png,
                     })
                   }
@@ -9844,7 +9848,7 @@ function HomePage({ user, onLogout }) {
                 if (rows.length === 0) {
                   return (
                     <div className="marketplace-list-empty card">
-                      <p className="muted" style={{ margin: 0 }}>Bu filtrede oyuncu ilanı yok. Satış İlanı sekmesinden ilan verebilir veya başka kategori seçebilirsin.</p>
+                      <p className="muted" style={{ margin: 0 }}>Bu filtrede aktif ilan görünmüyor. Başka kategori seçebilirsin.</p>
                     </div>
                   )
                 }
@@ -9880,6 +9884,9 @@ function HomePage({ user, onLogout }) {
                                 row.sellerName
                               )}
                             </span>
+                            {row.isSystem ? (
+                              <span className="marketplace-system-badge" aria-label="Sistem ilanı">🤖 Sistem İlanı</span>
+                            ) : null}
                             {insufficientFunds && (
                               <span className="marketplace-buy-card-warning" role="alert">Yetersiz bakiye</span>
                             )}
@@ -14870,83 +14877,75 @@ function HomePage({ user, onLogout }) {
     } catch (_) { return '' }
   }
 
-  const chatNewsFeed = (() => {
-    const feed = []
-    const seen = new Set()
-    const pushItem = (title, subtitle, createdAt, prefix = 'row') => {
-      const safeTitle = normalizeMojibakeText(String(title || '')).replace(/\s+/g, ' ').trim()
-      const safeSubtitle = normalizeMojibakeText(String(subtitle || '')).replace(/\s+/g, ' ').trim()
-      if (!safeTitle) return
-      const safeCreatedAt = String(createdAt || '').trim()
-      const dedupeKey = `${safeTitle.toLocaleLowerCase('tr-TR')}|${safeSubtitle.toLocaleLowerCase('tr-TR')}|${safeCreatedAt.slice(0, 16)}`
-      if (seen.has(dedupeKey)) return
-      seen.add(dedupeKey)
-      feed.push({
-        id: `${prefix}:${dedupeKey}`,
-        title: safeTitle,
-        subtitle: safeSubtitle,
-        createdAt: safeCreatedAt,
-        timeLabel: formatMessageTimeAgo(safeCreatedAt) || formatMessageDate(safeCreatedAt) || '',
-      })
-    }
-
-    const centerItems = Array.isArray(messageCenter?.items) ? messageCenter.items : []
-    for (const item of centerItems) {
-      if (!item || typeof item !== 'object') continue
-      const source = String(item.source || '').trim().toLowerCase()
-      if (source === 'direct' || source === 'friend_request') continue
-      const title = String(item.title || item.preview || item.message || 'Yeni gelişme').trim()
-      const subtitleRaw = String(item.message || '').trim()
-      const subtitle = subtitleRaw && subtitleRaw !== title ? subtitleRaw : ''
-      pushItem(title, subtitle, item.createdAt, `center-${source || 'notice'}`)
-    }
-
-    const recentPlayers = Array.isArray(chatRecentPlayers) ? chatRecentPlayers : []
-    for (const entry of recentPlayers.slice(0, 15)) {
-      const username = String(entry?.username || 'Oyuncu').trim() || 'Oyuncu'
+  const chatNewsFeed = (Array.isArray(chatRecentPlayers) ? chatRecentPlayers : [])
+    .map((entry, index) => {
+      const userId = String(entry?.userId || '').trim()
+      const username = normalizeMojibakeText(String(entry?.username || 'Oyuncu').trim() || 'Oyuncu')
+      const avatarUrl = String(entry?.avatarUrl || '').trim()
       const createdAt = String(entry?.createdAt || '').trim()
-      pushItem(
-        "Yeni bir oyuncu AEA'ya katıldı!",
-        `Yeni katılan oyuncunun adı ${username.toLocaleUpperCase('tr-TR')}`,
+      const createdAtMs = Date.parse(createdAt)
+      const safeCreatedAtMs = Number.isFinite(createdAtMs) ? createdAtMs : 0
+      const itemId = `${userId || 'anon'}:${createdAt || index}`
+      return {
+        id: itemId,
+        userId,
+        username,
+        avatarUrl,
         createdAt,
-        'player',
-      )
-    }
-
-    return feed
-      .sort((left, right) => {
-        const leftMs = Date.parse(String(left?.createdAt || ''))
-        const rightMs = Date.parse(String(right?.createdAt || ''))
-        const safeLeftMs = Number.isFinite(leftMs) ? leftMs : 0
-        const safeRightMs = Number.isFinite(rightMs) ? rightMs : 0
-        return safeRightMs - safeLeftMs
-      })
-      .slice(0, 24)
-  })()
+        createdAtMs: safeCreatedAtMs,
+        title: 'Yeni Oyuncu Katıldı 👋',
+        tapLabel: 'Bakmak için dokun.',
+        relativeTimeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
+        dateLabel: formatDateTime(createdAt),
+      }
+    })
+    .sort((left, right) => {
+      const diff = (right?.createdAtMs || 0) - (left?.createdAtMs || 0)
+      if (diff !== 0) return diff
+      return String(left?.username || '').localeCompare(String(right?.username || ''), 'tr')
+    })
+    .slice(0, CHAT_NEWS_MAX_ITEMS)
 
   const chatView = (
     <section className="panel-stack chat-screen chat-screen-pro">
       <article className="card chat-card chat-card-pro chat-card-clean">
+        <p className="chat-community-tabs-caption">Topluluk Menüsü</p>
+        <p className={`chat-inline-status ${chatSocketState === 'online' ? 'on' : 'off'}`}>
+          {chatSocketState === 'online' ? 'Sohbet canlı' : 'Bağlantı kuruluyor'}
+        </p>
         <div className="chat-community-tabs" role="tablist" aria-label="Oyun sohbet menüsü">
           {CHAT_COMMUNITY_TAB_ITEMS.map((entry) => {
-            const isRouteButton = entry.type === 'route'
-            const isActive = isRouteButton ? tab === 'messages' : chatCommunityTab === entry.id
+            const isPanel = entry.type === 'panel'
+            const isCityRoute = entry.type === 'route-home'
+            const isActive = isPanel && chatCommunityTab === entry.id
             return (
               <button
                 key={entry.id}
                 type="button"
-                role="tab"
-                aria-selected={isActive}
-                className={`chat-community-tab ${isActive ? 'is-active' : ''}`}
+                role={isPanel ? 'tab' : undefined}
+                aria-selected={isPanel ? isActive : undefined}
+                className={`chat-community-tab ${isActive ? 'is-active' : ''} ${isCityRoute ? 'chat-community-tab-city' : ''}`.trim()}
                 onClick={() => {
-                  if (isRouteButton) {
-                    void openTab('messages', { tab: 'messages', messageFilter: 'all' })
+                  if (isCityRoute) {
+                    void openTab('home', { tab: 'home' })
                     return
                   }
-                  setChatCommunityTab(entry.id)
+                  if (isPanel) {
+                    setChatCommunityTab(entry.id)
+                  }
                 }}
               >
-                <span className="chat-community-tab-icon" aria-hidden>{entry.icon}</span>
+                <span className="chat-community-tab-icon" aria-hidden>
+                  {entry.iconSrc ? (
+                    <img
+                      src={entry.iconSrc}
+                      alt=""
+                      className="chat-community-tab-icon-image"
+                      onError={(event) => { event.currentTarget.remove() }}
+                    />
+                  ) : null}
+                  <span className="chat-community-tab-icon-emoji">{entry.icon}</span>
+                </span>
                 <span>{entry.label}</span>
               </button>
             )
@@ -15146,21 +15145,61 @@ function HomePage({ user, onLogout }) {
           </>
         ) : null}
         {chatCommunityTab === 'haberler' ? (
-          <section className="chat-side-panel chat-news-panel" aria-label="Oyun haber akışı">
+          <section className="chat-side-panel chat-news-panel" aria-label="Yeni oyuncu haberleri">
+            <header className="chat-side-panel-head">
+              <h4 className="chat-side-panel-title">Haberler</h4>
+              <p className="chat-side-panel-sub">
+                Yeni kayıt olan oyuncular burada görünür. En güncel 50 kayıt tutulur.
+              </p>
+            </header>
             <div className="chat-news-list">
               {chatRecentPlayersLoading ? (
-                <p className="chat-news-empty">Haber akışı yükleniyor...</p>
+                <p className="chat-news-empty">Yeni oyuncu akışı yükleniyor...</p>
               ) : chatNewsFeed.length === 0 ? (
-                <p className="chat-news-empty">Henüz gösterilecek haber bulunmuyor.</p>
+                <p className="chat-news-empty">Henüz yeni oyuncu kaydı görünmüyor.</p>
               ) : (
                 chatNewsFeed.map((entry) => (
-                  <article key={entry.id} className={`chat-news-item ${entry.subtitle ? 'has-sub' : ''}`}>
-                    <p className="chat-news-title">{entry.title}</p>
-                    {entry.subtitle ? (
-                      <p className="chat-news-text">{entry.subtitle}</p>
-                    ) : null}
-                    {entry.timeLabel ? (
-                      <p className="chat-news-meta">{entry.timeLabel}</p>
+                  <article key={entry.id} className={`chat-news-item news-feed-entry ${chatNewsExpandedId === entry.id ? 'is-expanded' : ''}`.trim()}>
+                    <button
+                      type="button"
+                      className="chat-news-toggle"
+                      onClick={() => {
+                        setChatNewsExpandedId((prev) => (prev === entry.id ? '' : entry.id))
+                      }}
+                    >
+                      <p className="chat-news-title">{entry.title}</p>
+                      <p className="chat-news-text">{entry.tapLabel}</p>
+                      <p className="chat-news-meta">
+                        {entry.relativeTimeLabel}
+                        {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
+                      </p>
+                    </button>
+                    {chatNewsExpandedId === entry.id ? (
+                      <div className="chat-news-detail">
+                        <button
+                          type="button"
+                          className="chat-news-player"
+                          onClick={() => {
+                            if (!entry.userId) return
+                            void openProfileModal(entry.userId, {
+                              username: entry.username,
+                              displayName: entry.username,
+                              avatarUrl: entry.avatarUrl,
+                            })
+                          }}
+                          disabled={!entry.userId}
+                        >
+                          <img
+                            src={entry.avatarUrl || DEFAULT_CHAT_AVATAR}
+                            alt=""
+                            onError={(event) => { event.currentTarget.src = DEFAULT_CHAT_AVATAR }}
+                          />
+                          <span>{entry.username}</span>
+                        </button>
+                        <p className="chat-news-detail-time">
+                          Kayıt zamanı: {entry.dateLabel && entry.dateLabel !== '-' ? entry.dateLabel : 'Bilinmiyor'}
+                        </p>
+                      </div>
                     ) : null}
                   </article>
                 ))

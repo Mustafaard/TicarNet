@@ -3828,6 +3828,21 @@
   margin-top: 2px;
 }
 
+.marketplace-system-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: fit-content;
+  margin-top: 3px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid rgba(244, 197, 94, 0.58);
+  background: linear-gradient(180deg, rgba(129, 93, 34, 0.9), rgba(87, 58, 18, 0.9));
+  color: #ffe9ba;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 .marketplace-seller-link {
   appearance: none;
   background: none;
@@ -25525,7 +25540,28 @@ select {
 }
 
 .chat-community-tab-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
   font-size: 13px;
+  line-height: 1;
+}
+
+.chat-community-tab-icon-image {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
+}
+
+.chat-community-tab-icon-image + .chat-community-tab-icon-emoji {
+  display: none;
+}
+
+.chat-community-tab-icon-emoji {
+  display: inline-block;
   line-height: 1;
 }
 
@@ -25730,6 +25766,83 @@ select {
   color: rgba(182, 205, 236, 0.9);
   padding: 12px;
   text-align: center;
+  font-size: 12px;
+}
+
+.chat-news-item.news-feed-entry {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.chat-news-toggle {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  display: grid;
+  gap: 3px;
+  cursor: pointer;
+}
+
+.chat-news-item.news-feed-entry.is-expanded {
+  border-color: rgba(243, 197, 94, 0.62);
+}
+
+.chat-news-item.news-feed-entry .chat-news-title {
+  font-size: 14px;
+}
+
+.chat-news-item.news-feed-entry .chat-news-text {
+  color: rgba(214, 233, 255, 0.9);
+  font-weight: 700;
+}
+
+.chat-news-item.news-feed-entry .chat-news-meta {
+  color: rgba(253, 207, 134, 0.9);
+}
+
+.chat-news-detail {
+  border-top: 1px solid rgba(119, 176, 244, 0.28);
+  padding-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
+.chat-news-player {
+  border: 0;
+  background: rgba(10, 29, 53, 0.72);
+  border-radius: 10px;
+  min-height: 40px;
+  padding: 6px 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #f3f7ff;
+  font-size: 13px;
+  font-weight: 800;
+  width: fit-content;
+  cursor: pointer;
+}
+
+.chat-news-player:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+}
+
+.chat-news-player img {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid rgba(120, 179, 245, 0.4);
+}
+
+.chat-news-detail-time {
+  margin: 0;
+  color: rgba(187, 209, 239, 0.9);
   font-size: 12px;
 }
 
@@ -26182,265 +26295,5 @@ select {
 
   .chat-thread-pro.chat-thread-clean {
     padding: 8px;
-  }
-}
-
-/* Oyun sohbeti: referans görsel uyumlu sade görünüm */
-.home-page .chat-screen-pro .chat-card.chat-card-pro.chat-card-clean {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  padding: 8px 0 0;
-}
-
-.home-page .chat-community-tabs {
-  position: sticky;
-  top: 0;
-  z-index: 6;
-  margin: 0 10px 10px;
-  padding: 0;
-  gap: 10px;
-  border: 0;
-  background: transparent;
-}
-
-.home-page .chat-community-tab {
-  min-height: 40px;
-  border-radius: 10px;
-  border: 1px solid rgba(81, 126, 171, 0.45);
-  background: rgba(5, 19, 36, 0.95);
-  color: #e7effd;
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.01em;
-  box-shadow: none;
-}
-
-.home-page .chat-community-tab:hover {
-  transform: none;
-}
-
-.home-page .chat-community-tab.is-active {
-  border-color: rgba(223, 191, 120, 0.95);
-  background: linear-gradient(180deg, #dfc07b 0%, #cfab62 100%);
-  color: #243042;
-  box-shadow: none;
-}
-
-.home-page .chat-community-tab-icon {
-  display: none;
-}
-
-.home-page .chat-thread-pro.chat-thread-clean {
-  margin: 0 10px;
-  padding: 0 0 8px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  gap: 10px;
-}
-
-.home-page .chat-msg-clean {
-  align-items: flex-start;
-}
-
-.home-page .chat-msg-clean-row {
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.home-page .chat-msg-clean-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-}
-
-.home-page .chat-msg-clean-avatar-frame {
-  border-radius: 999px;
-  border: 1px solid rgba(126, 158, 192, 0.78);
-  background: rgba(8, 20, 38, 0.98);
-  box-shadow: none;
-}
-
-.home-page .chat-msg-clean-avatar-inner {
-  border-radius: 999px;
-}
-
-.home-page .chat-msg-clean-body {
-  width: min(100%, 92%);
-  max-width: min(100%, 92%);
-  gap: 6px;
-}
-
-.home-page .chat-msg-clean-bubble {
-  width: 100%;
-  min-width: 0;
-  border-radius: 14px;
-  padding: 10px 12px;
-  border: 1px solid rgba(86, 121, 157, 0.45);
-  background: rgba(4, 18, 33, 0.96);
-  box-shadow: none;
-}
-
-.home-page .chat-msg-clean.own .chat-msg-clean-bubble {
-  border-color: rgba(151, 181, 214, 0.55);
-  background: rgba(6, 24, 43, 0.96);
-}
-
-.home-page .chat-msg-clean-meta-inside {
-  margin: 0 0 4px;
-  padding: 0;
-  border: 0;
-}
-
-.home-page .chat-msg-clean-role,
-.home-page .chat-msg-clean-level,
-.home-page .chat-msg-clean-badge {
-  display: none;
-}
-
-.home-page .chat-msg-clean-name {
-  font-size: 17px;
-  font-weight: 800;
-  color: #d4b567;
-}
-
-.home-page .chat-msg-clean-name:hover {
-  color: #e3c97f;
-  text-decoration: none;
-}
-
-.home-page .chat-msg-clean-bubble .chat-msg-clean-text {
-  margin: 0 0 6px;
-  max-width: 100%;
-  color: #edf4ff !important;
-  font-size: 14px;
-  font-weight: 700 !important;
-  line-height: 1.38;
-  letter-spacing: 0;
-}
-
-.home-page .chat-msg-clean-footer {
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.home-page .chat-msg-clean-time {
-  font-size: 11px;
-  color: rgba(171, 188, 212, 0.72);
-}
-
-.home-page .chat-send-form-clean {
-  margin: 0 10px 10px;
-  padding: 8px 10px;
-  border-radius: 14px;
-  border: 1px solid rgba(82, 123, 163, 0.45);
-  background: rgba(3, 17, 32, 0.96);
-  gap: 8px;
-}
-
-.home-page .chat-send-input-clean {
-  min-height: 38px;
-  border-radius: 10px;
-  border: 0;
-  background: transparent;
-  color: #eaf2ff;
-  padding: 0 6px;
-}
-
-.home-page .chat-send-input-clean::placeholder {
-  color: rgba(184, 203, 228, 0.78);
-}
-
-.home-page .chat-send-btn-clean {
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  border-radius: 999px;
-  padding: 0;
-  border: 0;
-  background: rgba(229, 191, 102, 0.16);
-  color: #e3bc6a;
-  box-shadow: none;
-}
-
-.home-page .chat-send-btn-clean:hover:not(:disabled) {
-  background: rgba(229, 191, 102, 0.24);
-}
-
-.home-page .chat-send-btn-icon {
-  display: inline-block;
-  font-size: 18px;
-  line-height: 1;
-  transform: translateX(1px);
-}
-
-.home-page .chat-side-panel.chat-news-panel {
-  margin: 0 10px 10px;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  padding: 0;
-}
-
-.home-page .chat-news-list {
-  gap: 8px;
-}
-
-.home-page .chat-news-item {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 4px;
-  border-radius: 11px;
-  border: 1px solid rgba(83, 122, 161, 0.42);
-  background: rgba(4, 18, 34, 0.95);
-  padding: 10px 12px;
-}
-
-.home-page .chat-news-title {
-  margin: 0;
-  color: #eaf3ff;
-  font-size: 14px;
-  font-weight: 800;
-  text-align: center;
-}
-
-.home-page .chat-news-text {
-  margin: 0;
-  color: rgba(178, 201, 228, 0.94);
-  font-size: 13px;
-  text-align: center;
-}
-
-.home-page .chat-news-meta {
-  margin: 0;
-  color: rgba(210, 138, 138, 0.92);
-  font-size: 12px;
-  text-align: right;
-}
-
-.home-page .chat-news-avatar,
-.home-page .chat-news-chip {
-  display: none;
-}
-
-.home-page .chat-news-empty {
-  margin: 0;
-  border: 1px solid rgba(84, 124, 164, 0.42);
-  background: rgba(4, 18, 34, 0.95);
-  color: rgba(186, 204, 227, 0.9);
-}
-
-@media (max-width: 640px) {
-  .home-page .chat-community-tabs {
-    margin: 0 8px 8px;
-    gap: 8px;
-  }
-
-  .home-page .chat-thread-pro.chat-thread-clean,
-  .home-page .chat-send-form-clean,
-  .home-page .chat-side-panel.chat-news-panel {
-    margin-inline: 8px;
   }
 }

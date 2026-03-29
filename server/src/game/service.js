@@ -109,6 +109,7 @@ const MARKET_TAX_RATE = 0.10
 const MARKET_BOT_RESTOCK_DELAY_MS = 3 * MS_HOUR
 const MARKET_SYSTEM_CHECK_INTERVAL_MS = MARKET_BOT_RESTOCK_DELAY_MS
 const MARKET_BOT_RESTOCK_STOCK = 5000
+const MARKET_SYSTEM_PRICE_MULTIPLIER = 5
 const WEEKLY_EVENT_TIMEZONE = 'Europe/Istanbul'
 const WEEKLY_EVENT_XP_MULTIPLIER = 2
 const WEEKLY_EVENT_COST_DISCOUNT_RATE = 0.25
@@ -2399,14 +2400,19 @@ function marketStockCap() {
   return MARKET_BOT_RESTOCK_STOCK
 }
 
+function marketSystemPriceCap(itemDef) {
+  const baseMaxPrice = Math.max(1, asInt(itemDef?.maxPrice, 1))
+  return Math.max(baseMaxPrice, Math.round(baseMaxPrice * MARKET_SYSTEM_PRICE_MULTIPLIER))
+}
+
 function createInitialMarketState(timestamp) {
   return {
     lastUpdatedAt: timestamp,
     items: ITEM_CATALOG.map((item) => ({
       id: item.id,
       stock: MARKET_BOT_RESTOCK_STOCK,
-      price: item.maxPrice,
-      lastPrice: item.maxPrice,
+      price: marketSystemPriceCap(item),
+      lastPrice: marketSystemPriceCap(item),
       updatedAt: timestamp,
       depletedAt: '',
       lastRestockedAt: timestamp,
@@ -2428,20 +2434,21 @@ function normalizeMarketState(marketState, timestamp) {
   const items = ITEM_CATALOG.map((itemDef) => {
     const source = byId.get(itemDef.id)
     const stockCap = marketStockCap()
+    const systemPriceCap = marketSystemPriceCap(itemDef)
     const stock = clamp(
       asInt(source?.stock, MARKET_BOT_RESTOCK_STOCK),
       0,
       stockCap,
     )
     const price = clamp(
-      asInt(source?.price, itemDef.maxPrice),
+      asInt(source?.price, systemPriceCap),
       itemDef.minPrice,
-      itemDef.maxPrice,
+      systemPriceCap,
     )
     const lastPrice = clamp(
       asInt(source?.lastPrice, price),
       itemDef.minPrice,
-      itemDef.maxPrice,
+      systemPriceCap,
     )
 
     return {
@@ -5858,10 +5865,11 @@ function tickMarket(db, marketState, timestamp, options = {}) {
     if (!def) continue
 
     const stockCap = marketStockCap()
+    const systemPriceCap = marketSystemPriceCap(def)
     const currentStock = clamp(asInt(marketItem.stock, MARKET_BOT_RESTOCK_STOCK), 0, stockCap)
     marketItem.stock = currentStock
 
-    const currentPrice = clamp(asInt(marketItem.price, def.maxPrice), def.minPrice, def.maxPrice)
+    const currentPrice = clamp(asInt(marketItem.price, systemPriceCap), def.minPrice, systemPriceCap)
     marketItem.price = currentPrice
 
     const lastSystemCheckAtRaw =
@@ -5878,7 +5886,7 @@ function tickMarket(db, marketState, timestamp, options = {}) {
       if (!hasActiveSellListing && currentStock < stockCap) {
         marketItem.stock = MARKET_BOT_RESTOCK_STOCK
         marketItem.lastPrice = marketItem.price
-        marketItem.price = def.maxPrice
+        marketItem.price = systemPriceCap
         marketItem.updatedAt = timestamp
         marketItem.depletedAt = ''
         marketItem.lastRestockedAt = timestamp
@@ -5898,7 +5906,7 @@ function tickMarket(db, marketState, timestamp, options = {}) {
     }
 
     marketItem.lastPrice = marketItem.price
-    marketItem.price = def.maxPrice
+    marketItem.price = systemPriceCap
     marketItem.updatedAt = timestamp
   }
 
@@ -8274,6 +8282,30 @@ export async function getMarket(userId) {
         })
       }
     }
+    for (const marketItem of Array.isArray(db?.marketState?.items) ? db.marketState.items : []) {
+      const itemId = String(marketItem?.id || '').trim()
+      if (!itemId) continue
+      const itemDef = ITEM_BY_ID.get(itemId)
+      if (!itemDef) continue
+      const stock = clamp(asInt(marketItem?.stock, 0), 0, marketStockCap())
+      if (stock <= 0) continue
+      const systemPrice = clamp(
+        asInt(marketItem?.price, marketSystemPriceCap(itemDef)),
+        itemDef.minPrice,
+        marketSystemPriceCap(itemDef),
+      )
+      sellOrders.push({
+        orderId: `system:${itemId}`,
+        itemId,
+        itemName: itemDef.name || itemId,
+        quantity: stock,
+        limitPrice: systemPrice,
+        sellerName: 'Sistem Pazarı',
+        sellerUserId: '',
+        source: 'system',
+        isSystem: true,
+      })
+    }
     sellOrders.sort((a, b) => (a.itemId === b.itemId ? a.limitPrice - b.limitPrice : (a.itemId || '').localeCompare(b.itemId || '')))
 
     const todayKey = dailyStoreDayKeyFromIso(timestamp)
@@ -9305,7 +9337,7 @@ export async function buyMarketItem(userId, payload) {
       marketStockCap(),
     )
     marketItem.lastPrice = marketItem.price
-    marketItem.price = itemDef.maxPrice
+    marketItem.price = marketSystemPriceCap(itemDef)
     marketItem.updatedAt = timestamp
 
     addInventory(profile, itemId, quantity)
@@ -9617,7 +9649,7 @@ export async function sellMarketItem(userId, payload) {
       marketStockCap(),
     )
     marketItem.lastPrice = marketItem.price
-    marketItem.price = itemDef.maxPrice
+    marketItem.price = marketSystemPriceCap(itemDef)
     marketItem.updatedAt = timestamp
 
     applyMissionProgress(profile.missions, { type: 'sell_value', value: totalGain }, timestamp)
