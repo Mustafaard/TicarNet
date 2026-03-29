@@ -351,6 +351,7 @@ const FOREX_CHART_RANGE_OPTIONS = [
   { id: '168h', label: '7 Gün', seconds: 168 * 60 * 60, candleCount: 72 },
 ]
 const FOREX_CLIENT_POLL_INTERVAL_MS = 5000
+const MOBILE_LAYOUT_MAX_WIDTH = 430
 const FOREX_MENU_ICON_PRIMARY_SRC = '/home/icons/custom/ticarnet-doviz-menu.webp'
 const FOREX_MENU_ICON_FALLBACK_SRC = '/home/icons/depot/cash.png'
 const FOREX_HEADER_ICON_PRIMARY_SRC = '/home/icons/custom/ticarnet-doviz-header.webp'
@@ -2748,6 +2749,12 @@ function isPageVisible() {
   return typeof document === 'undefined' || document.visibilityState === 'visible'
 }
 
+function resolveMobileViewportWidth() {
+  if (typeof window === 'undefined') return MOBILE_LAYOUT_MAX_WIDTH
+  const viewportWidth = Number(window.innerWidth || MOBILE_LAYOUT_MAX_WIDTH)
+  return Math.min(MOBILE_LAYOUT_MAX_WIDTH, Math.max(320, viewportWidth))
+}
+
 function HomePage({ user, onLogout }) {
   const [tab, setTab] = useState('home')
   const [marketTab, setMarketTab] = useState('buy')
@@ -2787,7 +2794,7 @@ function HomePage({ user, onLogout }) {
   const [forexChartRangeId, setForexChartRangeId] = useState('24h')
   const [forexChartHoverIndex, setForexChartHoverIndex] = useState(-1)
   const [forexViewportWidth, setForexViewportWidth] = useState(() => (
-    typeof window !== 'undefined' ? window.innerWidth : 1280
+    resolveMobileViewportWidth()
   ))
   const [business, setBusiness] = useState(null)
   const [factories, setFactories] = useState(null)
@@ -4240,7 +4247,7 @@ function HomePage({ user, onLogout }) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined
-    const onResize = () => setForexViewportWidth(window.innerWidth)
+    const onResize = () => setForexViewportWidth(resolveMobileViewportWidth())
     onResize()
     window.addEventListener('resize', onResize)
     return () => window.removeEventListener('resize', onResize)

@@ -571,7 +571,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
         aria-hidden
       />
       <div
-        className="relative z-10 flex min-h-screen min-h-dvh flex-col items-center justify-start sm:justify-center p-4 sm:p-6 w-full box-border"
+        className="relative z-10 flex min-h-screen min-h-dvh flex-col items-center justify-start p-4 w-full box-border"
         style={{
           paddingTop: 'max(1rem, env(safe-area-inset-top))',
           paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))',
@@ -581,12 +581,12 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
       >
         <section className="w-full max-w-[min(100%,26rem)] flex flex-col items-center gap-5">
           {/* Hoş geldin başlığı */}
-          <h1 className="auth-welcome-title text-center text-[26px] sm:text-3xl md:text-[34px] leading-tight px-4">
+          <h1 className="auth-welcome-title text-center text-[26px] leading-tight px-4">
             TicarNet Online'a Hoş Geldiniz
           </h1>
 
           {/* Form alanı */}
-          <section className="auth-card w-full px-4 py-5 sm:px-5 sm:py-6 space-y-5">
+          <section className="auth-card w-full px-4 py-5 space-y-5">
             {/* Logo + brand */}
             <div className="flex flex-col items-center gap-3">
               {logoLoadError ? (
@@ -601,18 +601,18 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                   onError={() => setLogoLoadError(true)}
                 />
               )}
-              <p className="text-xs sm:text-sm text-slate-200/85 text-center tracking-wide">
+              <p className="text-xs text-slate-200/85 text-center tracking-wide">
                 Güvenli Ticaret Ağı
               </p>
             </div>
 
-            <h2 className="text-center font-display font-bold text-lg sm:text-xl text-slate-100 mt-2">
+            <h2 className="text-center font-display font-bold text-lg text-slate-100 mt-2">
               {pageTitle}
             </h2>
             {/* Alt açıklama metni sade tutuldu. */}
 
             {/* Sunucu durumu */}
-            <div className="flex items-center justify-center gap-2 text-[11px] sm:text-xs text-slate-200/80">
+            <div className="flex items-center justify-center gap-2 text-[11px] text-slate-200/80">
               <span
                 className={`inline-flex h-1.5 w-1.5 rounded-full ${
                   gateway.online ? 'bg-emerald-400' : 'bg-red-400'
@@ -754,7 +754,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
                 error={errors.confirmPassword}
                 autoComplete="new-password"
               />
-              <p className="text-[11px] sm:text-xs text-slate-300/85 -mt-1 mb-1">
+              <p className="text-[11px] text-slate-300/85 -mt-1 mb-1">
                 Şifre 8-64 karakter olmalı; en az bir küçük harf ve bir rakam içermelidir.
               </p>
               <AuthButton type="submit" disabled={isSubmitting}>
@@ -802,7 +802,7 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
 
       {/* Şifremi Unuttum modalı */}
       {mode === AUTH_MODE.FORGOT ? (
-        <div className="fixed inset-0 z-40 flex items-end justify-center overflow-y-auto px-4 py-[max(1rem,env(safe-area-inset-top))] sm:items-center">
+        <div className="fixed inset-0 z-40 flex items-end justify-center overflow-y-auto px-4 py-[max(1rem,env(safe-area-inset-top))]">
           <button
             type="button"
             className="absolute inset-0 bg-slate-950/60"
@@ -813,8 +813,8 @@ function AuthPage({ initialMode = AUTH_MODE.REGISTER, onAuthSuccess }) {
               }
             }}
           />
-          <section className="relative z-50 my-auto w-full max-w-md max-h-[min(38rem,calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom)))] overflow-y-auto rounded-2xl border border-amber-700/50 bg-slate-950/90 px-5 py-5 sm:px-6 sm:py-6 shadow-[0_24px_50px_rgba(0,0,0,0.7)]">
-            <h2 className="font-display text-lg sm:text-xl font-bold text-slate-50 text-center mb-1">
+          <section className="relative z-50 my-auto w-full max-w-[26rem] max-h-[min(38rem,calc(100dvh-2rem-env(safe-area-inset-top)-env(safe-area-inset-bottom)))] overflow-y-auto rounded-2xl border border-amber-700/50 bg-slate-950/90 px-5 py-5 shadow-[0_24px_50px_rgba(0,0,0,0.7)]">
+            <h2 className="font-display text-lg font-bold text-slate-50 text-center mb-1">
               Şifremi Unuttum
             </h2>
             <p className="text-sm text-slate-300 text-center mb-4">

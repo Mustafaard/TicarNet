@@ -2812,57 +2812,6 @@
   }
 }
 
-@media (min-width: 992px) {
-  .home-page.announcements-tab-active {
-    --app-max-content-width: min(100vw, 540px);
-  }
-
-  .home-page.announcements-tab-active .announcements-board-head {
-    padding: 14px 15px 11px;
-  }
-
-  .home-page.announcements-tab-active .announcements-hero-title {
-    font-size: clamp(30px, 2.5vw, 36px);
-    letter-spacing: 0.1em;
-  }
-
-  .home-page.announcements-tab-active .announcements-board-scroll {
-    gap: 10px;
-    padding: 10px 12px 12px 10px;
-  }
-
-  .home-page.announcements-tab-active .announcement-entry {
-    padding: 13px 13px 11px;
-  }
-
-  .home-page.announcements-tab-active .announcement-entry-title {
-    font-size: clamp(16px, 1.35vw, 20px);
-    line-height: 1.2;
-  }
-
-  .home-page.announcements-tab-active .announcement-entry-body p {
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  .home-page.announcements-tab-active .announcement-card-author,
-  .home-page.announcements-tab-active .announcement-card-time {
-    font-size: 11.5px;
-  }
-}
-
-@media (min-width: 1400px) {
-  .home-page.announcements-tab-active {
-    --app-max-content-width: min(100vw, 560px);
-  }
-}
-
-@media (min-width: 820px) {
-  .weekly-events-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 .module-card.module-card-split {
   padding: 0 2px;
 }
@@ -9005,36 +8954,6 @@
   }
 }
 
-@media (min-width: 1024px) {
-  .business-screen.is-focused .fleet-fullscreen-card {
-    max-width: 980px;
-    margin-inline: auto;
-  }
-
-  .fleet-detail-card .fleet-subheader,
-  .fleet-detail-card .fleet-detail-hero,
-  .fleet-detail-card .fleet-tier-strip,
-  .fleet-detail-card .fleet-market-inline-note,
-  .fleet-detail-card .fleet-market-list,
-  .fleet-detail-card .fleet-owned-list,
-  .fleet-detail-card .fleet-vehicle-list,
-  .fleet-detail-card .fleet-gallery-note,
-  .fleet-detail-card .fleet-filter-launch,
-  .fleet-detail-card > h4,
-  .fleet-detail-card > .muted {
-    width: 100%;
-    max-width: 900px;
-    margin-inline: auto;
-  }
-
-  .fleet-market-row,
-  .fleet-owned-row,
-  .fleet-compact-row {
-    max-width: 900px;
-    margin-inline: auto;
-  }
-}
-
 .fleet-market-lifetime {
   margin: 0;
   color: #c8ddf8;
@@ -12238,35 +12157,6 @@ select {
 .chat-send-btn-clean:disabled {
   opacity: 0.5;
   cursor: not-allowed;
-}
-
-/* Sohbet: PC'de ortada, makul genişlik; telefonda tam genişlik */
-@media (min-width: 640px) {
-  .chat-screen-pro {
-    align-items: stretch;
-  }
-  .chat-screen-pro .chat-card.chat-card-pro.chat-card-clean {
-    max-width: none;
-    width: 100%;
-    margin: 0;
-    border-radius: 16px;
-  }
-  .home-shell.chat-only-shell .chat-screen-pro .chat-card.chat-card-pro.chat-card-clean {
-    max-width: none;
-  }
-  .chat-thread-clean {
-    padding: 10px 8px 12px;
-    gap: 12px;
-  }
-  .chat-send-form-clean {
-    padding: 10px 0 8px;
-  }
-  .chat-send-input-clean {
-    padding: 11px 16px;
-  }
-  .chat-send-btn-clean {
-    padding: 11px 22px;
-  }
 }
 
 @media (max-width: 380px) {
@@ -17818,12 +17708,6 @@ select {
   line-height: 1;
 }
 
-@media (min-width: 820px) {
-  .garage-teklif-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
 /* Oyuncu profil modalı (kendi / baska oyuncu) */
 .player-profile-overlay {
   --profile-border: rgba(126, 187, 255, 0.38);
@@ -21636,54 +21520,6 @@ select {
   text-align: right;
 }
 
-@media (min-width: 768px) {
-  .factory-screen {
-    width: min(100%, 1060px);
-    margin-inline: auto;
-  }
-
-  .fleet-active-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .factory-grid.factory-grid-owned {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .factory-grid.factory-grid-shop {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .factory-purchase-summary {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .factory-scroll-spacer {
-    height: calc((var(--bottom-dock-height) * 0.75) + env(safe-area-inset-bottom));
-  }
-}
-
-@media (min-width: 1200px) {
-  .factory-screen {
-    width: min(100%, 1180px);
-  }
-
-  /* İşletme kartları hep 2 sütun: tek kart yarı genişlikte görünsün, çeyrek kalmasın */
-  .fleet-active-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .factory-grid.factory-grid-owned {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .factory-grid.factory-grid-shop {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    max-width: 980px;
-    margin-inline: auto;
-  }
-}
-
 @media (max-width: 767px) {
   .factory-grid.factory-grid-owned {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -23529,50 +23365,6 @@ select {
   }
 }
 
-@media (min-width: 900px) {
-  .daily-login-overlay {
-    padding: calc(16px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
-    align-items: center;
-    justify-items: center;
-  }
-
-  .warehouse-overlay-fullscreen .warehouse-modal-fullscreen.daily-login-modal {
-    width: min(460px, calc(100vw - 32px));
-    max-width: min(460px, calc(100vw - 32px));
-    height: min(92dvh, 860px);
-    max-height: min(92dvh, 860px);
-    border-radius: 20px;
-    padding: 14px;
-    gap: 12px;
-  }
-
-  .daily-login-header h3 {
-    font-size: 24px;
-  }
-
-  .daily-login-hero {
-    padding: 10px;
-  }
-
-  .daily-login-days-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .daily-login-day-card {
-    min-height: 100px;
-    padding: 7px;
-  }
-
-  .daily-login-day-card:last-child {
-    grid-column: 1 / -1;
-  }
-
-  .daily-login-foot {
-    padding-top: 8px;
-  }
-}
-
 .module-btn.module-btn-forex .module-icon img {
   filter: saturate(1.12) contrast(1.08) drop-shadow(0 0 4px rgba(230, 190, 90, 0.34));
 }
@@ -24847,12 +24639,6 @@ select {
 
 .bank-history-grid .is-positive strong {
   color: #9af7bc;
-}
-
-@media (min-width: 1280px) {
-  .bank-ops-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 980px) {
@@ -27077,4 +26863,48 @@ select {
     font-size: 11.5px;
     padding-inline: 6px;
   }
+}
+
+/* Tek görünüm: portal modal/panel genişliklerini mobil kabuğa sabitle */
+.warehouse-modal,
+.warehouse-modal-fullscreen,
+.fleet-modal,
+.fleet-sub-modal,
+.fleet-listing-modal,
+.fleet-filter-modal,
+.fleet-market-detail-modal,
+.fleet-market-purchase-modal,
+.fleet-bulk-modal,
+.fleet-accountant-modal,
+.factory-bulk-modal,
+.factory-collect-modal,
+.factory-upgrade-modal,
+.factory-purchase-modal,
+.factory-upgrade-costs.factory-upgrade-costs-modal,
+.marketplace-buy-modal,
+.marketplace-capacity-warning-modal,
+.player-profile-modal,
+.starter-detail-modal,
+.settings-theme-modal,
+.season-chests-modal,
+.daily-login-modal,
+.daily-login-result-modal,
+.tutorial-modal,
+.chat-side-panel,
+.garage-teklif-panel,
+.chat-report-modal,
+.dm-report-modal,
+.avatar-crop-modal,
+.avatar-confirm-modal,
+.leaderboard-search-modal {
+  width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
+  max-width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
+  min-width: min(320px, calc(100vw - 12px));
+  margin-inline: auto !important;
+}
+
+.warehouse-overlay-fullscreen .warehouse-modal-fullscreen.daily-login-modal {
+  height: min(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom), 860px) !important;
+  max-height: min(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom), 860px) !important;
+  border-radius: 18px !important;
 }

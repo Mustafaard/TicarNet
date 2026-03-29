@@ -1,12 +1,13 @@
-﻿.app-stage {
+.app-stage {
   width: 100%;
+  min-height: 100svh;
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
   place-items: stretch center;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow: clip;
   background:
     radial-gradient(circle at 14% 12%, rgba(117, 176, 255, 0.14), transparent 34%),
     radial-gradient(circle at 86% 16%, rgba(84, 142, 230, 0.12), transparent 36%),
@@ -35,11 +36,8 @@
   );
 }
 
-.app-desktop-glow {
-  display: none;
-}
-
 .app-route-loader {
+  min-height: 100svh;
   min-height: 100vh;
   min-height: 100dvh;
   display: grid;
@@ -85,10 +83,11 @@
   }
 }
 
-/* Ana içerik: telefon uyumlu genişlik, PC'de ortalanmış şerit */
+/* Ana içerik: tüm platformlarda aynı mobil gövde */
 .app-mobile-root {
-  width: 100%;
+  width: min(100%, var(--app-max-content-width));
   max-width: var(--app-max-content-width);
+  min-height: 100svh;
   min-height: 100vh;
   min-height: 100dvh;
   position: relative;
@@ -96,30 +95,9 @@
   isolation: isolate;
   transform: translateZ(0);
   margin: 0 auto;
-  overflow-x: hidden;
+  overflow-x: clip;
   background: #050d1d;
   box-shadow: 0 0 0 1px rgba(112, 170, 255, 0.08);
-}
-
-/* Tüm ekranlarda dar, ortalanmış şerit */
-@media (min-width: 481px) {
-  .app-stage {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .app-stage {
-    padding-left: 0;
-    padding-right: 0;
-  }
-}
-
-@media (min-width: 768px) {
-  .app-desktop-glow {
-    display: none;
-  }
 }
 
 @media (prefers-contrast: more) {
