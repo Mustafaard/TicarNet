@@ -26372,38 +26372,45 @@ select {
 }
 
 .message-sohbet-penceresi {
-  border: 1px solid rgba(112, 176, 246, 0.42);
+  border: 1px solid rgba(112, 176, 246, 0.36);
   background:
-    radial-gradient(circle at top right, rgba(244, 198, 93, 0.12), transparent 42%),
-    linear-gradient(180deg, rgba(7, 24, 50, 0.9), rgba(5, 16, 34, 0.94));
-  box-shadow: 0 14px 28px rgba(2, 9, 20, 0.44);
+    radial-gradient(circle at top right, rgba(244, 198, 93, 0.09), transparent 44%),
+    linear-gradient(180deg, rgba(7, 24, 50, 0.88), rgba(5, 16, 34, 0.92));
+  box-shadow: 0 12px 24px rgba(2, 9, 20, 0.38);
 }
 
 .message-sohbet-header {
-  border-bottom: 1px solid rgba(116, 178, 245, 0.3);
-  background: linear-gradient(180deg, rgba(11, 33, 62, 0.76), rgba(8, 23, 44, 0.58));
+  border-bottom: 1px solid rgba(116, 178, 245, 0.26);
+  background: linear-gradient(180deg, rgba(11, 33, 62, 0.68), rgba(8, 23, 44, 0.5));
+  padding: 10px 12px;
 }
 
 .message-sohbet-bubble-inner {
-  border: 1px solid rgba(112, 176, 246, 0.3);
-  background: linear-gradient(168deg, rgba(9, 30, 57, 0.92), rgba(6, 20, 40, 0.95));
-  box-shadow: 0 8px 18px rgba(2, 10, 22, 0.34);
+  border: 1px solid rgba(112, 176, 246, 0.26);
+  background: linear-gradient(168deg, rgba(9, 30, 57, 0.88), rgba(6, 20, 40, 0.92));
+  box-shadow: 0 6px 14px rgba(2, 10, 22, 0.28);
+  padding: 8px 11px;
+  border-radius: 13px;
 }
 
 .message-sohbet-bubble.own .message-sohbet-bubble-inner {
-  border-color: rgba(246, 197, 92, 0.52);
-  background: linear-gradient(170deg, rgba(79, 58, 22, 0.9), rgba(43, 31, 11, 0.94));
+  border-color: rgba(246, 197, 92, 0.46);
+  background: linear-gradient(170deg, rgba(75, 55, 21, 0.84), rgba(41, 30, 11, 0.9));
 }
 
 .message-sohbet-form {
-  border-top: 1px solid rgba(116, 178, 245, 0.24);
+  border-top: 1px solid rgba(116, 178, 245, 0.2);
   background: transparent;
-  padding: 10px 12px calc(12px + env(safe-area-inset-bottom, 0px));
+  padding: 8px 10px calc(12px + env(safe-area-inset-bottom, 0px));
+  gap: 8px;
 }
 
 .message-sohbet-input {
-  border: 1px solid rgba(111, 173, 242, 0.4);
+  border: 1px solid rgba(111, 173, 242, 0.36);
   background: transparent;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 13px;
 }
 
 .message-sohbet-input:focus {
@@ -26413,13 +26420,96 @@ select {
 }
 
 .message-sohbet-send {
-  border: 1px solid rgba(247, 205, 102, 0.64);
+  border: 1px solid rgba(247, 205, 102, 0.58);
   background: linear-gradient(180deg, rgba(218, 163, 54, 0.96), rgba(148, 98, 22, 0.96));
   color: #fff4d9;
+  min-width: 82px;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 10px;
 }
 
 .message-sohbet-send:hover:not(:disabled) {
   background: linear-gradient(180deg, rgba(234, 181, 72, 0.98), rgba(167, 112, 25, 0.98));
+}
+
+.message-sohbet-send:disabled {
+  opacity: 0.56;
+}
+
+.message-sohbet-user {
+  gap: 8px;
+}
+
+.message-sohbet-actions {
+  gap: 6px;
+}
+
+.message-sohbet-chip {
+  padding: 4px 9px;
+  font-size: 11px;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  border-radius: 999px;
+}
+
+.message-sohbet-chip-danger {
+  border-color: rgba(255, 118, 135, 0.74);
+  background: linear-gradient(135deg, rgba(120, 36, 45, 0.92), rgba(83, 24, 31, 0.94));
+}
+
+.message-sohbet-chip-report {
+  border-color: rgba(128, 177, 240, 0.6);
+  background: linear-gradient(135deg, rgba(28, 55, 92, 0.9), rgba(16, 35, 64, 0.92));
+  color: #dbe8ff;
+}
+
+.message-sohbet-chip-secondary {
+  border-color: rgba(248, 206, 103, 0.58);
+  background: linear-gradient(135deg, rgba(92, 68, 23, 0.86), rgba(63, 46, 17, 0.9));
+}
+
+.message-sohbet-body {
+  padding: 12px 12px;
+}
+
+.message-sohbet-thread {
+  gap: 8px;
+}
+
+.message-sohbet-bubble {
+  max-width: 95%;
+  gap: 5px;
+}
+
+.message-sohbet-avatar-bubble {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid rgba(123, 183, 249, 0.46);
+  box-shadow: 0 0 0 1px rgba(5, 16, 30, 0.46);
+}
+
+.message-sohbet-bubble.own .message-sohbet-avatar-bubble {
+  border-color: rgba(245, 197, 92, 0.54);
+}
+
+.message-sohbet-head {
+  margin-bottom: 4px;
+  gap: 4px;
+}
+
+.message-sohbet-text {
+  margin: 0 0 2px;
+  font-size: 13px;
+  line-height: 1.45;
+  font-weight: 600;
+}
+
+.message-sohbet-meta {
+  font-size: 10px;
+  gap: 6px;
 }
 
 .bank-panel {

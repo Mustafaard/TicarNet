@@ -15161,9 +15161,9 @@ function HomePage({ user, onLogout }) {
             const fromSystem = !/satıcı\s*:/.test(detailLower)
             detailIntro = detailIntro
               ? (fromSystem
-                ? `${currentChatProfileName} sistem pazarından alım yaptı. ${detailIntro}`
+                ? `${currentChatProfileName} pazar yerinden alım yaptı. ${detailIntro}`
                 : `${currentChatProfileName}: ${detailIntro}`)
-              : `${currentChatProfileName} sistem pazarından alım yaptı.`
+              : `${currentChatProfileName} pazar yerinden alım yaptı.`
           } else if (inferredKind === 'market_sell') {
             detailIntro = detailIntro
               ? `${currentChatProfileName}: ${detailIntro}`
