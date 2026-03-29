@@ -15010,9 +15010,9 @@ function HomePage({ user, onLogout }) {
       const day = Math.floor(hour / 24)
       if (day > 0) return `${day} gün önce`
       if (hour > 0) return `${hour} saat önce`
-      if (min > 0) return `${min} dakika önce`
-      if (sec <= 1) return '1 saniye önce'
-      return `${sec} saniye önce`
+      if (min > 0) return `${min} dk önce`
+      if (sec <= 1) return '1 sn önce'
+      return `${sec} sn önce`
     } catch (_) { return '' }
   }
 
@@ -15364,12 +15364,8 @@ function HomePage({ user, onLogout }) {
                           {isExpanded ? 'Gizle' : (entry.promptLabel || 'Dokun')}
                         </span>
                       </button>
-                      <div
-                        id={detailRegionId}
-                        className={`chat-news-expanded-wrap ${isExpanded ? 'is-open' : ''}`.trim()}
-                        aria-hidden={!isExpanded}
-                      >
-                        <div className="chat-news-expanded">
+                      {isExpanded ? (
+                        <div id={detailRegionId} className="chat-news-inline-detail" role="region" aria-label="Haber detayı">
                           {isJoinNews ? (
                             <p className="chat-news-text chat-news-row-subtitle">
                               {(entry.detailIntro || 'Aramıza katılan oyuncu:').replace(/\s*:\s*$/, ':')}{' '}
@@ -15404,7 +15400,7 @@ function HomePage({ user, onLogout }) {
                             </p>
                           )}
                         </div>
-                      </div>
+                      ) : null}
                     </article>
                   )
                 })

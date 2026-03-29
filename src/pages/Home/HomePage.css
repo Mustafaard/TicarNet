@@ -25858,65 +25858,73 @@ select {
 
 .chat-news-list {
   display: grid;
-  gap: 5px;
+  gap: 4px;
 }
 
 .chat-news-item {
-  display: grid;
-  gap: 0;
-  border-radius: 10px;
-  border: 0;
-  background: transparent;
+  display: block;
+  border-radius: 9px;
+  border: 1px solid rgba(92, 154, 224, 0.34);
+  background: linear-gradient(180deg, rgba(6, 20, 39, 0.95), rgba(4, 14, 29, 0.96));
   padding: 0;
+  overflow: hidden;
+  transition: border-color 0.16s ease, background 0.16s ease;
+}
+
+.chat-news-item:hover {
+  border-color: rgba(115, 178, 249, 0.5);
+}
+
+.chat-news-item.is-expanded {
+  border-color: rgba(242, 157, 157, 0.58);
 }
 
 .chat-news-brief {
   width: 100%;
-  border: 1px solid rgba(96, 158, 231, 0.36);
-  background: linear-gradient(180deg, rgba(5, 18, 36, 0.95), rgba(5, 14, 28, 0.97));
-  border-radius: 9px;
-  padding: 6px 9px;
-  min-height: 34px;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  padding: 6px 8px;
+  min-height: 32px;
   color: inherit;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
-  transition: border-color 0.16s ease, background 0.16s ease, transform 0.16s ease;
+  transition: background 0.14s ease;
 }
 
 .chat-news-brief:hover {
-  border-color: rgba(246, 205, 112, 0.52);
-  transform: translateY(-1px);
+  transform: none;
+  background: rgba(8, 25, 45, 0.58);
 }
 
 .chat-news-item.is-expanded .chat-news-brief {
-  border-color: rgba(255, 152, 152, 0.58);
-  background: linear-gradient(180deg, rgba(10, 24, 44, 0.96), rgba(7, 17, 32, 0.98));
+  background: rgba(10, 24, 44, 0.62);
 }
 
 .chat-news-brief-main {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 6px;
   min-width: 0;
 }
 
 .chat-news-strip-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 7px;
-  border: 1px solid rgba(110, 173, 243, 0.44);
-  background: rgba(16, 44, 80, 0.9);
+  width: 16px;
+  height: 16px;
+  border-radius: 6px;
+  border: 1px solid rgba(100, 166, 238, 0.34);
+  background: rgba(11, 35, 67, 0.72);
   display: grid;
   place-items: center;
   flex-shrink: 0;
 }
 
 .chat-news-strip-icon img {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   object-fit: contain;
   display: block;
 }
@@ -25926,24 +25934,25 @@ select {
 }
 
 .chat-news-strip-icon-fallback {
-  font-size: 11px;
+  font-size: 10px;
   line-height: 1;
 }
 
 .chat-news-strip-action {
   flex-shrink: 0;
   border-radius: 999px;
-  border: 1px solid rgba(255, 131, 131, 0.68);
-  background: linear-gradient(180deg, rgba(167, 48, 58, 0.96), rgba(120, 31, 39, 0.98));
+  border: 1px solid rgba(255, 132, 132, 0.62);
+  background: linear-gradient(180deg, rgba(171, 52, 63, 0.96), rgba(126, 33, 43, 0.98));
   color: #ffe4e4;
   font-size: 9px;
   font-weight: 800;
-  padding: 2px 8px;
+  line-height: 1;
+  padding: 3px 7px;
 }
 
 .chat-news-strip-action.is-open {
-  border-color: rgba(246, 206, 119, 0.72);
-  background: linear-gradient(180deg, rgba(196, 145, 52, 0.95), rgba(141, 94, 25, 0.97));
+  border-color: rgba(246, 206, 119, 0.64);
+  background: linear-gradient(180deg, rgba(189, 139, 48, 0.94), rgba(135, 90, 24, 0.96));
   color: #fff2cf;
 }
 
@@ -25963,7 +25972,7 @@ select {
 
 .chat-news-text {
   margin: 0;
-  color: rgba(197, 219, 244, 0.96);
+  color: rgba(206, 224, 245, 0.96);
   font-size: 10px;
   line-height: 1.3;
   text-align: left;
@@ -25971,23 +25980,9 @@ select {
 
 .chat-news-meta {
   margin: 0;
-  color: rgba(174, 202, 236, 0.9);
+  color: rgba(160, 189, 223, 0.92);
   font-size: 9px;
   text-align: left;
-}
-
-.chat-news-expanded-wrap {
-  max-height: 0;
-  overflow: hidden;
-  opacity: 0;
-  transform: translateY(-1px);
-  transition: max-height 0.2s ease, opacity 0.14s ease, transform 0.14s ease;
-}
-
-.chat-news-expanded-wrap.is-open {
-  max-height: 72px;
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .chat-news-chip {
@@ -26009,16 +26004,24 @@ select {
   text-align: left;
 }
 
-.chat-news-expanded {
+.chat-news-inline-detail {
   display: grid;
   gap: 2px;
-  border-radius: 0 0 9px 9px;
-  border: 1px solid rgba(108, 170, 243, 0.2);
-  border-top: 0;
-  background: rgba(5, 17, 33, 0.76);
-  padding: 5px 9px 6px;
-  min-height: 0;
-  overflow: hidden;
+  border-top: 1px solid rgba(105, 165, 236, 0.22);
+  background: rgba(5, 18, 35, 0.78);
+  padding: 4px 8px 6px;
+  animation: chat-news-inline-open 0.16s ease;
+}
+
+@keyframes chat-news-inline-open {
+  from {
+    opacity: 0;
+    transform: translateY(-2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .chat-news-row-subtitle {
@@ -26041,6 +26044,9 @@ select {
 .chat-news-row-meta {
   text-align: left;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .chat-news-name-link {
@@ -26050,13 +26056,18 @@ select {
   padding: 0;
   color: #f8d78f;
   font-size: inherit;
-  font-weight: 900;
+  font-weight: 800;
   cursor: pointer;
   text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .chat-news-name-link:hover {
   color: #ffe9bd;
+}
+
+.chat-news-name-link:active {
+  color: #ffd075;
 }
 
 .chat-news-name-highlight {
@@ -26176,17 +26187,13 @@ select {
   }
 
   .chat-news-brief {
-    padding: 5px 7px;
+    padding: 5px 6px;
     min-height: 30px;
   }
 
   .chat-news-strip-action {
     font-size: 9px;
-    padding: 2px 7px;
-  }
-
-  .chat-news-expanded-wrap.is-open {
-    max-height: 66px;
+    padding: 2px 6px;
   }
 }
 
