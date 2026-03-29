@@ -8265,19 +8265,22 @@ export async function getMarket(userId) {
       if (!itemId) continue
       const itemDef = ITEM_BY_ID.get(itemId)
       if (!itemDef) continue
-      const stock = clamp(asInt(marketItem?.stock, 0), 0, marketStockCap())
-      if (stock > 0) continue
       if (hasOpenSellLimitOrderForItem(db, itemId, nowMs)) continue
+
+      const systemPriceCap = marketSystemPriceCap(itemDef)
+      const previousStock = clamp(asInt(marketItem?.stock, 0), 0, marketStockCap())
       marketItem.stock = MARKET_BOT_RESTOCK_STOCK
       marketItem.lastPrice = clamp(
-        asInt(marketItem?.price, marketSystemPriceCap(itemDef)),
+        asInt(marketItem?.price, systemPriceCap),
         itemDef.minPrice,
-        marketSystemPriceCap(itemDef),
+        systemPriceCap,
       )
-      marketItem.price = marketSystemPriceCap(itemDef)
+      marketItem.price = systemPriceCap
       marketItem.updatedAt = timestamp
       marketItem.depletedAt = ''
-      marketItem.lastRestockedAt = timestamp
+      if (previousStock < MARKET_BOT_RESTOCK_STOCK) {
+        marketItem.lastRestockedAt = timestamp
+      }
       marketItem.lastSystemCheckAt = timestamp
     }
 
@@ -8309,6 +8312,7 @@ export async function getMarket(userId) {
       if (!itemId) continue
       const itemDef = ITEM_BY_ID.get(itemId)
       if (!itemDef) continue
+      if (hasOpenSellLimitOrderForItem(db, itemId, nowMs)) continue
       const systemPrice = marketSystemPriceCap(itemDef)
       const stock = clamp(asInt(marketItem?.stock, MARKET_BOT_RESTOCK_STOCK), 0, MARKET_BOT_RESTOCK_STOCK)
       sellOrders.push({

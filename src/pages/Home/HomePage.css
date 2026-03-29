@@ -26468,7 +26468,8 @@ select {
   background: linear-gradient(180deg, rgba(188, 71, 86, 0.97), rgba(122, 38, 54, 0.97)) !important;
 }
 
-/* Factory collect CTA: centered + green in bulk/accountant modals */
+/* Factory + business collect CTA: centered + green in bulk/accountant modals */
+.fleet-bulk-modal .fleet-modal-actions-bulk,
 .factory-bulk-modal .fleet-modal-actions-bulk,
 .fleet-accountant-modal .fleet-accountant-cta-card,
 .factory-collect-modal .fleet-accountant-cta-card {
@@ -26476,6 +26477,7 @@ select {
   justify-content: center;
 }
 
+.fleet-bulk-modal .btn-collect-main,
 .factory-modal-primary-btn,
 .factory-bulk-modal .btn-collect-main,
 .fleet-accountant-modal .btn-collect-inline,
@@ -26491,11 +26493,13 @@ select {
 }
 
 .factory-modal-primary-btn .btn-icon,
+.fleet-bulk-modal .btn-collect-main .btn-icon,
 .factory-bulk-modal .btn-collect-main .btn-icon,
 .fleet-accountant-modal .btn-collect-inline .btn-icon {
   margin-right: 0 !important;
 }
 
+.fleet-bulk-modal .btn-collect-main,
 .factory-modal-primary-btn,
 .factory-bulk-modal .btn-collect-main,
 .fleet-accountant-modal .btn-collect-inline {
@@ -26508,10 +26512,38 @@ select {
 }
 
 .factory-modal-primary-btn:hover:not(:disabled),
+.fleet-bulk-modal .btn-collect-main:hover:not(:disabled),
 .factory-bulk-modal .btn-collect-main:hover:not(:disabled),
 .fleet-accountant-modal .btn-collect-inline:hover:not(:disabled) {
   border-color: rgba(162, 236, 193, 0.86) !important;
   background: linear-gradient(180deg, rgba(62, 189, 122, 0.98), rgba(28, 136, 83, 0.98)) !important;
+}
+
+/* Mine-style modal background for collection/tax panels */
+.fleet-bulk-modal,
+.factory-bulk-modal,
+.fleet-accountant-modal,
+.factory-collect-modal {
+  border-radius: 24px !important;
+  border: 1px solid rgba(112, 184, 255, 0.4) !important;
+  background:
+    radial-gradient(circle at top right, rgba(255, 205, 94, 0.2), transparent 33%),
+    radial-gradient(circle at top left, rgba(56, 126, 223, 0.28), transparent 42%),
+    linear-gradient(180deg, rgba(9, 26, 52, 0.98), rgba(8, 16, 34, 0.99)) !important;
+  box-shadow:
+    0 24px 52px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(234, 248, 255, 0.08) !important;
+}
+
+.fleet-bulk-modal .fleet-bulk-kpi,
+.fleet-bulk-modal .fleet-bulk-summary,
+.fleet-accountant-modal .fleet-accountant-cta-card,
+.fleet-accountant-modal .fleet-accountant-summary,
+.fleet-accountant-modal .fleet-accountant-footer,
+.factory-bulk-modal .fleet-bulk-summary,
+.factory-collect-modal .fleet-accountant-summary {
+  border-color: rgba(132, 189, 246, 0.24) !important;
+  background: linear-gradient(180deg, rgba(16, 34, 60, 0.9), rgba(9, 20, 38, 0.86)) !important;
 }
 
 /* Non-btn close controls in modal/panel overlays should also be red */
