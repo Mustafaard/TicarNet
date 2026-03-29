@@ -166,7 +166,7 @@ const MESSAGE_ICONS = {
 const CHAT_COMMUNITY_TAB_ITEMS = [
   { id: 'sohbet', label: 'Sohbet', icon: '💬', iconSrc: '/home/icons/sohbet.png', type: 'panel' },
   { id: 'haberler', label: 'Haberler', icon: '📰', iconSrc: '/home/icons/messages/bildirim.webp', type: 'panel' },
-  { id: 'sehir', label: 'Şehir', icon: '🌍', iconSrc: '/home/icons/sehir.webp', type: 'route-home' },
+  { id: 'sehir', label: 'Şehrim', icon: '🌍', iconSrc: '/home/icons/sehir.webp', type: 'route-home' },
 ]
 const CHAT_NEWS_MAX_ITEMS = 50
 
@@ -2762,12 +2762,11 @@ function HomePage({ user, onLogout }) {
   const [chatReplyTarget, setChatReplyTarget] = useState(null)
   const [chatFirstUnreadId, setChatFirstUnreadId] = useState('')
   const [chatCommunityTab, setChatCommunityTab] = useState('sohbet')
-  const [chatSocketState, setChatSocketState] = useState('offline')
+  const [, setChatSocketState] = useState('offline')
   const [chatRestrictions, setChatRestrictions] = useState(EMPTY_CHAT_RESTRICTIONS)
   const [chatClockMs, setChatClockMs] = useState(() => new Date().getTime())
   const [chatRecentPlayers, setChatRecentPlayers] = useState([])
   const [chatRecentPlayersLoading, setChatRecentPlayersLoading] = useState(false)
-  const [chatNewsExpandedId, setChatNewsExpandedId] = useState('')
   const [, setMessageSocketState] = useState('offline')
   const [messageCenter, setMessageCenter] = useState({
     filter: 'all',
@@ -14893,9 +14892,9 @@ function HomePage({ user, onLogout }) {
         avatarUrl,
         createdAt,
         createdAtMs: safeCreatedAtMs,
-        title: 'Yeni Oyuncu Katıldı 👋',
-        tapLabel: 'Bakmak için dokun.',
-        relativeTimeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
+        title: "Yeni bir oyuncu AEA'ya katıldı!",
+        subtitle: `Yeni katılan oyuncunun adı ${username.toLocaleUpperCase('tr-TR')}`,
+        timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
         dateLabel: formatDateTime(createdAt),
       }
     })
@@ -14909,10 +14908,6 @@ function HomePage({ user, onLogout }) {
   const chatView = (
     <section className="panel-stack chat-screen chat-screen-pro">
       <article className="card chat-card chat-card-pro chat-card-clean">
-        <p className="chat-community-tabs-caption">Topluluk Menüsü</p>
-        <p className={`chat-inline-status ${chatSocketState === 'online' ? 'on' : 'off'}`}>
-          {chatSocketState === 'online' ? 'Sohbet canlı' : 'Bağlantı kuruluyor'}
-        </p>
         <div className="chat-community-tabs" role="tablist" aria-label="Oyun sohbet menüsü">
           {CHAT_COMMUNITY_TAB_ITEMS.map((entry) => {
             const isPanel = entry.type === 'panel'
@@ -15146,12 +15141,6 @@ function HomePage({ user, onLogout }) {
         ) : null}
         {chatCommunityTab === 'haberler' ? (
           <section className="chat-side-panel chat-news-panel" aria-label="Yeni oyuncu haberleri">
-            <header className="chat-side-panel-head">
-              <h4 className="chat-side-panel-title">Haberler</h4>
-              <p className="chat-side-panel-sub">
-                Yeni kayıt olan oyuncular burada görünür. En güncel 50 kayıt tutulur.
-              </p>
-            </header>
             <div className="chat-news-list">
               {chatRecentPlayersLoading ? (
                 <p className="chat-news-empty">Yeni oyuncu akışı yükleniyor...</p>
@@ -15159,48 +15148,32 @@ function HomePage({ user, onLogout }) {
                 <p className="chat-news-empty">Henüz yeni oyuncu kaydı görünmüyor.</p>
               ) : (
                 chatNewsFeed.map((entry) => (
-                  <article key={entry.id} className={`chat-news-item news-feed-entry ${chatNewsExpandedId === entry.id ? 'is-expanded' : ''}`.trim()}>
-                    <button
-                      type="button"
-                      className="chat-news-toggle"
-                      onClick={() => {
-                        setChatNewsExpandedId((prev) => (prev === entry.id ? '' : entry.id))
-                      }}
-                    >
-                      <p className="chat-news-title">{entry.title}</p>
-                      <p className="chat-news-text">{entry.tapLabel}</p>
-                      <p className="chat-news-meta">
-                        {entry.relativeTimeLabel}
-                        {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
-                      </p>
-                    </button>
-                    {chatNewsExpandedId === entry.id ? (
-                      <div className="chat-news-detail">
+                  <article key={entry.id} className="chat-news-item chat-news-row">
+                    <p className="chat-news-title chat-news-row-title">{entry.title}</p>
+                    <p className="chat-news-text chat-news-row-subtitle">
+                      Yeni katılan oyuncu:{' '}
+                      {entry.userId ? (
                         <button
                           type="button"
-                          className="chat-news-player"
+                          className="chat-news-name-link"
                           onClick={() => {
-                            if (!entry.userId) return
                             void openProfileModal(entry.userId, {
                               username: entry.username,
                               displayName: entry.username,
                               avatarUrl: entry.avatarUrl,
                             })
                           }}
-                          disabled={!entry.userId}
                         >
-                          <img
-                            src={entry.avatarUrl || DEFAULT_CHAT_AVATAR}
-                            alt=""
-                            onError={(event) => { event.currentTarget.src = DEFAULT_CHAT_AVATAR }}
-                          />
-                          <span>{entry.username}</span>
+                          {entry.username}
                         </button>
-                        <p className="chat-news-detail-time">
-                          Kayıt zamanı: {entry.dateLabel && entry.dateLabel !== '-' ? entry.dateLabel : 'Bilinmiyor'}
-                        </p>
-                      </div>
-                    ) : null}
+                      ) : (
+                        <span>{entry.username}</span>
+                      )}
+                    </p>
+                    <p className="chat-news-meta chat-news-row-meta">
+                      ({entry.timeLabel})
+                      {entry.dateLabel && entry.dateLabel !== '-' ? ` • ${entry.dateLabel}` : ''}
+                    </p>
                   </article>
                 ))
               )}

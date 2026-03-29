@@ -8258,8 +8258,29 @@ export async function getMarket(userId) {
     runGameTick(db, profile, timestamp)
     ensureFriendRequestsRoot(db)
 
-    const items = db.marketState.items.map((item) => marketItemView(profile, item))
     const nowMs = createdMs(timestamp) || Date.now()
+    for (const marketItem of Array.isArray(db?.marketState?.items) ? db.marketState.items : []) {
+      const itemId = String(marketItem?.id || '').trim()
+      if (!itemId) continue
+      const itemDef = ITEM_BY_ID.get(itemId)
+      if (!itemDef) continue
+      const stock = clamp(asInt(marketItem?.stock, 0), 0, marketStockCap())
+      if (stock > 0) continue
+      if (hasOpenSellLimitOrderForItem(db, itemId, nowMs)) continue
+      marketItem.stock = MARKET_BOT_RESTOCK_STOCK
+      marketItem.lastPrice = clamp(
+        asInt(marketItem?.price, marketSystemPriceCap(itemDef)),
+        itemDef.minPrice,
+        marketSystemPriceCap(itemDef),
+      )
+      marketItem.price = marketSystemPriceCap(itemDef)
+      marketItem.updatedAt = timestamp
+      marketItem.depletedAt = ''
+      marketItem.lastRestockedAt = timestamp
+      marketItem.lastSystemCheckAt = timestamp
+    }
+
+    const items = db.marketState.items.map((item) => marketItemView(profile, item))
     const openOrders = limitOrderView(profile).filter((order) => isOpenOrderSnapshotActive(order, nowMs))
 
     const sellOrders = []
@@ -8288,7 +8309,6 @@ export async function getMarket(userId) {
       const itemDef = ITEM_BY_ID.get(itemId)
       if (!itemDef) continue
       const stock = clamp(asInt(marketItem?.stock, 0), 0, marketStockCap())
-      if (stock <= 0) continue
       const systemPrice = clamp(
         asInt(marketItem?.price, marketSystemPriceCap(itemDef)),
         itemDef.minPrice,
@@ -8300,7 +8320,7 @@ export async function getMarket(userId) {
         itemName: itemDef.name || itemId,
         quantity: stock,
         limitPrice: systemPrice,
-        sellerName: 'Sistem Pazarı',
+        sellerName: 'Sistem Pazari',
         sellerUserId: '',
         source: 'system',
         isSystem: true,

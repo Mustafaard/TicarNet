@@ -25688,162 +25688,96 @@ select {
 
 .chat-news-list {
   display: grid;
-  gap: 9px;
+  gap: 8px;
 }
 
 .chat-news-item {
   display: grid;
-  grid-template-columns: 46px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 9px;
-  border-radius: 12px;
-  border: 1px solid rgba(104, 164, 236, 0.32);
-  background: linear-gradient(180deg, rgba(15, 43, 80, 0.82), rgba(10, 29, 54, 0.9));
-  padding: 8px 9px;
+  grid-template-columns: 1fr;
+  gap: 4px;
+  border-radius: 11px;
+  border: 1px solid rgba(93, 148, 216, 0.34);
+  background: rgba(6, 23, 42, 0.94);
+  padding: 10px 12px;
 }
 
 .chat-news-avatar {
-  width: 46px;
-  height: 46px;
-  border: 0;
-  padding: 0;
-  border-radius: 12px;
-  overflow: hidden;
-  cursor: pointer;
-  background: rgba(8, 20, 38, 0.8);
-  border: 1px solid rgba(118, 177, 247, 0.45);
+  display: none;
 }
 
 .chat-news-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  display: none;
 }
 
 .chat-news-copy {
-  min-width: 0;
-  display: grid;
-  gap: 3px;
+  display: none;
 }
 
 .chat-news-title {
   margin: 0;
-  color: #f6f9ff;
-  font-size: 13px;
+  color: #ecf4ff;
+  font-size: 14px;
   font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
 }
 
 .chat-news-text {
   margin: 0;
-  color: rgba(181, 207, 239, 0.95);
+  color: rgba(187, 211, 240, 0.94);
   font-size: 12px;
   line-height: 1.3;
+  text-align: center;
 }
 
 .chat-news-meta {
   margin: 0;
-  color: rgba(158, 186, 223, 0.82);
+  color: rgba(248, 158, 158, 0.9);
   font-size: 11px;
+  text-align: right;
 }
 
 .chat-news-chip {
-  padding: 4px 8px;
-  border-radius: 999px;
-  border: 1px solid rgba(244, 197, 94, 0.72);
-  background: linear-gradient(180deg, rgba(156, 112, 34, 0.85), rgba(112, 72, 16, 0.85));
-  color: #ffebb8;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  display: none;
 }
 
 .chat-news-empty {
   margin: 0;
-  border-radius: 12px;
-  border: 1px dashed rgba(116, 172, 239, 0.34);
-  background: rgba(8, 24, 45, 0.72);
-  color: rgba(182, 205, 236, 0.9);
+  border-radius: 11px;
+  border: 1px solid rgba(93, 148, 216, 0.32);
+  background: rgba(6, 23, 42, 0.94);
+  color: rgba(186, 208, 236, 0.9);
   padding: 12px;
   text-align: center;
   font-size: 12px;
 }
 
-.chat-news-item.news-feed-entry {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  align-items: stretch;
+.chat-news-row-title {
+  text-align: center;
 }
 
-.chat-news-toggle {
+.chat-news-row-subtitle {
+  text-align: center;
+}
+
+.chat-news-row-meta {
+  text-align: right;
+}
+
+.chat-news-name-link {
+  appearance: none;
   border: 0;
-  background: transparent;
-  width: 100%;
-  text-align: left;
+  background: none;
   padding: 0;
-  display: grid;
-  gap: 3px;
-  cursor: pointer;
-}
-
-.chat-news-item.news-feed-entry.is-expanded {
-  border-color: rgba(243, 197, 94, 0.62);
-}
-
-.chat-news-item.news-feed-entry .chat-news-title {
-  font-size: 14px;
-}
-
-.chat-news-item.news-feed-entry .chat-news-text {
-  color: rgba(214, 233, 255, 0.9);
-  font-weight: 700;
-}
-
-.chat-news-item.news-feed-entry .chat-news-meta {
-  color: rgba(253, 207, 134, 0.9);
-}
-
-.chat-news-detail {
-  border-top: 1px solid rgba(119, 176, 244, 0.28);
-  padding-top: 8px;
-  display: grid;
-  gap: 6px;
-}
-
-.chat-news-player {
-  border: 0;
-  background: rgba(10, 29, 53, 0.72);
-  border-radius: 10px;
-  min-height: 40px;
-  padding: 6px 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: #f3f7ff;
-  font-size: 13px;
+  color: #f8d78f;
+  font-size: inherit;
   font-weight: 800;
-  width: fit-content;
   cursor: pointer;
+  text-decoration: underline;
 }
 
-.chat-news-player:disabled {
-  opacity: 0.56;
-  cursor: not-allowed;
-}
-
-.chat-news-player img {
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 1px solid rgba(120, 179, 245, 0.4);
-}
-
-.chat-news-detail-time {
-  margin: 0;
-  color: rgba(187, 209, 239, 0.9);
-  font-size: 12px;
+.chat-news-name-link:hover {
+  color: #ffe9bd;
 }
 
 /* DM gorunumu: daha temiz mavi-altin cam */
