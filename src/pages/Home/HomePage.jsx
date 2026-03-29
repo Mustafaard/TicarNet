@@ -1902,6 +1902,39 @@ function pruneNewsRecords(list, limit = CHAT_NEWS_MAX_ITEMS) {
     .map((entry) => entry.entry)
 }
 
+function dedupeFeedEntries(list, limit = CHAT_NEWS_MAX_ITEMS) {
+  const parsedLimit = Number(limit)
+  const safeLimit = Number.isFinite(parsedLimit) && parsedLimit > 0
+    ? Math.max(1, Math.trunc(parsedLimit))
+    : CHAT_NEWS_MAX_ITEMS
+  const safeList = Array.isArray(list) ? list.filter(Boolean) : []
+  const normalizeText = (value) => String(value || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toLocaleLowerCase('tr')
+  const seen = new Set()
+  const deduped = []
+  for (const entry of safeList) {
+    if (!entry || typeof entry !== 'object') continue
+    const createdAt = String(entry?.createdAt || '').trim()
+    const createdAtMs = Date.parse(createdAt)
+    const timeBucket = Number.isFinite(createdAtMs)
+      ? Math.trunc(createdAtMs / 1000)
+      : 0
+    const source = normalizeText(entry?.source || entry?.kind || entry?.type || '')
+    const title = normalizeText(entry?.title || '')
+    const detail = normalizeText(
+      entry?.detailIntro ?? entry?.message ?? entry?.detail ?? entry?.preview ?? '',
+    )
+    const key = `${source}|${timeBucket}|${title}|${detail}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    deduped.push(entry)
+    if (deduped.length >= safeLimit) break
+  }
+  return deduped
+}
+
 function safeIsoDate(value) {
   const parsed = parseSafeDate(value)
   return parsed ? parsed.toISOString() : ''
@@ -8061,6 +8094,14 @@ function HomePage({ user, onLogout }) {
     ? EMPTY_MESSAGE_UNREAD
     : normalizeMessageUnreadCounters(messageCenter?.unread)
   const _messageItems = MESSAGES_DISABLED ? [] : (messageCenter?.items || [])
+  const messageDirectItems = useMemo(
+    () => _messageItems.filter((item) => item?.source === 'direct' || item?.filter === 'message'),
+    [_messageItems],
+  )
+  const messageNotificationItems = useMemo(() => {
+    const rows = _messageItems.filter((item) => !(item?.source === 'direct' || item?.filter === 'message'))
+    return dedupeFeedEntries(rows, Math.max(1, rows.length || 1))
+  }, [_messageItems])
   const messageSpotlight = MESSAGES_DISABLED ? null : (messageCenter?.spotlight || null)
   const _unreadMessageCountRaw = MESSAGES_DISABLED ? 0 : Number(messageCenter?.unreadCount || 0)
   const _unreadMessageCount = Number.isFinite(_unreadMessageCountRaw) && _unreadMessageCountRaw > 0
@@ -15046,58 +15087,140 @@ function HomePage({ user, onLogout }) {
       }
     })
 
-  const chatActivityNewsFeed = pruneNewsRecords(_messageItems, CHAT_NEWS_MAX_ITEMS)
-    .map((entry, index) => {
-      const source = String(entry?.source || '').trim().toLowerCase()
-      if (source !== 'transaction') return null
-      const type = String(entry?.type || '').trim().toLowerCase()
-      const rawTitle = normalizeMojibakeText(String(entry?.title || '').trim())
-      const rawDetail = normalizeMojibakeText(
-        String(entry?.message ?? entry?.detail ?? entry?.preview ?? '').trim(),
-      )
-      const titleLower = rawTitle.toLocaleLowerCase('tr')
-      const detailLower = rawDetail.toLocaleLowerCase('tr')
-      const isMarketBuy = type === 'market'
-        && (/al[ıi]m/.test(titleLower) || /sat[ıi]n al[ıi]nd[ıi]/.test(detailLower))
-      const isMarketSell = type === 'market'
-        && (/sat[ıi][şs]/.test(titleLower) || /sat[ıi]ld[ıi]/.test(detailLower))
-      const isFactoryUpgrade = type === 'factory' && /y[üu]kselt/.test(detailLower)
-      if (!isMarketBuy && !isMarketSell && !isFactoryUpgrade) return null
+  const currentChatProfileName = normalizeMojibakeText(
+    String(
+      overview?.profile?.username
+      || overview?.profile?.displayName
+      || user?.username
+      || user?.displayName
+      || 'Oyuncu',
+    ).trim() || 'Oyuncu',
+  )
+  const currentChatProfileUserId = String(
+    overview?.profile?.userId
+    || user?.id
+    || '',
+  ).trim()
+  const chatActivityNewsFeed = dedupeFeedEntries(
+    pruneNewsRecords(messageNotificationItems, CHAT_NEWS_MAX_ITEMS * 3)
+      .map((entry, index) => {
+        const source = String(entry?.source || '').trim().toLowerCase()
+        const type = String(entry?.type || '').trim().toLowerCase()
+        const kindRaw = String(entry?.kind || '').trim().toLowerCase()
+        const rawDetail = normalizeMojibakeText(
+          String(entry?.message ?? entry?.detail ?? entry?.preview ?? '').trim(),
+        )
+        const detailLower = rawDetail.toLocaleLowerCase('tr')
+        const inferredKind = (() => {
+          if (kindRaw) return kindRaw
+          if (type === 'market') {
+            if (/sat[ıi][şs]|sat[ıi]ld[ıi]/.test(detailLower)) return 'market_sell'
+            if (/al[ıi]m|sat[ıi]n al[ıi]nd[ıi]/.test(detailLower)) return 'market_buy'
+          }
+          if (type === 'factory') {
+            if (/sat[ıi]n al[ıi]nd[ıi]|kuruld/.test(detailLower)) return 'factory_buy'
+            if (/y[üu]kselt/.test(detailLower)) return 'factory_upgrade_start'
+          }
+          if (type === 'business' && /sat[ıi]ld[ıi]/.test(detailLower)) return 'vehicle_market_sell'
+          return ''
+        })()
+        const createdAt = String(entry?.createdAt || '').trim()
+        const createdAtMs = Date.parse(createdAt)
+        const safeCreatedAtMs = Number.isFinite(createdAtMs) ? createdAtMs : 0
+        const amount = Number(entry?.amount)
+        const hasAmount = Number.isFinite(amount) && Math.trunc(amount) !== 0
+        const amountInt = hasAmount ? Math.trunc(amount) : 0
+        let newsKind = ''
+        let title = ''
+        let detailIntro = rawDetail
+        let username = currentChatProfileName
+        let userId = currentChatProfileUserId
 
-      const createdAt = String(entry?.createdAt || '').trim()
-      const createdAtMs = Date.parse(createdAt)
-      const safeCreatedAtMs = Number.isFinite(createdAtMs) ? createdAtMs : 0
-      const detailIntro = rawDetail || (isFactoryUpgrade
-        ? 'Fabrika seviyesi yükseltildi.'
-        : isMarketSell
-          ? 'Pazar satım işlemi tamamlandı.'
-          : 'Pazar alım işlemi tamamlandı.')
-      const activityTitle = isFactoryUpgrade
-        ? 'Fabrika seviyesi yükseltildi!'
-        : isMarketSell
-          ? 'Pazarda satım işlemi gerçekleşti!'
-          : 'Pazarda alım işlemi gerçekleşti!'
+        if (source === 'transaction') {
+          if (inferredKind === 'market_buy') {
+            newsKind = 'activity-market-buy'
+            title = 'Pazarda alım işlemi yapıldı!'
+          } else if (inferredKind === 'market_sell') {
+            newsKind = 'activity-market-sell'
+            title = 'Pazarda satış işlemi yapıldı!'
+          } else if (inferredKind === 'factory_buy') {
+            newsKind = 'activity-factory-buy'
+            title = 'Yeni fabrika kuruldu!'
+          } else if (inferredKind === 'factory_upgrade_start') {
+            newsKind = 'activity-factory-upgrade'
+            title = 'Fabrika geliştirildi!'
+          } else if (inferredKind === 'business_vehicle_build' || inferredKind === 'logistics_truck_buy') {
+            newsKind = 'activity-business-build'
+            title = 'İşletmede üretim tamamlandı!'
+          } else if (inferredKind === 'vehicle_market_sell') {
+            newsKind = 'activity-vehicle-market-sell'
+            title = 'İlanlı araç satışı gerçekleşti!'
+          }
+          if (!newsKind) return null
+          if (inferredKind === 'market_buy') {
+            const fromSystem = !/satıcı\s*:/.test(detailLower)
+            detailIntro = detailIntro
+              ? (fromSystem
+                ? `${currentChatProfileName} sistem pazarından alım yaptı. ${detailIntro}`
+                : `${currentChatProfileName}: ${detailIntro}`)
+              : `${currentChatProfileName} sistem pazarından alım yaptı.`
+          } else if (inferredKind === 'market_sell') {
+            detailIntro = detailIntro
+              ? `${currentChatProfileName}: ${detailIntro}`
+              : `${currentChatProfileName} pazarda satış işlemi yaptı.`
+          } else {
+            detailIntro = detailIntro
+              ? `${currentChatProfileName}: ${detailIntro}`
+              : `${currentChatProfileName} yeni bir işlem gerçekleştirdi.`
+          }
+        } else if (source === 'notification' || source === 'push') {
+          const isMineEvent = type === 'mine' || /maden|kaz[ıi]/.test(detailLower)
+          const isMessagePenalty = /mesaj engeli|sustur|k[üu]f[üu]r/.test(detailLower)
+          if (isMineEvent) {
+            newsKind = 'activity-mine'
+            title = 'Maden üretimi tamamlandı!'
+            username = currentChatProfileName
+            userId = currentChatProfileUserId
+          } else if (isMessagePenalty) {
+            newsKind = 'activity-message-penalty'
+            title = 'Mesaj engeli bildirimi geldi!'
+            username = 'Yönetim'
+            userId = ''
+          } else {
+            return null
+          }
+          detailIntro = detailIntro || 'Detay bilgisi bulunamadı.'
+        } else {
+          return null
+        }
 
-      return {
-        id: `activity:${String(entry?.id || index)}`,
-        kind: isFactoryUpgrade
-          ? 'activity-factory-upgrade'
-          : isMarketSell
-            ? 'activity-market-sell'
-            : 'activity-market-buy',
-        userId: '',
-        username: 'TicarNet',
-        avatarUrl: '',
-        createdAt,
-        createdAtMs: safeCreatedAtMs,
-        title: activityTitle,
-        promptLabel: 'Dokun',
-        detailIntro,
-        timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
-        dateLabel: '',
-      }
-    })
-    .filter(Boolean)
+        if (hasAmount) {
+          const cashLabel = amountInt > 0
+            ? `Kazanılan nakit: +${fmt(amountInt)}`
+            : `Harcanan nakit: -${fmt(Math.abs(amountInt))}`
+          detailIntro = `${detailIntro}${detailIntro ? ' • ' : ''}${cashLabel}`
+        }
+
+        return {
+          id: `activity:${String(entry?.id || index)}`,
+          kind: newsKind,
+          source,
+          type,
+          userId,
+          username,
+          avatarUrl: '',
+          createdAt,
+          createdAtMs: safeCreatedAtMs,
+          title,
+          promptLabel: 'Dokun',
+          detailIntro,
+          timeLabel: formatMessageTimeAgo(createdAt) || 'Az önce',
+          dateLabel: '',
+        }
+      })
+      .filter(Boolean),
+    CHAT_NEWS_MAX_ITEMS * 2,
+  )
 
   const chatAnnouncementFeed = pruneNewsRecords(cityAnnouncements, CHAT_NEWS_MAX_ITEMS)
     .map((entry, index) => {
@@ -15122,13 +15245,15 @@ function HomePage({ user, onLogout }) {
       }
     })
 
-  const chatNewsFeed = [...chatPlayerNewsFeed, ...chatActivityNewsFeed, ...chatAnnouncementFeed]
-    .sort((left, right) => {
-      const diff = (right?.createdAtMs || 0) - (left?.createdAtMs || 0)
-      if (diff !== 0) return diff
-      return String(left?.id || '').localeCompare(String(right?.id || ''), 'tr')
-    })
-    .slice(0, CHAT_NEWS_MAX_ITEMS)
+  const chatNewsFeed = dedupeFeedEntries(
+    [...chatPlayerNewsFeed, ...chatActivityNewsFeed, ...chatAnnouncementFeed]
+      .sort((left, right) => {
+        const diff = (right?.createdAtMs || 0) - (left?.createdAtMs || 0)
+        if (diff !== 0) return diff
+        return String(left?.id || '').localeCompare(String(right?.id || ''), 'tr')
+      }),
+    CHAT_NEWS_MAX_ITEMS,
+  )
 
   useEffect(() => {
     if (!chatNewsExpandedId) return
@@ -15901,15 +16026,14 @@ function HomePage({ user, onLogout }) {
             ) : (
             <>
               <div className="message-gold-list">
-                {(_messageItems.filter((item) => item?.source === 'direct' || item?.filter === 'message')).length === 0 ? (
+                {messageDirectItems.length === 0 ? (
                   <div className="message-gold-empty">
                     <img src="/splash/logo.png" alt="" className="message-gold-empty-icon" onError={(e) => { e.target.style.display = 'none' }} />
                     <p className="message-gold-empty-text">Özel mesajlar burada listelenir.</p>
                     <p className="message-gold-empty-muted">Şu anda mesaj yok.</p>
                   </div>
                 ) : (
-                  _messageItems
-                    .filter((item) => item?.source === 'direct' || item?.filter === 'message')
+                  messageDirectItems
                     .map((item) => {
                       const detail =
                         normalizeMojibakeText(String(item?.message ?? item?.preview ?? '').trim()) || 'Mesaj'
@@ -15995,15 +16119,14 @@ function HomePage({ user, onLogout }) {
             )
           ) : (
             <div className="message-gold-list">
-              {_messageItems.filter((item) => !(item?.source === 'direct' || item?.filter === 'message')).length === 0 ? (
+              {messageNotificationItems.length === 0 ? (
                 <div className="message-gold-empty">
                   <img src="/home/icons/messages/bildirim.webp" alt="" className="message-gold-empty-icon" onError={(e) => { e.target.style.display = 'none' }} />
                   <p className="message-gold-empty-text">Bildirimler burada listelenir.</p>
                   <p className="message-gold-empty-muted">Şu anda bildirim yok.</p>
                 </div>
               ) : (
-              _messageItems
-                .filter((item) => !(item?.source === 'direct' || item?.filter === 'message'))
+              messageNotificationItems
                 .map((item) => {
                   const sourceType = item?.type ?? item?.kind ?? item?.filter ?? 'other'
                   const friendRequest = item?.source === 'friend_request' ? item?.request : null
@@ -16024,9 +16147,19 @@ function HomePage({ user, onLogout }) {
                     /Detaylar için buraya tıklayabilirsin/i.test(rawDetail) ||
                     /Başlangıç sermayen/i.test(rawDetail) ||
                     /Başlangıç paketin tanımlandı/i.test(rawDetail)
+                  const transactionAmountRaw = Number(item?.amount)
+                  const transactionAmount = Number.isFinite(transactionAmountRaw)
+                    ? Math.trunc(transactionAmountRaw)
+                    : 0
+                  const hasTransactionAmount = item?.source === 'transaction' && transactionAmount !== 0
+                  const transactionCashLabel = hasTransactionAmount
+                    ? (transactionAmount > 0
+                      ? `Kazanılan nakit: +${fmt(transactionAmount)}`
+                      : `Harcanan nakit: -${fmt(Math.abs(transactionAmount))}`)
+                    : ''
                   const detail = isStarterNotice
                     ? "TicarNet'e hoş geldin. Başlangıç paketin verildi: 2.000.000 Nakit, 500 Petrol, 200 Enerji, 3.000 Motor, 3.000 Yedek Parça. Detaylar için tıkla."
-                    : rawDetail
+                    : `${rawDetail}${transactionCashLabel ? ` • ${transactionCashLabel}` : ''}`
                   const handleClick = () => {
                     if (isIncomingFriendRequest) return
                     const itemSource = String(item?.source || '').trim().toLowerCase()

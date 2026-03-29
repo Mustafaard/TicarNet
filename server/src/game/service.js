@@ -7947,10 +7947,12 @@ function transactionItemView(entry) {
   const detail = String(entry.detail || '').trim()
   const amount = asInt(entry.amount, 0)
   const amountLabel = amount >= 0 ? `+${amount}` : `${amount}`
+  const kind = String(entry.kind || '').trim().toLowerCase()
   return {
     id: `txn:${entry.id}`,
     source: 'transaction',
     filter: 'trade',
+    kind,
     type: transactionSourceType(entry.kind),
     title: transactionTitle(entry.kind),
     message: detail,
