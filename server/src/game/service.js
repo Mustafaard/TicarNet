@@ -107,6 +107,7 @@ const LOGISTICS_MAX_TRUCK_COUNT = 1000
 const COLLECTION_TAX_RATE = 0.01
 const MARKET_TAX_RATE = 0.10
 const MARKET_BOT_RESTOCK_DELAY_MS = 3 * MS_HOUR
+const MARKET_SYSTEM_CHECK_INTERVAL_MS = MARKET_BOT_RESTOCK_DELAY_MS
 const MARKET_BOT_RESTOCK_STOCK = 5000
 const WEEKLY_EVENT_TIMEZONE = 'Europe/Istanbul'
 const WEEKLY_EVENT_XP_MULTIPLIER = 2
@@ -2409,6 +2410,7 @@ function createInitialMarketState(timestamp) {
       updatedAt: timestamp,
       depletedAt: '',
       lastRestockedAt: timestamp,
+      lastSystemCheckAt: timestamp,
     })),
   }
 }
@@ -2450,6 +2452,7 @@ function normalizeMarketState(marketState, timestamp) {
       updatedAt: typeof source?.updatedAt === 'string' ? source.updatedAt : timestamp,
       depletedAt: typeof source?.depletedAt === 'string' ? source.depletedAt : '',
       lastRestockedAt: typeof source?.lastRestockedAt === 'string' ? source.lastRestockedAt : '',
+      lastSystemCheckAt: typeof source?.lastSystemCheckAt === 'string' ? source.lastSystemCheckAt : '',
     }
   })
 
@@ -5800,24 +5803,55 @@ function tickShipments(profile, timestamp) {
   }
 }
 
-function hasOpenSellLimitOrderForItem(db, itemId) {
+function orderExpiresAtMs(order) {
+  const expiresAt = typeof order?.expiresAt === 'string' ? order.expiresAt : ''
+  return createdMs(expiresAt)
+}
+
+function isSellLimitOrderActive(order, nowMs = Date.now()) {
+  if (!order || order.status !== 'open' || order.side !== 'sell') return false
+  if (orderRemainingQuantity(order) <= 0) return false
+  const expiresMs = orderExpiresAtMs(order)
+  if (Number.isFinite(expiresMs) && expiresMs > 0 && expiresMs <= nowMs) return false
+  return true
+}
+
+function expireStaleOpenLimitOrders(db, timestamp) {
+  const nowMs = createdMs(timestamp) || Date.now()
+  const profiles = Array.isArray(db?.gameProfiles) ? db.gameProfiles : []
+  for (const profile of profiles) {
+    const orders = Array.isArray(profile?.limitOrders) ? profile.limitOrders : []
+    for (const order of orders) {
+      if (!order || order.status !== 'open') continue
+      const expiresMs = orderExpiresAtMs(order)
+      if (!Number.isFinite(expiresMs) || expiresMs <= 0 || expiresMs > nowMs) continue
+      order.status = 'expired'
+      order.updatedAt = timestamp
+      if (order.side === 'sell') {
+        releaseSellOrderReserve(profile, order)
+      }
+    }
+  }
+}
+
+function hasOpenSellLimitOrderForItem(db, itemId, nowMs = Date.now()) {
   const safeItemId = String(itemId || '').trim()
   if (!safeItemId) return false
   const profiles = Array.isArray(db?.gameProfiles) ? db.gameProfiles : []
   for (const profile of profiles) {
     const orders = Array.isArray(profile?.limitOrders) ? profile.limitOrders : []
     for (const order of orders) {
-      if (!order || order.status !== 'open' || order.side !== 'sell') continue
+      if (!isSellLimitOrderActive(order, nowMs)) continue
       if (String(order.itemId || '').trim() !== safeItemId) continue
-      if (orderRemainingQuantity(order) <= 0) continue
       return true
     }
   }
   return false
 }
 
-function tickMarket(db, marketState, timestamp) {
-  const nowMs = new Date(timestamp).getTime()
+function tickMarket(db, marketState, timestamp, options = {}) {
+  const nowMs = createdMs(timestamp) || Date.now()
+  const forceSystemCheck = options?.forceSystemCheck === true
 
   for (const marketItem of marketState.items) {
     const def = ITEM_BY_ID.get(marketItem.id)
@@ -5830,28 +5864,35 @@ function tickMarket(db, marketState, timestamp) {
     const currentPrice = clamp(asInt(marketItem.price, def.maxPrice), def.minPrice, def.maxPrice)
     marketItem.price = currentPrice
 
-    const hasOpenPlayerSellOrder = hasOpenSellLimitOrderForItem(db, marketItem.id)
-    const lastRestockedAtRaw = typeof marketItem.lastRestockedAt === 'string' ? marketItem.lastRestockedAt : ''
-    const lastRestockedAtMs = new Date(lastRestockedAtRaw).getTime()
-    const restockDelayPassed = !Number.isFinite(lastRestockedAtMs) || (nowMs - lastRestockedAtMs >= MARKET_BOT_RESTOCK_DELAY_MS)
+    const lastSystemCheckAtRaw =
+      typeof marketItem.lastSystemCheckAt === 'string' ? marketItem.lastSystemCheckAt : ''
+    const lastSystemCheckAtMs = createdMs(lastSystemCheckAtRaw)
+    const shouldRunSystemCheck =
+      forceSystemCheck ||
+      !Number.isFinite(lastSystemCheckAtMs) ||
+      lastSystemCheckAtMs <= 0 ||
+      (nowMs - lastSystemCheckAtMs >= MARKET_SYSTEM_CHECK_INTERVAL_MS)
 
-    if (!hasOpenPlayerSellOrder && currentStock < stockCap && restockDelayPassed) {
-      marketItem.stock = MARKET_BOT_RESTOCK_STOCK
-      marketItem.lastPrice = marketItem.price
-      marketItem.price = def.maxPrice
-      marketItem.updatedAt = timestamp
-      marketItem.depletedAt = ''
-      marketItem.lastRestockedAt = timestamp
-      continue
+    if (shouldRunSystemCheck) {
+      const hasActiveSellListing = hasOpenSellLimitOrderForItem(db, marketItem.id, nowMs)
+      if (!hasActiveSellListing && currentStock < stockCap) {
+        marketItem.stock = MARKET_BOT_RESTOCK_STOCK
+        marketItem.lastPrice = marketItem.price
+        marketItem.price = def.maxPrice
+        marketItem.updatedAt = timestamp
+        marketItem.depletedAt = ''
+        marketItem.lastRestockedAt = timestamp
+      }
+      marketItem.lastSystemCheckAt = timestamp
     }
 
-    if (currentStock > 0) {
+    if (marketItem.stock > 0) {
       if (marketItem.depletedAt) {
         marketItem.depletedAt = ''
       }
     } else {
       const depletedAtRaw = typeof marketItem.depletedAt === 'string' ? marketItem.depletedAt : ''
-      if (!depletedAtRaw || !Number.isFinite(new Date(depletedAtRaw).getTime())) {
+      if (!depletedAtRaw || createdMs(depletedAtRaw) <= 0) {
         marketItem.depletedAt = timestamp
       }
     }
@@ -6736,6 +6777,7 @@ function tickContracts(profile, timestamp) {
 function runGameTick(db, profile, timestamp) {
   normalizeAllProfiles(db, timestamp)
   normalizeLeagueState(profile, timestamp)
+  expireStaleOpenLimitOrders(db, timestamp)
   tickMarket(db, db.marketState, timestamp)
   const forexTickResult = tickForex(db.forexState, timestamp)
   if (forexTickResult?.updated) {
@@ -7204,6 +7246,21 @@ function limitOrderView(profile) {
     }))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 60)
+}
+
+function isOpenOrderSnapshotActive(order, nowMs = Date.now()) {
+  if (!order || order.status !== 'open') return false
+  const remaining = Math.max(
+    0,
+    asInt(
+      order.remainingQuantity,
+      asInt(order.quantity, 0) - asInt(order.filledQuantity, 0),
+    ),
+  )
+  if (remaining <= 0) return false
+  const expiresMs = createdMs(order?.expiresAt || '')
+  if (Number.isFinite(expiresMs) && expiresMs > 0 && expiresMs <= nowMs) return false
+  return true
 }
 
 function shipmentView(profile) {
@@ -8194,16 +8251,16 @@ export async function getMarket(userId) {
     ensureFriendRequestsRoot(db)
 
     const items = db.marketState.items.map((item) => marketItemView(profile, item))
-    const openOrders = limitOrderView(profile).filter((o) => o.status === 'open')
+    const nowMs = createdMs(timestamp) || Date.now()
+    const openOrders = limitOrderView(profile).filter((order) => isOpenOrderSnapshotActive(order, nowMs))
 
     const sellOrders = []
     for (const p of db.gameProfiles) {
       if (p.userId === profile.userId) continue
       const orders = Array.isArray(p.limitOrders) ? p.limitOrders : []
       for (const order of orders) {
-        if (!order || order.status !== 'open' || order.side !== 'sell') continue
+        if (!isSellLimitOrderActive(order, nowMs)) continue
         const remaining = orderRemainingQuantity(order)
-        if (remaining <= 0) continue
         const itemDef = ITEM_BY_ID.get(order.itemId)
         if (!itemDef) continue
         sellOrders.push({
@@ -8241,6 +8298,64 @@ export async function getMarket(userId) {
       updatedAt: timestamp,
     }
 
+    return db
+  })
+
+  return result
+}
+
+export async function runSystemMarketMaintenance() {
+  let result = {
+    success: true,
+    updated: false,
+    checkedItems: 0,
+    restockedItems: 0,
+    updatedAt: '',
+  }
+
+  await updateDb((db) => {
+    const timestamp = nowIso()
+    ensureGameRoot(db, timestamp)
+    expireStaleOpenLimitOrders(db, timestamp)
+
+    const beforeByItemId = new Map(
+      (Array.isArray(db?.marketState?.items) ? db.marketState.items : []).map((item) => [
+        String(item?.id || '').trim(),
+        {
+          stock: Math.max(0, asInt(item?.stock, 0)),
+          lastRestockedAt: String(item?.lastRestockedAt || '').trim(),
+          lastSystemCheckAt: String(item?.lastSystemCheckAt || '').trim(),
+        },
+      ]),
+    )
+
+    tickMarket(db, db.marketState, timestamp, { forceSystemCheck: true })
+
+    let checkedItems = 0
+    let restockedItems = 0
+    for (const item of Array.isArray(db?.marketState?.items) ? db.marketState.items : []) {
+      const itemId = String(item?.id || '').trim()
+      const previous = beforeByItemId.get(itemId) || null
+      const checkedNow = String(item?.lastSystemCheckAt || '').trim() === timestamp
+      if (checkedNow) {
+        checkedItems += 1
+      }
+      const restockedNow =
+        String(item?.lastRestockedAt || '').trim() === timestamp &&
+        String(previous?.lastRestockedAt || '').trim() !== timestamp &&
+        Math.max(0, asInt(item?.stock, 0)) === MARKET_BOT_RESTOCK_STOCK
+      if (restockedNow) {
+        restockedItems += 1
+      }
+    }
+
+    result = {
+      success: true,
+      updated: checkedItems > 0,
+      checkedItems,
+      restockedItems,
+      updatedAt: timestamp,
+    }
     return db
   })
 
@@ -9253,6 +9368,7 @@ export async function buyFromSellOrder(userId, payload) {
     }
 
     runGameTick(db, buyerProfile, timestamp)
+    const nowMs = createdMs(timestamp) || Date.now()
 
     const buyerFleet = logisticsFleetView(buyerProfile, timestamp)
     if (buyerFleet.summary.totalCapacity <= 0) {
@@ -9280,7 +9396,19 @@ export async function buyFromSellOrder(userId, payload) {
       return db
     }
 
-    if (order.status !== 'open' || order.side !== 'sell') {
+    if (!isSellLimitOrderActive(order, nowMs)) {
+      const expiresMs = orderExpiresAtMs(order)
+      if (
+        order?.status === 'open' &&
+        order?.side === 'sell' &&
+        Number.isFinite(expiresMs) &&
+        expiresMs > 0 &&
+        expiresMs <= nowMs
+      ) {
+        order.status = 'expired'
+        order.updatedAt = timestamp
+        releaseSellOrderReserve(sellerProfile, order)
+      }
       result = { success: false, reason: 'validation', errors: { global: 'Bu ilan artık geçerli değil.' } }
       return db
     }
@@ -14025,7 +14153,7 @@ export async function getOrderBook(userId, itemId) {
     result = {
       success: true,
       orderBook: buildOrderBook(db, marketItem),
-      openOrders: limitOrderView(profile).filter((order) => order.status === 'open'),
+      openOrders: limitOrderView(profile).filter((order) => isOpenOrderSnapshotActive(order, createdMs(timestamp) || Date.now())),
       marketItem: marketItemView(profile, marketItem),
       updatedAt: timestamp,
     }

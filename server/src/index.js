@@ -12,7 +12,11 @@ import { getRequestMetricsSummary, requestMetricsMiddleware } from './middleware
 import { runChatRetentionMaintenance } from './chat/service.js'
 import { attachChatSocketServer } from './chat/socket.js'
 import { attachMessageSocketServer } from './messages/socket.js'
-import { runForexClockMaintenance, runHistoryRetentionMaintenance } from './game/service.js'
+import {
+  runForexClockMaintenance,
+  runHistoryRetentionMaintenance,
+  runSystemMarketMaintenance,
+} from './game/service.js'
 import { runLeagueSeasonMaintenance } from './game/seasonMaintenance.js'
 import { processDueAccountDeletions } from './services/auth.js'
 import { runModeratorSalaryMaintenance } from './services/admin.js'
@@ -453,6 +457,19 @@ async function runForexMaintenance() {
   }
 }
 
+async function runSystemMarketMaintenanceJob() {
+  try {
+    const result = await runSystemMarketMaintenance()
+    if (result?.updated) {
+      console.log(
+        `[MARKET] Sistem pazari kontrol edildi. checked=${result.checkedItems || 0} restocked=${result.restockedItems || 0} updatedAt=${result.updatedAt || 'n/a'}`,
+      )
+    }
+  } catch (error) {
+    console.error('[MARKET] Zamanlanmis sistem pazar bakimi basarisiz:', error)
+  }
+}
+
 async function runHistoryRetentionMaintenanceJob() {
   try {
     const gameResult = await runHistoryRetentionMaintenance()
@@ -502,6 +519,7 @@ async function runDbAutoBackupJob() {
 void runAccountDeletionCleanup()
 void runLeagueMaintenance()
 void runForexMaintenance()
+void runSystemMarketMaintenanceJob()
 void runHistoryRetentionMaintenanceJob()
 void runModeratorSalaryMaintenanceJob()
 if (config.dbAutoBackupEnabled) {
@@ -522,5 +540,8 @@ setInterval(() => {
   void runHistoryRetentionMaintenanceJob()
   void runModeratorSalaryMaintenanceJob()
 }, 60 * 1000)
+setInterval(() => {
+  void runSystemMarketMaintenanceJob()
+}, 3 * 60 * 60 * 1000)
 
 export default server

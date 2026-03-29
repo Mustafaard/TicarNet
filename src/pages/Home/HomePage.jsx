@@ -164,8 +164,9 @@ const MESSAGE_ICONS = {
   otherFallback: '/home/icons/v2/nav-message.png',
 }
 const CHAT_COMMUNITY_TAB_ITEMS = [
-  { id: 'sohbet', label: 'Sohbet', icon: '💬' },
-  { id: 'haberler', label: 'Haberler', icon: '✨' },
+  { id: 'mesajlar', label: 'Mesajlar', icon: '✉️', type: 'route' },
+  { id: 'haberler', label: 'Haberler', icon: '📰', type: 'panel' },
+  { id: 'sohbet', label: 'Sohbet', icon: '💬', type: 'panel' },
 ]
 
 const CHAT_SEED = {
@@ -2760,7 +2761,7 @@ function HomePage({ user, onLogout }) {
   const [chatReplyTarget, setChatReplyTarget] = useState(null)
   const [chatFirstUnreadId, setChatFirstUnreadId] = useState('')
   const [chatCommunityTab, setChatCommunityTab] = useState('sohbet')
-  const [chatSocketState, setChatSocketState] = useState('offline')
+  const [, setChatSocketState] = useState('offline')
   const [chatRestrictions, setChatRestrictions] = useState(EMPTY_CHAT_RESTRICTIONS)
   const [chatClockMs, setChatClockMs] = useState(() => new Date().getTime())
   const [chatRecentPlayers, setChatRecentPlayers] = useState([])
@@ -14869,55 +14870,87 @@ function HomePage({ user, onLogout }) {
     } catch (_) { return '' }
   }
 
-  const chatNewsFeed = Array.isArray(chatRecentPlayers)
-    ? chatRecentPlayers.slice(0, 15).map((entry) => {
-      const userId = String(entry?.userId || '').trim()
+  const chatNewsFeed = (() => {
+    const feed = []
+    const seen = new Set()
+    const pushItem = (title, subtitle, createdAt, prefix = 'row') => {
+      const safeTitle = normalizeMojibakeText(String(title || '')).replace(/\s+/g, ' ').trim()
+      const safeSubtitle = normalizeMojibakeText(String(subtitle || '')).replace(/\s+/g, ' ').trim()
+      if (!safeTitle) return
+      const safeCreatedAt = String(createdAt || '').trim()
+      const dedupeKey = `${safeTitle.toLocaleLowerCase('tr-TR')}|${safeSubtitle.toLocaleLowerCase('tr-TR')}|${safeCreatedAt.slice(0, 16)}`
+      if (seen.has(dedupeKey)) return
+      seen.add(dedupeKey)
+      feed.push({
+        id: `${prefix}:${dedupeKey}`,
+        title: safeTitle,
+        subtitle: safeSubtitle,
+        createdAt: safeCreatedAt,
+        timeLabel: formatMessageTimeAgo(safeCreatedAt) || formatMessageDate(safeCreatedAt) || '',
+      })
+    }
+
+    const centerItems = Array.isArray(messageCenter?.items) ? messageCenter.items : []
+    for (const item of centerItems) {
+      if (!item || typeof item !== 'object') continue
+      const source = String(item.source || '').trim().toLowerCase()
+      if (source === 'direct' || source === 'friend_request') continue
+      const title = String(item.title || item.preview || item.message || 'Yeni gelişme').trim()
+      const subtitleRaw = String(item.message || '').trim()
+      const subtitle = subtitleRaw && subtitleRaw !== title ? subtitleRaw : ''
+      pushItem(title, subtitle, item.createdAt, `center-${source || 'notice'}`)
+    }
+
+    const recentPlayers = Array.isArray(chatRecentPlayers) ? chatRecentPlayers : []
+    for (const entry of recentPlayers.slice(0, 15)) {
       const username = String(entry?.username || 'Oyuncu').trim() || 'Oyuncu'
-      const avatarUrl = String(entry?.avatarUrl || '').trim()
       const createdAt = String(entry?.createdAt || '').trim()
-      const timeAgoLabel = formatMessageTimeAgo(createdAt)
-      const dateLabel = formatMessageDate(createdAt)
-      return {
-        userId,
-        username,
-        avatarUrl,
+      pushItem(
+        "Yeni bir oyuncu AEA'ya katıldı!",
+        `Yeni katılan oyuncunun adı ${username.toLocaleUpperCase('tr-TR')}`,
         createdAt,
-        timeLabel: timeAgoLabel || dateLabel || 'Az önce',
-      }
-    })
-    : []
+        'player',
+      )
+    }
+
+    return feed
+      .sort((left, right) => {
+        const leftMs = Date.parse(String(left?.createdAt || ''))
+        const rightMs = Date.parse(String(right?.createdAt || ''))
+        const safeLeftMs = Number.isFinite(leftMs) ? leftMs : 0
+        const safeRightMs = Number.isFinite(rightMs) ? rightMs : 0
+        return safeRightMs - safeLeftMs
+      })
+      .slice(0, 24)
+  })()
 
   const chatView = (
     <section className="panel-stack chat-screen chat-screen-pro">
       <article className="card chat-card chat-card-pro chat-card-clean">
-        <p className="chat-community-tabs-caption">Topluluk Menüsü</p>
-        <p className={`chat-inline-status ${chatSocketState === 'online' ? 'on' : 'off'}`}>
-          {chatSocketState === 'online' ? 'Sohbet canlı' : 'Bağlantı kuruluyor'}
-        </p>
-        <div className="chat-community-tabs" role="tablist" aria-label="Sohbet menüsü">
-          {CHAT_COMMUNITY_TAB_ITEMS.map((entry) => (
-            <button
-              key={entry.id}
-              type="button"
-              role="tab"
-              aria-selected={chatCommunityTab === entry.id}
-              className={`chat-community-tab ${chatCommunityTab === entry.id ? 'is-active' : ''}`}
-              onClick={() => setChatCommunityTab(entry.id)}
-            >
-              <span className="chat-community-tab-icon" aria-hidden>{entry.icon}</span>
-              <span>{entry.label}</span>
-            </button>
-          ))}
-          <button
-            type="button"
-            className="chat-community-tab chat-community-tab-city"
-            onClick={() => { void openTab('home', { tab: 'home' }) }}
-            aria-label="Şehir ekranına dön"
-            title="Şehir ekranını aç"
-          >
-            <span className="chat-community-tab-icon" aria-hidden>🌍</span>
-            <span>Şehir</span>
-          </button>
+        <div className="chat-community-tabs" role="tablist" aria-label="Oyun sohbet menüsü">
+          {CHAT_COMMUNITY_TAB_ITEMS.map((entry) => {
+            const isRouteButton = entry.type === 'route'
+            const isActive = isRouteButton ? tab === 'messages' : chatCommunityTab === entry.id
+            return (
+              <button
+                key={entry.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                className={`chat-community-tab ${isActive ? 'is-active' : ''}`}
+                onClick={() => {
+                  if (isRouteButton) {
+                    void openTab('messages', { tab: 'messages', messageFilter: 'all' })
+                    return
+                  }
+                  setChatCommunityTab(entry.id)
+                }}
+              >
+                <span className="chat-community-tab-icon" aria-hidden>{entry.icon}</span>
+                <span>{entry.label}</span>
+              </button>
+            )
+          })}
         </div>
         {chatCommunityTab === 'sohbet' ? (
           <>
@@ -15095,7 +15128,7 @@ function HomePage({ user, onLogout }) {
                   className="chat-send-input chat-send-input-clean"
                   value={chatInput}
                   onChange={(e) => setChatInput(e.target.value.slice(0, 500))}
-                  placeholder={chatHardRestrictionActive || chatCooldownActive ? 'Bekle...' : 'Mesaj yaz...'}
+                  placeholder={chatHardRestrictionActive || chatCooldownActive ? 'Bekle...' : 'Mesajınızı yazın.'}
                   disabled={chatHardRestrictionActive || chatCooldownActive || busy === 'chat-send'}
                   maxLength={500}
                   autoComplete="off"
@@ -15103,55 +15136,32 @@ function HomePage({ user, onLogout }) {
                 <button
                   type="submit"
                   className="chat-send-btn-clean"
+                  aria-label="Mesaj gönder"
                   disabled={!chatInput.trim() || chatHardRestrictionActive || chatCooldownActive || busy === 'chat-send'}
                 >
-                  Gönder
+                  <span className="chat-send-btn-icon" aria-hidden>➤</span>
                 </button>
               </form>
             ) : null}
           </>
         ) : null}
         {chatCommunityTab === 'haberler' ? (
-          <section className="chat-side-panel chat-news-panel" aria-label="Yeni oyuncular">
-            <header className="chat-side-panel-head">
-              <h4 className="chat-side-panel-title">Haberler</h4>
-              <p className="chat-side-panel-sub">Aramıza yeni katılan oyuncular.</p>
-            </header>
+          <section className="chat-side-panel chat-news-panel" aria-label="Oyun haber akışı">
             <div className="chat-news-list">
               {chatRecentPlayersLoading ? (
-                <p className="chat-news-empty">Yeni oyuncu akışı yükleniyor...</p>
+                <p className="chat-news-empty">Haber akışı yükleniyor...</p>
               ) : chatNewsFeed.length === 0 ? (
-                <p className="chat-news-empty">Henüz yeni oyuncu kaydı görünmüyor.</p>
+                <p className="chat-news-empty">Henüz gösterilecek haber bulunmuyor.</p>
               ) : (
                 chatNewsFeed.map((entry) => (
-                  <article key={`${entry.userId || entry.username}-${entry.createdAt}`} className="chat-news-item">
-                    <button
-                      type="button"
-                      className="chat-news-avatar"
-                      onClick={() => {
-                        if (!entry.userId) return
-                        void openProfileModal(entry.userId, {
-                          username: entry.username,
-                          displayName: entry.username,
-                          avatarUrl: entry.avatarUrl,
-                        })
-                      }}
-                      aria-label={`${entry.username} profili`}
-                    >
-                      <img
-                        src={entry.avatarUrl || DEFAULT_CHAT_AVATAR}
-                        alt={entry.username}
-                        onError={(event) => { event.currentTarget.src = DEFAULT_CHAT_AVATAR }}
-                      />
-                    </button>
-                    <div className="chat-news-copy">
-                      <p className="chat-news-title">{entry.username}</p>
-                      <p className="chat-news-text">
-                        {`Oyunumuza ${String(entry.username || 'Oyuncu').trim().toLocaleUpperCase('tr-TR')} adında oyuncu katıldı. Kayıt işlemi tamamlandı.`}
-                      </p>
+                  <article key={entry.id} className={`chat-news-item ${entry.subtitle ? 'has-sub' : ''}`}>
+                    <p className="chat-news-title">{entry.title}</p>
+                    {entry.subtitle ? (
+                      <p className="chat-news-text">{entry.subtitle}</p>
+                    ) : null}
+                    {entry.timeLabel ? (
                       <p className="chat-news-meta">{entry.timeLabel}</p>
-                    </div>
-                    <span className="chat-news-chip">YENİ</span>
+                    ) : null}
                   </article>
                 ))
               )}
