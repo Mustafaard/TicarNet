@@ -12,6 +12,7 @@ export default defineConfig([
     'android_backup_*/**',
     '.tools/**',
     '.codex/**',
+    'src/pages/Home/HomePageScreen.jsx',
   ]),
   {
     files: ['src/**/*.{js,jsx}'],

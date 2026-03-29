@@ -78,8 +78,8 @@ const LEGACY_TEMPLATE_MAP = {
 }
 const COUNTERPARTIES = ['Anka Trade', 'Marmara Lojistik', 'Nova Broker', 'Delta Pazarlama']
 const ORDER_MAX_DURATION_MINUTES = 180
-const SELL_LISTINGS_DAILY_LIMIT = 8
-const SPECIAL_LISTINGS_DAILY_LIMIT = 10
+// Genel ilanlar için limit kaldırıldı; eski kontrol noktalarıyla uyumluluk için çok yüksek tutulur.
+const SELL_LISTINGS_DAILY_LIMIT = Number.MAX_SAFE_INTEGER
 const SPECIAL_LISTINGS_ACTIVE_LIMIT = 10
 const CONTRACT_MAX_DURATION_MINUTES = 120
 const AUCTION_MIN_DURATION_MINUTES = 5
@@ -633,11 +633,7 @@ function normalizeFactoryUpgradeState(value, template) {
   const active = source.active === true
   const fromLevel = Math.max(0, asInt(source.fromLevel, fallback.fromLevel))
   const toLevel = Math.max(0, asInt(source.toLevel, fallback.toLevel))
-  const speedupRatio = clamp(
-    Number(source.speedupRatio ?? fallback.speedupRatio),
-    0.05,
-    0.9,
-  )
+  const speedupRatio = factorySpeedupRatio(template)
   const speedupDiamondCost = Math.max(
     1,
     asInt(source.speedupDiamondCost, fallback.speedupDiamondCost),
@@ -820,12 +816,12 @@ function normalizeMinesState(rawMines, timestamp) {
 }
 
 function mineDigDurationMs(template) {
-  const sec = Math.max(1, asInt(template?.digDurationSeconds, 10))
+  const sec = Math.max(1, asInt(template?.digDurationSeconds, 5))
   return sec * MS_SECOND
 }
 
 function mineCooldownMs(template) {
-  return Math.max(1, asInt(template?.cooldownMinutes, 30)) * MS_MINUTE
+  return Math.max(1, asInt(template?.cooldownMinutes, 15)) * MS_MINUTE
 }
 
 function mineCostCash(template) {
@@ -851,7 +847,30 @@ function tickMines(profile, timestamp) {
   for (const template of MINE_TEMPLATES) {
     const state = profile.mines[template.id] || createMineState(template.id, timestamp)
     profile.mines[template.id] = state
-    const digEndsMs = createdMs(state.digEndsAt)
+    const digDurationMs = mineDigDurationMs(template)
+    const cooldownMs = mineCooldownMs(template)
+    const stateUpdatedMs = createdMs(state.updatedAt)
+    let digEndsMs = createdMs(state.digEndsAt)
+    const nextDigMs = createdMs(state.nextDigAt)
+
+    // Geçmiş sürümlerde başlatılmış (10 sn / 30 dk) kazıları yeni kurala (5 sn / 15 dk) düşür.
+    // Böylece kullanıcı eski uzun bekleme süresinde takılı kalmaz.
+    if (stateUpdatedMs > 0) {
+      const maxDigEndsMs = stateUpdatedMs + digDurationMs
+      const maxNextDigMs = stateUpdatedMs + cooldownMs
+
+      if (digEndsMs > maxDigEndsMs) {
+        digEndsMs = maxDigEndsMs
+        state.digEndsAt = new Date(maxDigEndsMs).toISOString()
+        state.updatedAt = timestamp
+      }
+
+      if (nextDigMs > maxNextDigMs) {
+        state.nextDigAt = new Date(maxNextDigMs).toISOString()
+        state.updatedAt = timestamp
+      }
+    }
+
     if (digEndsMs > 0 && nowMs >= digEndsMs) {
       state.collectReadyAt = timestamp
       state.digEndsAt = ''
@@ -885,8 +904,8 @@ function minesView(profile, timestamp) {
       outputItemName: mineOutputDisplayName(outputItemId, outputItem?.name || outputItemId),
       minOutput,
       maxOutput,
-      digDurationSeconds: Math.max(1, asInt(template.digDurationSeconds, 10)),
-      cooldownMinutes: Math.max(1, asInt(template.cooldownMinutes, 30)),
+      digDurationSeconds: Math.max(1, asInt(template.digDurationSeconds, 5)),
+      cooldownMinutes: Math.max(1, asInt(template.cooldownMinutes, 15)),
       costCash,
       xpPerCollect: Math.max(0, asInt(template.xpPerCollect, 10)),
       canStartDig,
@@ -913,7 +932,8 @@ function factoryUpgradeDurationMs(template, targetLevel) {
   const baseMinutes = Math.max(1, asInt(template?.upgrade?.baseDurationMinutes, 30))
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  return Math.max(1, Math.round(baseMinutes * Math.pow(4, levelStep))) * MS_MINUTE
+  const growth = 1.3
+  return Math.max(1, Math.round(baseMinutes * Math.pow(growth, levelStep))) * MS_MINUTE
 }
 
 const FACTORY_UPGRADE_MIN_CASH = 5000000
@@ -924,10 +944,11 @@ function factoryUpgradeCashCost(template, targetLevel, options = {}) {
   const baseCash = Math.max(FACTORY_UPGRADE_MIN_CASH, configuredBaseCash > 0 ? configuredBaseCash : fallbackBaseCash)
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  const growth = 4
-  const calculated = Math.max(FACTORY_UPGRADE_MIN_CASH, Math.round(baseCash * Math.pow(growth, levelStep)))
+  const growth = 1.3
+  const calculated = Math.max(1, Math.round(baseCash * Math.pow(growth, levelStep)))
+  const discounted = Math.max(1, Math.round(calculated / 1.5))
   return weeklyEventCostValue(
-    calculated,
+    discounted,
     options?.timestamp || '',
     options?.weeklyEvents || null,
     { minPositive: 1 },
@@ -940,7 +961,7 @@ function factoryUpgradeResourceCost(template, targetLevel, options = {}) {
     : {}
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  const growth = 4
+  const growth = 1.3
   const multiplier = Math.pow(growth, levelStep)
   const nextCost = {}
   for (const [itemId, amount] of Object.entries(base)) {
@@ -976,8 +997,9 @@ function computeUpgradeSpeedupDiamondCost(template, remainingMs) {
   return Math.max(1, Math.round(rawCost * FACTORY_SPEEDUP_DIAMOND_MULTIPLIER))
 }
 
-function factorySpeedupRatio(template) {
-  return clamp(Number(template?.upgrade?.speedupRatio ?? FACTORY_DEFAULT_SPEEDUP_RATIO), 0.05, 0.9)
+function factorySpeedupRatio() {
+  // Tüm fabrika inşaat/yükseltme hızlandırmaları sabit %15.
+  return FACTORY_DEFAULT_SPEEDUP_RATIO
 }
 
 function factoryOutputPerCollect(template, level) {
@@ -8342,9 +8364,6 @@ export async function getMarket(userId) {
       })
     }
     sellOrders.sort((left, right) => {
-      const leftSystem = left?.isSystem === true
-      const rightSystem = right?.isSystem === true
-      if (leftSystem !== rightSystem) return leftSystem ? 1 : -1
       const priceDiff = Math.max(0, asInt(left?.limitPrice, 0)) - Math.max(0, asInt(right?.limitPrice, 0))
       if (priceDiff !== 0) return priceDiff
       const itemDiff = String(left?.itemId || '').localeCompare(String(right?.itemId || ''), 'tr')
@@ -11489,16 +11508,6 @@ export async function listBusinessVehicleForSale(userId, businessId, payload = {
 
     runGameTick(db, profile, timestamp)
     syncSpecialListingDailyState(profile, timestamp)
-    if (visibility === 'custom' && profile.specialListingsCountToday >= SPECIAL_LISTINGS_DAILY_LIMIT) {
-      result = {
-        success: false,
-        reason: 'limit_reached',
-        errors: {
-          global: `Özel ilan günlük limiti doldu (${SPECIAL_LISTINGS_DAILY_LIMIT}/${SPECIAL_LISTINGS_DAILY_LIMIT}). Yeni hak Türkiye saatiyle 00:00 sonrası açılır.`,
-        },
-      }
-      return db
-    }
     if (visibility === 'custom') {
       const activeSpecialCount = activeSpecialListingCount(profile)
       if (activeSpecialCount >= SPECIAL_LISTINGS_ACTIVE_LIMIT) {
@@ -11659,10 +11668,6 @@ export async function listBusinessVehicleForSale(userId, businessId, payload = {
       sellerName: profile.username,
     })
     profile.vehicleListings = profile.vehicleListings.slice(0, 120)
-    if (visibility === 'custom') {
-      syncSpecialListingDailyState(profile, timestamp)
-      profile.specialListingsCountToday = Math.max(0, asInt(profile.specialListingsCountToday, 0)) + 1
-    }
     profile.updatedAt = timestamp
     result = {
       success: true,
@@ -11728,16 +11733,6 @@ export async function listLogisticsTruckForSale(userId, truckId, payload = {}) {
 
     runGameTick(db, profile, timestamp)
     syncSpecialListingDailyState(profile, timestamp)
-    if (visibility === 'custom' && profile.specialListingsCountToday >= SPECIAL_LISTINGS_DAILY_LIMIT) {
-      result = {
-        success: false,
-        reason: 'limit_reached',
-        errors: {
-          global: `Özel ilan günlük limiti doldu (${SPECIAL_LISTINGS_DAILY_LIMIT}/${SPECIAL_LISTINGS_DAILY_LIMIT}). Yeni hak Türkiye saatiyle 00:00 sonrası açılır.`,
-        },
-      }
-      return db
-    }
     if (visibility === 'custom') {
       const activeSpecialCount = activeSpecialListingCount(profile)
       if (activeSpecialCount >= SPECIAL_LISTINGS_ACTIVE_LIMIT) {
@@ -11875,10 +11870,6 @@ export async function listLogisticsTruckForSale(userId, truckId, payload = {}) {
       sellerName: profile.username,
     })
     profile.vehicleListings = profile.vehicleListings.slice(0, 120)
-    if (visibility === 'custom') {
-      syncSpecialListingDailyState(profile, timestamp)
-      profile.specialListingsCountToday = Math.max(0, asInt(profile.specialListingsCountToday, 0)) + 1
-    }
     profile.updatedAt = timestamp
     result = {
       success: true,
@@ -13259,13 +13250,6 @@ export async function claimDailyLoginReward(userId) {
         detail: message,
         amount: cashReward,
       },
-      timestamp,
-    )
-
-    pushNotification(
-      profile,
-      'system',
-      message,
       timestamp,
     )
 
@@ -16867,3 +16851,4 @@ export async function markMessageCenterRead(userId, messageId) {
 
   return result
 }
+
