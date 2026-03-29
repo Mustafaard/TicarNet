@@ -10095,7 +10095,7 @@ function HomePage({ user, onLogout }) {
                       orderId: '',
                       itemId: item.id,
                       itemName: item.name || meta?.label || item.id,
-                      price: Math.max(1, Math.trunc(num(item?.buyPrice || item?.price || 0))),
+                      price: Math.max(1, Math.trunc(num(item?.price || item?.buyPrice || 0))),
                       stock: Math.min(MARKETPLACE_SYSTEM_STOCK_CAP, Math.max(0, Math.trunc(num(item?.stock || 0)))),
                       sellerName: 'Sistem Pazarı',
                       sellerUserId: '',
@@ -10124,9 +10124,6 @@ function HomePage({ user, onLogout }) {
                   }
                 }
                 rows.sort((left, right) => {
-                  const leftSystem = left?.isSystem === true
-                  const rightSystem = right?.isSystem === true
-                  if (leftSystem !== rightSystem) return leftSystem ? 1 : -1
                   const priceDiff = Math.max(0, Math.trunc(num(left?.price || 0))) - Math.max(0, Math.trunc(num(right?.price || 0)))
                   if (priceDiff !== 0) return priceDiff
                   const itemDiff = String(left?.itemId || '').localeCompare(String(right?.itemId || ''), 'tr')

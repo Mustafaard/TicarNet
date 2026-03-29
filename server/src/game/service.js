@@ -8342,9 +8342,6 @@ export async function getMarket(userId) {
       })
     }
     sellOrders.sort((left, right) => {
-      const leftSystem = left?.isSystem === true
-      const rightSystem = right?.isSystem === true
-      if (leftSystem !== rightSystem) return leftSystem ? 1 : -1
       const priceDiff = Math.max(0, asInt(left?.limitPrice, 0)) - Math.max(0, asInt(right?.limitPrice, 0))
       if (priceDiff !== 0) return priceDiff
       const itemDiff = String(left?.itemId || '').localeCompare(String(right?.itemId || ''), 'tr')
