@@ -6829,6 +6829,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  flex-wrap: wrap;
   border-radius: 999px;
   border: 1px solid rgba(126, 183, 247, 0.3);
   background: rgba(15, 30, 52, 0.78);
@@ -6845,6 +6846,34 @@
   min-width: 0;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.factory-cost-chip-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(126, 183, 247, 0.34);
+  background: rgba(15, 30, 52, 0.82);
+  color: #dcecff;
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.factory-cost-chip-status.is-ready {
+  border-color: rgba(117, 225, 169, 0.62);
+  background: rgba(18, 82, 55, 0.7);
+  color: #dffff0;
+}
+
+.factory-cost-chip-status.is-missing {
+  border-color: rgba(255, 177, 177, 0.68);
+  background: rgba(93, 34, 34, 0.76);
+  color: #ffe7e7;
 }
 
 .factory-cost-chip img {
@@ -26760,7 +26789,8 @@ select {
 
 .factory-screen .factory-grid.factory-grid-shop .factory-card:not(.is-owned) .factory-buy-btn,
 .factory-screen .factory-purchase-modal-actions .factory-buy-btn,
-.factory-screen .factory-actions .factory-buy-btn.factory-action-btn-wide {
+.factory-screen .factory-actions .factory-buy-btn.factory-action-btn-wide,
+.factory-purchase-overlay .factory-purchase-modal-actions .factory-buy-btn {
   border-color: rgba(106, 224, 166, 0.82) !important;
   background: linear-gradient(180deg, rgba(34, 160, 101, 0.97), rgba(18, 96, 61, 0.97)) !important;
   color: #ecfff4 !important;
@@ -26768,7 +26798,8 @@ select {
 
 .factory-screen .factory-grid.factory-grid-shop .factory-card:not(.is-owned) .factory-buy-btn:hover:not(:disabled),
 .factory-screen .factory-purchase-modal-actions .factory-buy-btn:hover:not(:disabled),
-.factory-screen .factory-actions .factory-buy-btn.factory-action-btn-wide:hover:not(:disabled) {
+.factory-screen .factory-actions .factory-buy-btn.factory-action-btn-wide:hover:not(:disabled),
+.factory-purchase-overlay .factory-purchase-modal-actions .factory-buy-btn:hover:not(:disabled) {
   border-color: rgba(142, 238, 192, 0.9) !important;
   background: linear-gradient(180deg, rgba(42, 178, 114, 0.98), rgba(22, 110, 71, 0.98)) !important;
 }
@@ -26779,9 +26810,16 @@ select {
   color: #fff0f4 !important;
 }
 
-.factory-screen .factory-purchase-modal-actions .btn.btn-danger:hover:not(:disabled) {
+.factory-screen .factory-purchase-modal-actions .btn.btn-danger:hover:not(:disabled),
+.factory-purchase-overlay .factory-purchase-modal-actions .btn.btn-danger:hover:not(:disabled) {
   border-color: rgba(255, 190, 190, 0.86) !important;
   background: linear-gradient(180deg, rgba(188, 71, 86, 0.97), rgba(122, 38, 54, 0.97)) !important;
+}
+
+.factory-purchase-overlay .factory-purchase-modal-actions .btn.btn-danger {
+  border-color: rgba(255, 167, 167, 0.78) !important;
+  background: linear-gradient(180deg, rgba(168, 60, 74, 0.97), rgba(108, 32, 45, 0.97)) !important;
+  color: #fff0f4 !important;
 }
 
 /* Factory + business collect CTA: centered + green in bulk/accountant modals */

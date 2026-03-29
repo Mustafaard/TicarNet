@@ -12231,7 +12231,7 @@ function HomePage({ user, onLogout }) {
         {lockedFactoryRows.length > 0 ? (
           <section className="factory-section">
             <div className="factory-section-head">
-              <h4>Satın alabileceğiniz fabrikalar</h4>
+              <h4>Fabrika Kur</h4>
               <p>{canStartAnotherFactoryBuild ? 'Kartlara dokunup kurulum detayını açabilirsin' : 'Fabrika kurulurken başka fabrika kurulamaz'}</p>
             </div>
             <div className="factory-grid factory-grid-shop">
@@ -12272,7 +12272,7 @@ function HomePage({ user, onLogout }) {
                       onClick={() => openFactoryPurchaseModal(factory.id)}
                       disabled={Boolean(busy)}
                     >
-                      {busy === `factory-buy:${factory.id}` ? 'Kuruluyor...' : 'İnşa Et'}
+                      {busy === `factory-buy:${factory.id}` ? 'İnşaat Ediliyor...' : 'İnşaat Et'}
                     </button>
                   </article>
                 )
@@ -12331,7 +12331,7 @@ function HomePage({ user, onLogout }) {
                     <article key={`${factoryPurchaseModal.id}-row-${row.key}`} className={`factory-purchase-cost-row ${row.missing > 0 ? 'is-missing' : 'is-ready'}`.trim()}>
                       <span className="factory-purchase-cost-main"><img src={row.icon} alt="" aria-hidden="true" />{row.label}</span>
                       <strong>{fmt(row.required)}</strong>
-                      <span className="factory-purchase-cost-state">{row.missing > 0 ? `Eksik ${fmt(row.missing)}` : 'Yeterli'}</span>
+                      <span className="factory-purchase-cost-state">{row.missing > 0 ? 'Yetersiz' : 'Yeterli'}</span>
                     </article>
                   ))}
                 </div>
@@ -12351,7 +12351,7 @@ function HomePage({ user, onLogout }) {
                   onClick={() => void buyFactoryAction(factoryPurchaseModal.id)}
                   disabled={Boolean(busy) || !factoryPurchaseModalCanBuyNow}
                 >
-                  {busy === factoryPurchaseBusyKey ? 'Kuruluyor...' : !canStartAnotherFactoryBuild ? 'Fabrika kurulurken başka fabrika kurulamaz' : factoryPurchaseModal.canPurchaseNow ? 'Fabrikayı Kur' : 'Maliyet Yetersiz'}
+                  {busy === factoryPurchaseBusyKey ? 'İnşaat Ediliyor...' : !canStartAnotherFactoryBuild ? 'Fabrika kurulurken başka fabrika kurulamaz' : factoryPurchaseModal.canPurchaseNow ? 'İnşaat Et' : 'Maliyet Yetersiz'}
                 </button>
                 <button type="button" className="btn btn-danger" onClick={closeFactoryPurchaseModal}>Kapat</button>
               </div>
@@ -12513,11 +12513,17 @@ function HomePage({ user, onLogout }) {
                   <div className={`factory-cost-chip ${factoryUpgradeModal.missingUpgradeCash > 0 ? 'is-missing' : 'is-ready'}`.trim()}>
                     <img src="/home/icons/depot/cash.webp" alt="" aria-hidden="true" />
                     <span>Nakit: {fmt(factoryUpgradeModal.nextUpgradeCostCash || 0)}</span>
+                    <em className={`factory-cost-chip-status ${factoryUpgradeModal.missingUpgradeCash > 0 ? 'is-missing' : 'is-ready'}`.trim()}>
+                      {factoryUpgradeModal.missingUpgradeCash > 0 ? 'Yetersiz' : 'Yeterli'}
+                    </em>
                   </div>
                   {(factoryUpgradeModal.upgradeCostRows || []).map((row) => (
                     <div key={row.itemId} className={`factory-cost-chip ${row.missing > 0 ? 'is-missing' : 'is-ready'}`.trim()}>
                       <img src={row.meta?.icon} alt="" aria-hidden="true" />
                       <span>{row.meta?.label}: {fmt(row.amount)}</span>
+                      <em className={`factory-cost-chip-status ${row.missing > 0 ? 'is-missing' : 'is-ready'}`.trim()}>
+                        {row.missing > 0 ? 'Yetersiz' : 'Yeterli'}
+                      </em>
                     </div>
                   ))}
                 </div>
