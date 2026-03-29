@@ -28657,3 +28657,241 @@ select {
     font-size: 11px;
   }
 }
+
+/* Business + factory compact alignment fixes */
+.business-screen .fleet-overview-head {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  align-items: start;
+  column-gap: 8px;
+  row-gap: 2px;
+}
+
+.business-screen .fleet-overview-head h3 {
+  margin: 0;
+  white-space: nowrap;
+  font-size: clamp(15px, 3.9vw, 18px);
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+}
+
+.business-screen .fleet-overview-sub {
+  margin: 1px 0 0;
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+.business-screen .fleet-company-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  gap: 5px;
+}
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 76px;
+  border-radius: 9px;
+  padding: 6px 5px;
+  gap: 2px;
+}
+
+.business-screen .fleet-company-cta-head {
+  min-height: 14px;
+}
+
+.business-screen .fleet-company-cta-title-wrap {
+  padding-right: 26px;
+}
+
+.business-screen .fleet-company-cta-title {
+  font-size: 10px;
+  line-height: 1.08;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.business-screen .fleet-company-cta-value {
+  font-size: clamp(9px, 2.45vw, 10.4px);
+  line-height: 1.08;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.business-screen .fleet-company-cta-meta {
+  font-size: 7.8px;
+  line-height: 1.1;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+.business-screen .fleet-company-cta-badge {
+  min-width: 24px;
+  min-height: 14px;
+  font-size: 7px;
+  padding: 0 4px;
+}
+
+.warehouse-modal.fleet-modal.fleet-upgrade-modal,
+.warehouse-modal.fleet-modal.fleet-setup-modal,
+.warehouse-modal.fleet-modal.fleet-accountant-modal,
+.warehouse-modal.fleet-modal.factory-upgrade-modal,
+.warehouse-modal.fleet-modal.factory-collect-modal,
+.factory-purchase-overlay .factory-purchase-modal {
+  width: min(340px, calc(100vw - 24px)) !important;
+  max-width: min(340px, calc(100vw - 24px)) !important;
+  max-height: min(74dvh, 620px);
+  margin-inline: auto !important;
+  place-self: center;
+  border-radius: 14px !important;
+  padding: 10px !important;
+  overflow: auto;
+}
+
+.fleet-upgrade-modal > h3,
+.fleet-setup-modal .fleet-subheader > h3,
+.fleet-accountant-title {
+  font-size: clamp(26px, 5.5vw, 30px);
+  line-height: 1.06;
+}
+
+.fleet-upgrade-modal .fleet-modal-subtitle,
+.fleet-setup-modal .fleet-modal-subtitle,
+.fleet-accountant-subtitle {
+  font-size: 11px;
+  line-height: 1.28;
+}
+
+.fleet-upgrade-modal .fleet-upgrade-box,
+.fleet-accountant-cta-card,
+.fleet-accountant-summary,
+.fleet-accountant-footer {
+  padding: 10px;
+  border-radius: 12px;
+}
+
+.fleet-upgrade-modal .fleet-modal-actions .btn,
+.fleet-setup-modal .unlock-node .btn,
+.fleet-accountant-modal .btn-collect-inline,
+.factory-upgrade-modal .fleet-modal-actions .btn,
+.factory-collect-modal .btn-collect-inline,
+.factory-purchase-modal-actions .btn {
+  min-height: 36px;
+  font-size: 11px;
+  line-height: 1.1;
+  border-radius: 10px;
+}
+
+.fleet-setup-modal .fleet-subheader-actions {
+  gap: 6px;
+}
+
+.fleet-setup-modal .fleet-subheader-actions .btn {
+  min-height: 32px;
+  font-size: 10px;
+  padding-inline: 7px;
+}
+
+.fleet-setup-modal .fleet-setup-grid {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.fleet-setup-modal .unlock-node {
+  padding: 7px;
+  gap: 5px;
+}
+
+.fleet-setup-modal .unlock-node p,
+.fleet-setup-modal .unlock-node small {
+  font-size: 10px;
+  line-height: 1.22;
+}
+
+.fleet-accountant-summary .fleet-summary-line {
+  min-height: 36px;
+  padding: 8px 9px;
+  font-size: 11px;
+}
+
+.fleet-accountant-summary .fleet-summary-line img {
+  width: 18px;
+  height: 18px;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned.is-shop-summary-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 6px;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned.is-shop-summary-card .factory-shop-hero {
+  width: 100%;
+  height: clamp(82px, 21vw, 96px);
+  min-height: clamp(82px, 21vw, 96px);
+  max-height: clamp(82px, 21vw, 96px);
+  border-radius: 10px;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned.is-shop-summary-card .factory-shop-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-name {
+  font-size: clamp(11px, 2.9vw, 13px);
+  min-height: 2.1em;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned .factory-shop-card-hint {
+  font-size: 10px;
+  min-height: 1.2em;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions .factory-buy-btn {
+  min-height: 34px;
+  border-radius: 9px;
+  padding: 0 4px;
+  font-size: 11px;
+  line-height: 1.06;
+  white-space: normal;
+  text-align: center;
+  text-wrap: balance;
+}
+
+@media (max-width: 360px) {
+  .business-screen .fleet-overview-head {
+    grid-template-columns: max-content minmax(0, 1fr);
+    column-gap: 6px;
+  }
+
+  .business-screen .fleet-overview-head h3 {
+    font-size: 14px;
+  }
+
+  .business-screen .fleet-company-actions .fleet-company-cta {
+    min-height: 72px;
+    padding: 5px 4px;
+  }
+
+  .business-screen .fleet-company-cta-title {
+    font-size: 9.5px;
+  }
+
+  .business-screen .fleet-company-cta-value {
+    font-size: 8.7px;
+  }
+
+  .business-screen .fleet-company-cta-meta {
+    font-size: 7.3px;
+  }
+
+  .factory-grid.factory-grid-owned .factory-card.is-owned .factory-owned-actions .factory-buy-btn {
+    min-height: 32px;
+    font-size: 10px;
+  }
+}

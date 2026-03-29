@@ -8493,24 +8493,24 @@ function HomePage({ user, onLogout }) {
     Math.trunc(num(bulkPreview.collectedCount)) + Math.trunc(num(logisticsPreview.collectedCount || 0)),
   )
   const ctaUpgradePrimary = companyUpgrade?.maxReached
-    ? `Seviye ${fmt(upgradeCurrentLevel)} ⬢ MAX`
-    : `Seviye ${fmt(upgradeCurrentLevel)} -> ${fmt(upgradeNextLevel)}`
+    ? `Lv ${fmt(upgradeCurrentLevel)} MAX`
+    : `Lv ${fmt(upgradeCurrentLevel)}→${fmt(upgradeNextLevel)}`
   const ctaUpgradeSecondary = companyUpgrade?.maxReached
-    ? 'Yeni seviye kilidi yok'
+    ? 'Seviye tamam'
     : mustBuyNextUnlockFirst && nextCompanyUnlock
-      ? `${nextCompanyUnlock.name} satın alınmalı`
-      : `${fmt(upgradeCostValue)} nakit gerekli`
+      ? `Önce ${nextCompanyUnlock.name}`
+      : `Nakit ${fmt(upgradeCostValue)}`
   const ctaBulkPrimary = totalBulkCount > 0
     ? `${premiumBoostActive ? '2x ' : ''}+${fmt(premiumBoostActive ? totalBulkNet2x : totalBulkNet)} net`
     : 'Toplanacak gelir yok'
   const ctaBulkSecondary = totalBulkCount > 0
-    ? `Hazır işletme: ${fmt(totalBulkCount)}`
-    : 'Tahsilat saati bekleniyor'
+    ? `Hazır ${fmt(totalBulkCount)}`
+    : 'Saat bekleniyor'
   const ctaSetupPrimary = nextCompanyUnlock
     ? String(nextCompanyUnlock.name || 'İş Kur')
     : 'Tüm alanlar açık'
   const ctaSetupSecondary = nextCompanyUnlock
-    ? `${fmt(nextCompanyUnlock.cost || 0)} nakit ile satın al`
+    ? `Maliyet ${fmt(nextCompanyUnlock.cost || 0)}`
     : 'Yeni alan yok'
 
   const warehouseCards = useMemo(
@@ -12278,7 +12278,7 @@ function HomePage({ user, onLogout }) {
                       onClick={() => factory.canCollectNow && openFactoryCollectModal(factory.id)}
                       disabled={Boolean(busy) || !factory.canCollectNow}
                     >
-                      {busy === busyCollectKey ? 'Tahsilat...' : factory.canCollectNow ? 'Tahsilat Yap' : 'Bekle'}
+                      {busy === busyCollectKey ? 'Alınıyor...' : factory.canCollectNow ? 'Tahsil Et' : 'Bekle'}
                     </button>
                     <button
                       type="button"
