@@ -26761,14 +26761,25 @@ select {
 .factory-screen .factory-grid.factory-grid-shop .factory-card:not(.is-owned) .factory-buy-btn,
 .factory-screen .factory-purchase-modal-actions .factory-buy-btn,
 .factory-screen .factory-actions .factory-buy-btn.factory-action-btn-wide {
-  border-color: rgba(255, 167, 167, 0.78) !important;
-  background: linear-gradient(180deg, rgba(168, 60, 74, 0.97), rgba(108, 32, 45, 0.97)) !important;
-  color: #fff0f4 !important;
+  border-color: rgba(106, 224, 166, 0.82) !important;
+  background: linear-gradient(180deg, rgba(34, 160, 101, 0.97), rgba(18, 96, 61, 0.97)) !important;
+  color: #ecfff4 !important;
 }
 
 .factory-screen .factory-grid.factory-grid-shop .factory-card:not(.is-owned) .factory-buy-btn:hover:not(:disabled),
 .factory-screen .factory-purchase-modal-actions .factory-buy-btn:hover:not(:disabled),
 .factory-screen .factory-actions .factory-buy-btn.factory-action-btn-wide:hover:not(:disabled) {
+  border-color: rgba(142, 238, 192, 0.9) !important;
+  background: linear-gradient(180deg, rgba(42, 178, 114, 0.98), rgba(22, 110, 71, 0.98)) !important;
+}
+
+.factory-screen .factory-purchase-modal-actions .btn.btn-danger {
+  border-color: rgba(255, 167, 167, 0.78) !important;
+  background: linear-gradient(180deg, rgba(168, 60, 74, 0.97), rgba(108, 32, 45, 0.97)) !important;
+  color: #fff0f4 !important;
+}
+
+.factory-screen .factory-purchase-modal-actions .btn.btn-danger:hover:not(:disabled) {
   border-color: rgba(255, 190, 190, 0.86) !important;
   background: linear-gradient(180deg, rgba(188, 71, 86, 0.97), rgba(122, 38, 54, 0.97)) !important;
 }
