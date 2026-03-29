@@ -29922,3 +29922,73 @@ select {
     padding: 0 6px;
   }
 }
+
+/* Final stabilization: mines timing + factory 2-column clarity + daily reward CTA */
+.daily-login-result-continue-btn {
+  border-color: rgba(100, 220, 156, 0.86) !important;
+  background: linear-gradient(180deg, rgba(44, 200, 126, 0.98), rgba(26, 142, 88, 0.99)) !important;
+  color: #ecfff5 !important;
+  box-shadow: 0 8px 18px rgba(15, 92, 58, 0.34);
+}
+
+.daily-login-result-continue-btn:hover,
+.daily-login-result-continue-btn:focus-visible {
+  border-color: rgba(140, 242, 188, 0.92) !important;
+  background: linear-gradient(180deg, rgba(66, 220, 147, 0.99), rgba(35, 161, 103, 1)) !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned,
+.factory-screen .factory-grid.factory-grid-shop {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  align-items: stretch;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-shop-summary-card,
+.factory-screen .factory-grid.factory-grid-shop > .factory-card.is-shop-summary-card {
+  min-width: 0;
+  min-height: 0 !important;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 7px;
+}
+
+.factory-screen .factory-grid .factory-shop-hero {
+  aspect-ratio: 16 / 9;
+  min-height: 92px;
+  max-height: none;
+}
+
+.factory-screen .factory-grid .factory-shop-card-name {
+  font-size: clamp(12px, 3.2vw, 15px) !important;
+  line-height: 1.15;
+  min-height: 2.3em;
+  width: 100%;
+  text-align: center;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.factory-screen .factory-grid .factory-shop-card-hint {
+  font-size: clamp(10px, 2.7vw, 11.5px) !important;
+  line-height: 1.18;
+  min-height: 2.3em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.factory-screen .factory-grid .factory-owned-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px;
+}
+
+.factory-screen .factory-grid .factory-owned-actions .factory-buy-btn {
+  min-height: 36px;
+  font-size: clamp(10.6px, 2.8vw, 12px);
+  line-height: 1.1;
+  white-space: normal;
+  text-wrap: balance;
+  overflow: hidden;
+}

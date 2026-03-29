@@ -742,6 +742,8 @@ function normalizeFactoriesState(rawFactories, timestamp) {
 // --- Madenler (Mines) ---
 const MS_SECOND = 1000
 const MINE_PREMIUM_MULTIPLIER = 2
+const MINE_FIXED_DIG_DURATION_SECONDS = 5
+const MINE_FIXED_COOLDOWN_MINUTES = 15
 const MINE_NAME_BY_ID = Object.freeze({
   'gold-mine': 'Alt\u0131n Madeni',
   'steel-mine': 'Demir Madeni',
@@ -815,13 +817,13 @@ function normalizeMinesState(rawMines, timestamp) {
   return nextState
 }
 
-function mineDigDurationMs(template) {
-  const sec = Math.max(1, asInt(template?.digDurationSeconds, 5))
+function mineDigDurationMs() {
+  const sec = Math.max(1, asInt(MINE_FIXED_DIG_DURATION_SECONDS, 5))
   return sec * MS_SECOND
 }
 
-function mineCooldownMs(template) {
-  return Math.max(1, asInt(template?.cooldownMinutes, 15)) * MS_MINUTE
+function mineCooldownMs() {
+  return Math.max(1, asInt(MINE_FIXED_COOLDOWN_MINUTES, 15)) * MS_MINUTE
 }
 
 function mineCostCash(template) {
@@ -855,20 +857,19 @@ function tickMines(profile, timestamp) {
 
     // Geçmiş sürümlerde başlatılmış (10 sn / 30 dk) kazıları yeni kurala (5 sn / 15 dk) düşür.
     // Böylece kullanıcı eski uzun bekleme süresinde takılı kalmaz.
-    if (stateUpdatedMs > 0) {
-      const maxDigEndsMs = stateUpdatedMs + digDurationMs
-      const maxNextDigMs = stateUpdatedMs + cooldownMs
+    const clampBaseMs = stateUpdatedMs > 0 ? stateUpdatedMs : nowMs
+    const maxDigEndsMs = clampBaseMs + digDurationMs
+    const maxNextDigMs = clampBaseMs + cooldownMs
 
-      if (digEndsMs > maxDigEndsMs) {
-        digEndsMs = maxDigEndsMs
-        state.digEndsAt = new Date(maxDigEndsMs).toISOString()
-        state.updatedAt = timestamp
-      }
+    if (digEndsMs > maxDigEndsMs) {
+      digEndsMs = maxDigEndsMs
+      state.digEndsAt = new Date(maxDigEndsMs).toISOString()
+      state.updatedAt = timestamp
+    }
 
-      if (nextDigMs > maxNextDigMs) {
-        state.nextDigAt = new Date(maxNextDigMs).toISOString()
-        state.updatedAt = timestamp
-      }
+    if (nextDigMs > maxNextDigMs) {
+      state.nextDigAt = new Date(maxNextDigMs).toISOString()
+      state.updatedAt = timestamp
     }
 
     if (digEndsMs > 0 && nowMs >= digEndsMs) {
@@ -904,8 +905,8 @@ function minesView(profile, timestamp) {
       outputItemName: mineOutputDisplayName(outputItemId, outputItem?.name || outputItemId),
       minOutput,
       maxOutput,
-      digDurationSeconds: Math.max(1, asInt(template.digDurationSeconds, 5)),
-      cooldownMinutes: Math.max(1, asInt(template.cooldownMinutes, 15)),
+      digDurationSeconds: Math.max(1, asInt(MINE_FIXED_DIG_DURATION_SECONDS, 5)),
+      cooldownMinutes: Math.max(1, asInt(MINE_FIXED_COOLDOWN_MINUTES, 15)),
       costCash,
       xpPerCollect: Math.max(0, asInt(template.xpPerCollect, 10)),
       canStartDig,

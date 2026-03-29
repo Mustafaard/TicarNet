@@ -8897,14 +8897,12 @@ function HomePage({ user, onLogout }) {
   }, [leaderboardRowsSeason, profileModalData, profileModalUserId])
 
   const minesList = Array.isArray(mines?.mines) ? mines.mines : []
-  const minesDigDurationSeconds = Math.max(
-    1,
-    Math.trunc(num(minesList[0]?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)),
-  )
-  const minesCooldownMinutes = Math.max(
-    1,
-    Math.trunc(num(minesList[0]?.cooldownMinutes || DEFAULT_MINE_COOLDOWN_MINUTES)),
-  )
+  const minesDigDurationSeconds = DEFAULT_MINE_DIG_DURATION_SEC
+  const minesCooldownMinutes = DEFAULT_MINE_COOLDOWN_MINUTES
+  const minesBaseMinOutput = Math.max(1, Math.trunc(num(minesList[0]?.minOutput || 10)))
+  const minesBaseMaxOutput = Math.max(minesBaseMinOutput, Math.trunc(num(minesList[0]?.maxOutput || 1000)))
+  const minesPremiumMinOutput = minesBaseMinOutput * 2
+  const minesPremiumMaxOutput = minesBaseMaxOutput * 2
   const mineDigAction = async (mineId) => {
     const mine = minesList.find((m) => m.id === mineId)
     if (mine && !mine.hasEnoughCash) {
@@ -8925,10 +8923,7 @@ function HomePage({ user, onLogout }) {
       mineDigCollectedRef.current = false
       setMineCollectResult(null)
       const updatedMine = response.mines?.find((m) => m.id === mineId) || mine || minesList.find((m) => m.id === mineId)
-      const nextDigDurationSec = Math.max(
-        1,
-        Math.trunc(num(updatedMine?.digDurationSeconds || mine?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)),
-      )
+      const nextDigDurationSec = DEFAULT_MINE_DIG_DURATION_SEC
       setMineDigCountdownSec(nextDigDurationSec)
       setMineDigModal(updatedMine ? { mine: updatedMine } : null)
     } finally {
@@ -8957,7 +8952,7 @@ function HomePage({ user, onLogout }) {
           <button type="button" className="btn btn-ghost btn-sm mines-back-btn" onClick={() => void openTab('home', { tab: 'home' })}>Şehir</button>
         </div>
         <p className="muted mines-summary">
-          Her maden için kazı süresi {fmt(minesDigDurationSeconds)} saniye, bekleme süresi {fmt(minesCooldownMinutes)} dakikadır. Standart üyeler 10-500, Premium üyeler 20-1000 arası rastgele kaynak kazanır. Yetersiz nakitte işlem başlatılmaz.
+          Her maden için kazı süresi {fmt(minesDigDurationSeconds)} saniye, bekleme süresi {fmt(minesCooldownMinutes)} dakikadır. Standart üyeler {fmt(minesBaseMinOutput)}-{fmt(minesBaseMaxOutput)}, Premium üyeler {fmt(minesPremiumMinOutput)}-{fmt(minesPremiumMaxOutput)} arası rastgele kaynak kazanır. Yetersiz nakitte işlem başlatılmaz.
         </p>
         {minesList.length === 0 ? (
           <p className="empty" style={{ marginTop: 16 }}>Yükleniyor...</p>
@@ -18117,7 +18112,7 @@ function HomePage({ user, onLogout }) {
             </p>
           ))}
         </div>
-        <button type="button" className="btn btn-primary full" onClick={() => setDailyRewardResult(null)}>
+        <button type="button" className="btn btn-success full daily-login-result-continue-btn" onClick={() => setDailyRewardResult(null)}>
           Devam Et
         </button>
       </article>
