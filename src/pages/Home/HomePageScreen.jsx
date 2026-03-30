@@ -19139,15 +19139,18 @@ function HomePage({ user, onLogout }) {
                       {profileModalData.factories
                         .filter((f) => f && f.owned)
                         .slice()
+                        // Once level'e gore (yuksekten dusuge), esitse FACTORY_CARD_ORDER'a gore sirala
                         .sort((left, right) => {
+                          const leftLevel = Math.max(1, Number(left?.level || 1))
+                          const rightLevel = Math.max(1, Number(right?.level || 1))
+                          if (leftLevel !== rightLevel) return rightLevel - leftLevel
                           const leftId = String(left?.id || '').trim()
                           const rightId = String(right?.id || '').trim()
                           const leftIndex = FACTORY_CARD_ORDER.indexOf(leftId)
                           const rightIndex = FACTORY_CARD_ORDER.indexOf(rightId)
                           const safeLeft = leftIndex === -1 ? FACTORY_CARD_ORDER.length : leftIndex
                           const safeRight = rightIndex === -1 ? FACTORY_CARD_ORDER.length : rightIndex
-                          if (safeLeft !== safeRight) return safeLeft - safeRight
-                          return String(left?.name || '').localeCompare(String(right?.name || ''), 'tr')
+                          return safeLeft - safeRight
                         })
                         .map((factory) => (
                           <div key={factory.id} className="player-profile-factory-card">
@@ -19158,11 +19161,8 @@ function HomePage({ user, onLogout }) {
                                 loading="lazy"
                                 onError={(e) => { e.currentTarget.src = '/splash/logo.png' }}
                               />
-                              <span
-                                className="factory-level-badge player-profile-factory-level-chip"
-                                title={`Seviye ${fmt(Math.max(1, Number(factory.level || 1)))}`}
-                              >
-                                Lv {fmt(Math.max(1, Number(factory.level || 1)))}
+                              <span className="factory-level-badge" title={`Seviye ${fmt(Math.max(1, Number(factory.level || 1)))}`}>
+                                ★{fmt(Math.max(1, Number(factory.level || 1)))}
                               </span>
                             </span>
                             <div className="player-profile-factory-meta">
