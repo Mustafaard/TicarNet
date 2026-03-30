@@ -30143,6 +30143,10 @@ select {
 
 .factory-level-badge-owned,
 .player-profile-factory-level-badge {
+  position: absolute !important;
+  display: inline-flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
   z-index: 3 !important;
   top: 7px !important;
   right: 7px !important;
@@ -30157,11 +30161,18 @@ select {
     inset 0 1px 0 rgba(255, 240, 188, 0.18) !important;
 }
 
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-hero-wrap,
+.player-profile-factory-img-wrap.factory-shop-hero-wrap {
+  position: relative !important;
+  overflow: visible !important;
+  isolation: isolate;
+}
+
 .factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card:last-child:nth-child(odd) {
-  grid-column: 1 / -1 !important;
-  width: 100% !important;
-  max-width: calc((100% - 10px) / 2) !important;
-  justify-self: center !important;
+  grid-column: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  justify-self: stretch !important;
 }
 
 .player-profile-factory-grid {
@@ -30196,10 +30207,10 @@ select {
 }
 
 .player-profile-factory-card:last-child:nth-child(odd) {
-  grid-column: 1 / -1;
-  width: 100%;
-  max-width: calc((100% - 10px) / 2);
-  justify-self: center;
+  grid-column: auto !important;
+  width: auto !important;
+  max-width: none !important;
+  justify-self: stretch !important;
 }
 
 @media (max-width: 360px) {
