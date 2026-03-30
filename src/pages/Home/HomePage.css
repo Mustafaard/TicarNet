@@ -30229,32 +30229,33 @@ select {
 
 /* Final mobile-first polish: owned factories + events + premium daily offers */
 .factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card {
-  padding: 8px !important;
-  gap: 7px !important;
+  padding: 7px !important;
+  gap: 6px !important;
 }
 
 .factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-hero {
-  min-height: clamp(88px, 22vw, 102px) !important;
-  max-height: clamp(88px, 22vw, 102px) !important;
+  min-height: clamp(80px, 20vw, 94px) !important;
+  max-height: clamp(80px, 20vw, 94px) !important;
 }
 
 .factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-card-name {
-  font-size: clamp(11.6px, 2.9vw, 13.2px) !important;
-  min-height: 2.18em !important;
+  font-size: clamp(11px, 2.75vw, 12.6px) !important;
+  min-height: 2.08em !important;
+  line-height: 1.14 !important;
 }
 
 .factory-owned-meta-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 5px;
   width: 100%;
 }
 
 .factory-owned-meta-pill {
   display: grid;
-  gap: 2px;
-  padding: 6px 7px;
-  border-radius: 10px;
+  gap: 1px;
+  padding: 5px 6px;
+  border-radius: 9px;
   border: 1px solid rgba(112, 168, 232, 0.28);
   background: rgba(10, 20, 38, 0.82);
   min-width: 0;
@@ -30262,7 +30263,7 @@ select {
 
 .factory-owned-meta-pill small {
   margin: 0;
-  font-size: 9.5px;
+  font-size: 8.9px;
   line-height: 1.1;
   color: #8fb1d8;
   white-space: nowrap;
@@ -30270,8 +30271,8 @@ select {
 
 .factory-owned-meta-pill strong {
   margin: 0;
-  font-size: 11.5px;
-  line-height: 1.15;
+  font-size: 10.8px;
+  line-height: 1.1;
   color: #eef7ff;
   white-space: nowrap;
   overflow: hidden;
@@ -30301,14 +30302,15 @@ select {
 }
 
 .factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-card-hint {
-  min-height: 1.2em !important;
-  font-size: clamp(9.4px, 2.35vw, 10.3px) !important;
-  line-height: 1.15 !important;
+  min-height: 1.1em !important;
+  font-size: clamp(8.9px, 2.2vw, 9.8px) !important;
+  line-height: 1.12 !important;
 }
 
 .factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-owned-actions .factory-buy-btn {
-  min-height: 36px !important;
-  font-size: clamp(10.2px, 2.55vw, 11.4px) !important;
+  min-height: 34px !important;
+  font-size: clamp(9.8px, 2.4vw, 10.9px) !important;
+  border-radius: 10px !important;
 }
 
 .weekly-events-hero-card {
@@ -30390,11 +30392,11 @@ select {
 
 @media (max-width: 360px) {
   .factory-owned-meta-pill {
-    padding: 5px 6px;
+    padding: 4px 5px;
   }
 
   .factory-owned-meta-pill strong {
-    font-size: 10.8px;
+    font-size: 10.1px;
   }
 
   .weekly-events-grid {
