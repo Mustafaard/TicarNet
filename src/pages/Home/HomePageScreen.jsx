@@ -12307,7 +12307,7 @@ function HomePage({ user, onLogout }) {
                         />
                         <span className="factory-shop-hero-fallback">FAB</span>
                       </div>
-                      <span className="factory-level-badge" title={`Seviye ${fmt(factory.level)}`}>
+                      <span className="factory-level-badge factory-level-badge-owned" title={`Seviye ${fmt(factory.level)}`}>
                         ★{fmt(factory.level)}
                       </span>
                     </div>
@@ -19161,7 +19161,7 @@ function HomePage({ user, onLogout }) {
                                 loading="lazy"
                                 onError={(e) => { e.currentTarget.src = '/splash/logo.png' }}
                               />
-                              <span className="factory-level-badge" title={`Seviye ${fmt(Math.max(1, Number(factory.level || 1)))}`}>
+                              <span className="factory-level-badge player-profile-factory-level-badge" title={`Seviye ${fmt(Math.max(1, Number(factory.level || 1)))}`}>
                                 ★{fmt(Math.max(1, Number(factory.level || 1)))}
                               </span>
                             </span>
