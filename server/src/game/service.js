@@ -559,6 +559,7 @@ function createDefaultBusinessUnlocks() {
 const FACTORY_MIN_LEVEL = 1
 const FACTORY_UNCAPPED_MAX_LEVEL = 1000000000
 const FACTORY_DEFAULT_MAX_LEVEL = 200
+const FACTORY_DEFAULT_GROWTH_MULTIPLIER = 1.4
 const FACTORY_DEFAULT_SPEEDUP_RATIO = 0.15
 const FACTORY_DEFAULT_SPEEDUP_DIAMONDS = 40
 const FACTORY_SPEEDUP_DIAMOND_MULTIPLIER = 2
@@ -578,6 +579,12 @@ function factoryMaxLevel(template) {
   const configured = factoryConfiguredMaxLevel(template)
   if (configured > 0) return Math.max(FACTORY_MIN_LEVEL, configured)
   return Math.max(FACTORY_MIN_LEVEL, FACTORY_DEFAULT_MAX_LEVEL)
+}
+
+function factoryGrowthMultiplier(template) {
+  const rawMultiplier = Number(template?.upgrade?.growthMultiplier ?? FACTORY_DEFAULT_GROWTH_MULTIPLIER)
+  if (!Number.isFinite(rawMultiplier) || rawMultiplier <= 1) return FACTORY_DEFAULT_GROWTH_MULTIPLIER
+  return rawMultiplier
 }
 
 function createDefaultFactoryUpgradeState(template) {
@@ -1042,14 +1049,14 @@ function factoryOutputPerCollect(template, level) {
   const safeLevel = Math.max(FACTORY_MIN_LEVEL, asInt(level, FACTORY_MIN_LEVEL))
   const baseOutput = Math.max(1, asInt(template?.baseOutputPerCollect, 1))
   const levelStep = Math.max(0, safeLevel - FACTORY_MIN_LEVEL)
-  return Math.max(1, Math.round(baseOutput * Math.pow(2, levelStep)))
+  return Math.max(1, Math.round(baseOutput * Math.pow(factoryGrowthMultiplier(template), levelStep)))
 }
 
 function factoryEnergyCostPerCollect(template, level) {
   const safeLevel = Math.max(FACTORY_MIN_LEVEL, asInt(level, FACTORY_MIN_LEVEL))
   const baseEnergy = Math.max(0, asInt(template?.baseEnergyCostPerCollect, 0))
   const levelStep = Math.max(0, safeLevel - FACTORY_MIN_LEVEL)
-  return Math.max(0, Math.round(baseEnergy * Math.pow(2, levelStep)))
+  return Math.max(0, Math.round(baseEnergy * Math.pow(factoryGrowthMultiplier(template), levelStep)))
 }
 
 function factoryPurchaseResourceCost(template, options = {}) {
@@ -1224,6 +1231,17 @@ function factoriesView(profile, timestamp) {
       ? Math.min(maxLevel, Math.max(FACTORY_MIN_LEVEL, level) + 1)
       : Math.max(FACTORY_MIN_LEVEL, level) + 1
     const maxReached = hasLevelCap && level >= maxLevel
+    const nextOutputPerCollect = maxReached
+      ? currentOutputPerCollect
+      : factoryOutputPerCollect(template, nextLevel)
+    const nextEnergyCostPerCollect = maxReached
+      ? currentEnergyCostPerCollect
+      : weeklyEventCostValue(
+        factoryEnergyCostPerCollect(template, nextLevel),
+        timestamp,
+        weeklyEvents,
+        { minPositive: 1, applyDiscount: true },
+      )
     const upgradeCostCash = maxReached
       ? 0
       : factoryUpgradeCashCost(template, nextLevel, { timestamp, weeklyEvents })
@@ -1254,6 +1272,13 @@ function factoriesView(profile, timestamp) {
       timestamp,
       weeklyEvents,
     )
+    const nextXpPerCollect = maxReached
+      ? xpPerCollect
+      : weeklyEventXpGain(
+        Math.max(5, Math.round(nextOutputPerCollect * 0.35)),
+        timestamp,
+        weeklyEvents,
+      )
     const canCollectNow = owned &&
       !isBuilding &&
       !isUpgrading &&
@@ -1310,6 +1335,9 @@ function factoriesView(profile, timestamp) {
         maxReached,
         nextLevel,
         durationMinutes: maxReached ? 0 : Math.round(factoryUpgradeDurationMs(template, nextLevel) / MS_MINUTE),
+        outputPerCollect: nextOutputPerCollect,
+        energyCostPerCollect: nextEnergyCostPerCollect,
+        xpPerCollect: nextXpPerCollect,
         costCash: upgradeCostCash,
         missingCash: missingUpgradeCash,
         costByItem: upgradeCostByItem,

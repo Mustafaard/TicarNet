@@ -1873,6 +1873,17 @@ function roleBadgeMeta(role, isPremium = false, fallbackLabel = '', seasonBadge 
   }
 }
 
+function profileStaffRoleMeta(role) {
+  const safeRole = normalizeRoleValue(role)
+  if (safeRole === 'admin') {
+    return { text: 'Admin', className: 'is-admin' }
+  }
+  if (safeRole === 'moderator') {
+    return { text: 'Moderatör', className: 'is-moderator' }
+  }
+  return null
+}
+
 function _relativeChatTime(value) {
   const date = parseSafeDate(value)
   if (!date) return '--'
@@ -8353,6 +8364,9 @@ function HomePage({ user, onLogout }) {
       const buildDurationMinutes = Math.max(1, Math.trunc(num(entry?.buildDurationMinutes || 30)))
       const speedupDiamondCost = Math.max(0, Math.trunc(num(entry?.upgrading?.speedupDiamondCost || 0)))
       const xpPerCollect = Math.max(0, Math.trunc(num(entry?.xpPerCollect || 0)))
+      const nextUpgradeOutputPerCollect = Math.max(0, Math.trunc(num(entry?.nextUpgrade?.outputPerCollect || 0)))
+      const nextUpgradeEnergyCostPerCollect = Math.max(0, Math.trunc(num(entry?.nextUpgrade?.energyCostPerCollect || 0)))
+      const nextUpgradeXpPerCollect = Math.max(0, Math.trunc(num(entry?.nextUpgrade?.xpPerCollect || 0)))
       const nextUpgradeCostCash = Math.max(0, Math.trunc(num(entry?.nextUpgrade?.costCash || 0)))
       const missingUpgradeCash = Math.max(0, Math.trunc(num(entry?.nextUpgrade?.missingCash || 0)))
       const upgradeCostRows = Object.entries(entry?.nextUpgrade?.costByItem || {})
@@ -8390,6 +8404,9 @@ function HomePage({ user, onLogout }) {
         outputMeta,
         energyMeta,
         xpPerCollect,
+        nextUpgradeOutputPerCollect,
+        nextUpgradeEnergyCostPerCollect,
+        nextUpgradeXpPerCollect,
         nextUpgradeCostCash,
         missingUpgradeCash,
         speedupDiamondCost,
@@ -8487,6 +8504,20 @@ function HomePage({ user, onLogout }) {
     ]
     : []
   const factoryUpgradeModalHasMissingCost = factoryUpgradeModalMissingRows.length > 0
+  const profileModalIsSelf = Boolean(profileModalUserId && user?.id && String(profileModalUserId) === String(user.id))
+  const profileModalRoleValue = profileModalIsSelf
+    ? normalizeRoleValue(role)
+    : normalizeRoleValue(profileModalData?.role || 'player')
+  const profileModalPremiumActive = profileModalIsSelf ? premiumActive : Boolean(profileModalData?.premium?.active)
+  const profileModalStaffRole = profileStaffRoleMeta(profileModalRoleValue)
+  const profileModalSeasonBadge = normalizeSeasonBadgeMeta(profileModalData?.seasonBadge || null)
+  const profileModalDisplayName = String(profileModalData?.displayName || profileModalData?.username || 'Oyuncu').trim() || 'Oyuncu'
+  const profileModalUsername = String(profileModalData?.username || '').trim()
+  const profileModalShowHandle = Boolean(
+    profileModalUsername &&
+    profileModalUsername.toLocaleLowerCase('tr') !== profileModalDisplayName.toLocaleLowerCase('tr'),
+  )
+  const profileModalMembershipLabel = profileModalPremiumActive ? 'Premium Üye' : 'Standart Üye'
   const factoryPurchaseModalCanBuyNow = Boolean(
     factoryPurchaseModal &&
     canStartAnotherFactoryBuild &&
@@ -12038,6 +12069,9 @@ function HomePage({ user, onLogout }) {
                     </div>
                   ))}
                 </div>
+                <span className="factory-cost-title">
+                  Sonraki tahsilat: +{fmt(factory.nextUpgradeOutputPerCollect || 0)} {factory.outputMeta.label} · -{fmt(factory.nextUpgradeEnergyCostPerCollect || 0)} {factory.energyMeta.label} · +{fmt(factory.nextUpgradeXpPerCollect || 0)} XP
+                </span>
                 {factory.missingUpgradeCash > 0 ? (
                   <span className="factory-cost-title factory-cost-title-missing">
                     Eksik nakit: {fmt(factory.missingUpgradeCash)}
@@ -12612,15 +12646,15 @@ function HomePage({ user, onLogout }) {
                 <h4>Yükseltme tamamlandığında</h4>
                 <p className="fleet-summary-line positive">
                   <img src={factoryUpgradeModal.outputMeta?.icon} alt="" aria-hidden="true" />
-                  Üretim geliri: +{fmt(Math.max(0, Math.trunc(num(factoryUpgradeModal.outputPerCollect || 0) * 2)))} {factoryUpgradeModal.outputMeta?.label} / tahsilat
+                  Üretim geliri: +{fmt(factoryUpgradeModal.nextUpgradeOutputPerCollect || 0)} {factoryUpgradeModal.outputMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line negative">
                   <img src={factoryUpgradeModal.energyMeta?.icon} alt="" aria-hidden="true" />
-                  Tahsilat gideri: -{fmt(Math.max(0, Math.trunc(num(factoryUpgradeModal.energyCostPerCollect || 0) * 2)))} {factoryUpgradeModal.energyMeta?.label} / tahsilat
+                  Tahsilat gideri: -{fmt(factoryUpgradeModal.nextUpgradeEnergyCostPerCollect || 0)} {factoryUpgradeModal.energyMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line positive">
                   <img src="/home/ui/hud/xp-icon.webp" alt="" aria-hidden="true" />
-                  Tahsilat XP getirisi de artar
+                  Tahsilat XP getirisi: +{fmt(factoryUpgradeModal.nextUpgradeXpPerCollect || 0)} XP
                 </p>
               </div>
               <div className="factory-upgrade-modal-costs">
@@ -18744,87 +18778,88 @@ function HomePage({ user, onLogout }) {
                   <div className="player-profile-updating">Profil bilgileri güncelleniyor...</div>
                 ) : null}
                 <div className="player-profile-header">
-                  <div className="player-profile-avatar-wrap">
-                    <img
-                      src={profileModalData.avatar?.url || '/splash/logo.png'}
-                      alt=""
-                      className="player-profile-avatar"
-                      onError={(e) => { e.target.src = '/splash/logo.png' }}
-                    />
-                  </div>
-                  {profileModalData.levelInfo?.level || profileModalData.companyLevel || profileModalData?.seasonBadge ? (
-                    <div className="player-profile-rozet">
-                      {profileModalData.levelInfo?.level ? (
-                        <span className="player-profile-rozet-badge" title="Seviye">LV {profileModalData.levelInfo.level}</span>
-                      ) : null}
-                      {profileModalData.companyLevel ? (
-                        <span className="player-profile-rozet-badge" title="İşletme Seviyesi">İş. {profileModalData.companyLevel}</span>
-                      ) : null}
-                      {profileModalData?.seasonBadge ? (() => {
-                        const seasonBadge = profileModalData.seasonBadge
-                        return (
-                          <span
-                            className={`player-profile-rozet-badge season is-${String(seasonBadge.tier || '').trim().toLowerCase() || 'gold'}`}
-                            title={`${seasonBadge.label || 'Sezon Rozeti'} ⬢ ${seasonBadge.awardedForSeasonKey || ''}`.trim()}
-                          >
-                            {seasonBadge.icon ? (
-                              <img
-                                src={seasonBadge.icon}
-                                alt=""
-                                className="player-profile-rozet-badge-icon"
-                                aria-hidden
-                                onError={(event) => {
-                                  event.currentTarget.style.display = 'none'
-                                }}
-                              />
+                  <div className="player-profile-header-main">
+                    <div className="player-profile-header-media">
+                      <div className="player-profile-avatar-wrap">
+                        <img
+                          src={profileModalData.avatar?.url || '/splash/logo.png'}
+                          alt=""
+                          className="player-profile-avatar"
+                          onError={(e) => { e.target.src = '/splash/logo.png' }}
+                        />
+                      </div>
+                      {profileModalSeasonBadge ? (
+                        <div className={`player-profile-earned-badge is-${profileModalSeasonBadge.tier || 'gold'}`}>
+                          <img
+                            src={profileModalSeasonBadge.icon}
+                            alt=""
+                            aria-hidden
+                            className="player-profile-earned-badge-icon"
+                            onError={(event) => {
+                              event.currentTarget.style.display = 'none'
+                            }}
+                          />
+                          <span className="player-profile-earned-badge-copy">
+                            <strong>{profileModalSeasonBadge.label || 'Sezon Rozeti'}</strong>
+                            {profileModalSeasonBadge.awardedForSeasonKey ? (
+                              <small>{profileModalSeasonBadge.awardedForSeasonKey}</small>
                             ) : null}
-                            <span className="player-profile-rozet-badge-copy">
-                              <span>{seasonBadge.label || 'Sezon Rozeti'}</span>
-                            </span>
                           </span>
-                        )
-                      })() : null}
+                        </div>
+                      ) : null}
                     </div>
-                  ) : null}
-                  <h2 className="player-profile-name">
-                    {profileModalData.displayName || profileModalData.username || 'Oyuncu'}
-                    {(() => {
-                      const lastActiveIso = profileModalData.lastSeenAt || profileModalData.updatedAt || ''
-                      const lastActiveMs = lastActiveIso ? Date.parse(lastActiveIso) : 0
-                      const liveNowMsSafe = chatClockMs || Date.now()
-                      const isOnline = lastActiveMs && liveNowMsSafe - lastActiveMs < 90 * 1000
-                      if (!lastActiveMs) return null
-                      const diffSeconds = Math.max(0, Math.floor((liveNowMsSafe - lastActiveMs) / 1000))
-                      const diffMinutes = Math.floor(diffSeconds / 60)
-                      const diffHours = Math.floor(diffMinutes / 60)
-                      const diffDays = Math.floor(diffHours / 24)
-                      let inactiveLabel = `${Math.max(1, diffSeconds)} saniye`
-                      if (diffDays > 0) inactiveLabel = `${diffDays} gün`
-                      else if (diffHours > 0) inactiveLabel = `${diffHours} saat`
-                      else if (diffMinutes > 0) inactiveLabel = `${diffMinutes} dakika`
-                      const statusText = isOnline ? 'Çevrim içi' : `Çevrim dışı · ${inactiveLabel}`
-                      return (
-                        <span
-                          className={`player-profile-status-badge ${isOnline ? 'is-online' : 'is-offline'}`}
-                        >
-                          <span className="player-profile-status-dot" />
-                          {statusText}
-                        </span>
-                      )
-                    })()}
-                  </h2>
-                  {profileModalData?.username ? (
-                    <p className="player-profile-handle">{profileModalData.username}</p>
-                  ) : null}
-                  <p className="player-profile-unvan">
-                    {profileModalData.levelInfo?.level
-                      ? `Seviye ${profileModalData.levelInfo.level}`
-                      : ''}
-                    {profileModalData.companyLevel
-                      ? ` · İşletme Seviyesi ${profileModalData.companyLevel}`
-                      : ''}
-                    {!(profileModalData.levelInfo?.level || profileModalData.companyLevel) ? 'Oyuncu' : ''}
-                  </p>
+                    <div className="player-profile-header-copy">
+                      {profileModalData.levelInfo?.level || profileModalData.companyLevel ? (
+                        <div className="player-profile-rozet">
+                          {profileModalData.levelInfo?.level ? (
+                            <span className="player-profile-rozet-badge" title="Seviye">LV {profileModalData.levelInfo.level}</span>
+                          ) : null}
+                          {profileModalData.companyLevel ? (
+                            <span className="player-profile-rozet-badge" title="İşletme Seviyesi">İş. {profileModalData.companyLevel}</span>
+                          ) : null}
+                        </div>
+                      ) : null}
+                      <h2 className="player-profile-name">
+                        {profileModalDisplayName}
+                        {(() => {
+                          const lastActiveIso = profileModalData.lastSeenAt || profileModalData.updatedAt || ''
+                          const lastActiveMs = lastActiveIso ? Date.parse(lastActiveIso) : 0
+                          const liveNowMsSafe = chatClockMs || Date.now()
+                          const isOnline = lastActiveMs && liveNowMsSafe - lastActiveMs < 90 * 1000
+                          if (!lastActiveMs) return null
+                          const diffSeconds = Math.max(0, Math.floor((liveNowMsSafe - lastActiveMs) / 1000))
+                          const diffMinutes = Math.floor(diffSeconds / 60)
+                          const diffHours = Math.floor(diffMinutes / 60)
+                          const diffDays = Math.floor(diffHours / 24)
+                          let inactiveLabel = `${Math.max(1, diffSeconds)} saniye`
+                          if (diffDays > 0) inactiveLabel = `${diffDays} gün`
+                          else if (diffHours > 0) inactiveLabel = `${diffHours} saat`
+                          else if (diffMinutes > 0) inactiveLabel = `${diffMinutes} dakika`
+                          const statusText = isOnline ? 'Çevrim içi' : `Çevrim dışı · ${inactiveLabel}`
+                          return (
+                            <span
+                              className={`player-profile-status-badge ${isOnline ? 'is-online' : 'is-offline'}`}
+                            >
+                              <span className="player-profile-status-dot" />
+                              {statusText}
+                            </span>
+                          )
+                        })()}
+                      </h2>
+                      {profileModalShowHandle ? (
+                        <p className="player-profile-handle">@{profileModalUsername}</p>
+                      ) : null}
+                      <p className="player-profile-unvan">
+                        {profileModalData.levelInfo?.level
+                          ? `Seviye ${profileModalData.levelInfo.level}`
+                          : ''}
+                        {profileModalData.companyLevel
+                          ? ` · İşletme Seviyesi ${profileModalData.companyLevel}`
+                          : ''}
+                        {!(profileModalData.levelInfo?.level || profileModalData.companyLevel) ? 'Oyuncu' : ''}
+                      </p>
+                    </div>
+                  </div>
                 </div>
                 <div className="player-profile-stats player-profile-stats-large">
                   <div className="player-profile-stat">
@@ -18850,32 +18885,20 @@ function HomePage({ user, onLogout }) {
                     #{profileModalLeagueRanks.seasonRank ?? '-'}
                   </span>
                 </div>
-                {(() => {
-                  const isSelf = profileModalUserId && user?.id && String(profileModalUserId) === String(user.id)
-                  const modalRole = isSelf ? role : normalizeRoleValue(profileModalData?.role || 'player')
-                  const modalBadge = roleBadgeMeta(
-                    modalRole,
-                    isSelf ? premiumActive : Boolean(profileModalData?.premium?.active),
-                    isSelf ? selfRoleLabel : profileModalData?.roleLabel,
-                    profileModalData?.seasonBadge || null,
-                  )
-                  return (
-                  <div className="player-profile-premium-row">
-                    <span className="player-profile-premium-label">Rol / Üyelik</span>
-                    <span className={`player-profile-premium-value ${modalBadge.className === 'premium' ? 'is-premium' : ''} ${modalBadge.className === 'season' ? 'is-season' : ''} ${modalBadge.isStaff ? 'is-staff' : ''}`}>
-                      {modalBadge.icon ? (
-                        <img
-                          src={modalBadge.icon}
-                          alt=""
-                          className={`player-profile-role-badge-icon ${modalBadge.isStaff ? 'role' : ''}`}
-                          onError={(e) => { e.target.style.display = 'none' }}
-                        />
-                      ) : null}
-                      {modalBadge.isStaff ? modalBadge.fullText : modalBadge.text}
+                {profileModalStaffRole ? (
+                  <div className="player-profile-premium-row player-profile-role-row">
+                    <span className="player-profile-premium-label">Rol</span>
+                    <span className={`player-profile-premium-value is-role ${profileModalStaffRole.className}`.trim()}>
+                      {profileModalStaffRole.text}
                     </span>
                   </div>
-                  )
-                })()}
+                ) : null}
+                <div className="player-profile-premium-row player-profile-membership-row">
+                  <span className="player-profile-premium-label">Üyelik</span>
+                  <span className={`player-profile-premium-value ${profileModalPremiumActive ? 'is-premium' : 'is-standard'}`.trim()}>
+                    {profileModalMembershipLabel}
+                  </span>
+                </div>
                 {profileModalUserId && user?.id && String(profileModalUserId) !== String(user.id) && profileModalData?.username ? (() => {
                   const relationship = profileModalData.relationship || {}
                   const isFriend = Boolean(relationship.isFriend)

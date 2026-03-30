@@ -30687,3 +30687,136 @@ select {
   max-width: none !important;
   justify-self: stretch !important;
 }
+
+/* Final profile header pass: role and membership split, avatar on left, badge only when earned */
+.player-profile-header-main {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) !important;
+  gap: 12px !important;
+  align-items: center !important;
+}
+
+.player-profile-header-media {
+  display: grid !important;
+  gap: 8px !important;
+  justify-items: start !important;
+  align-content: start !important;
+}
+
+.player-profile-header-copy {
+  min-width: 0 !important;
+  text-align: left !important;
+}
+
+.player-profile-header .player-profile-avatar-wrap {
+  width: 88px !important;
+  height: 88px !important;
+  margin: 0 !important;
+}
+
+.player-profile-earned-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  max-width: 100%;
+  padding: 6px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 219, 149, 0.58);
+  background: linear-gradient(160deg, rgba(63, 49, 16, 0.92), rgba(28, 22, 8, 0.92));
+  color: #ffeabf;
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.24);
+}
+
+.player-profile-earned-badge.is-silver {
+  border-color: rgba(167, 199, 232, 0.48);
+  background: linear-gradient(160deg, rgba(38, 50, 68, 0.92), rgba(19, 26, 37, 0.92));
+  color: #edf6ff;
+}
+
+.player-profile-earned-badge.is-bronze,
+.player-profile-earned-badge.is-common {
+  border-color: rgba(231, 177, 118, 0.48);
+  background: linear-gradient(160deg, rgba(74, 45, 22, 0.92), rgba(38, 24, 12, 0.92));
+  color: #ffe4c4;
+}
+
+.player-profile-earned-badge-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex: 0 0 20px;
+}
+
+.player-profile-earned-badge-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+
+.player-profile-earned-badge-copy strong {
+  font-size: 11px;
+  line-height: 1.12;
+}
+
+.player-profile-earned-badge-copy small {
+  font-size: 9px;
+  line-height: 1.15;
+  color: rgba(255, 236, 196, 0.82);
+}
+
+.player-profile-header .player-profile-rozet {
+  justify-content: flex-start !important;
+  margin: 0 0 6px !important;
+}
+
+.player-profile-header .player-profile-name {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  gap: 8px !important;
+  font-size: clamp(20px, 4.8vw, 28px) !important;
+  line-height: 1.14 !important;
+}
+
+.player-profile-header .player-profile-status-badge {
+  margin-left: 0 !important;
+}
+
+.player-profile-header .player-profile-handle {
+  margin: 4px 0 0 !important;
+  font-size: 11px !important;
+}
+
+.player-profile-header .player-profile-unvan {
+  margin: 6px 0 0 !important;
+  font-size: 12px !important;
+}
+
+.player-profile-role-row .player-profile-premium-value.is-role {
+  color: #ffd977 !important;
+  text-shadow: 0 0 10px rgba(244, 194, 78, 0.18);
+}
+
+.player-profile-membership-row .player-profile-premium-value.is-standard {
+  color: #dfeeff !important;
+}
+
+@media (max-width: 380px) {
+  .player-profile-header-main {
+    gap: 10px !important;
+  }
+
+  .player-profile-header .player-profile-avatar-wrap {
+    width: 80px !important;
+    height: 80px !important;
+  }
+
+  .player-profile-earned-badge {
+    padding: 5px 7px;
+  }
+
+  .player-profile-earned-badge-copy strong {
+    font-size: 10px;
+  }
+}
