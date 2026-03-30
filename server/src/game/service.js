@@ -850,6 +850,32 @@ function mineRandomOutput(profile, template, timestamp) {
   return Math.max(1, amount)
 }
 
+function settleMineCollection(profile, template, state, timestamp) {
+  const amount = mineRandomOutput(profile, template, timestamp)
+  const outputItemId = normalizeItemId(template.outputItemId || 'gold')
+  const outputItem = ITEM_BY_ID.get(outputItemId)
+  const xpEarned = Math.max(0, asInt(template?.xpPerCollect, 10))
+  addInventory(profile, outputItemId, amount)
+  applyMissionProgress(profile.missions, { type: 'mine_output', value: amount }, timestamp)
+  if (xpEarned > 0) addProfileXp(profile, xpEarned)
+  addSeasonPoints(profile, 2)
+  state.collectReadyAt = ''
+  state.digEndsAt = ''
+  state.updatedAt = timestamp
+  pushNotification(
+    profile,
+    'mine',
+    `${template?.name || 'Maden'} kazısı tamamlandı. ${amount} adet ${outputItem?.name || outputItemId} depoya eklendi.`,
+    timestamp,
+  )
+  return {
+    itemId: outputItemId,
+    itemName: outputItem?.name || outputItemId,
+    quantity: amount,
+    xpEarned,
+  }
+}
+
 function tickMines(profile, timestamp) {
   const nowMs = createdMs(timestamp) || Date.now()
   if (!profile.mines || typeof profile.mines !== 'object') {
@@ -10158,14 +10184,23 @@ export async function startMineDig(userId, mineId) {
     const collectReadyMs = createdMs(state.collectReadyAt)
     const canCollect = collectReadyMs > 0 && nowMs >= collectReadyMs
     const nextDigMs = createdMs(state.nextDigAt)
-    const canStartDig = !isDigging && !canCollect && (nextDigMs <= 0 || nowMs >= nextDigMs)
+    let autoCollected = null
+    if (canCollect) {
+      autoCollected = settleMineCollection(profile, template, state, timestamp)
+    }
+    const canStartDig = !isDigging && (nextDigMs <= 0 || nowMs >= nextDigMs)
     const costCash = mineCostCash(template)
     const wallet = Math.max(0, asInt(profile.wallet, 0))
     if (!canStartDig) {
       result = {
         success: false,
         reason: 'not_ready',
-        errors: { global: isDigging ? 'Bu maden şu an kazılıyor.' : canCollect ? 'Önce tahsilat yapmalısın.' : 'Bir sonraki kazı için bekleme süresi dolmadı.' },
+        errors: {
+          global: isDigging
+            ? 'Bu maden şu an kazılıyor.'
+            : 'Bir sonraki kazı için bekleme süresi dolmadı.',
+        },
+        ...(autoCollected ? { autoCollected } : {}),
       }
       return db
     }
@@ -10190,12 +10225,12 @@ export async function startMineDig(userId, mineId) {
       wallet: profile.wallet,
       mines: minesView(profile, timestamp),
       updatedAt: timestamp,
+      ...(autoCollected ? { autoCollected } : {}),
     }
     return db
   })
   return result
 }
-
 export async function collectMine(userId, mineId) {
   const safeMineId = String(mineId || '').trim()
   if (!safeMineId || !MINE_BY_ID.has(safeMineId)) {
@@ -10238,23 +10273,13 @@ export async function collectMine(userId, mineId) {
       }
       return db
     }
-    const amount = mineRandomOutput(profile, template, timestamp)
-    const outputItemId = normalizeItemId(template.outputItemId || 'gold')
-    const outputItem = ITEM_BY_ID.get(outputItemId)
-    const xpEarned = Math.max(0, asInt(template?.xpPerCollect, 10))
-    addInventory(profile, outputItemId, amount)
-    applyMissionProgress(profile.missions, { type: 'mine_output', value: amount }, timestamp)
-    if (xpEarned > 0) addProfileXp(profile, xpEarned)
-    addSeasonPoints(profile, 2)
-    state.collectReadyAt = ''
-    state.digEndsAt = ''
-    state.updatedAt = timestamp
-    pushNotification(profile, 'mine', `${template?.name || 'Maden'} kazısı tamamlandı. ${amount} adet ${outputItem?.name || outputItemId} depoya eklendi.`, timestamp)
+
+    const collected = settleMineCollection(profile, template, state, timestamp)
     result = {
       success: true,
-      message: `${amount} ${outputItem?.name || outputItemId} depoya aktarıldı.`,
-      collected: { itemId: outputItemId, quantity: amount },
-      xpEarned,
+      message: `${collected.quantity} ${collected.itemName} depoya aktarıldı.`,
+      collected: { itemId: collected.itemId, quantity: collected.quantity },
+      xpEarned: collected.xpEarned,
       inventory: inventoryView(profile, []),
       mines: minesView(profile, timestamp),
       updatedAt: timestamp,
@@ -10263,7 +10288,6 @@ export async function collectMine(userId, mineId) {
   })
   return result
 }
-
 export async function buyFactory(userId, payload = {}) {
   const safeFactoryId = String(payload?.factoryId || '').trim()
   if (!safeFactoryId || !FACTORY_BY_ID.has(safeFactoryId)) {

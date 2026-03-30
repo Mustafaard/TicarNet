@@ -3092,6 +3092,7 @@ function HomePage({ user, onLogout }) {
   const chatInitReadyRef = useRef(false)
   const activeTabRef = useRef('home')
   const mineDigCollectedRef = useRef(false)
+  const mineAutoCollectingRef = useRef('')
   const pageScrollRef = useRef(null)
   const factoryPurchaseOverlayRef = useRef(null)
   const avatarCropImageRef = useRef(null)
@@ -3664,18 +3665,29 @@ function HomePage({ user, onLogout }) {
   useEffect(() => {
     if (!mineDigModal) return undefined
     if (mineCollectResult) return undefined
-    if (mineDigCountdownSec <= 0) {
-      if (mineDigCollectedRef.current) return undefined
-      mineDigCollectedRef.current = true
-      const mineId = mineDigModal.mine?.id
-      if (!mineId) {
-        mineDigCollectedRef.current = false
-        setMineDigModal(null)
-        setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
-        return undefined
-      }
-      let cancelled = false
-      collectMine(mineId).then((response) => {
+    if (mineDigCountdownSec > 0) {
+      const interval = window.setInterval(() => {
+        setMineDigCountdownSec((s) => Math.max(0, s - 1))
+      }, 1000)
+      return () => window.clearInterval(interval)
+    }
+
+    if (mineDigCollectedRef.current) return undefined
+    mineDigCollectedRef.current = true
+    const mineId = String(mineDigModal?.mine?.id || '').trim()
+    if (!mineId) {
+      mineDigCollectedRef.current = false
+      setMineDigModal(null)
+      setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
+      return undefined
+    }
+
+    let cancelled = false
+    let retryTimer = 0
+    const maxCollectAttempts = 8
+    const runCollectAttempt = async (attemptNo = 1) => {
+      try {
+        const response = await collectMine(mineId)
         if (cancelled) return
         if (response?.success && response?.collected) {
           setMineCollectResult(response.collected)
@@ -3685,29 +3697,76 @@ function HomePage({ user, onLogout }) {
           setNotice(`Elde ettiğin kaynak: ${response.collected.quantity} ${label} depoya aktarıldı.`)
           loadProfile().catch(() => {})
           loadOverview().catch(() => {})
-        } else {
-          fail(response, response?.errors?.global || 'Tahsilat alınamadı.')
-          setMineDigModal(null)
+          setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
+          return
         }
+
+        const isNotReady = String(response?.reason || '').trim() === 'not_ready'
+        if (isNotReady && attemptNo < maxCollectAttempts) {
+          retryTimer = window.setTimeout(() => {
+            void runCollectAttempt(attemptNo + 1)
+          }, 450)
+          return
+        }
+
+        fail(response, response?.errors?.global || 'Tahsilat alınamadı.')
+        setMineDigModal(null)
+        setMineCollectResult(null)
+        mineDigCollectedRef.current = false
         setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
-      }).catch(() => {
-        if (!cancelled) setMineDigModal(null)
-        setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
-      })
-      const t = window.setTimeout(() => {
+      } catch {
         if (!cancelled) {
           setMineDigModal(null)
           setMineCollectResult(null)
           mineDigCollectedRef.current = false
+          setMineDigCountdownSec(DEFAULT_MINE_DIG_DURATION_SEC)
         }
-      }, 2500)
-      return () => { cancelled = true; window.clearTimeout(t) }
+      }
     }
-    const interval = window.setInterval(() => {
-      setMineDigCountdownSec((s) => Math.max(0, s - 1))
-    }, 1000)
-    return () => window.clearInterval(interval)
+
+    void runCollectAttempt(1)
+    return () => {
+      cancelled = true
+      window.clearTimeout(retryTimer)
+    }
   }, [DEFAULT_MINE_DIG_DURATION_SEC, fail, loadOverview, loadProfile, mineDigCountdownSec, mineDigModal, mineCollectResult])
+
+  useEffect(() => {
+    const mineEntries = Array.isArray(mines?.mines) ? mines.mines : []
+    if (!mineEntries.length) return undefined
+    if (mineDigModal || mineCollectResult) return undefined
+    if (String(busy || '').startsWith('mine-')) return undefined
+
+    const readyMine = mineEntries.find((entry) => entry?.canCollect && !entry?.isDigging)
+    if (!readyMine) return undefined
+    const mineId = String(readyMine?.id || '').trim()
+    if (!mineId) return undefined
+    if (mineAutoCollectingRef.current === mineId) return undefined
+    mineAutoCollectingRef.current = mineId
+
+    let cancelled = false
+    collectMine(mineId)
+      .then((response) => {
+        if (cancelled || !response?.success) return
+        setMines((prev) => (response.mines ? { ...prev, mines: response.mines, updatedAt: response.updatedAt } : prev))
+        if (response?.collected) {
+          const label = factoryItemMeta(response.collected.itemId)?.label || response.collected.itemId
+          setNoticeIsSuccess(true)
+          setNotice(`Elde ettiğin kaynak: ${response.collected.quantity} ${label} depoya aktarıldı.`)
+        }
+        if (response.inventory) loadProfile().catch(() => {})
+        loadOverview().catch(() => {})
+      })
+      .finally(() => {
+        if (!cancelled) {
+          mineAutoCollectingRef.current = ''
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [busy, loadOverview, loadProfile, mineCollectResult, mineDigModal, mines])
 
   const triggerLiveStateRefresh = useCallback(() => {
     const runRefresh = async () => {
@@ -8906,7 +8965,7 @@ function HomePage({ user, onLogout }) {
     Math.trunc(num(minesList[0]?.cooldownMinutes || DEFAULT_MINE_COOLDOWN_MINUTES)),
   )
   const minesBaseMinOutput = Math.max(1, Math.trunc(num(minesList[0]?.minOutput || 10)))
-  const minesBaseMaxOutput = Math.max(minesBaseMinOutput, Math.trunc(num(minesList[0]?.maxOutput || 1000)))
+  const minesBaseMaxOutput = Math.max(minesBaseMinOutput, Math.trunc(num(minesList[0]?.maxOutput || 500)))
   const minesPremiumMinOutput = minesBaseMinOutput * 2
   const minesPremiumMaxOutput = minesBaseMaxOutput * 2
   const mineDigAction = async (mineId) => {
@@ -8924,6 +8983,11 @@ function HomePage({ user, onLogout }) {
         if (response?.reason === 'insufficient_funds') setError(response?.errors?.global || 'Yetersiz nakit.')
         return
       }
+      if (response?.autoCollected?.quantity > 0) {
+        const autoCollectedLabel = factoryItemMeta(response.autoCollected.itemId)?.label || response.autoCollected.itemName || response.autoCollected.itemId
+        setNoticeIsSuccess(true)
+        setNotice(`Elde ettiğin kaynak: ${response.autoCollected.quantity} ${autoCollectedLabel} depoya aktarıldı.`)
+      }
       setMines((prev) => (response.mines ? { ...prev, mines: response.mines, updatedAt: response.updatedAt } : prev))
       if (response.wallet != null) loadOverview().catch(() => {})
       mineDigCollectedRef.current = false
@@ -8936,20 +9000,6 @@ function HomePage({ user, onLogout }) {
       setBusy('')
     }
   }
-  const mineCollectAction = async (mineId) => {
-    const key = `mine-collect:${mineId}`
-    setBusy(key)
-    try {
-      const response = await collectMine(mineId)
-      if (!response?.success) return fail(response, response?.errors?.global || 'Tahsilat yapılamadı.')
-      setMines((prev) => (response.mines ? { ...prev, mines: response.mines, updatedAt: response.updatedAt } : prev))
-      if (response.collected) setNotice(`${response.collected.quantity} ${factoryItemMeta(response.collected.itemId)?.label || response.collected.itemId} depoya eklendi.`)
-      if (response.inventory) loadProfile().catch(() => {})
-    } finally {
-      setBusy('')
-    }
-  }
-
   const minesView = (
     <section className="panel-stack home-sections mines-screen">
       <article className="card">
@@ -8958,7 +9008,7 @@ function HomePage({ user, onLogout }) {
           <button type="button" className="btn btn-ghost btn-sm mines-back-btn" onClick={() => void openTab('home', { tab: 'home' })}>Şehir</button>
         </div>
         <p className="muted mines-summary">
-          Her maden için kazı süresi {fmt(minesDigDurationSeconds)} saniye, bekleme süresi {fmt(minesCooldownMinutes)} dakikadır. Standart üyeler {fmt(minesBaseMinOutput)}-{fmt(minesBaseMaxOutput)}, Premium üyeler {fmt(minesPremiumMinOutput)}-{fmt(minesPremiumMaxOutput)} arası rastgele kaynak kazanır. Yetersiz nakitte işlem başlatılmaz.
+          Her maden için kazı süresi {fmt(minesDigDurationSeconds)} saniye, bekleme süresi {fmt(minesCooldownMinutes)} dakikadır. Standart üyeler {fmt(minesBaseMinOutput)}-{fmt(minesBaseMaxOutput)}, Premium üyeler {fmt(minesPremiumMinOutput)}-{fmt(minesPremiumMaxOutput)} arası rastgele kaynak kazanır. Kazı tamamlanınca ödül otomatik depoya aktarılır.
         </p>
         {minesList.length === 0 ? (
           <p className="empty" style={{ marginTop: 16 }}>Yükleniyor...</p>
@@ -8968,8 +9018,7 @@ function HomePage({ user, onLogout }) {
               const meta = factoryItemMeta(mine.outputItemId)
               const safeMineName = mineDisplayName(mine)
               const busyDig = busy === `mine-dig:${mine.id}`
-              const busyCollect = busy === `mine-collect:${mine.id}`
-              const isBusy = busyDig || busyCollect
+              const isBusy = busyDig
               const liveNextDigRemainingMs = mine.nextDigAt
                 ? Math.max(0, new Date(mine.nextDigAt).getTime() - Date.now())
                 : 0
@@ -8994,7 +9043,7 @@ function HomePage({ user, onLogout }) {
                       Kazı sürüyor · Kalan <span style={{ color: '#ffd28d', fontWeight: 700 }}>{formatCollectionCountdown(mine.digRemainingMs)}</span>
                     </p>
                   )}
-                  {mine.canCollect && <p className="mine-card-hint mine-card-hint-ready">Tahsilat hazır</p>}
+                  {mine.canCollect && <p className="mine-card-hint mine-card-hint-ready">Kazı tamamlandı, depoya aktarılıyor...</p>}
                   {!mine.isDigging && !mine.canCollect && liveNextDigRemainingMs <= 0 && (
                     <p className="mine-card-hint mine-card-hint-start">Kazıyı başlatmak için dokun.</p>
                   )}
@@ -9008,13 +9057,8 @@ function HomePage({ user, onLogout }) {
                       <button type="button" className="btn btn-ghost mine-card-action-full" disabled>Kazı Sürüyor</button>
                     ) : null}
                     {mine.canCollect ? (
-                      <button
-                        type="button"
-                        className="btn btn-primary mine-card-action-full"
-                        onClick={() => void mineCollectAction(mine.id)}
-                        disabled={Boolean(isBusy)}
-                      >
-                        {busyCollect ? 'Tahsil ediliyor...' : 'Tahsil Et'}
+                      <button type="button" className="btn btn-ghost mine-card-action-full" disabled>
+                        Depoya Aktarılıyor
                       </button>
                     ) : null}
                     {!mine.isDigging && !mine.canCollect ? (
