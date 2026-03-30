@@ -29992,3 +29992,101 @@ select {
   text-wrap: balance;
   overflow: hidden;
 }
+
+/* 2026-03-30 hard-fix: owned factory cards must stay clean in 2-column mobile grid */
+.factory-screen .factory-grid.factory-grid-owned {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+  align-items: stretch !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card {
+  min-width: 0 !important;
+  min-height: 0 !important;
+  padding: 8px !important;
+  border-radius: 14px !important;
+  display: grid !important;
+  grid-template-rows: auto auto !important;
+  gap: 7px !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-card-open-wrap {
+  display: grid !important;
+  grid-template-rows: auto auto auto !important;
+  gap: 6px !important;
+  align-content: start !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-hero {
+  aspect-ratio: 16 / 9 !important;
+  min-height: clamp(86px, 24vw, 108px) !important;
+  max-height: clamp(86px, 24vw, 108px) !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-hero img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-card-name {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  text-align: center !important;
+  font-size: clamp(12px, 3vw, 14px) !important;
+  line-height: 1.18 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  min-height: 2.35em !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-shop-card-hint {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  text-align: center !important;
+  font-size: clamp(10px, 2.6vw, 11px) !important;
+  line-height: 1.2 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  min-height: 2.25em !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-owned-actions {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 6px !important;
+}
+
+.factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-owned-actions .factory-buy-btn {
+  min-height: 36px !important;
+  border-radius: 10px !important;
+  font-size: clamp(11px, 2.8vw, 12px) !important;
+  line-height: 1.08 !important;
+  padding: 0 6px !important;
+  white-space: nowrap !important;
+}
+
+@media (max-width: 360px) {
+  .factory-screen .factory-grid.factory-grid-owned {
+    gap: 8px !important;
+  }
+
+  .factory-screen .factory-grid.factory-grid-owned > .factory-card.is-owned.is-shop-summary-card .factory-owned-actions .factory-buy-btn {
+    min-height: 34px !important;
+    font-size: 10.6px !important;
+  }
+}

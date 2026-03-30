@@ -8897,8 +8897,14 @@ function HomePage({ user, onLogout }) {
   }, [leaderboardRowsSeason, profileModalData, profileModalUserId])
 
   const minesList = Array.isArray(mines?.mines) ? mines.mines : []
-  const minesDigDurationSeconds = DEFAULT_MINE_DIG_DURATION_SEC
-  const minesCooldownMinutes = DEFAULT_MINE_COOLDOWN_MINUTES
+  const minesDigDurationSeconds = Math.max(
+    1,
+    Math.trunc(num(minesList[0]?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)),
+  )
+  const minesCooldownMinutes = Math.max(
+    1,
+    Math.trunc(num(minesList[0]?.cooldownMinutes || DEFAULT_MINE_COOLDOWN_MINUTES)),
+  )
   const minesBaseMinOutput = Math.max(1, Math.trunc(num(minesList[0]?.minOutput || 10)))
   const minesBaseMaxOutput = Math.max(minesBaseMinOutput, Math.trunc(num(minesList[0]?.maxOutput || 1000)))
   const minesPremiumMinOutput = minesBaseMinOutput * 2
@@ -18080,10 +18086,7 @@ function HomePage({ user, onLogout }) {
   )
 
   const dailyRewardResultRows = dailyRewardResult ? dailyLoginRewardEntries(dailyRewardResult) : []
-  const mineDigDurationForModal = Math.max(
-    1,
-    Math.trunc(num(mineDigModal?.mine?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)),
-  )
+  const mineDigDurationForModal = Math.max(1, Math.trunc(num(DEFAULT_MINE_DIG_DURATION_SEC)))
   const mineDigProgressPercent = Math.min(
     100,
     Math.max(0, ((mineDigDurationForModal - mineDigCountdownSec) / mineDigDurationForModal) * 100),
@@ -18170,7 +18173,7 @@ function HomePage({ user, onLogout }) {
               ) : (
                 'Premium ile kazı başına 2× kaynak kazanırsın. '
               )}
-              Kazıyı başlattıktan sonra {Math.max(1, Math.trunc(num(mineConfirmModal?.digDurationSeconds || DEFAULT_MINE_DIG_DURATION_SEC)))} saniyelik işlem gösterilir. Süre tamamlanınca kaynak otomatik olarak depoya aktarılır.
+              Kazıyı başlattıktan sonra {Math.max(1, Math.trunc(num(DEFAULT_MINE_DIG_DURATION_SEC)))} saniyelik işlem gösterilir. Süre tamamlanınca kaynak otomatik olarak depoya aktarılır.
             </p>
             <div className="mine-confirm-footer">
               <div className="mine-confirm-actions">

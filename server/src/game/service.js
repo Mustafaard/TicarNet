@@ -826,6 +826,15 @@ function mineCooldownMs() {
   return Math.max(1, asInt(MINE_FIXED_COOLDOWN_MINUTES, 15)) * MS_MINUTE
 }
 
+function canonicalMineDigEndsMs(state) {
+  const rawDigEndsMs = createdMs(state?.digEndsAt)
+  if (rawDigEndsMs <= 0) return 0
+  const stateUpdatedMs = createdMs(state?.updatedAt)
+  if (stateUpdatedMs <= 0) return rawDigEndsMs
+  const maxDigEndsMs = stateUpdatedMs + mineDigDurationMs()
+  return Math.min(rawDigEndsMs, maxDigEndsMs)
+}
+
 function mineCostCash(template) {
   const baseCost = Math.max(0, asInt(template?.costCash, 0))
   return Math.max(0, baseCost * 4)
@@ -886,7 +895,7 @@ function minesView(profile, timestamp) {
   const wallet = Math.max(0, asInt(profile?.wallet, 0))
   return MINE_TEMPLATES.map((template) => {
     const state = minesState[template.id] || createMineState(template.id, timestamp)
-    const digEndsMs = createdMs(state.digEndsAt)
+    const digEndsMs = canonicalMineDigEndsMs(state)
     const isDigging = digEndsMs > nowMs
     const digRemainingMs = isDigging ? Math.max(0, digEndsMs - nowMs) : 0
     const collectReadyMs = createdMs(state.collectReadyAt)
@@ -10210,7 +10219,17 @@ export async function collectMine(userId, mineId) {
     const state = profile.mines?.[safeMineId] || createMineState(safeMineId, timestamp)
     profile.mines[safeMineId] = state
     const nowMs = createdMs(timestamp) || Date.now()
-    const collectReadyMs = createdMs(state.collectReadyAt)
+    const mineCollectGraceMs = 1500
+    const digEndsMs = canonicalMineDigEndsMs(state)
+    let collectReadyMs = createdMs(state.collectReadyAt)
+
+    if (collectReadyMs <= 0 && digEndsMs > 0 && (nowMs + mineCollectGraceMs) >= digEndsMs) {
+      state.collectReadyAt = timestamp
+      state.digEndsAt = ''
+      state.updatedAt = timestamp
+      collectReadyMs = nowMs
+    }
+
     if (collectReadyMs <= 0 || nowMs < collectReadyMs) {
       result = {
         success: false,
