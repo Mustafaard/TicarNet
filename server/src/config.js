@@ -275,6 +275,13 @@ export function isSmtpConfigured() {
   )
 }
 
+export function isSmtpPartiallyConfigured() {
+  const userReady = !isPlaceholderSecret(config.smtp.user)
+  const passReady = !isPlaceholderSecret(config.smtp.pass)
+  const fromReady = !isPlaceholderSecret(config.smtp.from)
+  return userReady || passReady || fromReady
+}
+
 export function getSmtpMissingEnvVars() {
   const missing = []
   if (isPlaceholderSecret(config.smtp.user)) missing.push('SMTP_USER')
@@ -353,7 +360,7 @@ export function getStartupWarnings() {
     }
   }
 
-  if (!isSmtpConfigured()) {
+  if (isSmtpPartiallyConfigured() && !isSmtpConfigured()) {
     warnings.push(
       `SMTP ayarlari eksik: ${getSmtpMissingEnvVars().join(', ')}. (Destek e-postalari gonderilemeyebilir.)`,
     )

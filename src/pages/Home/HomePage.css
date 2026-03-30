@@ -29718,9 +29718,9 @@ select {
 }
 
 .warehouse-modal.fleet-modal.factory-upgrade-modal {
-  width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
-  max-width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
-  max-height: min(calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 860px) !important;
+  width: min(344px, calc(100vw - 28px)) !important;
+  max-width: min(344px, calc(100vw - 28px)) !important;
+  max-height: min(calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 640px) !important;
   border-radius: 16px !important;
   padding: 12px !important;
   margin-inline: auto !important;

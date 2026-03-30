@@ -12646,15 +12646,15 @@ function HomePage({ user, onLogout }) {
                 <h4>Yükseltme tamamlandığında</h4>
                 <p className="fleet-summary-line positive">
                   <img src={factoryUpgradeModal.outputMeta?.icon} alt="" aria-hidden="true" />
-                  Üretim geliri: +{fmt(factoryUpgradeModal.nextUpgradeOutputPerCollect || 0)} {factoryUpgradeModal.outputMeta?.label} / tahsilat
+                  Üretim: {fmt(factoryUpgradeModal.outputPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeOutputPerCollect || 0)} {factoryUpgradeModal.outputMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line negative">
                   <img src={factoryUpgradeModal.energyMeta?.icon} alt="" aria-hidden="true" />
-                  Tahsilat gideri: -{fmt(factoryUpgradeModal.nextUpgradeEnergyCostPerCollect || 0)} {factoryUpgradeModal.energyMeta?.label} / tahsilat
+                  Enerji gideri: {fmt(factoryUpgradeModal.energyCostPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeEnergyCostPerCollect || 0)} {factoryUpgradeModal.energyMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line positive">
                   <img src="/home/ui/hud/xp-icon.webp" alt="" aria-hidden="true" />
-                  Tahsilat XP getirisi: +{fmt(factoryUpgradeModal.nextUpgradeXpPerCollect || 0)} XP
+                  XP: {fmt(factoryUpgradeModal.xpPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeXpPerCollect || 0)} XP / tahsilat
                 </p>
               </div>
               <div className="factory-upgrade-modal-costs">
