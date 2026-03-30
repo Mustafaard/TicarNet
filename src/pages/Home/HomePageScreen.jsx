@@ -7927,6 +7927,15 @@ function HomePage({ user, onLogout }) {
   const weeklyEventsTodayDetail = weeklyEventsPrimary
     ? `Zaman: ${weeklyEventsPrimaryWindowLabel} · Kalan süre: ${weeklyEventsRemainingLabel}`
     : 'Sonraki etkinlikler takvime göre otomatik başlar.'
+  const weeklyEventsHeroSubtitle = weeklyEventsPrimary
+    ? `${weeklyEventsPrimary.title || 'Haftalık etkinlik'} · ${weeklyEventsPrimary.bonusLabel || 'Aktif'}`
+    : 'Haftalık planlı etkinlikleri ve aktif bonusları aşağıdan takip et.'
+  const weeklyEventsHeroBadge = weeklyEventsPrimary
+    ? (weeklyEventsPrimary.bonusLabel || 'Aktif')
+    : 'Takvim'
+  const weeklyEventsHeroCountdown = weeklyEventsPrimary
+    ? `Zaman: ${weeklyEventsPrimaryWindowLabel} · Bitiş: ${formatDateTime(weeklyEventsPrimary.endsAt || '')} · Kalan: ${weeklyEventsRemainingLabel}`
+    : `Bugün: ${weeklyEventsRuntimeState.dayName} · ${weeklyEventsTodayDetail}`
   const cityAnnouncements = (Array.isArray(overview?.announcements) ? overview.announcements : [])
     .map((entry) => {
       const id = String(entry?.id || '').trim()
@@ -11749,33 +11758,27 @@ function HomePage({ user, onLogout }) {
 
   const eventsView = (
     <section className="panel-stack weekly-events-screen">
-      {weeklyEventsPrimary ? (
-        <article className="card module-card weekly-events-hero-card">
-          <div className="weekly-events-head">
-            <div>
-              <p className="weekly-events-overline">HAFTALIK TAKVİM</p>
-              <h3 className="weekly-events-title">Etkinlik Duyuruları</h3>
-              <p className="weekly-events-subtitle">
-                {`${weeklyEventsPrimary.title || 'Haftalık etkinlik'} · ${weeklyEventsPrimary.bonusLabel || 'Aktif'}`}
-              </p>
-            </div>
-            <span className="weekly-events-active-pill is-active">
-              {weeklyEventsPrimary.bonusLabel || 'Aktif'}
-            </span>
+      <article className="card module-card weekly-events-hero-card">
+        <div className="weekly-events-head">
+          <div>
+            <p className="weekly-events-overline">HAFTALIK TAKVİM</p>
+            <h3 className="weekly-events-title">Etkinlik Duyuruları</h3>
+            <p className="weekly-events-subtitle">{weeklyEventsHeroSubtitle}</p>
           </div>
-          <p className="weekly-events-countdown">
-            {`Zaman: ${weeklyEventsPrimaryWindowLabel} · Bitiş: ${formatDateTime(weeklyEventsPrimary.endsAt || '')} · Kalan: ${weeklyEventsRemainingLabel}`}
-          </p>
-          <article className="weekly-events-today-card">
-            <span className="weekly-events-today-dot is-active" />
-            <div className="weekly-events-today-copy">
-              <strong>Bugün: {weeklyEventsRuntimeState.dayName}</strong>
-              <small>{weeklyEventsTodaySummary}</small>
-              <small>{weeklyEventsTodayDetail}</small>
-            </div>
-          </article>
+          <span className={`weekly-events-active-pill${weeklyEventsPrimary ? ' is-active' : ''}`}>
+            {weeklyEventsHeroBadge}
+          </span>
+        </div>
+        <p className="weekly-events-countdown">{weeklyEventsHeroCountdown}</p>
+        <article className="weekly-events-today-card">
+          <span className={`weekly-events-today-dot${weeklyEventsPrimary ? ' is-active' : ''}`} />
+          <div className="weekly-events-today-copy">
+            <strong>Bugün: {weeklyEventsRuntimeState.dayName}</strong>
+            <small>{weeklyEventsTodaySummary}</small>
+            <small>{weeklyEventsTodayDetail}</small>
+          </div>
         </article>
-      ) : null}
+      </article>
 
       {weeklyEventRangeCards.length > 0 ? (
         <article className="card module-card weekly-events-grid-card">
@@ -12294,6 +12297,24 @@ function HomePage({ user, onLogout }) {
                     : factory.collectEnergyMissing > 0
                       ? `Seviye ${fmt(factory.level)} · ${factory.energyMeta?.label || 'Enerji'} eksik`
                       : `Seviye ${fmt(factory.level)}`
+              const statusValue = factory.isUpgrading
+                ? formatCollectionCountdown(factory.upgradeRemainingMs)
+                : factory.canCollectNow
+                  ? 'Hazır'
+                  : factory.collectRemainingMs > 0
+                    ? formatCollectionCountdown(factory.collectRemainingMs)
+                    : factory.collectEnergyMissing > 0
+                      ? 'Eksik'
+                      : 'Beklemede'
+              const statusLabel = factory.isUpgrading
+                ? 'Yükseltme'
+                : factory.canCollectNow
+                  ? 'Tahsilat'
+                  : factory.collectRemainingMs > 0
+                    ? 'Kalan süre'
+                    : factory.collectEnergyMissing > 0
+                      ? (factory.energyMeta?.label || 'Enerji')
+                      : 'Durum'
               return (
                 <article key={factory.id} className="factory-card is-owned is-shop-card is-shop-summary-card" data-factory-id={factory.id}>
                   <div className="factory-shop-card-open-wrap">
@@ -12312,6 +12333,16 @@ function HomePage({ user, onLogout }) {
                       </span>
                     </div>
                     <strong className="factory-shop-card-name">{factory.name}</strong>
+                    <div className="factory-owned-meta-row">
+                      <span className="factory-owned-meta-pill">
+                        <small>Seviye</small>
+                        <strong>Lv {fmt(factory.level)}</strong>
+                      </span>
+                      <span className={`factory-owned-meta-pill${factory.canCollectNow ? ' is-ready' : ''}${factory.collectRemainingMs > 0 || factory.isUpgrading ? ' is-timed' : ''}${factory.collectEnergyMissing > 0 ? ' is-warning' : ''}`}>
+                        <small>{statusLabel}</small>
+                        <strong>{statusValue}</strong>
+                      </span>
+                    </div>
                     <small className="factory-shop-card-hint">{hint}</small>
                   </div>
                   <div className="factory-owned-actions">
@@ -16542,32 +16573,34 @@ function HomePage({ user, onLogout }) {
                   </div>
                   <p>{offer.description}</p>
                 </div>
-                <div className="premium-daily-price">
-                  <img src="/home/icons/depot/diamond.webp" alt="" aria-hidden="true" />
-                  <span>{fmt(price)}</span>
-                </div>
-                <p className={`premium-daily-reset${isPurchased ? ' is-active' : ''}`}>
+                <div className="premium-daily-footer">
+                  <div className="premium-daily-price">
+                    <img src="/home/icons/depot/diamond.webp" alt="" aria-hidden="true" />
+                    <span>{fmt(price)}</span>
+                  </div>
+                  <p className={`premium-daily-reset${isPurchased ? ' is-active' : ''}`}>
                     {isPurchased ? `Yeni hak: ${dailyResetLabel}` : dailyResetInfoLabel}
-                </p>
-                <button
-                  className="btn full premium-gold-btn"
-                  disabled={isPurchased || actionLocked}
-                  onClick={() => {
-                    if (canAfford) {
-                      void purchaseDailyOfferAction(offer.id)
-                      return
-                    }
-                    void openDiamondMarketHub()
-                  }}
-                >
+                  </p>
+                  <button
+                    className="btn full premium-gold-btn"
+                    disabled={isPurchased || actionLocked}
+                    onClick={() => {
+                      if (canAfford) {
+                        void purchaseDailyOfferAction(offer.id)
+                        return
+                      }
+                      void openDiamondMarketHub()
+                    }}
+                  >
                     {isPurchased
                       ? 'Bugün kullanıldı'
                       : isBusy
                         ? 'Yükleniyor...'
-                      : canAfford
-                        ? 'Satın Al'
-                        : 'Elmas Marketi'}
-                </button>
+                        : canAfford
+                          ? 'Satın Al'
+                          : 'Elmas Marketi'}
+                  </button>
+                </div>
               </div>
             )
           })}
