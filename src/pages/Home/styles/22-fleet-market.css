@@ -1,0 +1,473 @@
+
+.fleet-market-hero {
+  margin-bottom: 6px;
+}
+
+
+.fleet-market-list,
+.fleet-owned-list {
+  display: grid;
+  gap: 8px;
+}
+
+
+.fleet-market-inline-note {
+  margin: -2px 0 2px;
+  color: #b8d3f4;
+  font-size: 12px;
+}
+
+
+.fleet-market-row,
+.fleet-owned-row,
+.fleet-compact-row {
+  border-radius: 13px;
+  border: 1px solid rgba(120, 181, 255, 0.2);
+  background: linear-gradient(165deg, rgba(52, 57, 68, 0.9), rgba(41, 46, 57, 0.9));
+  padding: 10px;
+  display: grid;
+  grid-template-columns: 116px 1fr auto;
+  gap: 10px;
+  align-items: start;
+}
+
+
+.fleet-market-row.fleet-market-listable {
+  cursor: pointer;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.16s ease,
+    background 0.18s ease;
+}
+
+
+.fleet-market-row.fleet-market-listable:hover {
+  border-color: rgba(255, 205, 122, 0.56);
+  background: linear-gradient(165deg, rgba(56, 63, 77, 0.94), rgba(43, 48, 61, 0.94));
+  box-shadow: 0 10px 20px rgba(5, 10, 20, 0.32);
+  transform: translateY(-1px);
+}
+
+
+.fleet-market-row.fleet-market-listable:focus-visible {
+  outline: 2px solid rgba(255, 212, 131, 0.86);
+  outline-offset: 2px;
+  border-color: rgba(255, 205, 122, 0.68);
+}
+
+
+.fleet-market-row.fleet-market-listable:active {
+  transform: translateY(0);
+}
+
+
+.fleet-market-row.fleet-market-listable.is-locked {
+  border-color: rgba(255, 131, 142, 0.46);
+  background: linear-gradient(165deg, rgba(66, 50, 62, 0.9), rgba(51, 38, 51, 0.9));
+}
+
+
+.fleet-market-row .fleet-compact-thumb,
+.fleet-market-row .fleet-owned-thumb {
+  width: min(132px, 100%);
+  height: 94px;
+}
+
+
+.fleet-market-row .fleet-compact-thumb img,
+.fleet-market-row .fleet-owned-thumb img {
+  image-rendering: auto;
+  filter: none;
+}
+
+
+.fleet-market-lock {
+  margin-top: 2px;
+  color: #ffd4da;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+
+.fleet-market-private-badge {
+  display: inline-block;
+  margin-bottom: 2px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #a7f3d0;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+
+.fleet-market-meta-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: -1px;
+}
+
+
+.fleet-market-level {
+  border-radius: 999px;
+  border: 1px solid rgba(98, 187, 255, 0.46);
+  background: rgba(26, 73, 112, 0.46);
+  color: #8be3ff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 1;
+  padding: 5px 9px;
+}
+
+
+.fleet-market-seller {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #b9d3f1;
+  font-size: 12px;
+}
+
+
+.fleet-market-seller strong {
+  color: #f3f9ff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+
+.fleet-market-truck-meta {
+  margin: 0;
+  color: #b6cce6;
+  font-size: 12px;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+
+.fleet-market-capacity-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.fleet-market-tap-hint {
+  margin-top: 1px;
+  color: #9ebadb;
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.1px;
+}
+
+
+.fleet-market-footer {
+  grid-column: 2 / -1;
+  margin-top: 4px;
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+
+.fleet-market-lifetime {
+  margin: 0;
+  color: #c8ddf8;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+
+.fleet-market-lifetime.is-expired {
+  color: #ffd3d7;
+}
+
+
+.fleet-market-lifetime::before {
+  content: '•';
+  margin-right: 6px;
+  opacity: 0.92;
+}
+
+
+.fleet-market-copy,
+.fleet-compact-meta {
+  display: grid;
+  gap: 4px;
+}
+
+
+.fleet-market-copy strong,
+.fleet-compact-meta strong {
+  margin: 0;
+  color: #f4f8ff;
+  font-size: 18px;
+}
+
+
+.fleet-market-copy p,
+.fleet-market-copy small,
+.fleet-compact-meta p {
+  margin: 0;
+  color: #e1e8f7;
+  font-size: 13px;
+}
+
+
+.fleet-market-price {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+
+.fleet-market-price span {
+  color: #d2def2;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.fleet-market-price strong {
+  margin: 0;
+  color: #f4fbff;
+  font-size: 18px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+
+.fleet-market-price strong img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  display: block;
+  filter: saturate(1.14) contrast(1.08);
+}
+
+
+.fleet-market-price-note {
+  margin: 0;
+  color: #9bc3e8;
+  font-size: 11px;
+  line-height: 1.28;
+}
+
+
+.fleet-market-detail-modal {
+  width: min(580px, 96vw);
+  max-width: min(580px, 96vw);
+}
+
+
+.fleet-market-detail-preview {
+  align-items: start;
+}
+
+
+.fleet-market-detail-seller {
+  margin-top: -2px;
+  color: #cfe2ff;
+  font-size: 13px;
+}
+
+
+.fleet-market-detail-seller span {
+  color: #f9fdff;
+  font-weight: 800;
+}
+
+
+.fleet-market-detail-price {
+  border-color: rgba(255, 212, 126, 0.36);
+  background:
+    radial-gradient(circle at 14% 8%, rgba(255, 195, 109, 0.14), transparent 44%),
+    rgba(18, 24, 38, 0.88);
+}
+
+
+.fleet-market-detail-warning {
+  margin: 0;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 144, 151, 0.56);
+  background: rgba(74, 25, 34, 0.64);
+  padding: 7px 9px;
+  color: #ffe0e5;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+
+.fleet-market-detail-capacity-note {
+  margin: 0;
+  border-radius: 9px;
+  border: 1px solid rgba(120, 186, 255, 0.42);
+  background: rgba(20, 44, 72, 0.62);
+  padding: 7px 9px;
+  color: #d6eaff;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+
+.fleet-market-purchase-modal {
+  width: min(520px, 96vw);
+  max-width: min(520px, 96vw);
+  border-color: rgba(102, 193, 255, 0.5);
+  box-shadow:
+    0 24px 42px rgba(1, 9, 19, 0.62),
+    inset 0 1px 0 rgba(165, 220, 255, 0.22),
+    0 0 24px rgba(102, 193, 255, 0.26);
+}
+
+
+.fleet-market-purchase-hero {
+  border-radius: 12px;
+  border: 1px solid rgba(102, 188, 255, 0.3);
+  background: linear-gradient(170deg, rgba(34, 140, 214, 0.24), rgba(27, 91, 151, 0.24));
+  padding: 12px 10px;
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+
+.fleet-market-purchase-hero img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  display: block;
+}
+
+
+.fleet-market-purchase-hero p {
+  margin: 0;
+  color: #e7f5ff;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+
+.fleet-market-purchase-hero strong {
+  margin: 0;
+  color: #ffffff;
+  font-size: 33px;
+  line-height: 1.1;
+}
+
+
+.fleet-market-purchase-preview {
+  align-items: center;
+}
+
+
+.fleet-market-purchase-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.orderbook-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+
+
+.quick-card {
+  min-height: 112px;
+  border-radius: 13px;
+  border: 1px solid rgba(255, 188, 102, 0.25);
+  background: linear-gradient(160deg, rgba(21, 30, 44, 0.92), rgba(8, 13, 23, 0.92));
+  color: #f2f5fc;
+  padding: 11px;
+  text-align: left;
+  display: grid;
+  gap: 5px;
+  align-content: start;
+  cursor: pointer;
+  transition: transform 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease;
+}
+
+
+.quick-card:active {
+  transform: translateY(1px);
+}
+
+
+.quick-card:hover {
+  border-color: rgba(255, 205, 120, 0.45);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.24);
+}
+
+
+.quick-icon {
+  width: var(--icon-quick-wrap-size);
+  height: var(--icon-quick-wrap-size);
+  border-radius: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+}
+
+
+.quick-icon img {
+  width: var(--icon-quick-size);
+  height: var(--icon-quick-size);
+  object-fit: contain;
+}
+
+
+.quick-card strong {
+  font-size: 23px;
+  line-height: 1.15;
+}
+
+
+.quick-card small {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.25;
+}
+
+
+.simple-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 9px;
+}
+
+
+.tile h4 {
+  margin: 0 0 6px;
+}
+
+
+.gap-sm {
+  gap: 6px;
+}
+
+
+.fleet-market-lifetime::before {
+  content: '•';
+}
+
+
+.business-screen .fleet-market-copy .fleet-market-truck-meta {
+  font-size: 10px;
+}

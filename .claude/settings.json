@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=15 -i \"$USERPROFILE/.ssh/ticarnet_actions\" root@178.210.161.210 \"cd /var/www/ticarnet/current && git pull origin main && npm run native:build\")",
+      "Bash(powershell -NoProfile -Command \"Test-NetConnection -ComputerName 178.210.161.210 -Port 22 -WarningAction SilentlyContinue | Select-Object TcpTestSucceeded\")"
+    ]
+  }
+}

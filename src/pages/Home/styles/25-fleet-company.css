@@ -1,0 +1,328 @@
+
+.fleet-company-shell {
+  display: grid;
+  gap: 8px;
+}
+
+
+.fleet-company-card {
+  border-radius: 18px;
+  border: 1px solid rgba(107, 182, 255, 0.3);
+  background:
+    linear-gradient(180deg, rgba(10, 18, 35, 0.62), rgba(10, 18, 35, 0.92)),
+    url('/home/icons/isletmeler.webp') center/cover no-repeat;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+
+.fleet-company-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+
+.fleet-company-title {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  flex: 1;
+}
+
+
+.fleet-company-title small {
+  margin: 0;
+  color: #a9c4e8;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.22px;
+  text-transform: uppercase;
+}
+
+
+.fleet-company-top h4 {
+  margin: 0;
+  color: #eef6ff;
+  font-size: clamp(14px, 3.9vw, 18px);
+  line-height: 1.04;
+  overflow-wrap: anywhere;
+}
+
+
+.fleet-company-main {
+  display: grid;
+  grid-template-columns: minmax(0, 150px) 1fr;
+  gap: 10px;
+  align-items: center;
+}
+
+
+.fleet-company-meta {
+  display: grid;
+  gap: 4px;
+}
+
+
+.fleet-company-meta small {
+  color: #e8da4e;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+.fleet-company-meta strong {
+  margin: 0;
+  color: #f7fbff;
+  font-size: 20px;
+  line-height: 1.1;
+  overflow-wrap: anywhere;
+}
+
+
+.fleet-company-meta p {
+  margin: 0;
+  color: #d4e6ff;
+  font-size: 12px;
+}
+
+
+.fleet-company-actions {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: stretch;
+}
+
+
+.fleet-company-actions-inline {
+  margin-top: 2px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+
+.fleet-company-actions .fleet-company-cta {
+  min-height: 102px;
+  height: 100%;
+  border-radius: 12px;
+  padding: 9px 8px 8px;
+  display: grid;
+  align-content: start;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 4px;
+  text-align: left;
+  line-height: 1.16;
+  border-color: rgba(116, 178, 255, 0.56);
+  background: linear-gradient(165deg, rgba(35, 63, 99, 0.86), rgba(16, 31, 54, 0.95));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 5px 12px rgba(3, 12, 27, 0.24);
+}
+
+
+.fleet-company-cta-head {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0;
+  min-width: 0;
+  min-height: 18px;
+}
+
+
+.fleet-company-cta-title-wrap {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  padding-right: 36px;
+}
+
+
+.fleet-company-cta-title {
+  color: #f8fbff;
+  font-size: 13px;
+  font-weight: 820;
+  letter-spacing: 0.02px;
+  line-height: 1.05;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+.fleet-company-cta-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 32px;
+  min-height: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.2px;
+  text-transform: uppercase;
+  border: 1px solid rgba(143, 200, 255, 0.38);
+  background: rgba(20, 43, 73, 0.58);
+  color: #d8edff;
+}
+
+
+.fleet-company-cta-badge.is-live {
+  border-color: rgba(137, 240, 193, 0.58);
+  background: rgba(22, 84, 62, 0.68);
+  color: #ceffe7;
+}
+
+
+.fleet-company-cta-badge.is-muted {
+  border-color: rgba(146, 178, 214, 0.34);
+  background: rgba(30, 45, 66, 0.6);
+  color: #b9cde5;
+}
+
+
+.fleet-company-cta-value {
+  margin: 0;
+  color: #f5fbff;
+  font-size: clamp(11px, 3.1vw, 14px);
+  font-weight: 900;
+  line-height: 1.12;
+  letter-spacing: 0.08px;
+  font-variant-numeric: tabular-nums;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+.fleet-company-cta-meta {
+  margin: 0;
+  max-width: 100%;
+  min-height: 0;
+  color: rgba(230, 243, 255, 0.88);
+  font-size: 9px;
+  font-weight: 720;
+  text-align: left;
+  line-height: 1.18;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+
+.fleet-company-actions .fleet-company-cta.is-upgrade {
+  border-color: rgba(255, 203, 117, 0.62);
+  background: linear-gradient(165deg, rgba(126, 92, 30, 0.78), rgba(60, 45, 16, 0.93));
+}
+
+
+.fleet-company-actions .fleet-company-cta.is-bulk {
+  border-color: rgba(104, 236, 187, 0.82);
+  background: linear-gradient(165deg, rgba(29, 132, 97, 0.86), rgba(13, 57, 43, 0.95));
+  box-shadow:
+    0 0 14px rgba(76, 220, 166, 0.2),
+    inset 0 1px 0 rgba(214, 255, 241, 0.16);
+}
+
+
+.fleet-company-actions .fleet-company-cta.is-setup {
+  border-color: rgba(125, 191, 255, 0.68);
+  background: linear-gradient(165deg, rgba(42, 96, 146, 0.84), rgba(18, 49, 79, 0.95));
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 104px;
+  padding: 10px 8px 9px;
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 88px;
+  border-radius: 10px;
+  padding: 7px 6px;
+  gap: 3px;
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 96px;
+  padding: 8px 7px;
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 76px;
+  border-radius: 9px;
+  padding: 6px 5px;
+  gap: 2px;
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 82px;
+  border-radius: 10px;
+  padding: 7px 6px;
+  gap: 3px;
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta.is-setup {
+  grid-column: 1 / -1;
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta {
+  min-height: 74px !important;
+  border-radius: 10px;
+  padding: 7px 5px !important;
+  gap: 3px;
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta.is-setup {
+  grid-column: auto !important;
+}
+
+
+.business-screen .fleet-company-actions .fleet-company-cta.is-bulk {
+  border-color: rgba(92, 222, 168, 0.86) !important;
+  background: linear-gradient(170deg, rgba(26, 143, 102, 0.88), rgba(13, 65, 48, 0.96)) !important;
+}
+
+
+@media (max-width: 360px) {
+  .business-screen .fleet-company-actions .fleet-company-cta {
+    min-height: 70px !important;
+    padding: 6px 4px !important;
+  }
+
+  .factory-upgrade-modal .factory-cost-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-page .chat-community-tab {
+    min-height: 40px;
+    font-size: 10.6px;
+    padding: 0 6px;
+  }
+}

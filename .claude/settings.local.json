@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk 'NR>=29496 && NR<=29570' src/pages/Home/HomePage.css)",
+      "Bash(awk 'NR>=28700 && NR<=28740 && /@media/' src/pages/Home/HomePage.css)",
+      "Bash(awk 'NR>=28600 && NR<=28740' src/pages/Home/HomePage.css)"
+    ]
+  }
+}

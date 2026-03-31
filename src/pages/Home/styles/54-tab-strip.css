@@ -1,0 +1,102 @@
+
+@keyframes home-alert-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+
+.panel-stack {
+  display: grid;
+  gap: 10px;
+  contain: layout style paint;
+  will-change: auto;
+}
+
+
+.tab-content-layer {
+  position: relative;
+  z-index: 1;
+  isolation: isolate;
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding-bottom: 6px;
+  contain: content;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+
+.btn-success {
+  border-color: var(--theme-btn-success-border);
+  background: linear-gradient(165deg, var(--theme-btn-success-bg-top), var(--theme-btn-success-bg-bottom));
+}
+
+
+.btn-accent {
+  border-color: var(--theme-btn-accent-border);
+  background: linear-gradient(165deg, var(--theme-btn-accent-bg-top), var(--theme-btn-accent-bg-bottom));
+}
+
+
+.btn-warning {
+  border-color: var(--theme-btn-warning-border);
+  background: linear-gradient(165deg, var(--theme-btn-warning-bg-top), var(--theme-btn-warning-bg-bottom));
+}
+
+
+.btn-ghost {
+  border-color: var(--theme-btn-ghost-border);
+  background: var(--theme-btn-ghost-bg);
+}
+
+
+.tab-strip {
+  display: grid;
+  gap: 7px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 10px;
+}
+
+
+.tab-strip.four {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+
+.tab-strip.five {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+
+.tab-strip.six {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+
+.tab-strip button {
+  min-height: 42px;
+  border-radius: 999px;
+  border: 1px solid var(--theme-tab-border);
+  background: var(--theme-tab-bg);
+  color: var(--theme-tab-text);
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+
+.tab-strip button.on {
+  background: linear-gradient(120deg, var(--theme-tab-active-bg-top), var(--theme-tab-active-bg-bottom));
+  border-color: var(--theme-tab-active-border);
+  color: var(--theme-tab-active-text);
+}

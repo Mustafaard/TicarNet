@@ -1,0 +1,461 @@
+
+.marketplace-buy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+
+.marketplace-buy-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+
+.marketplace-buy-card-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.marketplace-buy-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+
+.marketplace-buy-card-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+
+.marketplace-buy-card-stock,
+.marketplace-buy-card-price {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.marketplace-buy-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+
+.marketplace-buy-qty {
+  width: 80px;
+  max-width: none;
+}
+
+
+.marketplace-buy-btn {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a1a1a;
+  background: linear-gradient(180deg, #5cb85c, #4cae4c);
+  border: 1px solid rgba(76, 174, 76, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+
+.marketplace-buy-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+
+.marketplace-buy-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+.marketplace-buy-card-total {
+  width: 100%;
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+
+.marketplace-buy-card-total strong {
+  color: #f0c14b;
+}
+
+
+/* Temiz liste: kart + adet fiyatı + SATIN AL → modal */
+.marketplace-buy-list-clean {
+  gap: 10px;
+}
+
+
+.marketplace-buy-card-clean {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  flex-wrap: wrap;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(6px);
+}
+
+
+.marketplace-buy-card-clean-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.marketplace-buy-card-clean-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+
+.marketplace-buy-card-clean-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+
+.marketplace-buy-card-clean-stock {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.marketplace-buy-card-seller {
+  font-size: 12px;
+  color: var(--cyan);
+  margin-top: 2px;
+}
+
+
+.marketplace-buy-card-warning {
+  display: block;
+  font-size: 11px;
+  color: var(--danger);
+  margin-top: 2px;
+}
+
+
+.marketplace-buy-card-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+
+.marketplace-buy-card-clean-price-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+}
+
+
+.marketplace-buy-card-clean-price {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+  gap: 4px;
+}
+
+
+.marketplace-buy-card-clean-price-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+
+.marketplace-buy-btn-clean {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(180deg, #5cb85c, #4cae4c);
+  border: 1px solid rgba(76, 174, 76, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+
+.marketplace-buy-btn-clean:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+
+.marketplace-buy-btn-clean:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+.marketplace-buy-modal.marketplace-buy-modal-centered {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 32px);
+  max-width: 360px;
+  max-height: min(90vh, 560px);
+  max-height: min(90dvh, 560px);
+  padding: 20px;
+  margin: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: none;
+  transition: none;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  z-index: 1001;
+  pointer-events: auto;
+}
+
+
+.marketplace-buy-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+
+.marketplace-buy-modal-product-icon {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: rgba(30, 41, 59, 0.5);
+  padding: 4px;
+}
+
+
+.marketplace-buy-modal-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+  flex: 1;
+}
+
+
+.marketplace-buy-modal-product-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+
+.marketplace-buy-modal-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+
+.marketplace-buy-modal-row-total {
+  margin-top: 12px;
+  margin-bottom: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+
+.marketplace-buy-modal-label {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+
+.marketplace-buy-modal-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text);
+  font-weight: 500;
+  text-align: right;
+}
+
+
+.marketplace-buy-modal-value-total {
+  font-weight: 700;
+  color: #f0c14b;
+  font-size: 16px;
+}
+
+
+.marketplace-buy-modal-capacity-hint {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+.marketplace-buy-modal-capacity-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.marketplace-buy-modal-capacity-hint strong {
+  color: var(--text);
+}
+
+
+.marketplace-buy-modal-tax {
+  margin: 10px 0 16px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.marketplace-buy-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+
+.marketplace-buy-modal-actions .btn-ghost {
+  color: var(--muted);
+}
+
+
+.marketplace-buy-modal-actions .marketplace-buy-btn {
+  min-width: 100px;
+}
+
+
+.marketplace-buy-list-clean,
+.marketplace-listings-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.marketplace-buy-card-clean,
+.marketplace-listing-card {
+  min-height: 92px;
+  padding: 9px;
+}
+
+
+.marketplace-buy-card-clean-name,
+.marketplace-listing-name {
+  font-size: 13px;
+}
+
+
+.marketplace-buy-card-clean-stock,
+.marketplace-listing-date,
+.marketplace-listing-price-label,
+.marketplace-buy-card-warning,
+.marketplace-buy-card-hint {
+  font-size: 10.2px;
+}
+
+
+.marketplace-buy-list-clean,
+.marketplace-listings-list {
+  display: grid;
+  grid-template-columns: 1fr !important;
+  gap: 8px;
+}
+
+
+.marketplace-buy-card-clean {
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-areas:
+    'icon info'
+    'price price'
+    'action action';
+  gap: 8px;
+  min-height: 0;
+  padding: 10px;
+}
+
+
+.marketplace-buy-card-clean-icon {
+  grid-area: icon;
+  width: 44px;
+  height: 44px;
+}
+
+
+.marketplace-buy-card-clean-info {
+  grid-area: info;
+}
+
+
+.marketplace-buy-card-clean-name {
+  font-size: 13px;
+}
+
+
+.marketplace-buy-card-clean-stock,
+.marketplace-buy-card-clean-price-label,
+.marketplace-buy-card-seller,
+.marketplace-buy-card-warning,
+.marketplace-buy-card-hint {
+  font-size: 10px;
+}
+
+
+.marketplace-buy-card-clean-price-wrap {
+  grid-area: price;
+  justify-self: start;
+}
+
+
+.marketplace-buy-btn-clean {
+  grid-area: action;
+  width: 100%;
+  min-height: 34px;
+}

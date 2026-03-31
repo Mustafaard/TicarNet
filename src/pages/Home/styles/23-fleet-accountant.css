@@ -1,0 +1,195 @@
+
+.fleet-accountant-modal {
+  border: 1px solid rgba(120, 177, 235, 0.36);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 211, 102, 0.18), transparent 34%),
+    radial-gradient(circle at top left, rgba(57, 127, 214, 0.22), transparent 40%),
+    linear-gradient(168deg, rgba(10, 21, 38, 0.98), rgba(7, 14, 26, 0.98));
+  box-shadow: 0 24px 56px rgba(3, 10, 23, 0.44);
+}
+
+
+.fleet-accountant-title {
+  margin: 0 0 8px;
+  font-size: 1.6rem;
+  color: #f6fbff;
+  letter-spacing: 0.01em;
+}
+
+
+.fleet-accountant-subtitle {
+  margin: 0 0 14px;
+  color: #c6d9ef;
+  font-size: 0.97rem;
+  line-height: 1.5;
+}
+
+
+.fleet-accountant-cta-card,
+.fleet-accountant-summary,
+.fleet-accountant-footer {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(132, 189, 246, 0.2);
+  background:
+    linear-gradient(180deg, rgba(16, 34, 60, 0.9), rgba(9, 20, 38, 0.86));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+
+.fleet-accountant-cta-card {
+  margin-bottom: 12px;
+}
+
+
+.fleet-accountant-summary {
+  background:
+    linear-gradient(180deg, rgba(15, 31, 55, 0.92), rgba(8, 18, 33, 0.88));
+}
+
+
+.fleet-accountant-summary-title {
+  margin: 0 0 12px;
+  color: #ffd784;
+  font-size: 0.85rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+
+.fleet-accountant-modal .btn-collect-inline {
+  min-height: 58px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 211, 102, 0.36);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 12px 24px rgba(5, 14, 26, 0.28);
+}
+
+
+.fleet-accountant-summary .fleet-summary-line {
+  width: 100%;
+  min-height: 48px;
+  justify-content: flex-start;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(120, 177, 235, 0.14);
+  background: rgba(7, 15, 27, 0.36);
+}
+
+
+.fleet-accountant-summary hr {
+  margin: 10px 0;
+  border-top-color: rgba(255, 211, 102, 0.22);
+}
+
+
+.fleet-accountant-footnote,
+.fleet-accountant-summary small {
+  display: block;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(120, 177, 235, 0.16);
+  color: #d0d9e8;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+
+.fleet-accountant-summary .fleet-summary-line img {
+  width: 22px;
+  height: 22px;
+}
+
+
+.fleet-accountant-footer {
+  margin-top: 12px;
+}
+
+
+.fleet-accountant-close {
+  width: 100%;
+}
+
+
+@media (max-width: 520px) {
+  .fleet-accountant-modal {
+    border-radius: 20px;
+  }
+
+  .fleet-accountant-cta-card,
+  .fleet-accountant-summary,
+  .fleet-accountant-footer {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .fleet-accountant-title {
+    font-size: 1.4rem;
+  }
+
+  .fleet-accountant-summary .fleet-summary-line {
+    min-height: 44px;
+    padding: 9px 10px;
+  }
+}
+
+
+/* Factory + business collect CTA: centered + green in bulk/accountant modals */
+.fleet-bulk-modal .fleet-modal-actions-bulk,
+.factory-bulk-modal .fleet-modal-actions-bulk,
+.fleet-accountant-modal .fleet-accountant-cta-card,
+.factory-collect-modal .fleet-accountant-cta-card {
+  display: flex !important;
+  justify-content: center;
+}
+
+
+.fleet-bulk-modal .fleet-bulk-kpi,
+.fleet-bulk-modal .fleet-bulk-summary,
+.fleet-accountant-modal .fleet-accountant-cta-card,
+.fleet-accountant-modal .fleet-accountant-summary,
+.fleet-accountant-modal .fleet-accountant-footer,
+.factory-bulk-modal .fleet-bulk-summary,
+.factory-collect-modal .fleet-accountant-summary {
+  border-color: rgba(132, 189, 246, 0.24) !important;
+  background: linear-gradient(180deg, rgba(16, 34, 60, 0.9), rgba(9, 20, 38, 0.86)) !important;
+}
+
+
+.fleet-accountant-modal .btn-collect-inline {
+  min-height: 48px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+
+.fleet-accountant-summary .fleet-summary-line {
+  min-height: 42px;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-box,
+.fleet-accountant-cta-card,
+.fleet-accountant-summary,
+.fleet-accountant-footer {
+  padding: 10px;
+  border-radius: 12px;
+}
+
+
+.fleet-accountant-summary .fleet-summary-line {
+  min-height: 36px;
+  padding: 8px 9px;
+  font-size: 11px;
+}
+
+
+.fleet-accountant-summary .fleet-summary-line img {
+  width: 18px;
+  height: 18px;
+}

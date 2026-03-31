@@ -6,56 +6,24 @@ import { requireModerator } from '../middleware/admin.js'
 import { readDb, updateDb } from '../db.js'
 import { config } from '../config.js'
 import {
-  buyFromSellOrder,
-  buyMarketItem,
-  buyBusiness,
-  buyFactory,
-  buyVehicleListing,
-  cancelLimitOrder,
-  cancelVehicleListing,
   claimLeague,
   openLeagueSeasonChest,
-  scrapBusinessVehicle,
-  scrapLogisticsTruck,
-  scrapVehicleListing,
   claimMission,
-  claimShipment,
-  collectLogisticsIncome,
-  collectBusiness,
-  collectBusinessesBulk,
-  collectFactory,
-  collectFactoriesBulk,
-  collectMine,
-  createMarketAuction,
   createPushPriceAlert,
   createContract,
-  createShipment,
   getContracts,
   getDirectMessageThread,
   getMessageCenter,
-  getBusinesses,
-  getFactories,
   getGameOverview,
   getLeague,
-  getLogistics,
-  getMarket,
-  getForex,
-  getMines,
   getMissions,
-  getOrderBook,
   getProfileDetails,
   getPublicProfile,
   getFriendsState,
   getPushCenter,
-  listBusinessVehicleForSale,
-  listLogisticsTruckForSale,
   markMessageCenterRead,
   markMessageCenterNotificationsRead,
   markPushNotificationRead,
-  placeLimitOrder,
-  placeMarketAuctionBid,
-  purchaseLogisticsTruck,
-  produceBusinessVehicle,
   registerPushDevice,
   respondContract,
   respondFriendRequest,
@@ -64,24 +32,11 @@ import {
   sendFriendRequest,
   sendDirectMessage,
   setBlockStatus,
-  sellMarketItem,
-  buyForexCurrency,
-  claimBankTermDeposit,
-  depositBankCash,
-  getBank,
-  sellForexCurrency,
-  openBankTermDeposit,
-  withdrawBankCash,
-  speedupFactoryBuild,
-  speedupFactoryUpgrade,
-  startMineDig,
   unregisterPushDevice,
   updateProfileAvatarUpload,
   updateProfileAvatarUrl,
   updateProfileDisplayName,
   updatePushPreferences,
-  upgradeFactory,
-  upgradeBusiness,
   getDailyStore,
   getDailyLoginReward,
   consumeDiamondWelcomePack,
@@ -106,6 +61,10 @@ import {
 import { sendSupportRequestEmail } from '../services/mailer.js'
 import { getPenalizedUsers } from '../services/admin.js'
 import { getClientIp } from '../utils.js'
+import { registerMarketRoutes } from './game/marketRoutes.js'
+import { registerFinanceRoutes } from './game/financeRoutes.js'
+import { registerOperationsRoutes } from './game/operationsRoutes.js'
+import { financeRouteDeps, marketRouteDeps, operationsRouteDeps } from '../game/routeDeps.js'
 
 const gameRouter = Router()
 
@@ -189,413 +148,19 @@ gameRouter.get('/overview', async (req, res, next) => {
   }
 })
 
-gameRouter.get('/market', async (req, res, next) => {
-  try {
-    const result = await getMarket(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
+registerMarketRoutes(gameRouter, {
+  sendResult,
+  ...marketRouteDeps,
 })
 
-gameRouter.get('/market/orderbook', async (req, res, next) => {
-  try {
-    const result = await getOrderBook(req.auth.userId, req.query.itemId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
+registerFinanceRoutes(gameRouter, {
+  sendResult,
+  ...financeRouteDeps,
 })
 
-gameRouter.post('/market/orderbook/orders', async (req, res, next) => {
-  try {
-    const result = await placeLimitOrder(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/market/orderbook/orders/:orderId/cancel', async (req, res, next) => {
-  try {
-    const result = await cancelLimitOrder(req.auth.userId, req.params.orderId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/market/buy', async (req, res, next) => {
-  try {
-    const result = await buyMarketItem(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/market/buy-from-order', async (req, res, next) => {
-  try {
-    const result = await buyFromSellOrder(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/market/sell', async (req, res, next) => {
-  try {
-    const result = await sellMarketItem(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/market/auctions', async (req, res, next) => {
-  try {
-    const result = await createMarketAuction(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/market/auctions/:auctionId/bid', async (req, res, next) => {
-  try {
-    const result = await placeMarketAuctionBid(
-      req.auth.userId,
-      req.params.auctionId,
-      req.body || {},
-    )
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.get('/forex', async (req, res, next) => {
-  try {
-    const result = await getForex(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/forex/buy', async (req, res, next) => {
-  try {
-    const result = await buyForexCurrency(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/forex/sell', async (req, res, next) => {
-  try {
-    const result = await sellForexCurrency(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.get('/bank', async (req, res, next) => {
-  try {
-    const result = await getBank(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/bank/deposit', async (req, res, next) => {
-  try {
-    const result = await depositBankCash(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/bank/withdraw', async (req, res, next) => {
-  try {
-    const result = await withdrawBankCash(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/bank/term/open', async (req, res, next) => {
-  try {
-    const result = await openBankTermDeposit(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/bank/term/claim', async (req, res, next) => {
-  try {
-    const result = await claimBankTermDeposit(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.get('/businesses', async (req, res, next) => {
-  try {
-    const result = await getBusinesses(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.get('/factories', async (req, res, next) => {
-  try {
-    const result = await getFactories(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/factories/buy', async (req, res, next) => {
-  try {
-    const result = await buyFactory(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/factories/collect/bulk', async (req, res, next) => {
-  try {
-    const result = await collectFactoriesBulk(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/factories/:factoryId/collect', async (req, res, next) => {
-  try {
-    const result = await collectFactory(req.auth.userId, req.params.factoryId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/factories/:factoryId/upgrade', async (req, res, next) => {
-  try {
-    const result = await upgradeFactory(req.auth.userId, req.params.factoryId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/factories/:factoryId/speedup', async (req, res, next) => {
-  try {
-    const result = await speedupFactoryUpgrade(req.auth.userId, req.params.factoryId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/factories/:factoryId/speedup-build', async (req, res, next) => {
-  try {
-    const result = await speedupFactoryBuild(req.auth.userId, req.params.factoryId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.get('/mines', async (req, res, next) => {
-  try {
-    const result = await getMines(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/mines/:mineId/dig', async (req, res, next) => {
-  try {
-    const result = await startMineDig(req.auth.userId, req.params.mineId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/mines/:mineId/collect', async (req, res, next) => {
-  try {
-    const result = await collectMine(req.auth.userId, req.params.mineId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.get('/logistics', async (req, res, next) => {
-  try {
-    const result = await getLogistics(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/logistics', async (req, res, next) => {
-  try {
-    const result = await createShipment(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/logistics/trucks', async (req, res, next) => {
-  try {
-    const result = await purchaseLogisticsTruck(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/logistics/trucks/:truckId/list', async (req, res, next) => {
-  try {
-    const result = await listLogisticsTruckForSale(req.auth.userId, req.params.truckId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/logistics/:shipmentId/claim', async (req, res, next) => {
-  try {
-    const result = await claimShipment(req.auth.userId, req.params.shipmentId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/logistics/collect', async (req, res, next) => {
-  try {
-    const result = await collectLogisticsIncome(req.auth.userId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/buy', async (req, res, next) => {
-  try {
-    const result = await buyBusiness(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/:businessId/upgrade', async (req, res, next) => {
-  try {
-    const result = await upgradeBusiness(req.auth.userId, req.params.businessId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/:businessId/produce-vehicle', async (req, res, next) => {
-  try {
-    const result = await produceBusinessVehicle(req.auth.userId, req.params.businessId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/:businessId/list-vehicle', async (req, res, next) => {
-  try {
-    const result = await listBusinessVehicleForSale(req.auth.userId, req.params.businessId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/:businessId/scrap-vehicle', async (req, res, next) => {
-  try {
-    const result = await scrapBusinessVehicle(req.auth.userId, req.params.businessId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/vehicle-market/:listingId/buy', async (req, res, next) => {
-  try {
-    const result = await buyVehicleListing(req.auth.userId, req.params.listingId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/vehicle-market/:listingId/cancel', async (req, res, next) => {
-  try {
-    const result = await cancelVehicleListing(req.auth.userId, req.params.listingId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/vehicle-market/:listingId/scrap', async (req, res, next) => {
-  try {
-    const result = await scrapVehicleListing(req.auth.userId, req.params.listingId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/logistics/:truckId/scrap-truck', async (req, res, next) => {
-  try {
-    const result = await scrapLogisticsTruck(req.auth.userId, req.params.truckId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/:businessId/collect', async (req, res, next) => {
-  try {
-    const result = await collectBusiness(req.auth.userId, req.params.businessId)
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
-})
-
-gameRouter.post('/businesses/collect/bulk', async (req, res, next) => {
-  try {
-    const result = await collectBusinessesBulk(req.auth.userId, req.body || {})
-    sendResult(res, result)
-  } catch (error) {
-    next(error)
-  }
+registerOperationsRoutes(gameRouter, {
+  sendResult,
+  ...operationsRouteDeps,
 })
 
 gameRouter.get('/rewards/daily-login', async (req, res, next) => {
@@ -794,25 +359,25 @@ gameRouter.post('/support/request', async (req, res, next) => {
       })
     }
 
-    if (emailStatus !== 'queued') {
-      try {
-        await updateDb((draft) => {
-          if (!Array.isArray(draft.supportTickets)) return draft
-          const index = draft.supportTickets.findIndex((entry) => entry?.ticketId === ticketId)
-          if (index < 0) return draft
-          draft.supportTickets[index] = {
-            ...draft.supportTickets[index],
-            emailStatus,
-          }
-          return draft
-        })
-      } catch (statusUpdateError) {
-        console.error('[SUPPORT_TICKET_STATUS_UPDATE_FAILED]', {
-          ticketId,
+    // Always persist the resolved email status so no ticket is permanently
+    // stuck at "queued" if resolveSupportEmailStatus returns a retry status.
+    try {
+      await updateDb((draft) => {
+        if (!Array.isArray(draft.supportTickets)) return draft
+        const index = draft.supportTickets.findIndex((entry) => entry?.ticketId === ticketId)
+        if (index < 0) return draft
+        draft.supportTickets[index] = {
+          ...draft.supportTickets[index],
           emailStatus,
-          message: statusUpdateError?.message,
-        })
-      }
+        }
+        return draft
+      })
+    } catch (statusUpdateError) {
+      console.error('[SUPPORT_TICKET_STATUS_UPDATE_FAILED]', {
+        ticketId,
+        emailStatus,
+        message: statusUpdateError?.message,
+      })
     }
 
     sendResult(res, {

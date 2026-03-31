@@ -1,0 +1,265 @@
+
+/* Garaj teklif paneli — ayrı overlay, alta düşmez */
+.garage-teklif-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 126;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(88, 156, 255, 0.2), transparent 38%),
+    radial-gradient(circle at 90% 92%, rgba(255, 205, 118, 0.14), transparent 40%),
+    rgba(2, 5, 14, 0.92);
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  padding: 0;
+  backdrop-filter: blur(6px);
+  overflow: auto;
+}
+
+
+.garage-teklif-panel {
+  width: 100%;
+  max-width: 100%;
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(180deg, #0c1728 0%, #081223 100%);
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  border-radius: 0;
+  box-shadow:
+    0 18px 50px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+
+.garage-teklif-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(115, 168, 226, 0.24);
+  flex-shrink: 0;
+  background: linear-gradient(180deg, rgba(9, 20, 38, 0.95), rgba(9, 20, 38, 0.8));
+}
+
+
+.garage-teklif-back {
+  appearance: none;
+  border: 1px solid rgba(124, 186, 255, 0.45);
+  background: rgba(27, 48, 79, 0.88);
+  color: #eaf4ff;
+  padding: 8px 13px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.16s ease;
+}
+
+
+.garage-teklif-back:hover {
+  filter: brightness(1.08);
+}
+
+
+.garage-teklif-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #f0f4ff;
+  text-align: right;
+}
+
+
+.garage-teklif-body {
+  padding: 16px;
+  overflow-y: auto;
+  display: grid;
+  gap: 12px;
+}
+
+
+.garage-teklif-profile-card {
+  border: 1px solid rgba(118, 180, 250, 0.34);
+  border-radius: 14px;
+  background:
+    linear-gradient(165deg, rgba(10, 24, 44, 0.94), rgba(8, 18, 34, 0.94)),
+    radial-gradient(circle at 95% 0%, rgba(121, 184, 255, 0.16), transparent 48%);
+  padding: 12px;
+  box-shadow:
+    0 10px 24px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+
+.garage-teklif-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+
+.garage-teklif-avatar-wrap {
+  margin: 0;
+}
+
+
+.garage-teklif-profile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+
+.garage-teklif-player-name {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: #edf6ff;
+}
+
+
+.garage-teklif-player-meta {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(190, 210, 240, 0.92);
+}
+
+
+.garage-teklif-subtitle {
+  margin: 10px 0 0;
+  font-size: 13px;
+  color: rgba(185, 205, 235, 0.92);
+}
+
+
+.garage-teklif-subtitle strong {
+  color: #ffe09d;
+}
+
+
+.garage-teklif-empty {
+  margin: 0;
+  padding: 22px 16px;
+  text-align: center;
+  color: rgba(190, 210, 240, 0.9);
+  border: 1px dashed rgba(122, 186, 255, 0.34);
+  border-radius: 14px;
+  background: rgba(9, 22, 42, 0.56);
+}
+
+
+.garage-teklif-empty-icon {
+  display: inline-flex;
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+
+.garage-teklif-empty-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f4f9ff;
+}
+
+
+.garage-teklif-empty-sub {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: rgba(184, 208, 237, 0.86);
+}
+
+
+.garage-teklif-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+
+.garage-teklif-li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: rgba(13, 28, 52, 0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(116, 172, 235, 0.4);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.38);
+}
+
+
+.garage-teklif-thumb {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+  border-radius: 10px;
+  border: 1px solid rgba(121, 183, 248, 0.4);
+  background: rgba(7, 17, 33, 0.64);
+  flex-shrink: 0;
+}
+
+
+.garage-teklif-item-meta {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+  flex: 1;
+}
+
+
+.garage-teklif-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #f0f4ff;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.garage-teklif-asset-badge {
+  justify-self: start;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #d8ebff;
+  border: 1px solid rgba(116, 177, 244, 0.45);
+  background: rgba(19, 49, 86, 0.72);
+}
+
+
+.garage-teklif-btn {
+  flex-shrink: 0;
+  min-height: 38px;
+  border: 1px solid rgba(124, 191, 255, 0.54);
+  border-radius: 10px;
+  background: linear-gradient(160deg, rgba(37, 108, 164, 0.96), rgba(24, 79, 126, 0.96));
+  color: #eaf5ff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 12px;
+  padding: 0 10px;
+}
+
+
+.garage-teklif-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+
+.garage-teklif-btn-icon {
+  font-size: 13px;
+  line-height: 1;
+}

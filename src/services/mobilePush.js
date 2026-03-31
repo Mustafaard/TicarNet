@@ -1,7 +1,7 @@
 ﻿import { Capacitor } from '@capacitor/core'
 import { PushNotifications } from '@capacitor/push-notifications'
 import { getDeviceId } from './auth.js'
-import { registerPushDevice, unregisterPushDevice } from './game.js'
+import { registerPushDevice, unregisterPushDevice } from './api/notificationApi.js'
 
 let listenersReady = false
 let setupPromise = null

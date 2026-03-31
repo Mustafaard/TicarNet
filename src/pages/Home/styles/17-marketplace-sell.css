@@ -1,0 +1,220 @@
+
+/* Sat (Sell) tab: resource grid + form */
+.marketplace-sell-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+
+.marketplace-sell-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+  text-align: center;
+}
+
+
+.marketplace-sell-grid-item:hover:not(:disabled) {
+  border-color: rgba(230, 168, 42, 0.5);
+  background: rgba(30, 40, 55, 0.6);
+}
+
+
+.marketplace-sell-grid-item.active {
+  border-color: #e6a82a;
+  background: linear-gradient(180deg, rgba(240, 193, 75, 0.18), rgba(230, 168, 42, 0.12));
+  box-shadow: 0 0 0 1px rgba(230, 168, 42, 0.35);
+}
+
+
+.marketplace-sell-grid-item.zero {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+.marketplace-sell-grid-icon {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  margin-bottom: 6px;
+}
+
+
+.marketplace-sell-grid-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+
+.marketplace-sell-grid-qty {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+
+.marketplace-sell-form {
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+
+.marketplace-sell-form .marketplace-sell-form-select,
+.marketplace-sell-form .marketplace-sell-form-input {
+  max-width: 100%;
+}
+
+
+.marketplace-sell-form-title {
+  margin: 0 0 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+
+.marketplace-sell-limit-hint {
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.marketplace-sell-limit-hint strong {
+  color: var(--text);
+}
+
+
+.marketplace-sell-limit-reached {
+  color: var(--danger);
+  font-weight: 600;
+}
+
+
+.marketplace-sell-form-row {
+  margin-bottom: 14px;
+}
+
+
+.marketplace-sell-form-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+
+.marketplace-sell-form-select,
+.marketplace-sell-form-input {
+  width: 100%;
+  max-width: 280px;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #1d1d1d;
+  background: #f5f6f8;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+
+.marketplace-sell-form-select {
+  cursor: pointer;
+}
+
+
+.marketplace-sell-form-select option {
+  background: #fff;
+  color: #1d1d1d;
+  padding: 8px;
+}
+
+
+.marketplace-sell-form-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+
+.marketplace-sell-form-total {
+  margin: 14px 0;
+  font-size: 14px;
+  color: var(--text);
+}
+
+
+.marketplace-sell-form-total strong {
+  color: #f0c14b;
+}
+
+
+.marketplace-sell-form-tax {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 16px;
+  padding: 10px 12px;
+  font-size: 12px;
+  color: #e6a82a;
+  background: rgba(230, 168, 42, 0.12);
+  border: 1px solid rgba(230, 168, 42, 0.35);
+  border-radius: 8px;
+}
+
+
+.marketplace-sell-form-tax-icon {
+  font-size: 16px;
+}
+
+
+.marketplace-sell-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+  background: linear-gradient(180deg, #f0c14b, #e6a82a);
+  border: 1px solid rgba(230, 168, 42, 0.6);
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: filter 0.15s;
+}
+
+
+.marketplace-sell-submit:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+
+.marketplace-sell-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
+.marketplace-sell-submit-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}

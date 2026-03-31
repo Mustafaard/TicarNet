@@ -23,7 +23,6 @@ import {
   revokeAdminResource,
   searchAdminUsers,
   setAdminChatBlock,
-  setAdminMute,
   setAdminMessageBlock,
   setAdminTempBan,
   updateAdminUserEmail,

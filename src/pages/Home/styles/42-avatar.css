@@ -1,0 +1,264 @@
+
+.avatar-file-label {
+  display: grid;
+  gap: 6px;
+  color: #bcccea;
+  font-size: 12px;
+}
+
+
+.avatar-file-input {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 186, 96, 0.36);
+  background: rgba(10, 15, 25, 0.92);
+  color: #f5f7ff;
+  padding: 8px 10px;
+}
+
+
+.avatar-crop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(2, 6, 16, 0.78);
+  display: grid;
+  place-items: center;
+  padding: calc(12px + env(safe-area-inset-top)) 10px calc(12px + env(safe-area-inset-bottom));
+  backdrop-filter: blur(4px);
+}
+
+
+.avatar-crop-modal {
+  width: min(430px, 100%);
+  max-height: min(88dvh, 760px);
+  border-radius: 16px;
+  border: 1px solid rgba(112, 181, 255, 0.38);
+  background: linear-gradient(170deg, rgba(9, 18, 36, 0.96), rgba(8, 15, 30, 0.96));
+  box-shadow:
+    0 24px 42px rgba(0, 0, 0, 0.56),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  padding: 12px;
+  overflow: auto;
+  display: grid;
+  gap: 10px;
+}
+
+
+.avatar-crop-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+
+.avatar-crop-head h3 {
+  margin: 0;
+  font-size: 24px;
+  color: #eef5ff;
+}
+
+
+.avatar-crop-note {
+  margin: 0;
+  font-size: 12px;
+}
+
+
+.avatar-crop-stage {
+  display: grid;
+  place-items: center;
+}
+
+
+.avatar-crop-frame {
+  width: 248px;
+  height: 248px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 192, 102, 0.42);
+  background: rgba(8, 15, 29, 0.88);
+  overflow: hidden;
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 12px 22px rgba(0, 0, 0, 0.34);
+}
+
+
+.avatar-crop-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: top left;
+  width: auto;
+  height: auto;
+  user-select: none;
+  -webkit-user-drag: none;
+  image-rendering: auto;
+}
+
+
+.avatar-crop-image.gif {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  transform: none;
+  background: rgba(7, 18, 34, 0.9);
+}
+
+
+.avatar-crop-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 2px rgba(255, 220, 148, 0.58);
+  background:
+    linear-gradient(90deg, transparent 33%, rgba(255, 255, 255, 0.12) 33%, rgba(255, 255, 255, 0.12) 34%, transparent 34%, transparent 66%, rgba(255, 255, 255, 0.12) 66%, rgba(255, 255, 255, 0.12) 67%, transparent 67%),
+    linear-gradient(180deg, transparent 33%, rgba(255, 255, 255, 0.12) 33%, rgba(255, 255, 255, 0.12) 34%, transparent 34%, transparent 66%, rgba(255, 255, 255, 0.12) 66%, rgba(255, 255, 255, 0.12) 67%, transparent 67%);
+}
+
+
+.avatar-crop-controls {
+  display: grid;
+  gap: 8px;
+}
+
+
+.avatar-crop-controls label {
+  display: grid;
+  gap: 4px;
+  color: #c7d8f4;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+
+.avatar-crop-controls input[type='range'] {
+  width: 100%;
+}
+
+
+.avatar-crop-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.coin-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+}
+
+
+.coin {
+  position: fixed;
+  transform: translate(-50%, -50%);
+  font-size: 18px;
+  font-weight: 900;
+  color: #ffcf69;
+  text-shadow: 0 0 10px rgba(255, 207, 105, 0.8);
+  animation: coin-pop 0.9s ease-out forwards;
+}
+
+
+@keyframes hero-card-bg-drift {
+  0% {
+    background-position: center, 50% 48%, center;
+  }
+  50% {
+    background-position: center, 52% 50%, center;
+  }
+  100% {
+    background-position: center, 48% 52%, center;
+  }
+}
+
+
+/* UI polish: avatar confirmation + chat/dm/bank visual upgrade */
+.avatar-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(2, 10, 24, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+
+.avatar-confirm-modal {
+  width: min(440px, 100%);
+  border-radius: 16px;
+  border: 1px solid rgba(113, 179, 247, 0.52);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(63, 151, 255, 0.24), transparent 54%),
+    radial-gradient(circle at 88% 100%, rgba(244, 193, 76, 0.2), transparent 52%),
+    linear-gradient(170deg, rgba(8, 24, 50, 0.96), rgba(5, 14, 31, 0.98));
+  padding: 16px 15px;
+  display: grid;
+  gap: 10px;
+  box-shadow: 0 24px 48px rgba(2, 8, 20, 0.6);
+}
+
+
+.avatar-confirm-modal h3 {
+  margin: 0;
+  color: #f3f8ff;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+}
+
+
+.avatar-confirm-modal p {
+  margin: 0;
+  color: rgba(198, 220, 248, 0.96);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+
+.avatar-confirm-modal p strong {
+  color: #ffd889;
+}
+
+
+.avatar-confirm-balance strong {
+  color: #8de8bf;
+}
+
+
+.avatar-confirm-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 2px;
+}
+
+
+.avatar-confirm-actions .btn {
+  min-height: 42px;
+  border-radius: 11px;
+  font-weight: 800;
+}
+
+
+.avatar-confirm-actions .btn.btn-primary {
+  border: 1px solid rgba(252, 214, 120, 0.7);
+  background: linear-gradient(180deg, rgba(227, 170, 62, 0.98), rgba(162, 106, 22, 0.98));
+  color: #fff6dd;
+}
+
+
+.avatar-confirm-actions .btn.btn-ghost {
+  border: 1px solid rgba(111, 170, 238, 0.56);
+  background: linear-gradient(180deg, rgba(12, 38, 70, 0.9), rgba(8, 24, 46, 0.95));
+  color: #dcedff;
+}

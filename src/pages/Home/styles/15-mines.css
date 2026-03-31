@@ -1,0 +1,913 @@
+
+/* Madenler: fabrika kartlarıyla aynı ölçü ve düzen */
+.mines-screen > .card {
+  border: 1px solid rgba(110, 183, 255, 0.42);
+  background:
+    linear-gradient(180deg, rgba(9, 24, 48, 0.96), rgba(7, 17, 34, 0.98)),
+    radial-gradient(circle at 92% 2%, rgba(243, 196, 90, 0.14), transparent 52%);
+  box-shadow:
+    inset 0 1px 0 rgba(223, 241, 255, 0.06),
+    0 12px 24px rgba(4, 11, 22, 0.3);
+}
+
+
+.mines-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  gap: 10px;
+}
+
+
+.mines-title {
+  margin: 0;
+  color: #f8fbff;
+  font-size: clamp(22px, 3.2vw, 28px);
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  text-shadow:
+    0 0 10px rgba(114, 188, 255, 0.22),
+    0 1px 0 rgba(0, 0, 0, 0.36);
+}
+
+
+.mines-summary {
+  margin-top: 4px;
+  color: #c7dcf8;
+  line-height: 1.45;
+}
+
+
+.mines-screen > .card > .muted {
+  color: #bfd4f0;
+}
+
+
+.mines-screen .btn.btn-ghost.btn-sm,
+.mines-back-btn {
+  border-color: rgba(255, 207, 109, 0.78);
+  background: linear-gradient(180deg, rgba(211, 161, 53, 0.95), rgba(137, 92, 18, 0.95));
+  color: #fff6de;
+  font-weight: 800;
+  box-shadow:
+    0 10px 18px rgba(60, 37, 8, 0.36),
+    inset 0 1px 0 rgba(255, 240, 200, 0.28);
+}
+
+
+.mines-screen .mines-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+
+.mine-card {
+  border: 1px solid rgba(124, 188, 255, 0.5);
+  border-radius: 18px;
+  padding: 12px;
+  background:
+    linear-gradient(165deg, rgba(10, 26, 52, 0.98), rgba(7, 17, 34, 0.99)),
+    radial-gradient(ellipse 120% 82% at 50% -10%, rgba(110, 181, 255, 0.2), transparent 58%),
+    radial-gradient(circle at 96% 6%, rgba(245, 195, 88, 0.16), transparent 48%);
+  box-shadow:
+    0 6px 22px rgba(0, 0, 0, 0.38),
+    0 0 0 1px rgba(0, 0, 0, 0.2) inset,
+    0 1px 0 rgba(255, 255, 255, 0.08) inset;
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  min-width: 0;
+  max-width: 100%;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+
+.mine-card:hover {
+  border-color: rgba(255, 212, 124, 0.62);
+  box-shadow:
+    0 10px 26px rgba(0, 0, 0, 0.42),
+    0 0 0 1px rgba(0, 0, 0, 0.2) inset,
+    0 1px 0 rgba(255, 244, 221, 0.18) inset;
+  transform: translateY(-1px);
+}
+
+
+.mine-card-hero-wrap {
+  position: relative;
+  width: 100%;
+}
+
+
+.mine-card-hero {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 100px;
+  max-height: 180px;
+  border-radius: 12px;
+  border: 1px solid rgba(120, 183, 252, 0.35);
+  background:
+    linear-gradient(180deg, rgba(10, 26, 48, 0.95), rgba(6, 16, 32, 0.98)),
+    radial-gradient(circle at 85% 0, rgba(148, 202, 255, 0.1), transparent 55%);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25) inset;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  position: relative;
+}
+
+
+.mine-card-hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+
+.mine-card-hero-fallback {
+  display: none;
+  width: 48px;
+  height: 48px;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.mine-card-hero-fallback img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+
+.mine-card-hero[data-broken='1'] > img:first-of-type {
+  display: none;
+}
+
+
+.mine-card-hero[data-broken='1'] .mine-card-hero-fallback {
+  display: flex;
+}
+
+
+.mine-card-name {
+  margin: 0;
+  font-size: clamp(14px, 2vw, 17px);
+  font-weight: 900;
+  color: #f8fbff;
+  text-align: center;
+  line-height: 1.2;
+  text-shadow:
+    0 0 12px rgba(111, 181, 255, 0.2),
+    0 1px 0 rgba(0, 0, 0, 0.42);
+}
+
+
+.mine-card-hint {
+  margin: 0;
+  font-size: 12px;
+  color: #c7daf4;
+  text-align: center;
+  line-height: 1.25;
+  min-height: 1.25em;
+}
+
+
+.mine-card-hint-digging {
+  color: #ffe0ae;
+  font-weight: 700;
+}
+
+
+.mine-card-hint-ready {
+  color: #a4f4ce;
+  font-weight: 700;
+}
+
+
+.mine-card-hint-start {
+  color: #c7defd;
+  font-weight: 600;
+}
+
+
+.mine-card-hint-inner {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 6px;
+}
+
+
+.mine-card-hint-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+
+.mine-card-hint-sep {
+  margin: 0 2px;
+  color: rgba(148, 202, 255, 0.6);
+}
+
+
+.mine-card-hint-2x {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #7dd3fc;
+  font-weight: 700;
+}
+
+
+.mine-card-hint-2x .mine-card-hint-icon {
+  width: 14px;
+  height: 14px;
+}
+
+
+.mine-card-countdown {
+  color: #ffd98b !important;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-align: center;
+  margin: 0 0 8px 0;
+  padding: 6px 10px;
+  background: linear-gradient(180deg, rgba(22, 49, 88, 0.64), rgba(15, 35, 64, 0.64));
+  border: 1px solid rgba(255, 210, 120, 0.5);
+  border-radius: 8px;
+  line-height: 1.3;
+}
+
+
+.mine-card-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: auto;
+}
+
+
+.mine-card-actions .btn {
+  min-height: 48px;
+  border-radius: 12px;
+  border-width: 1px;
+  font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 10px 20px rgba(4, 12, 26, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+
+.mine-card-actions .mine-card-action-full {
+  grid-column: 1 / -1;
+}
+
+
+.mine-card-actions .btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 24px rgba(3, 10, 22, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+
+.mine-card-actions .btn:not(:disabled):active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+
+.mine-card-actions .btn.btn-primary {
+  border-color: rgba(132, 201, 255, 0.82);
+  background:
+    linear-gradient(180deg, rgba(48, 132, 218, 0.98), rgba(24, 72, 128, 0.98)),
+    radial-gradient(circle at 100% 0%, rgba(255, 212, 118, 0.22), transparent 52%);
+  color: #f3f9ff;
+  box-shadow:
+    inset 0 1px 0 rgba(214, 238, 255, 0.28),
+    0 10px 18px rgba(7, 24, 50, 0.36);
+}
+
+
+.mine-card-actions .btn.btn-accent {
+  border-color: rgba(255, 221, 138, 0.9);
+  background:
+    linear-gradient(180deg, rgba(228, 178, 67, 0.98), rgba(152, 103, 20, 0.98)),
+    radial-gradient(circle at 0% 0%, rgba(159, 223, 255, 0.18), transparent 56%);
+  color: #fff8e6;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 243, 210, 0.36),
+    0 10px 18px rgba(54, 36, 8, 0.34);
+}
+
+
+.mine-card-actions .btn.btn-ghost {
+  border-color: rgba(123, 190, 255, 0.66);
+  background:
+    linear-gradient(180deg, rgba(24, 58, 104, 0.92), rgba(12, 33, 64, 0.94)),
+    radial-gradient(circle at 90% 0%, rgba(246, 202, 106, 0.1), transparent 54%);
+  color: #d7ebff;
+}
+
+
+.mine-card-actions .btn:disabled {
+  filter: saturate(0.82);
+  opacity: 0.8;
+  box-shadow:
+    0 6px 12px rgba(3, 10, 20, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+
+/* Maden kazı modalı (10 sn bekleyin + tamamlandı) */
+.mine-dig-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+}
+
+
+.mine-dig-modal {
+  position: relative;
+  width: min(380px, 100%);
+  padding: 20px;
+  border-radius: 16px;
+  background:
+    linear-gradient(180deg, rgba(9, 26, 52, 0.98), rgba(8, 16, 34, 0.99)),
+    radial-gradient(circle at 94% 6%, rgba(242, 192, 81, 0.16), transparent 48%);
+  border: 1px solid rgba(112, 184, 255, 0.5);
+  box-shadow:
+    0 20px 42px rgba(0, 0, 0, 0.46),
+    inset 0 1px 0 rgba(234, 248, 255, 0.08);
+  text-align: center;
+}
+
+
+.mine-dig-modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #d9ebff;
+  background: linear-gradient(180deg, rgba(27, 60, 105, 0.84), rgba(17, 39, 71, 0.88));
+  border: 1px solid rgba(124, 191, 255, 0.58);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+
+.mine-dig-modal-close:hover {
+  color: #f7fbff;
+  background: linear-gradient(180deg, rgba(44, 86, 142, 0.9), rgba(26, 58, 99, 0.9));
+}
+
+
+.mine-dig-modal-hero {
+  width: 100%;
+  max-width: 200px;
+  height: 120px;
+  margin: 0 auto 12px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(10, 20, 38, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.mine-dig-modal-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.mine-dig-modal-title {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffe0a0;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.35);
+}
+
+
+.mine-dig-modal-msg,
+.mine-dig-modal-done {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: #c8ddfa;
+}
+
+
+.mine-dig-progress-wrap {
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(9, 26, 50, 0.9), rgba(8, 20, 40, 0.92));
+  border: 1px solid rgba(104, 174, 247, 0.44);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+
+.mine-dig-progress {
+  height: 100%;
+  background: linear-gradient(90deg, #3ab5ff 0%, #6ad8ff 48%, #efc46f 100%);
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+
+
+.mine-dig-countdown {
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: #e2e8f7;
+}
+
+
+.mine-dig-countdown strong {
+  font-size: 18px;
+  color: #ffd98c;
+}
+
+
+.mine-dig-note {
+  margin: 0;
+  font-size: 11px;
+  color: #a9bfdc;
+}
+
+
+.mine-dig-modal-result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(20, 55, 98, 0.56), rgba(15, 39, 72, 0.56));
+  border: 1px solid rgba(255, 210, 120, 0.52);
+}
+
+
+.mine-dig-modal-result img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+
+.mine-dig-modal-result strong {
+  font-size: 16px;
+  color: #ffe09f;
+}
+
+
+/* Maden onay paneli (maliyet, aralık, XP, Kazıyı gerçekleştir) */
+.mine-confirm-modal {
+  width: min(408px, 100%);
+  padding: 22px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 205, 94, 0.2), transparent 33%),
+    radial-gradient(circle at top left, rgba(56, 126, 223, 0.28), transparent 42%),
+    linear-gradient(180deg, rgba(9, 26, 52, 0.98), rgba(8, 16, 34, 0.99));
+  border: 1px solid rgba(112, 184, 255, 0.38);
+  box-shadow:
+    0 24px 52px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(234, 248, 255, 0.08);
+  text-align: center;
+}
+
+
+.mine-confirm-title {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #ffdfa1;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.34);
+}
+
+
+.mine-confirm-hero {
+  width: 100%;
+  max-width: 200px;
+  height: 120px;
+  margin: 0 auto 16px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(10, 20, 38, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.mine-confirm-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.mine-confirm-details {
+  text-align: left;
+  margin-bottom: 14px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(132, 189, 246, 0.2);
+  background: linear-gradient(180deg, rgba(16, 34, 60, 0.9), rgba(9, 20, 38, 0.86));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+
+.mine-confirm-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(118, 177, 237, 0.14);
+  background: rgba(6, 15, 28, 0.4);
+  font-size: 14px;
+  color: #c7ddfa;
+}
+
+
+.mine-confirm-row strong {
+  color: #eef5ff;
+  margin-left: 8px;
+}
+
+
+.mine-confirm-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+  text-align: right;
+  flex-wrap: wrap;
+}
+
+
+.mine-confirm-row-icon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.mine-confirm-label {
+  color: #a8bfdd;
+}
+
+
+.mine-confirm-note {
+  margin: 0;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(120, 177, 235, 0.16);
+  background: rgba(8, 20, 38, 0.6);
+  font-size: 12px;
+  color: #b3c8e4;
+  line-height: 1.5;
+}
+
+
+.mine-confirm-premium-note {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffd98b;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+
+.mine-confirm-2x {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: #ffd98b;
+  font-weight: 700;
+  margin-right: 2px;
+}
+
+
+.mine-confirm-footer {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid rgba(120, 177, 235, 0.18);
+  background: linear-gradient(180deg, rgba(15, 31, 55, 0.92), rgba(8, 18, 33, 0.88));
+}
+
+
+.mine-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: nowrap;
+}
+
+
+.mine-confirm-actions .btn {
+  flex: 1 1 0;
+  min-height: 48px;
+  border-radius: 12px;
+  font-weight: 900;
+  letter-spacing: 0.01em;
+  min-width: 0;
+  box-shadow:
+    0 10px 18px rgba(4, 12, 26, 0.34),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+
+.mine-confirm-actions .btn.btn-primary {
+  border-color: rgba(255, 212, 117, 0.82);
+  background: linear-gradient(180deg, rgba(211, 161, 55, 0.98), rgba(140, 94, 18, 0.98));
+  color: #fff8e6;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 239, 197, 0.26),
+    0 8px 16px rgba(54, 36, 8, 0.32);
+}
+
+
+.mine-confirm-actions .btn.btn-ghost {
+  border-color: rgba(107, 175, 246, 0.56);
+  background: linear-gradient(180deg, rgba(17, 43, 80, 0.88), rgba(11, 29, 56, 0.9));
+  color: #d8eaff;
+}
+
+
+.mine-confirm-actions .btn.mine-confirm-cancel {
+  max-width: 132px;
+}
+
+
+.mine-confirm-actions .btn:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 12px 22px rgba(3, 10, 22, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.16);
+}
+
+
+.mine-confirm-actions .btn:not(:disabled):active {
+  transform: translateY(0);
+  filter: brightness(0.98);
+}
+
+
+@media (max-width: 520px) {
+  .mine-dig-modal,
+  .mine-confirm-modal {
+    width: min(360px, 100%);
+    padding: 18px 14px;
+    border-radius: 14px;
+  }
+
+  .mine-confirm-footer {
+    padding: 10px;
+    border-radius: 16px;
+  }
+
+  .mine-confirm-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .mine-confirm-actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .mine-confirm-actions .btn.mine-confirm-cancel {
+    max-width: none;
+  }
+}
+
+
+.factory-build-countdown small,
+.factory-build-countdown strong,
+.factory-status-line strong,
+.factory-shop-card-hint,
+.fleet-live-countdown,
+.mine-card-countdown,
+.mine-dig-countdown,
+.mine-dig-countdown strong,
+.weekly-event-inline-countdown,
+.home-weekly-event-countdown,
+.weekly-events-countdown,
+.weekly-event-day-countdown,
+.profile-event-countdown,
+.leaderboard-countdown-slot strong {
+  color: #ff8d9a !important;
+}
+
+
+/* Non-btn close controls in modal/panel overlays should also be red */
+.mine-dig-modal-close,
+.chat-report-close,
+.home-floating-alert-close,
+.starter-detail-close {
+  border-color: rgba(255, 167, 167, 0.78) !important;
+  background: linear-gradient(180deg, rgba(168, 60, 74, 0.97), rgba(108, 32, 45, 0.97)) !important;
+  color: #fff0f4 !important;
+}
+
+
+.mine-dig-modal-close:hover,
+.chat-report-close:hover:not(:disabled),
+.home-floating-alert-close:hover:not(:disabled),
+.starter-detail-close:hover {
+  border-color: rgba(255, 190, 190, 0.86) !important;
+  background: linear-gradient(180deg, rgba(188, 71, 86, 0.97), rgba(122, 38, 54, 0.97)) !important;
+}
+
+
+.mines-screen .mines-head {
+  flex-wrap: wrap;
+}
+
+
+.mines-screen .mines-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 168px), 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+
+.mines-screen .mines-back-btn,
+.mines-screen .btn.btn-ghost.btn-sm {
+  min-height: var(--mobile-touch-target);
+  padding-inline: 12px;
+}
+
+
+.mines-screen .mine-card {
+  padding: clamp(10px, 2.8vw, 13px);
+}
+
+
+.mines-screen .mine-card-name,
+.mines-screen .mine-card-hint {
+  overflow-wrap: anywhere;
+}
+
+
+.season-rewards-modal,
+.mine-dig-modal,
+.mine-confirm-modal,
+.tutorial-modal,
+.tutorial-resume-chip,
+.avatar-confirm-modal,
+.chat-report-modal,
+.dm-report-modal,
+.player-profile-modal,
+.leaderboard-search-modal {
+  width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
+  max-width: min(var(--app-max-content-width), calc(100vw - 12px)) !important;
+  min-width: min(320px, calc(100vw - 12px));
+  margin-inline: auto !important;
+}
+
+
+.season-rewards-modal,
+.mine-dig-modal,
+.mine-confirm-modal,
+.tutorial-modal,
+.avatar-confirm-modal,
+.chat-report-modal,
+.dm-report-modal,
+.player-profile-modal {
+  max-height: min(calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 860px) !important;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+.mines-screen .mines-grid {
+  gap: 8px;
+  margin-top: 10px;
+}
+
+
+.mines-screen .mine-card {
+  border-radius: 12px;
+  padding: 8px;
+  gap: 6px;
+}
+
+
+.mines-screen .mine-card-hero {
+  border-radius: 10px;
+  min-height: 80px;
+}
+
+
+.mines-screen .mine-card-name {
+  font-size: clamp(12px, 3.3vw, 14px);
+  text-align: left;
+  line-height: 1.2;
+}
+
+
+.mines-screen .mine-card-hint {
+  min-height: 0;
+  font-size: clamp(10px, 2.7vw, 11px);
+  text-align: left;
+}
+
+
+.mines-screen .mine-card-countdown {
+  margin: 0;
+  font-size: 11px;
+  padding: 5px 8px;
+}
+
+
+.mines-screen .mine-card-actions .btn {
+  min-height: 40px;
+  font-size: 11px;
+}
+
+
+.mine-confirm-modal,
+.mine-dig-modal {
+  width: min(336px, calc(100vw - 18px)) !important;
+  max-width: min(336px, calc(100vw - 18px)) !important;
+  max-height: min(calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 620px) !important;
+  border-radius: 16px !important;
+  padding: 14px 12px 12px !important;
+}
+
+
+.mine-confirm-title,
+.mine-dig-modal-title {
+  font-size: clamp(17px, 5vw, 20px);
+}
+
+
+.mine-confirm-hero,
+.mine-dig-modal-hero {
+  max-width: 170px;
+  height: 96px;
+  margin-bottom: 10px;
+}
+
+
+.mine-confirm-details {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 14px;
+}
+
+
+.mine-confirm-note,
+.mine-dig-note,
+.mine-dig-modal-msg,
+.mine-dig-modal-done {
+  font-size: 11px;
+  line-height: 1.32;
+}
+
+
+.mine-confirm-actions {
+  gap: 8px;
+}
+
+
+.mine-confirm-actions .btn,
+.mine-dig-modal-close {
+  min-height: 36px;
+  font-size: 11px;
+}

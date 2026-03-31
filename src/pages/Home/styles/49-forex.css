@@ -1,0 +1,889 @@
+
+.forex-screen {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+
+.forex-panel.forex-panel-solo {
+  padding: 14px;
+  border: 1px solid rgba(102, 168, 255, 0.28);
+  border-radius: 18px;
+  background:
+    linear-gradient(150deg, rgba(8, 26, 48, 0.94), rgba(8, 14, 30, 0.94)),
+    radial-gradient(circle at 12% 0, rgba(58, 178, 255, 0.16), transparent 48%);
+  display: grid;
+  gap: 12px;
+}
+
+
+.forex-solo-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+
+.forex-solo-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.forex-solo-head-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+.forex-solo-trend-pill {
+  border-radius: 999px;
+  border: 1px solid rgba(125, 181, 247, 0.42);
+  background: rgba(12, 31, 56, 0.72);
+  padding: 5px 9px;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.18px;
+  line-height: 1;
+  color: #e5f2ff;
+  white-space: nowrap;
+}
+
+
+.forex-solo-trend-pill.is-up {
+  border-color: rgba(116, 224, 161, 0.7);
+  color: #bbffd9;
+  background: rgba(16, 66, 47, 0.72);
+}
+
+
+.forex-solo-trend-pill.is-down {
+  border-color: rgba(255, 143, 143, 0.7);
+  color: #ffd4d4;
+  background: rgba(70, 22, 22, 0.72);
+}
+
+
+.forex-solo-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  object-fit: contain;
+  display: block;
+}
+
+
+.forex-solo-title {
+  margin: 0;
+  font-size: 24px;
+  line-height: 1.15;
+}
+
+
+.forex-solo-subtitle {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: rgba(191, 214, 242, 0.9);
+}
+
+
+.forex-solo-card {
+  border: 1px solid rgba(118, 183, 255, 0.26);
+  border-radius: 12px;
+  background: rgba(5, 14, 26, 0.78);
+  padding: 10px 12px;
+  display: grid;
+  gap: 8px;
+}
+
+
+.forex-solo-card.forex-solo-metrics-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.forex-solo-metric {
+  border: 1px solid rgba(118, 183, 255, 0.24);
+  border-radius: 10px;
+  background: rgba(8, 20, 37, 0.76);
+  padding: 7px 8px;
+  display: grid;
+  gap: 2px;
+}
+
+
+.forex-solo-metric small {
+  color: rgba(198, 220, 246, 0.9);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+
+.forex-solo-metric strong {
+  font-size: 22px;
+  line-height: 1;
+  color: #f8fcff;
+}
+
+
+.forex-solo-metric span {
+  color: rgba(169, 197, 230, 0.86);
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+
+.forex-solo-metric.is-sell strong,
+.forex-solo-metric.is-up strong {
+  color: #80e79d;
+}
+
+
+.forex-solo-metric.is-down strong {
+  color: #ff9e9e;
+}
+
+
+.forex-solo-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+
+.forex-solo-row span {
+  color: rgba(190, 214, 241, 0.9);
+}
+
+
+.forex-solo-row strong {
+  font-size: 23px;
+  line-height: 1;
+}
+
+
+.forex-solo-row.is-up strong,
+.forex-solo-row .is-up {
+  color: #7de08a;
+}
+
+
+.forex-solo-row.is-down strong,
+.forex-solo-row .is-down {
+  color: #ff8e8e;
+}
+
+
+.forex-chart-card {
+  border: 1px solid rgba(118, 183, 255, 0.22);
+  border-radius: 14px;
+  background:
+    radial-gradient(120% 140% at 0% 0%, rgba(36, 113, 185, 0.15), rgba(6, 12, 25, 0)),
+    rgba(1, 7, 15, 0.86);
+  padding: 12px;
+}
+
+
+.forex-chart-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+
+.forex-chart-head-meta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+
+.forex-chart-range-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px;
+  border-radius: 999px;
+  border: 1px solid rgba(113, 172, 240, 0.34);
+  background: rgba(8, 21, 39, 0.72);
+}
+
+
+.forex-chart-range-btn {
+  min-height: 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: rgba(194, 218, 246, 0.9);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14px;
+  line-height: 1;
+  padding: 0 9px;
+}
+
+
+.forex-chart-range-btn.is-active {
+  border-color: rgba(132, 194, 255, 0.62);
+  background: rgba(21, 59, 103, 0.84);
+  color: #eef6ff;
+}
+
+
+.forex-chart-range-btn:disabled {
+  opacity: 0.6;
+}
+
+
+.forex-chart-title {
+  margin: 0;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+}
+
+
+.forex-chart-updated {
+  font-size: 11.5px;
+  color: rgba(243, 249, 255, 0.95);
+  white-space: nowrap;
+}
+
+
+.forex-chart-window-pill {
+  border-radius: 999px;
+  border: 1px solid rgba(125, 184, 247, 0.42);
+  background: rgba(10, 26, 49, 0.75);
+  color: rgba(223, 236, 253, 0.96);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.14px;
+  line-height: 1;
+  padding: 5px 7px;
+  white-space: nowrap;
+}
+
+
+.forex-chart-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+
+.forex-chart-metric {
+  border: 1px solid rgba(89, 151, 221, 0.25);
+  border-radius: 8px;
+  background: rgba(9, 22, 39, 0.72);
+  padding: 6px;
+  display: grid;
+  gap: 3px;
+}
+
+
+.forex-chart-metric-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+
+.forex-chart-metric small {
+  font-size: 11px;
+  color: rgba(239, 247, 255, 0.93);
+}
+
+
+.forex-chart-metric-pill {
+  border-radius: 999px;
+  border: 1px solid rgba(123, 183, 249, 0.36);
+  background: rgba(18, 43, 75, 0.76);
+  color: rgba(214, 233, 255, 0.94);
+  font-size: 8.5px;
+  font-weight: 900;
+  letter-spacing: 0.22px;
+  line-height: 1;
+  padding: 3px 6px;
+  white-space: nowrap;
+}
+
+
+.forex-chart-metric strong {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.99);
+  text-shadow: 0 0 4px rgba(255, 255, 255, 0.15);
+  line-height: 1.2;
+}
+
+
+.forex-chart-metric-note {
+  font-size: 9.5px;
+  color: rgba(181, 206, 235, 0.9);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+
+.forex-chart-metric.is-up strong,
+.forex-chart-metric.is-max strong {
+  color: rgba(255, 255, 255, 0.99);
+}
+
+
+.forex-chart-metric.is-down strong,
+.forex-chart-metric.is-min strong {
+  color: rgba(255, 255, 255, 0.99);
+}
+
+
+.forex-chart-wrap {
+  border: 1px solid rgba(79, 142, 214, 0.28);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(14, 39, 68, 0.58), rgba(2, 11, 21, 0.9)),
+    rgba(0, 0, 0, 0.64);
+  padding: 10px 10px 14px;
+  overflow: hidden;
+}
+
+
+.forex-chart-svg {
+  width: 100%;
+  min-width: 0;
+  min-height: 238px;
+  aspect-ratio: 17 / 9.4;
+  height: auto;
+  display: block;
+  text-rendering: geometricPrecision;
+}
+
+
+.forex-grid-line {
+  stroke: rgba(128, 166, 211, 0.24);
+  stroke-width: 1;
+}
+
+
+.forex-chart-legend {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-bottom: 4px;
+  color: rgba(220, 240, 255, 0.96);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+
+.forex-chart-legend-swatch {
+  width: 34px;
+  height: 12px;
+  border-radius: 2px;
+  border: 2px solid rgba(55, 198, 255, 0.96);
+  background: rgba(35, 160, 220, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(119, 222, 255, 0.32);
+}
+
+
+.forex-chart-legend-label {
+  letter-spacing: 0.14px;
+}
+
+
+.forex-area-fill {
+  fill: url(#forex-area-fill-gradient);
+}
+
+
+.forex-line {
+  fill: none;
+  stroke: url(#forex-line-stroke-gradient);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px rgba(69, 203, 255, 0.44));
+}
+
+
+.forex-point {
+  fill: rgba(49, 196, 255, 0.62);
+  stroke: rgba(167, 235, 255, 0.92);
+  stroke-width: 0.8;
+}
+
+
+.forex-min-point {
+  fill: #ff9f9f;
+  stroke: #381c1c;
+  stroke-width: 1.2;
+}
+
+
+.forex-max-point {
+  fill: #88e89a;
+  stroke: #16351d;
+  stroke-width: 1.2;
+}
+
+
+.forex-live-line {
+  stroke: rgba(95, 183, 249, 0.66);
+  stroke-width: 1.1;
+  stroke-dasharray: 5 5;
+}
+
+
+.forex-hover-line {
+  stroke: rgba(151, 207, 255, 0.46);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+}
+
+
+.forex-hover-tooltip {
+  fill: rgba(5, 16, 33, 0.95);
+  stroke: rgba(174, 219, 255, 0.72);
+  stroke-width: 1;
+}
+
+
+.forex-hover-tooltip-title {
+  fill: #f2f8ff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.14px;
+}
+
+
+.forex-hover-tooltip-line {
+  fill: rgba(220, 236, 255, 0.95);
+  font-size: 10.5px;
+  font-weight: 700;
+}
+
+
+.forex-hover-tooltip-volume {
+  fill: rgba(146, 255, 194, 0.95);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+
+.forex-hit-area {
+  fill: transparent;
+  pointer-events: all;
+  touch-action: manipulation;
+}
+
+
+.forex-live-point-glow {
+  fill: url(#forex-live-glow);
+}
+
+
+.forex-live-point {
+  fill: #42c4ff;
+  stroke: #d7f5ff;
+  stroke-width: 1.4;
+}
+
+
+.forex-live-badge {
+  fill: rgba(10, 26, 50, 0.96);
+  stroke: rgba(235, 246, 255, 0.92);
+  stroke-width: 1;
+}
+
+
+.forex-live-badge-text {
+  fill: #ffffff;
+  font-size: 15.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+
+.forex-axis-text {
+  fill: rgba(252, 253, 255, 0.98);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12px;
+  text-shadow: 0 0 4px rgba(4, 9, 18, 0.8);
+}
+
+
+.forex-axis-text-x {
+  font-size: 9.5px;
+  font-weight: 600;
+}
+
+
+.forex-axis-text-y {
+  font-size: 13px;
+}
+
+
+.forex-trade-minimal {
+  border: 1px solid rgba(118, 183, 255, 0.22);
+  border-radius: 14px;
+  background: rgba(5, 14, 26, 0.85);
+  padding: 11px;
+  display: grid;
+  gap: 8px;
+}
+
+
+.forex-form-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: rgba(216, 233, 252, 0.95);
+}
+
+
+.forex-trade-minimal .qty-input {
+  height: 40px;
+  width: 100%;
+  border: 1px solid rgba(97, 153, 219, 0.35);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #ecf6ff;
+  padding: 0 10px;
+  font-weight: 700;
+}
+
+
+.forex-qty-quick-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.forex-qty-quick-btn {
+  min-height: 32px;
+  border-radius: 9px;
+  border: 1px solid rgba(106, 168, 237, 0.4);
+  background: rgba(8, 22, 40, 0.9);
+  color: #d8ebff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18px;
+}
+
+
+.forex-qty-quick-btn:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+}
+
+
+.forex-qty-quick-btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+
+.forex-trade-side-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.forex-trade-side-btn {
+  min-height: 56px;
+  border-radius: 10px;
+  border: 1px solid rgba(113, 169, 235, 0.34);
+  background: rgba(7, 20, 37, 0.9);
+  color: #d8ebff;
+  padding: 8px 10px;
+  text-align: left;
+  display: grid;
+  gap: 1px;
+  transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease, transform 0.16s ease;
+}
+
+
+.forex-trade-side-btn:disabled {
+  opacity: 0.58;
+  cursor: not-allowed;
+}
+
+
+.forex-trade-side-btn:not(:disabled):active {
+  transform: translateY(1px);
+}
+
+
+.forex-trade-side-title {
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.28px;
+}
+
+
+.forex-trade-side-desc {
+  font-size: 10px;
+  color: rgba(198, 221, 248, 0.86);
+}
+
+
+.forex-trade-side-btn.buy.is-active {
+  border-color: rgba(82, 219, 154, 0.92);
+  background: linear-gradient(150deg, rgba(23, 76, 58, 0.92), rgba(11, 37, 29, 0.96));
+  box-shadow: 0 0 0 1px rgba(82, 219, 154, 0.24), inset 0 0 20px rgba(24, 140, 96, 0.28);
+}
+
+
+.forex-trade-side-btn.sell.is-active {
+  border-color: rgba(255, 123, 123, 0.92);
+  background: linear-gradient(150deg, rgba(92, 34, 34, 0.9), rgba(38, 14, 14, 0.96));
+  box-shadow: 0 0 0 1px rgba(255, 123, 123, 0.2), inset 0 0 20px rgba(167, 55, 55, 0.24);
+}
+
+
+.forex-trade-warning {
+  margin: 0;
+  padding: 7px 9px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 161, 93, 0.4);
+  background: rgba(57, 23, 6, 0.55);
+  color: rgba(255, 221, 189, 0.96);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+.forex-trade-preview {
+  border: 1px solid rgba(118, 183, 255, 0.2);
+  border-radius: 10px;
+  background: rgba(8, 20, 39, 0.7);
+  padding: 8px 10px;
+  display: grid;
+  gap: 4px;
+}
+
+
+.forex-trade-preview p {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(204, 224, 247, 0.94);
+}
+
+
+.forex-trade-preview strong {
+  color: #ffffff;
+}
+
+
+.forex-solo-note {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(185, 210, 238, 0.88);
+}
+
+
+@media (max-width: 760px) {
+  .forex-panel.forex-panel-solo {
+    padding: 12px 10px;
+    gap: 10px;
+  }
+
+  .forex-solo-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .forex-solo-title-wrap {
+    width: 100%;
+  }
+
+  .forex-solo-head-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .forex-solo-title {
+    font-size: 20px;
+  }
+
+  .forex-solo-card.forex-solo-metrics-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .forex-solo-metric strong {
+    font-size: 18px;
+    line-height: 1.1;
+  }
+
+  .forex-solo-metric span {
+    font-size: 9px;
+  }
+
+  .forex-solo-row {
+    font-size: 11px;
+  }
+
+  .forex-solo-row strong {
+    font-size: 17px;
+    text-align: right;
+  }
+
+  .forex-chart-wrap {
+    padding: 8px 8px 12px;
+  }
+
+  .forex-chart-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .forex-chart-updated {
+    font-size: 10px;
+    white-space: normal;
+  }
+
+  .forex-chart-head-meta {
+    width: 100%;
+    justify-content: flex-start;
+    display: grid;
+    gap: 6px;
+  }
+
+  .forex-chart-range-group {
+    order: 0;
+    width: fit-content;
+  }
+
+  .forex-chart-window-pill {
+    font-size: 10px;
+    white-space: normal;
+  }
+
+  .forex-chart-legend {
+    font-size: 12px;
+    gap: 6px;
+  }
+
+  .forex-chart-legend-swatch {
+    width: 28px;
+    height: 10px;
+  }
+
+  .forex-chart-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .forex-chart-metric {
+    padding: 5px 6px;
+  }
+
+  .forex-chart-metric small {
+    font-size: 10px;
+  }
+
+  .forex-chart-metric strong {
+    font-size: 12px;
+  }
+
+  .forex-chart-metric-note {
+    font-size: 9px;
+  }
+
+  .forex-chart-svg {
+    min-height: 208px;
+  }
+
+  .forex-axis-text {
+    font-size: 10px;
+  }
+
+  .forex-axis-text-x {
+    font-size: 7.5px;
+  }
+
+  .forex-axis-text-y {
+    font-size: 10px;
+  }
+
+  .forex-trade-minimal {
+    padding: 10px 9px;
+    gap: 7px;
+  }
+
+  .forex-trade-side-btn {
+    min-height: 52px;
+    padding: 7px 8px;
+  }
+
+  .forex-trade-side-desc {
+    font-size: 9px;
+  }
+
+  .forex-trade-preview p {
+    font-size: 10.5px;
+    line-height: 1.28;
+  }
+}
+
+
+@media (max-width: 520px) {
+  .forex-chart-range-btn {
+    min-height: 22px;
+    font-size: 9px;
+    padding: 0 8px;
+  }
+
+  .forex-chart-updated,
+  .forex-chart-window-pill {
+    font-size: 9.5px;
+  }
+
+  .forex-chart-svg {
+    min-height: 196px;
+  }
+
+  .forex-trade-side-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .forex-trade-side-btn {
+    min-height: 48px;
+  }
+}
+
+
+@media (max-width: 390px) {
+  .forex-solo-card.forex-solo-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forex-solo-metric strong {
+    font-size: 17px;
+  }
+
+  .forex-trade-side-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .forex-chart-head-meta {
+    gap: 5px;
+  }
+}

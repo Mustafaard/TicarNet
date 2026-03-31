@@ -1,0 +1,385 @@
+
+.factory-purchase-summary .fleet-order-summary-item.is-income .fleet-order-summary-value {
+  color: #8ef2bc;
+}
+
+
+.factory-purchase-summary .fleet-order-summary-item.is-fuel .fleet-order-summary-value {
+  color: #ff9eaa;
+}
+
+
+.factory-purchase-summary .fleet-order-summary-item.is-xp .fleet-order-summary-value {
+  color: #9cd7ff;
+}
+
+
+.fleet-order-truck-capacity-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  border: 1px solid rgba(180, 160, 220, 0.4);
+  background: linear-gradient(180deg, rgba(42, 36, 58, 0.85), rgba(32, 28, 48, 0.9));
+  color: #e8dcff;
+  font-size: 14px;
+}
+
+
+.fleet-order-truck-capacity-block .fleet-order-capacity-icon {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.fleet-order-truck-capacity-value {
+  color: #d4c8f0;
+}
+
+
+.fleet-order-truck-capacity-value strong {
+  color: #fff;
+}
+
+
+.fleet-order-summary-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0;
+  color: #c5d8f0;
+  font-size: 11px;
+  line-height: 1.2;
+  font-weight: 700;
+  flex-shrink: 0;
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+
+.fleet-order-summary-label img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.fleet-order-summary-value {
+  margin: 0;
+  font-size: clamp(12px, 3vw, 15px);
+  line-height: 1.2;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+
+.fleet-detail-card.moto-order-screen .fleet-order-summary-item.is-income,
+.fleet-detail-card.auto-order-screen .fleet-order-summary-item.is-income,
+.fleet-detail-card.truck-order-screen .fleet-order-summary-item.is-income,
+.fleet-order-screen .fleet-order-summary-item.is-income {
+  border-color: rgba(104, 196, 150, 0.42);
+  background: linear-gradient(180deg, rgba(18, 57, 46, 0.9), rgba(14, 43, 35, 0.94));
+  box-shadow:
+    inset 2px 0 0 rgba(106, 206, 157, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+
+.fleet-order-screen .fleet-order-summary-item.is-income .fleet-order-summary-value {
+  color: #8ef2bc;
+}
+
+
+.fleet-detail-card.moto-order-screen .fleet-order-summary-item.is-fuel,
+.fleet-detail-card.auto-order-screen .fleet-order-summary-item.is-fuel,
+.fleet-detail-card.truck-order-screen .fleet-order-summary-item.is-fuel,
+.fleet-order-screen .fleet-order-summary-item.is-fuel {
+  border-color: rgba(220, 126, 138, 0.46);
+  background: linear-gradient(180deg, rgba(77, 27, 37, 0.9), rgba(58, 21, 29, 0.94));
+  box-shadow:
+    inset 2px 0 0 rgba(233, 134, 145, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+
+.fleet-order-screen .fleet-order-summary-item.is-fuel .fleet-order-summary-value {
+  color: #ff9eaa;
+}
+
+
+.fleet-detail-card.moto-order-screen .fleet-order-summary-item.is-xp,
+.fleet-detail-card.auto-order-screen .fleet-order-summary-item.is-xp,
+.fleet-detail-card.truck-order-screen .fleet-order-summary-item.is-xp,
+.fleet-order-screen .fleet-order-summary-item.is-xp {
+  border-color: rgba(124, 176, 240, 0.42);
+  background: linear-gradient(180deg, rgba(21, 40, 66, 0.9), rgba(16, 31, 53, 0.94));
+  box-shadow:
+    inset 2px 0 0 rgba(122, 184, 245, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+
+.fleet-order-screen .fleet-order-summary-item.is-xp .fleet-order-summary-value {
+  color: #9cd7ff;
+}
+
+
+.fleet-detail-card.truck-order-screen .fleet-order-summary-item.is-capacity,
+.fleet-order-screen .fleet-order-summary-item.is-capacity {
+  border-color: rgba(180, 160, 220, 0.46);
+  background: linear-gradient(180deg, rgba(42, 36, 58, 0.9), rgba(32, 28, 48, 0.94));
+}
+
+
+.fleet-order-screen .fleet-order-summary-item.is-capacity .fleet-order-summary-label {
+  color: #d4c8f0;
+}
+
+
+.fleet-order-screen .fleet-order-summary-item.is-capacity .fleet-order-summary-value {
+  color: #e8dcff;
+}
+
+
+.fleet-detail-card.moto-order-screen .fleet-order-summary-item.is-lifetime,
+.fleet-detail-card.auto-order-screen .fleet-order-summary-item.is-lifetime,
+.fleet-detail-card.truck-order-screen .fleet-order-summary-item.is-lifetime,
+.fleet-order-screen .fleet-order-summary-item.is-lifetime {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  border-color: rgba(246, 210, 126, 0.46);
+  background: linear-gradient(180deg, rgba(73, 58, 26, 0.88), rgba(53, 42, 19, 0.92));
+  box-shadow:
+    inset 2px 0 0 rgba(244, 207, 118, 0.72),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+
+.fleet-order-screen .fleet-order-summary-item.is-lifetime .fleet-order-summary-label {
+  color: #f3e2b2;
+}
+
+
+.fleet-order-screen .fleet-order-summary-item.is-lifetime .fleet-order-summary-value {
+  color: #fff0be;
+  font-size: clamp(13px, 3.1vw, 16px);
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  text-align: right;
+}
+
+
+.fleet-order-capacity-note {
+  margin: 2px 0 0;
+  border-radius: 9px;
+  border: 1px solid rgba(120, 183, 255, 0.32);
+  background: rgba(12, 28, 48, 0.7);
+  padding: 7px 9px;
+  color: #cfe5ff;
+  font-size: 12px;
+  line-height: 1.36;
+}
+
+
+.fleet-setup-modal {
+  max-height: min(88dvh, 920px);
+}
+
+
+.fleet-setup-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+
+.fleet-setup-card {
+  border-radius: 14px;
+  border: 0;
+  background: linear-gradient(180deg, rgba(35, 46, 66, 0.96), rgba(25, 35, 52, 0.95));
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  overflow: hidden;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.28);
+}
+
+
+.fleet-setup-image {
+  width: 100%;
+  height: auto;
+  min-height: 0;
+  aspect-ratio: auto;
+  border-radius: 12px;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: start center;
+  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  margin-bottom: 2px;
+}
+
+
+.fleet-setup-image img {
+  width: 100%;
+  height: auto;
+  max-height: none;
+  object-fit: fill;
+  object-position: center center;
+  display: block;
+  padding: 0;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  image-rendering: -webkit-optimize-contrast;
+  transform: none;
+  filter: none;
+}
+
+
+.fleet-setup-fallback {
+  display: none;
+  font-size: 40px;
+}
+
+
+.fleet-setup-image[data-broken='1'] img {
+  display: none;
+}
+
+
+.fleet-setup-image[data-broken='1'] .fleet-setup-fallback {
+  display: inline;
+}
+
+
+.fleet-setup-card strong {
+  margin: 0;
+  color: #d9feff;
+  font-size: 18px;
+}
+
+
+.fleet-setup-card p,
+.fleet-setup-card small {
+  margin: 0;
+  color: #eff5c8;
+  font-size: 13px;
+  position: relative;
+  z-index: 2;
+}
+
+
+.fleet-setup-grid {
+  gap: 7px;
+}
+
+
+.fleet-setup-card,
+.unlock-node {
+  border-radius: 11px;
+  padding: 8px;
+  gap: 6px;
+}
+
+
+.fleet-setup-image {
+  height: 74px;
+}
+
+
+.fleet-setup-image img {
+  max-height: 74px;
+  width: auto;
+}
+
+
+.fleet-setup-modal .fleet-subheader-actions .btn {
+  min-height: 36px;
+  font-size: 11px;
+  padding-inline: 8px;
+}
+
+
+.fleet-setup-modal .fleet-subheader-actions {
+  gap: 6px;
+}
+
+
+.fleet-setup-modal .fleet-subheader-actions .btn {
+  min-height: 32px;
+  font-size: 10px;
+  padding-inline: 7px;
+}
+
+
+.fleet-setup-modal .fleet-setup-grid {
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+
+.fleet-setup-modal .unlock-node {
+  padding: 7px;
+  gap: 5px;
+}
+
+
+.fleet-setup-modal .unlock-node p,
+.fleet-setup-modal .unlock-node small {
+  font-size: 10px;
+  line-height: 1.22;
+}
+
+
+.business-screen .fleet-order-screen .fleet-order-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+
+.business-screen .fleet-order-screen .fleet-order-summary-item {
+  min-height: 60px;
+  border-radius: 9px;
+  padding: 7px;
+  gap: 3px;
+}
+
+
+.business-screen .fleet-order-screen .fleet-order-summary-label {
+  font-size: 9.4px;
+}
+
+
+.business-screen .fleet-order-screen .fleet-order-summary-label img {
+  width: 16px;
+  height: 16px;
+}
+
+
+.business-screen .fleet-order-screen .fleet-order-summary-value {
+  font-size: 12px;
+}
+
+
+.business-screen .fleet-order-screen .fleet-order-action {
+  min-height: 36px;
+  border-radius: 10px;
+  font-size: 11px;
+}

@@ -1,0 +1,322 @@
+
+.fleet-upgrade-modal {
+  gap: 12px;
+}
+
+
+.fleet-upgrade-modal .fleet-modal-subtitle {
+  max-width: 450px;
+  margin-inline: auto;
+  color: #d6e8ff;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+
+.fleet-upgrade-box {
+  border-radius: 16px;
+  border: 1px solid rgba(129, 196, 255, 0.34);
+  background: linear-gradient(165deg, rgba(9, 27, 54, 0.86), rgba(8, 20, 42, 0.92));
+  padding: 12px;
+  display: grid;
+  gap: 10px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 18px rgba(2, 10, 24, 0.28);
+}
+
+
+.fleet-upgrade-head {
+  display: grid;
+  gap: 3px;
+  text-align: center;
+}
+
+
+.fleet-upgrade-eyebrow {
+  color: #a9c8ef;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+}
+
+
+.fleet-upgrade-level {
+  color: #f5fbff;
+  font-size: 30px;
+  line-height: 1.04;
+  text-shadow: 0 8px 20px rgba(44, 127, 215, 0.34);
+}
+
+
+.fleet-upgrade-target {
+  margin: 0;
+  color: #d7e7fa;
+  font-size: 13px;
+}
+
+
+.fleet-upgrade-track {
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(13, 33, 58, 0.86);
+  border: 1px solid rgba(102, 169, 242, 0.28);
+}
+
+
+.fleet-upgrade-track > span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f6d676 0%, #8dffb8 48%, #6ac8ff 100%);
+  box-shadow: 0 0 16px rgba(123, 223, 255, 0.4);
+  transition: width 0.24s ease;
+}
+
+
+.fleet-upgrade-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.fleet-upgrade-metric {
+  border-radius: 12px;
+  border: 1px solid rgba(115, 178, 244, 0.32);
+  background: rgba(10, 22, 44, 0.76);
+  padding: 8px 7px;
+  display: grid;
+  gap: 3px;
+  text-align: center;
+}
+
+
+.fleet-upgrade-metric > span {
+  color: #a8c2e3;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+.fleet-upgrade-metric > strong {
+  color: #eff8ff;
+  font-size: 18px;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+
+.fleet-upgrade-metric > strong.is-ok {
+  color: #ccffe4;
+}
+
+
+.fleet-upgrade-metric > strong.is-missing {
+  color: #ffd7db;
+}
+
+
+.fleet-upgrade-remain {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.fleet-upgrade-remain span {
+  border-radius: 999px;
+  border: 1px solid rgba(126, 187, 255, 0.34);
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+
+.fleet-upgrade-remain span.is-ok {
+  border-color: rgba(120, 233, 169, 0.62);
+  background: rgba(20, 80, 57, 0.58);
+  color: #c9ffe1;
+}
+
+
+.fleet-upgrade-remain span.is-missing {
+  border-color: rgba(255, 143, 143, 0.62);
+  background: rgba(90, 28, 40, 0.58);
+  color: #ffd8db;
+}
+
+
+.fleet-upgrade-next-note {
+  margin: 0;
+  text-align: center;
+  color: #d3e4fb;
+  font-size: 13px;
+}
+
+
+.fleet-upgrade-modal,
+.fleet-setup-modal {
+  gap: 9px;
+}
+
+
+.fleet-upgrade-box {
+  border-radius: 12px;
+  padding: 9px;
+  gap: 8px;
+}
+
+
+.fleet-upgrade-level {
+  font-size: clamp(21px, 5.6vw, 24px);
+}
+
+
+.fleet-upgrade-target {
+  font-size: 11px;
+}
+
+
+.fleet-upgrade-track {
+  height: 7px;
+}
+
+
+.fleet-upgrade-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+
+.fleet-upgrade-metric {
+  border-radius: 10px;
+  padding: 6px;
+  gap: 2px;
+}
+
+
+.fleet-upgrade-metric > span {
+  font-size: 9.8px;
+}
+
+
+.fleet-upgrade-metric > strong {
+  font-size: 13px;
+}
+
+
+.fleet-upgrade-remain {
+  gap: 6px;
+}
+
+
+.fleet-upgrade-remain span {
+  padding: 5px 7px;
+  font-size: 10.2px;
+}
+
+
+.fleet-upgrade-next-note {
+  font-size: 10.8px;
+}
+
+
+.fleet-upgrade-modal,
+.fleet-setup-modal,
+.fleet-accountant-modal {
+  border-radius: 18px !important;
+  padding: 10px !important;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-metrics {
+  gap: 6px;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-metric > span {
+  font-size: 10px;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-metric > strong {
+  font-size: 15px;
+}
+
+
+.fleet-upgrade-modal .fleet-modal-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+
+.fleet-upgrade-modal .fleet-modal-actions .btn,
+.fleet-setup-modal .unlock-node .btn {
+  min-height: 40px;
+  font-size: 12px;
+  line-height: 1.2;
+  white-space: normal;
+}
+
+
+@media (max-width: 360px) {
+  .fleet-upgrade-modal .fleet-modal-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .fleet-accountant-modal .btn-collect-inline {
+    min-height: 44px;
+    font-size: 11px;
+  }
+}
+
+
+.fleet-upgrade-modal > h3,
+.fleet-setup-modal .fleet-subheader > h3,
+.fleet-accountant-title {
+  font-size: clamp(26px, 5.5vw, 30px);
+  line-height: 1.06;
+}
+
+
+.fleet-upgrade-modal > h3,
+.fleet-setup-modal .fleet-subheader > h3,
+.fleet-accountant-title {
+  font-size: clamp(21px, 6.1vw, 25px);
+  line-height: 1.08;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-metrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-metric > span {
+  font-size: 9.2px;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-metric > strong {
+  font-size: 12.8px;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-remain {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}
+
+
+.fleet-upgrade-modal .fleet-upgrade-remain span {
+  font-size: 10px;
+  padding: 5px 7px;
+}

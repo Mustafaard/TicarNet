@@ -1,0 +1,263 @@
+
+.fleet-active-card {
+  display: grid;
+  gap: 10px;
+}
+
+
+.fleet-active-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
+  min-width: 0;
+}
+
+
+.fleet-active-tile {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 198, 107, 0.22);
+  background: linear-gradient(165deg, rgba(15, 18, 24, 0.98), rgba(8, 9, 14, 0.98));
+  padding: 10px;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  gap: 8px;
+  min-height: 302px;
+}
+
+
+.fleet-active-open {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  display: grid;
+  width: 100%;
+  grid-template-rows: auto auto minmax(14px, auto);
+  align-content: start;
+  justify-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+
+.fleet-active-thumb {
+  width: min(100%, 184px);
+  aspect-ratio: 4 / 3;
+  height: auto;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  overflow: visible;
+  margin: 0 auto;
+  padding: 2px 6px;
+}
+
+
+.fleet-active-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+  filter: drop-shadow(0 10px 18px rgba(2, 8, 18, 0.52));
+}
+
+
+.fleet-active-fallback {
+  display: none;
+  font-size: 34px;
+}
+
+
+.fleet-active-thumb[data-broken='1'] img,
+.fleet-compact-thumb[data-broken='1'] img,
+.fleet-owned-thumb[data-broken='1'] img {
+  display: none;
+}
+
+
+.fleet-active-thumb[data-broken='1'] .fleet-active-fallback,
+.fleet-compact-thumb[data-broken='1'] .fleet-active-fallback,
+.fleet-owned-thumb[data-broken='1'] .fleet-active-fallback {
+  display: inline;
+}
+
+
+.fleet-active-tile strong {
+  margin: 0;
+  color: #eef4ff;
+  font-size: clamp(16px, 2.7vw, 18px);
+  text-align: center;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+}
+
+
+.fleet-active-timer {
+  color: #c6d7f5;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  min-height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.fleet-owned-actions {
+  display: grid;
+  gap: 8px;
+  min-width: 120px;
+}
+
+
+.fleet-owned-row-listing {
+  cursor: pointer;
+  align-items: flex-start;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.16s ease,
+    background 0.18s ease;
+}
+
+
+.fleet-owned-row-listing:hover {
+  border-color: rgba(255, 205, 122, 0.5);
+  background: linear-gradient(165deg, rgba(59, 64, 77, 0.93), rgba(45, 50, 62, 0.93));
+  box-shadow: 0 10px 18px rgba(5, 9, 18, 0.3);
+  transform: translateY(-1px);
+}
+
+
+.fleet-owned-row-listing:focus-visible {
+  outline: 2px solid rgba(255, 212, 131, 0.84);
+  outline-offset: 2px;
+}
+
+
+.fleet-owned-row-listing.is-open {
+  border-color: rgba(120, 197, 255, 0.42);
+  background: linear-gradient(165deg, rgba(26, 41, 67, 0.92), rgba(17, 30, 53, 0.92));
+}
+
+
+.fleet-owned-row.fleet-owned-row-modal {
+  grid-template-columns: 116px 1fr;
+}
+
+
+.fleet-owned-main {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+
+.fleet-owned-mainline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+}
+
+
+.fleet-owned-mainline strong {
+  margin: 0;
+  color: #f4f9ff;
+  font-size: 19px;
+  line-height: 1.12;
+  max-width: 100%;
+  word-break: normal;
+  overflow-wrap: break-word;
+}
+
+
+.fleet-owned-price {
+  flex-shrink: 0;
+  align-self: start;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 212, 125, 0.56);
+  background: rgba(105, 74, 20, 0.52);
+  color: #ffe6a6;
+  font-size: 13px;
+  font-weight: 900;
+  padding: 4px 10px;
+}
+
+
+.fleet-owned-subline {
+  margin: 0;
+  color: #d8e8ff;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+
+.fleet-owned-capacity-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.fleet-owned-metrics {
+  margin-top: 1px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+
+.fleet-owned-metrics .fleet-compact-metric {
+  min-width: 0;
+  min-height: 30px;
+  border-radius: 10px;
+  justify-content: center;
+  padding: 2px 6px;
+  font-size: 10.5px;
+  line-height: 1.15;
+  white-space: normal;
+  text-align: center;
+}
+
+
+.fleet-owned-metrics .fleet-compact-metric img {
+  width: 13px;
+  height: 13px;
+}
+
+
+.fleet-owned-extra {
+  border-radius: 10px;
+  border: 1px solid rgba(114, 179, 255, 0.28);
+  background: rgba(11, 23, 42, 0.64);
+  padding: 8px 10px;
+  display: grid;
+  gap: 4px;
+}
+
+
+.fleet-owned-extra p {
+  margin: 0;
+  color: #d7e9ff;
+  font-size: 12px;
+  line-height: 1.32;
+}
+
+
+.fleet-owned-expand-hint {
+  margin-top: 3px;
+  color: #a8c7ec;
+  font-size: 10.5px;
+  font-weight: 700;
+}

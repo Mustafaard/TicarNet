@@ -1,0 +1,113 @@
+
+/* Penalized Users Card */
+.penalized-users-card {
+  padding: 10px 12px;
+}
+
+
+.penalized-users-empty {
+  margin: 6px 0 2px;
+  font-size: 12px;
+  color: #7a9cbf;
+  text-align: center;
+}
+
+
+.penalized-users-subtitle {
+  margin: 2px 0 8px;
+  font-size: 12px;
+  color: #7a9cbf;
+}
+
+
+.penalized-users-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+
+.penalized-user-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(100, 160, 220, 0.1);
+}
+
+
+.penalized-user-row:last-child {
+  border-bottom: 0;
+}
+
+
+.penalized-user-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: rgba(40, 70, 110, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+
+.penalized-user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+.penalized-user-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #dceeff;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.penalized-user-penalties {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+
+.penalized-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+
+.penalized-badge-mute {
+  background: rgba(246, 173, 85, 0.18);
+  color: #f6ad55;
+  border: 1px solid rgba(246, 173, 85, 0.36);
+}
+
+
+.penalized-badge-tempban {
+  background: rgba(245, 101, 101, 0.15);
+  color: #fc8181;
+  border: 1px solid rgba(245, 101, 101, 0.32);
+}
+
+
+.penalized-badge-permban {
+  background: rgba(197, 48, 48, 0.18);
+  color: #feb2b2;
+  border: 1px solid rgba(197, 48, 48, 0.36);
+}

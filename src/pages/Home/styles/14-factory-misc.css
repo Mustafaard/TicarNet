@@ -1,0 +1,294 @@
+
+.factory-head {
+  min-width: 0;
+}
+
+
+.factory-head h3 {
+  margin: 0;
+  font-size: clamp(22px, 4.4vw, 28px);
+  color: #eef5ff;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+
+.factory-head p {
+  margin: 6px 0 0;
+  color: #bdd1ee;
+  font-size: 13px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+
+.factory-banner-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+}
+
+
+.factory-section {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+
+.factory-section + .factory-section {
+  border-top: 1px solid rgba(121, 180, 246, 0.2);
+  padding-top: 14px;
+  margin-top: 2px;
+}
+
+
+.factory-scroll-spacer {
+  height: calc(var(--bottom-dock-height) + 16px + env(safe-area-inset-bottom));
+  pointer-events: none;
+}
+
+
+.factory-section-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+
+.factory-section-head h4 {
+  margin: 0;
+  color: #f1f7ff;
+  font-size: 17px;
+  line-height: 1.12;
+}
+
+
+.factory-section-head p {
+  margin: 0;
+  color: #a9c3e5;
+  font-size: 11px;
+  line-height: 1.28;
+  text-align: right;
+  max-width: min(280px, 100%);
+  min-width: 0;
+  flex: 1 1 220px;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+
+.factory-summary-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(116, 209, 165, 0.35);
+  background: rgba(18, 48, 41, 0.5);
+  font-size: 13px;
+  color: #b9cfee;
+}
+
+
+.factory-summary-stats .factory-summary-label {
+  font-weight: 700;
+  color: #8ce8c1;
+}
+
+
+.factory-summary-stats .factory-summary-value {
+  color: #e5fff1;
+  font-weight: 600;
+}
+
+
+.factory-max-label {
+  color: #a7eec7;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+
+.factory-buy-btn:not(:disabled) {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 244, 216, 0.38),
+    0 8px 16px rgba(32, 22, 6, 0.24);
+}
+
+
+.factory-bulk-modal,
+.factory-collect-modal {
+  width: min(100%, 520px);
+  max-width: min(520px, 96vw);
+}
+
+
+.factory-modal-note,
+.factory-modal-error {
+  margin: 0;
+  border-radius: 11px;
+  padding: 10px 12px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+
+.factory-modal-note {
+  border: 1px solid rgba(116, 176, 244, 0.34);
+  background: rgba(10, 31, 58, 0.72);
+  color: #d7e9ff;
+}
+
+
+.factory-modal-error {
+  border: 1px solid rgba(255, 146, 146, 0.5);
+  background: rgba(96, 22, 32, 0.72);
+  color: #ffe5e8;
+  font-weight: 700;
+}
+
+
+.factory-bulk-modal .fleet-modal-actions-bulk {
+  display: grid;
+  width: 100%;
+}
+
+
+.factory-modal-primary-btn {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 15px;
+  border: 1px solid rgba(140, 220, 171, 0.72);
+  background: linear-gradient(180deg, rgba(39, 158, 95, 0.98), rgba(20, 112, 66, 0.98));
+  color: #effff5;
+  font-weight: 900;
+  box-shadow:
+    inset 0 1px 0 rgba(220, 255, 236, 0.3),
+    0 12px 22px rgba(7, 37, 24, 0.34);
+}
+
+
+.factory-modal-primary-btn .btn-label {
+  font-size: 15px;
+}
+
+
+.factory-modal-primary-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+
+.factory-modal-primary-btn:disabled {
+  opacity: 0.68;
+  filter: saturate(0.75);
+  box-shadow: none;
+}
+
+
+.factory-modal-close-btn {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 175, 175, 0.64);
+  background: linear-gradient(180deg, rgba(165, 58, 72, 0.95), rgba(116, 36, 48, 0.95));
+  color: #ffeef1;
+  font-weight: 800;
+}
+
+
+.factory-modal-close-btn:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+
+.fleet-bulk-modal .btn-collect-main,
+.factory-modal-primary-btn,
+.factory-bulk-modal .btn-collect-main,
+.fleet-accountant-modal .btn-collect-inline,
+.fleet-accountant-modal .btn-collect-inline.full {
+  width: min(100%, 380px) !important;
+  margin-inline: auto;
+  justify-self: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+
+
+.factory-modal-primary-btn .btn-icon,
+.fleet-bulk-modal .btn-collect-main .btn-icon,
+.factory-bulk-modal .btn-collect-main .btn-icon,
+.fleet-accountant-modal .btn-collect-inline .btn-icon {
+  margin-right: 0 !important;
+}
+
+
+.fleet-bulk-modal .btn-collect-main,
+.factory-modal-primary-btn,
+.factory-bulk-modal .btn-collect-main,
+.fleet-accountant-modal .btn-collect-inline {
+  border-color: rgba(141, 224, 175, 0.78) !important;
+  background: linear-gradient(180deg, rgba(44, 172, 106, 0.98), rgba(24, 120, 73, 0.98)) !important;
+  color: #ecfff4 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(220, 255, 236, 0.3),
+    0 12px 22px rgba(7, 37, 24, 0.34);
+}
+
+
+.factory-modal-primary-btn:hover:not(:disabled),
+.fleet-bulk-modal .btn-collect-main:hover:not(:disabled),
+.factory-bulk-modal .btn-collect-main:hover:not(:disabled),
+.fleet-accountant-modal .btn-collect-inline:hover:not(:disabled) {
+  border-color: rgba(162, 236, 193, 0.86) !important;
+  background: linear-gradient(180deg, rgba(62, 189, 122, 0.98), rgba(28, 136, 83, 0.98)) !important;
+}
+
+
+.fleet-bulk-modal .btn-collect-main,
+.fleet-accountant-modal .btn-collect-inline,
+.factory-bulk-modal .btn-collect-main,
+.factory-modal-primary-btn {
+  min-height: 36px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+
+.business-screen .fleet-detail-main .fleet-collect-action,
+.fleet-bulk-modal .btn-collect-main,
+.fleet-accountant-modal .btn-collect-inline,
+.factory-bulk-modal .btn-collect-main,
+.factory-collect-modal .btn-collect-inline,
+.factory-screen .factory-btn-collect {
+  border-color: rgba(96, 227, 170, 0.72) !important;
+  background: linear-gradient(180deg, rgba(36, 178, 122, 0.97), rgba(24, 126, 89, 0.98)) !important;
+  color: #eafff5 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(206, 255, 233, 0.2),
+    0 8px 18px rgba(4, 39, 29, 0.26) !important;
+}
+
+
+.business-screen .fleet-detail-main .fleet-collect-action:disabled,
+.fleet-bulk-modal .btn-collect-main:disabled,
+.fleet-accountant-modal .btn-collect-inline:disabled,
+.factory-bulk-modal .btn-collect-main:disabled,
+.factory-collect-modal .btn-collect-inline:disabled,
+.factory-screen .factory-btn-collect:disabled {
+  opacity: 0.66;
+  filter: grayscale(0.08);
+}

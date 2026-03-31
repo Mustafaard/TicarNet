@@ -1,0 +1,410 @@
+
+.daily-login-overlay {
+  padding: 0;
+  align-items: stretch;
+}
+
+
+.daily-login-modal {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  border-radius: 0;
+}
+
+
+.daily-login-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+
+.daily-login-header h3 {
+  margin: 0;
+  font-size: 24px;
+  color: #f8fafc;
+}
+
+
+.daily-login-close-btn {
+  min-height: 36px;
+  min-width: 92px;
+  border-radius: 10px;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+
+.daily-login-hero {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 208, 120, 0.35);
+  background:
+    radial-gradient(circle at 14% 10%, rgba(255, 188, 98, 0.18), transparent 55%),
+    linear-gradient(155deg, rgba(48, 30, 22, 0.9), rgba(20, 16, 33, 0.94));
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+
+.daily-login-hero-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 214, 145, 0.52);
+  background: rgba(31, 19, 25, 0.82);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 54px;
+}
+
+
+.daily-login-hero-icon img {
+  width: 34px;
+  height: 34px;
+  object-fit: contain;
+}
+
+
+.daily-login-hero-copy {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+
+.daily-login-hero-copy strong {
+  color: #fff1d1;
+  font-size: 16px;
+}
+
+
+.daily-login-hero-copy p {
+  margin: 0;
+  color: rgba(248, 227, 195, 0.9);
+  font-size: 12px;
+  line-height: 1.38;
+}
+
+
+.daily-login-hero-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 212, 135, 0.55);
+  background: rgba(74, 38, 24, 0.64);
+  padding: 3px 10px;
+  color: #ffe6b5;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+.daily-login-days-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  align-content: start;
+}
+
+
+.daily-login-days-scroll {
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+  overscroll-behavior: contain;
+}
+
+
+.daily-login-day-card {
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: rgba(15, 23, 42, 0.8);
+  padding: 7px;
+  display: grid;
+  gap: 5px;
+  min-height: 102px;
+}
+
+
+.daily-login-day-card.is-available {
+  border-color: rgba(255, 200, 109, 0.6);
+  background:
+    radial-gradient(circle at 86% 10%, rgba(255, 190, 87, 0.24), transparent 54%),
+    linear-gradient(160deg, rgba(64, 38, 22, 0.9), rgba(31, 18, 28, 0.95));
+}
+
+
+.daily-login-day-card.is-claimed,
+.daily-login-day-card.is-today {
+  border-color: rgba(88, 201, 146, 0.52);
+  background:
+    radial-gradient(circle at 86% 10%, rgba(88, 201, 146, 0.2), transparent 52%),
+    linear-gradient(160deg, rgba(19, 52, 35, 0.88), rgba(13, 34, 29, 0.94));
+}
+
+
+.daily-login-day-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+
+.daily-login-day-index {
+  color: #f8fafc;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+.daily-login-day-bonus {
+  border-radius: 999px;
+  border: 1px solid rgba(255, 212, 135, 0.58);
+  background: rgba(74, 38, 24, 0.64);
+  color: #ffe6b5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 2px 7px;
+}
+
+
+.daily-login-reward-list {
+  display: grid;
+  gap: 4px;
+}
+
+
+.daily-login-reward-row {
+  display: grid;
+  grid-template-columns: 16px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+
+.daily-login-reward-row img {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+}
+
+
+.daily-login-reward-row span {
+  color: rgba(219, 234, 254, 0.9);
+  font-size: 10px;
+  min-width: 0;
+}
+
+
+.daily-login-reward-row strong {
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 800;
+  text-align: right;
+}
+
+
+.daily-login-day-state {
+  margin-top: auto;
+  color: rgba(191, 219, 254, 0.85);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+
+.daily-login-foot {
+  display: grid;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(106, 162, 233, 0.22);
+  background: linear-gradient(180deg, rgba(6, 12, 24, 0), rgba(6, 12, 24, 0.9) 35%);
+}
+
+
+.daily-login-reset-note {
+  margin: 0;
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 12px;
+}
+
+
+.daily-login-reset-note strong {
+  color: #fef3c7;
+}
+
+
+.daily-login-claim-btn {
+  min-height: 46px;
+  border: 1px solid rgba(255, 206, 116, 0.68);
+  background: linear-gradient(180deg, #f5cf63, #d89f1b);
+  color: #2f1a08;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+
+.daily-login-claim-btn:hover,
+.daily-login-claim-btn:focus-visible {
+  border-color: rgba(255, 225, 160, 0.9);
+  background: linear-gradient(180deg, #f8da87, #e6b238);
+  color: #2f1a08;
+}
+
+
+.daily-login-claim-btn:disabled {
+  border-color: rgba(148, 163, 184, 0.46);
+  background: linear-gradient(180deg, rgba(71, 85, 105, 0.82), rgba(51, 65, 85, 0.86));
+  color: rgba(226, 232, 240, 0.86);
+}
+
+
+.daily-login-result-modal {
+  width: min(360px, calc(100vw - 26px));
+  max-width: min(360px, calc(100vw - 26px));
+  display: grid;
+  gap: 11px;
+  text-align: center;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 214, 145, 0.35);
+  background:
+    radial-gradient(circle at 50% -15%, rgba(255, 189, 98, 0.16), transparent 55%),
+    linear-gradient(170deg, rgba(8, 15, 31, 0.95), rgba(10, 23, 43, 0.96));
+  box-shadow: 0 14px 34px rgba(2, 6, 16, 0.62);
+}
+
+
+.daily-login-result-overlay {
+  backdrop-filter: blur(2px);
+}
+
+
+.daily-login-result-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 210, 128, 0.62);
+  background: linear-gradient(160deg, rgba(57, 31, 24, 0.85), rgba(33, 20, 36, 0.88));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 2px auto 2px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 8px 20px rgba(0, 0, 0, 0.34);
+}
+
+
+.daily-login-result-icon img {
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+}
+
+
+.daily-login-result-modal h3 {
+  margin: 0;
+  color: #fff1d1;
+  font-size: 28px;
+  line-height: 1.12;
+}
+
+
+.daily-login-result-headline {
+  margin: -2px 0 1px;
+  color: rgba(226, 232, 240, 0.9);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+
+.daily-login-result-list {
+  display: grid;
+  gap: 8px;
+}
+
+
+.daily-login-result-row {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 20px auto minmax(0, 1fr);
+  align-items: center;
+  justify-content: stretch;
+  gap: 9px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(106, 162, 233, 0.24);
+  background: rgba(14, 26, 47, 0.62);
+  color: rgba(234, 242, 255, 0.94);
+  font-size: 13px;
+  text-align: left;
+}
+
+
+.daily-login-result-row img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+}
+
+
+.daily-login-result-row strong {
+  color: #f8fafc;
+  letter-spacing: 0.01em;
+}
+
+
+.daily-login-result-value {
+  color: #fef3c7;
+  font-size: 14px;
+}
+
+
+.daily-login-result-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+
+.daily-login-claim-btn:hover,
+.daily-login-claim-btn:focus-visible {
+  border-color: rgba(255, 230, 155, 0.9) !important;
+  background:
+    linear-gradient(180deg, rgba(241, 184, 67, 0.99), rgba(192, 137, 37, 1)) !important;
+}
+
+
+.daily-login-day-card.is-available {
+  border-color: rgba(101, 228, 170, 0.64);
+  box-shadow:
+    0 0 0 1px rgba(132, 246, 194, 0.24),
+    inset 0 0 0 1px rgba(177, 255, 221, 0.14);
+}
+
+
+/* Final stabilization: mines timing + factory 2-column clarity + daily reward CTA */
+.daily-login-result-continue-btn {
+  border-color: rgba(100, 220, 156, 0.86) !important;
+  background: linear-gradient(180deg, rgba(44, 200, 126, 0.98), rgba(26, 142, 88, 0.99)) !important;
+  color: #ecfff5 !important;
+  box-shadow: 0 8px 18px rgba(15, 92, 58, 0.34);
+}
+
+
+.daily-login-result-continue-btn:hover,
+.daily-login-result-continue-btn:focus-visible {
+  border-color: rgba(140, 242, 188, 0.92) !important;
+  background: linear-gradient(180deg, rgba(66, 220, 147, 0.99), rgba(35, 161, 103, 1)) !important;
+}

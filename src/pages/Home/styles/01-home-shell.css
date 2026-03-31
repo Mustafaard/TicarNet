@@ -1,0 +1,1630 @@
+.home-page {
+  --bg-main: #070f1f;
+  --bg-card: rgba(10, 20, 37, 0.92);
+  --bg-soft: rgba(15, 29, 50, 0.84);
+  --line: rgba(116, 171, 248, 0.3);
+  --line-soft: rgba(120, 182, 255, 0.26);
+  --text: #edf4ff;
+  --muted: #aec0dd;
+  --danger: #ff6c71;
+  --warn: #ffcc63;
+  --ok: #52e0ae;
+  --cyan: #67c9ff;
+  --level-accent: #8fe9ff;
+  --theme-bg-overlay-top: rgba(7, 21, 57, 0.36);
+  --theme-bg-overlay-bottom: rgba(4, 11, 34, 0.64);
+  --theme-bg-base: #061231;
+  --theme-before-accent-a: rgba(120, 179, 255, 0.13);
+  --theme-before-accent-b: rgba(120, 179, 255, 0.1);
+  --theme-after-overlay-top: rgba(6, 13, 39, 0.1);
+  --theme-after-overlay-bottom: rgba(2, 6, 22, 0.48);
+  --theme-after-grid: rgba(199, 220, 255, 0.018);
+  --theme-card-border: var(--line);
+  --theme-card-bg-top: rgba(12, 24, 44, 0.94);
+  --theme-card-bg-bottom: rgba(8, 16, 30, 0.94);
+  --theme-card-glow: rgba(96, 168, 255, 0.12);
+  --theme-wallet-border: rgba(123, 181, 255, 0.28);
+  --theme-wallet-bg-top: rgba(9, 20, 40, 0.92);
+  --theme-wallet-bg-bottom: rgba(6, 14, 28, 0.96);
+  --theme-pill-border: rgba(123, 177, 255, 0.34);
+  --theme-pill-bg-top: rgba(12, 28, 50, 0.92);
+  --theme-pill-bg-bottom: rgba(8, 18, 34, 0.95);
+  --theme-pill-gem-border: rgba(130, 203, 255, 0.46);
+  --theme-pill-gem-bg-top: rgba(9, 36, 64, 0.92);
+  --theme-pill-gem-bg-bottom: rgba(6, 22, 40, 0.95);
+  --theme-ann-board-border: rgba(104, 177, 247, 0.36);
+  --theme-ann-board-bg-a: rgba(66, 156, 255, 0.18);
+  --theme-ann-board-bg-b: rgba(245, 193, 84, 0.16);
+  --theme-ann-board-bg-top: rgba(8, 18, 40, 0.98);
+  --theme-ann-board-bg-bottom: rgba(4, 10, 24, 0.99);
+  --theme-ann-head-border: rgba(110, 179, 245, 0.3);
+  --theme-ann-title: #f3cb67;
+  --theme-ann-title-glow: rgba(243, 190, 74, 0.2);
+  --theme-ann-scroll-track: rgba(8, 20, 40, 0.88);
+  --theme-ann-scroll-thumb-top: rgba(250, 203, 102, 0.98);
+  --theme-ann-scroll-thumb-bottom: rgba(214, 151, 45, 0.98);
+  --theme-ann-card-border: rgba(106, 174, 242, 0.34);
+  --theme-ann-card-bg-a: rgba(244, 191, 82, 0.12);
+  --theme-ann-card-bg-b-top: rgba(9, 23, 46, 0.78);
+  --theme-ann-card-bg-b-bottom: rgba(6, 13, 28, 0.88);
+  --theme-ann-card-bg-c: rgba(67, 157, 255, 0.15);
+  --theme-ann-footer-border: rgba(102, 164, 232, 0.24);
+  --theme-ann-author: #f0c868;
+  --theme-ann-time: rgba(243, 198, 100, 0.94);
+  --theme-btn-border: rgba(255, 187, 102, 0.45);
+  --theme-btn-bg-top: rgba(38, 50, 72, 0.95);
+  --theme-btn-bg-bottom: rgba(18, 25, 40, 0.95);
+  --theme-btn-text: #f4f6ff;
+  --theme-btn-primary-border: rgba(102, 198, 255, 0.72);
+  --theme-btn-primary-bg-top: rgba(45, 115, 160, 0.92);
+  --theme-btn-primary-bg-bottom: rgba(20, 57, 83, 0.96);
+  --theme-btn-success-border: rgba(82, 224, 174, 0.75);
+  --theme-btn-success-bg-top: rgba(27, 144, 101, 0.9);
+  --theme-btn-success-bg-bottom: rgba(14, 62, 45, 0.95);
+  --theme-btn-accent-border: rgba(255, 210, 109, 0.82);
+  --theme-btn-accent-bg-top: rgba(168, 124, 31, 0.95);
+  --theme-btn-accent-bg-bottom: rgba(85, 62, 13, 0.95);
+  --theme-btn-warning-border: rgba(255, 186, 76, 0.86);
+  --theme-btn-warning-bg-top: rgba(184, 121, 28, 0.96);
+  --theme-btn-warning-bg-bottom: rgba(102, 64, 12, 0.95);
+  --theme-btn-danger-border: rgba(255, 109, 114, 0.75);
+  --theme-btn-danger-bg-top: rgba(144, 44, 59, 0.95);
+  --theme-btn-danger-bg-bottom: rgba(66, 20, 30, 0.95);
+  --theme-btn-ghost-border: rgba(109, 170, 255, 0.48);
+  --theme-btn-ghost-bg: rgba(34, 56, 87, 0.48);
+  --theme-tab-border: rgba(255, 182, 95, 0.35);
+  --theme-tab-bg: rgba(25, 34, 51, 0.9);
+  --theme-tab-text: var(--muted);
+  --theme-tab-active-bg-top: #ffbf56;
+  --theme-tab-active-bg-bottom: #ffdd8e;
+  --theme-tab-active-border: rgba(255, 216, 128, 0.9);
+  --theme-tab-active-text: #281900;
+  --theme-input-border: rgba(255, 186, 96, 0.36);
+  --theme-input-bg: rgba(10, 15, 25, 0.92);
+  --theme-input-text: #f5f7ff;
+  --theme-input-placeholder: rgba(213, 223, 239, 0.66);
+  --theme-module-border: rgba(126, 183, 245, 0.3);
+  --theme-module-bg-top: rgba(16, 25, 44, 0.93);
+  --theme-module-bg-bottom: rgba(10, 17, 31, 0.94);
+  --theme-module-glow: rgba(108, 171, 243, 0.08);
+  --theme-module-text: #eef4ff;
+  --theme-module-hover-border: rgba(159, 210, 255, 0.54);
+  --theme-module-active-border: rgba(255, 215, 140, 0.9);
+  --theme-module-active-bg-top: rgba(70, 50, 18, 0.98);
+  --theme-module-active-bg-bottom: rgba(33, 22, 6, 0.98);
+  --theme-module-icon-border: rgba(136, 193, 255, 0.32);
+  --theme-module-icon-bg-top: rgba(22, 36, 60, 0.96);
+  --theme-module-icon-bg-bottom: rgba(14, 24, 45, 0.99);
+  --theme-hero-border: rgba(146, 208, 255, 0.52);
+  --theme-hero-overlay-top: rgba(8, 22, 46, 0.12);
+  --theme-hero-overlay-bottom: rgba(4, 12, 26, 0.24);
+  --theme-hero-pill-border: rgba(123, 193, 255, 0.5);
+  --theme-hero-pill-bg: rgba(10, 35, 58, 0.88);
+  --theme-hero-pill-text: #d1ebff;
+  --theme-hero-mini-border: rgba(108, 178, 255, 0.58);
+  --theme-hero-mini-bg: rgba(29, 52, 83, 0.86);
+  --theme-hero-mini-text: #dcf0ff;
+  --theme-rules-border: rgba(105, 181, 255, 0.36);
+  --theme-rules-accent-a: rgba(34, 110, 190, 0.2);
+  --theme-rules-accent-b: rgba(244, 195, 91, 0.15);
+  --theme-rules-bg-top: rgba(7, 20, 42, 0.96);
+  --theme-rules-bg-bottom: rgba(4, 13, 30, 0.97);
+  --theme-market-bg-top: rgba(15, 23, 42, 0.97);
+  --theme-market-bg-mid: rgba(30, 41, 59, 0.95);
+  --theme-market-bg-bottom: rgba(15, 23, 42, 0.98);
+  --theme-market-panel-bg: rgba(30, 41, 59, 0.52);
+  --theme-market-panel-border: rgba(148, 163, 184, 0.12);
+  --theme-market-divider: rgba(148, 163, 184, 0.12);
+  --theme-message-bg-top: rgba(14, 32, 65, 0.72);
+  --theme-message-bg-bottom: rgba(10, 24, 52, 0.82);
+  --theme-message-header-border: rgba(120, 170, 235, 0.18);
+  --theme-message-wallet-bg-top: rgba(18, 42, 78, 0.82);
+  --theme-message-wallet-bg-bottom: rgba(14, 32, 62, 0.88);
+  --theme-message-wallet-border: rgba(120, 170, 235, 0.22);
+  --theme-message-wallet-item-border: rgba(140, 190, 255, 0.28);
+  --theme-message-wallet-item-bg-top: rgba(28, 58, 95, 0.75);
+  --theme-message-wallet-item-bg-bottom: rgba(20, 42, 75, 0.85);
+  --theme-message-title: #d4af37;
+  --theme-message-subtitle: #f7fbff;
+  --theme-chat-banner-border: rgba(255, 190, 99, 0.34);
+  --theme-chat-banner-bg: rgba(34, 27, 13, 0.72);
+  --theme-chat-banner-strong: #ffe3b3;
+  --theme-chat-banner-text: #f9e8c7;
+  --theme-chat-live-border: rgba(85, 225, 175, 0.52);
+  --theme-chat-live-bg: rgba(25, 96, 74, 0.38);
+  --theme-chat-live-text: #b2f5dd;
+  --theme-modal-border: rgba(108, 170, 255, 0.34);
+  --theme-modal-bg-top: rgba(7, 15, 31, 0.95);
+  --theme-modal-bg-bottom: rgba(8, 14, 27, 0.96);
+  --theme-search-border: rgba(255, 214, 132, 0.45);
+  --theme-search-bg-top: rgba(35, 22, 14, 0.94);
+  --theme-search-bg-bottom: rgba(16, 10, 7, 0.96);
+  --theme-search-text: #f5efe4;
+  --theme-search-sub: rgba(236, 220, 195, 0.9);
+  --theme-search-input-border: rgba(255, 214, 132, 0.35);
+  --theme-search-input-bg: rgba(10, 6, 4, 0.55);
+  --theme-search-input-text: #fff6e7;
+  --theme-search-input-placeholder: rgba(255, 246, 231, 0.55);
+  --theme-settings-border: rgba(220, 72, 72, 0.28);
+  --theme-settings-bg-top: rgba(10, 12, 24, 0.94);
+  --theme-settings-bg-bottom: rgba(6, 8, 16, 0.97);
+  --theme-settings-glow-a: rgba(220, 50, 50, 0.1);
+  --theme-settings-glow-b: rgba(59, 130, 246, 0.1);
+  --theme-settings-grid-a: rgba(239, 68, 68, 0.08);
+  --theme-settings-grid-b: rgba(239, 68, 68, 0.06);
+  --theme-settings-section-border: rgba(91, 127, 199, 0.3);
+  --theme-settings-section-bg-top: rgba(10, 16, 33, 0.84);
+  --theme-settings-section-bg-bottom: rgba(7, 10, 22, 0.9);
+  --theme-settings-section-glow: rgba(59, 130, 246, 0.14);
+  --ui-card-gap: var(--ui-space-5);
+  --ui-chip-radius: var(--ui-radius-md);
+  --hero-avatar-size: 82px;
+  --profile-avatar-size: 84px;
+  --ui-icon-avatar: clamp(43px, 11vw, 50px);
+  --chat-card-max-width: min(354px, calc(100% - var(--ui-icon-avatar) - 19px));
+  --icon-hud-size: 28px;
+  --icon-hud-img-size: 24px;
+  --icon-hud-gem-img-size: 27px;
+  --icon-stat-size: 26px;
+  --icon-hero-level-size: 26px;
+  --icon-todo-wrap-size: 36px;
+  --icon-todo-size: 32px;
+  --icon-module-wrap-size: 40px;
+  --icon-module-size: 36px;
+  --icon-quick-wrap-size: 40px;
+  --icon-quick-size: 36px;
+  --icon-chat-reply-size: 38px;
+  --icon-message-hero-wrap-size: 66px;
+  --icon-message-hero-size: 52px;
+  --icon-message-highlight-wrap-size: 40px;
+  --icon-message-highlight-size: 36px;
+  --icon-message-avatar-wrap-size: 48px;
+  --icon-message-avatar-size: 42px;
+  --icon-nav-size: 30px;
+  --icon-nav-main-size: 32px;
+  --icon-warehouse-wrap-size: 70px;
+  --icon-warehouse-size: 68px;
+  --top-dock-height: 66px;
+  --bottom-dock-height: 112px;
+  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding:
+    calc(var(--top-dock-height) - 8px + env(safe-area-inset-top))
+    10px
+    calc(var(--bottom-dock-height) + env(safe-area-inset-bottom));
+  color: var(--text);
+  font-family: var(--font-body);
+  background:
+    linear-gradient(180deg, var(--theme-bg-overlay-top), var(--theme-bg-overlay-bottom)),
+    url('/home/backgrounds/game-main-bg.webp') center/cover no-repeat,
+    var(--theme-bg-base);
+  position: relative;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-anchor: none;
+  scrollbar-gutter: stable;
+  scroll-padding-top: calc(var(--top-dock-height) + 10px + env(safe-area-inset-top));
+  scroll-padding-bottom: calc(var(--bottom-dock-height) + 12px + env(safe-area-inset-bottom));
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+
+.home-page.home-tab-active {
+  padding-top: calc(var(--top-dock-height) - 16px + env(safe-area-inset-top));
+  scroll-padding-top: calc(var(--top-dock-height) + 4px + env(safe-area-inset-top));
+}
+
+
+/* Leaderboard tab: clearer background + glass surfaces (MENÜ look) */
+.home-page.leaderboard-tab-active {
+  background:
+    linear-gradient(180deg, var(--theme-bg-overlay-top), var(--theme-bg-overlay-bottom)),
+    url('/home/backgrounds/game-main-bg.webp') center/cover no-repeat,
+    var(--theme-bg-base);
+}
+
+
+.home-page.leaderboard-tab-active::before {
+  background:
+    radial-gradient(circle at 5% 15%, var(--theme-before-accent-a), transparent 48%),
+    radial-gradient(circle at 95% 85%, var(--theme-before-accent-b), transparent 45%);
+}
+
+
+.home-page.leaderboard-tab-active::after {
+  background:
+    linear-gradient(180deg, var(--theme-after-overlay-top), var(--theme-after-overlay-bottom)),
+    repeating-linear-gradient(130deg, transparent 0 72px, var(--theme-after-grid) 72px 73px);
+}
+
+
+.home-page.leaderboard-tab-active .card,
+.home-page.leaderboard-tab-active .foot {
+  border-color: rgba(116, 171, 248, 0.24);
+  background: linear-gradient(170deg, rgba(12, 24, 44, 0.56), rgba(8, 16, 30, 0.5));
+  box-shadow:
+    0 16px 30px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 0 18px rgba(96, 168, 255, 0.1);
+  backdrop-filter: blur(5px) saturate(1.12);
+  -webkit-backdrop-filter: blur(5px) saturate(1.12);
+}
+
+
+.home-page.missions-tab-active {
+  background:
+    linear-gradient(180deg, var(--theme-bg-overlay-top), var(--theme-bg-overlay-bottom)),
+    url('/home/backgrounds/game-main-bg.webp') center/cover no-repeat,
+    var(--theme-bg-base);
+}
+
+
+.home-page.announcements-tab-active {
+  background:
+    linear-gradient(180deg, var(--theme-bg-overlay-top), var(--theme-bg-overlay-bottom)),
+    radial-gradient(circle at 14% 10%, var(--theme-ann-card-bg-c), transparent 42%),
+    radial-gradient(circle at 88% 86%, var(--theme-ann-board-bg-a), transparent 48%),
+    radial-gradient(circle at 74% 6%, var(--theme-ann-card-bg-a), transparent 34%),
+    url('/home/backgrounds/game-main-bg.webp') center/cover no-repeat,
+    var(--theme-bg-base);
+  overflow: hidden;
+  scroll-padding-bottom: calc(var(--bottom-dock-height) + env(safe-area-inset-bottom));
+}
+
+
+.home-page.announcements-tab-active::before {
+  background:
+    radial-gradient(circle at 10% 16%, var(--theme-ann-card-bg-c), transparent 38%),
+    radial-gradient(circle at 94% 14%, var(--theme-ann-board-bg-a), transparent 44%),
+    radial-gradient(circle at 86% 2%, var(--theme-ann-card-bg-a), transparent 40%);
+}
+
+
+.home-page.announcements-tab-active::after {
+  background:
+    linear-gradient(180deg, var(--theme-after-overlay-top), var(--theme-after-overlay-bottom)),
+    repeating-linear-gradient(140deg, transparent 0 74px, var(--theme-after-grid) 74px 75px),
+    repeating-linear-gradient(45deg, transparent 0 116px, var(--theme-ann-card-bg-a) 116px 117px);
+}
+
+
+.home-page .level-text {
+  color: var(--level-accent);
+  font-weight: 800;
+  text-shadow: 0 0 10px rgba(92, 201, 255, 0.32);
+}
+
+
+.home-page :is(button, input, select, textarea):focus-visible {
+  outline: 3px solid #93d4ff;
+  outline-offset: 2px;
+}
+
+
+.home-page.chat-only-page {
+  padding-top: calc(8px + env(safe-area-inset-top));
+  padding-bottom: calc(var(--bottom-dock-height) + env(safe-area-inset-bottom));
+}
+
+
+.home-page.chat-tab-active {
+  overflow: hidden;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  scroll-padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+
+.home-page.bank-tab-active {
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
+}
+
+
+.home-page.bank-tab-active.factory-modal-open,
+.home-page.bank-tab-active.marketplace-modal-open {
+  overflow-y: auto !important;
+  touch-action: pan-y !important;
+}
+
+
+.home-page.wallet-hidden-page {
+  padding-top: calc(8px + env(safe-area-inset-top));
+  scroll-padding-top: calc(12px + env(safe-area-inset-top));
+}
+
+
+.home-page.business-only-page {
+  padding-top: calc(var(--top-dock-height) + 10px + env(safe-area-inset-top));
+  padding-bottom: calc(var(--bottom-dock-height) + env(safe-area-inset-bottom));
+}
+
+
+.home-page::before,
+.home-page::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+
+.home-page::before {
+  background:
+    radial-gradient(circle at 5% 15%, var(--theme-before-accent-a), transparent 44%),
+    radial-gradient(circle at 95% 85%, var(--theme-before-accent-b), transparent 40%);
+}
+
+
+.home-page::after {
+  background:
+    linear-gradient(180deg, var(--theme-after-overlay-top), var(--theme-after-overlay-bottom)),
+    repeating-linear-gradient(130deg, transparent 0 56px, var(--theme-after-grid) 56px 57px);
+}
+
+
+.home-shell {
+  width: min(var(--app-max-content-width), 100%);
+  margin: 0 auto;
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: var(--ui-card-gap);
+}
+
+
+.home-shell.chat-only-shell {
+  min-height: calc(100dvh - (8px + env(safe-area-inset-top)) - (var(--bottom-dock-height) + 8px + env(safe-area-inset-bottom)));
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+
+.home-page.chat-tab-active .home-shell.chat-only-shell {
+  height: calc(100dvh - (8px + env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
+  min-height: calc(100dvh - (8px + env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
+}
+
+
+.home-page.chat-tab-active .mobile-nav {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(110%);
+}
+
+
+.home-shell.business-only-shell {
+  min-height: calc(100dvh - (8px + env(safe-area-inset-top)) - (var(--bottom-dock-height) + 8px + env(safe-area-inset-bottom)));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+
+.home-shell.messages-tab-shell {
+  min-height: calc(100dvh - (8px + env(safe-area-inset-top)) - (var(--bottom-dock-height) + 8px + env(safe-area-inset-bottom)));
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+
+.home-shell.missions-shell {
+  min-height: calc(100dvh - (8px + env(safe-area-inset-top)) - (var(--bottom-dock-height) + 8px + env(safe-area-inset-bottom)));
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+
+.home-shell.announcements-shell {
+  height: calc(100dvh - (8px + env(safe-area-inset-top)) - (var(--bottom-dock-height) + env(safe-area-inset-bottom)));
+  min-height: calc(100dvh - (8px + env(safe-area-inset-top)) - (var(--bottom-dock-height) + env(safe-area-inset-bottom)));
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+  max-width: 100%;
+}
+
+
+.home-shell.business-only-shell .fleet-fullscreen-card {
+  min-height: 100%;
+}
+
+
+.home-shell.levelup {
+  animation: level-shake 0.5s linear;
+}
+
+
+.home-page .hud {
+  position: relative;
+  top: auto;
+  z-index: 2;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+
+.risk span {
+  background: linear-gradient(90deg, #32dc98, #ffd56d, #ff6d78);
+}
+
+
+.feedback {
+  margin: 0;
+  border-radius: 12px;
+  padding: 9px 11px;
+  font-size: 12px;
+}
+
+
+.feedback.notice {
+  border: 1px solid rgba(103, 201, 255, 0.5);
+  background: rgba(45, 107, 154, 0.25);
+}
+
+
+.feedback.error {
+  border: 1px solid rgba(255, 108, 113, 0.6);
+  background: rgba(129, 33, 45, 0.36);
+}
+
+
+.home-floating-alert {
+  position: fixed;
+  left: 50%;
+  top: max(10px, env(safe-area-inset-top, 0px) + 8px);
+  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 20px));
+  padding: 11px 13px;
+  border-radius: 14px;
+  border: 1px solid rgba(233, 205, 158, 0.52);
+  background: rgba(11, 20, 33, 0.93);
+  color: #eaf2ff;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  z-index: 180;
+  box-shadow:
+    0 12px 28px rgba(4, 10, 20, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  animation: home-alert-in 0.2s ease-out;
+}
+
+
+.home-floating-alert.is-error {
+  border-color: rgba(255, 146, 146, 0.62);
+  background: linear-gradient(180deg, rgba(70, 24, 32, 0.95), rgba(52, 17, 23, 0.95));
+  color: #ffd8d8;
+}
+
+
+.home-floating-alert.is-notice {
+  border-color: rgba(126, 223, 196, 0.58);
+  background: linear-gradient(180deg, rgba(18, 53, 49, 0.95), rgba(12, 39, 34, 0.95));
+  color: #d6fff2;
+}
+
+
+.home-floating-alert.is-success {
+  border-color: rgba(74, 222, 128, 0.65);
+  background: linear-gradient(180deg, rgba(20, 58, 38, 0.96), rgba(14, 42, 28, 0.98));
+  color: #bbf7d0;
+}
+
+
+.home-floating-alert-text {
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+
+.home-floating-alert-close {
+  min-width: 64px;
+  min-height: 32px;
+  border-radius: 9px;
+  border: 1px solid rgba(236, 214, 170, 0.6);
+  background: rgba(236, 214, 170, 0.14);
+  color: #f3e4c2;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+
+.home-shell.chat-only-shell .tab-content-layer,
+.home-shell.business-only-shell .tab-content-layer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.home-shell.missions-shell .tab-content-layer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.home-shell.announcements-shell .tab-content-layer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+}
+
+
+.home-shell.chat-only-shell .tab-content-layer {
+  gap: 0;
+  padding: 0;
+}
+
+
+.section-head {
+  margin-bottom: 3px;
+}
+
+
+.section-head h3,
+.card h3,
+.card h4 {
+  margin: 0;
+}
+
+
+.card h3 {
+  font-size: 19px;
+}
+
+
+.card h4 {
+  margin-top: 10px;
+  font-size: 15px;
+}
+
+
+.home-sections {
+  gap: 8px;
+  margin-top: 14px;
+}
+
+
+.home-daily-claim-strip-wrap {
+  margin: 0 2px;
+}
+
+
+.home-daily-claim-strip {
+  width: 100%;
+  border: 1px solid rgba(255, 205, 123, 0.4);
+  border-radius: 16px;
+  padding: 11px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background:
+    radial-gradient(circle at 85% 12%, rgba(255, 183, 87, 0.2), transparent 54%),
+    linear-gradient(160deg, rgba(57, 35, 21, 0.92), rgba(20, 18, 34, 0.95));
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+
+.home-daily-claim-strip:hover,
+.home-daily-claim-strip:focus-visible {
+  border-color: rgba(255, 217, 146, 0.65);
+  box-shadow: 0 0 0 1px rgba(255, 217, 146, 0.25), 0 14px 26px rgba(3, 10, 25, 0.34);
+  transform: translateY(-1px);
+}
+
+
+.home-daily-claim-strip:disabled {
+  opacity: 0.72;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+}
+
+
+.home-daily-claim-icon {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+}
+
+
+.home-daily-claim-icon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+
+.home-daily-claim-copy {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+
+.home-daily-claim-copy strong {
+  color: #fff4d8;
+  font-size: 17px;
+  line-height: 1.2;
+}
+
+
+.home-daily-claim-copy small {
+  color: rgba(244, 225, 190, 0.9);
+  font-size: 12px;
+  line-height: 1.32;
+}
+
+
+.home-daily-claim-action {
+  margin-left: auto;
+  min-width: 66px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 207, 118, 0.55);
+  background: linear-gradient(180deg, #f5cf63, #d79d18);
+  color: #2e1808;
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-align: center;
+  padding: 8px 12px;
+}
+
+
+.home-weekly-event-strip {
+  border-color: rgba(126, 197, 255, 0.44);
+  background:
+    radial-gradient(circle at 14% 8%, rgba(120, 188, 255, 0.2), transparent 54%),
+    linear-gradient(160deg, rgba(18, 42, 86, 0.94), rgba(17, 27, 52, 0.95));
+}
+
+
+.home-weekly-event-strip:hover,
+.home-weekly-event-strip:focus-visible {
+  border-color: rgba(162, 215, 255, 0.68);
+  box-shadow: 0 0 0 1px rgba(123, 203, 255, 0.28), 0 14px 26px rgba(3, 10, 25, 0.34);
+}
+
+
+.home-weekly-event-icon img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: saturate(1.15) drop-shadow(0 0 6px rgba(110, 194, 255, 0.45));
+}
+
+
+.home-weekly-event-action {
+  border-color: rgba(150, 220, 255, 0.55);
+  background: linear-gradient(180deg, #95d8ff, #4b93c9);
+  color: #0e233f;
+}
+
+
+.home-weekly-event-countdown {
+  margin-top: 2px;
+  color: rgba(210, 235, 255, 0.94);
+  font-weight: 700;
+}
+
+
+.empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+
+.home-booting-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  padding: 20px;
+  text-align: center;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+.home-booting-card .empty {
+  color: var(--text);
+  font-size: 15px;
+}
+
+
+.home-shell.chat-only-shell .chat-thread,
+.home-shell.chat-only-shell .chat-thread-pro {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  padding-right: 3px;
+}
+
+
+.home-page.chat-tab-active .chat-thread-clean {
+  padding-bottom: 8px;
+}
+
+
+.home-page.chat-tab-active .chat-send-form-clean {
+  margin-top: auto;
+  padding: 8px 0 calc(16px + env(safe-area-inset-bottom));
+  margin-bottom: 0;
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  background: linear-gradient(180deg, rgba(7, 21, 41, 0), rgba(7, 21, 41, 0.96) 35%, rgba(7, 21, 41, 0.98));
+}
+
+
+.home-page.chat-tab-active .home-shell.chat-only-shell {
+  width: min(var(--app-max-content-width), 100%);
+  max-width: var(--app-max-content-width);
+  margin: 0 auto;
+}
+
+
+.home-page.chat-tab-active .home-shell {
+  width: min(var(--app-max-content-width), 100%);
+  max-width: var(--app-max-content-width);
+}
+
+
+.home-page.chat-tab-active .tab-content-layer {
+  padding: 0 !important;
+}
+
+
+/* Tam ekran: üst/alt bar sabit, içerik kaydırılabilir */
+.home-shell.messages-tab-shell .tab-content-layer {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+
+.home-shell.messages-tab-shell .message-gold-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+}
+
+
+.home-shell.messages-tab-shell .message-gold-header {
+  flex-shrink: 0;
+  padding: 16px 18px 12px;
+}
+
+
+.home-shell.messages-tab-shell .message-gold-tabs {
+  flex-shrink: 0;
+}
+
+
+.home-shell.messages-tab-shell .message-gold-content {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 12px 14px 24px;
+}
+
+
+.home-page.dm-fullscreen-active .home-shell.messages-tab-shell .message-gold-header,
+.home-page.dm-fullscreen-active .home-shell.messages-tab-shell .message-gold-tabs {
+  display: none;
+}
+
+
+.home-page.dm-fullscreen-active .home-shell.messages-tab-shell .message-gold-content {
+  padding: 0;
+  overflow: hidden;
+}
+
+
+.home-page.dm-fullscreen-active {
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  scroll-padding-bottom: max(8px, env(safe-area-inset-bottom));
+}
+
+
+.home-page.dm-fullscreen-active .home-shell.messages-tab-shell {
+  min-height: calc(100dvh - (8px + env(safe-area-inset-top)) - max(8px, env(safe-area-inset-bottom)));
+}
+
+
+.home-page.dm-fullscreen-active .mobile-nav {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(110%);
+}
+
+
+.home-shell.messages-tab-shell .message-gold-card {
+  background: linear-gradient(180deg, var(--theme-message-bg-top) 0%, var(--theme-message-bg-bottom) 100%);
+  backdrop-filter: blur(10px);
+}
+
+
+.home-shell.chat-only-shell .message-screen {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+
+.home-shell.chat-only-shell .message-hero-card,
+.home-shell.chat-only-shell .message-feed-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+
+.home-shell.chat-only-shell .message-feed-list {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+}
+
+
+.foot {
+  padding: 10px 12px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+
+.home-page.factory-modal-open {
+  overflow: hidden;
+}
+
+
+.home-page.marketplace-modal-open {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
+
+.home-page.factory-modal-open .mobile-nav {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(110%);
+}
+
+
+.home-page.nav-theme-dark {
+  --text: #e3e9f4;
+  --muted: #a6b2c9;
+  --theme-bg-overlay-top: rgba(12, 14, 22, 0.62);
+  --theme-bg-overlay-bottom: rgba(6, 7, 13, 0.86);
+  --theme-bg-base: #05070d;
+  --theme-before-accent-a: rgba(148, 165, 199, 0.13);
+  --theme-before-accent-b: rgba(99, 115, 149, 0.12);
+  --theme-after-overlay-top: rgba(8, 10, 18, 0.25);
+  --theme-after-overlay-bottom: rgba(3, 4, 8, 0.62);
+  --theme-after-grid: rgba(184, 201, 233, 0.018);
+  --theme-card-border: rgba(126, 141, 174, 0.28);
+  --theme-card-bg-top: rgba(22, 27, 41, 0.95);
+  --theme-card-bg-bottom: rgba(11, 15, 25, 0.97);
+  --theme-card-glow: rgba(141, 160, 199, 0.14);
+  --theme-wallet-border: rgba(128, 144, 179, 0.35);
+  --theme-wallet-bg-top: rgba(18, 22, 34, 0.95);
+  --theme-wallet-bg-bottom: rgba(10, 13, 21, 0.98);
+  --theme-pill-border: rgba(119, 138, 174, 0.36);
+  --theme-pill-bg-top: rgba(24, 31, 47, 0.92);
+  --theme-pill-bg-bottom: rgba(14, 19, 31, 0.96);
+  --theme-pill-gem-border: rgba(139, 169, 212, 0.44);
+  --theme-pill-gem-bg-top: rgba(24, 38, 59, 0.93);
+  --theme-pill-gem-bg-bottom: rgba(13, 24, 40, 0.97);
+  --theme-ann-board-border: rgba(126, 142, 180, 0.34);
+  --theme-ann-board-bg-a: rgba(113, 130, 170, 0.16);
+  --theme-ann-board-bg-b: rgba(173, 152, 112, 0.11);
+  --theme-ann-board-bg-top: rgba(15, 20, 33, 0.98);
+  --theme-ann-board-bg-bottom: rgba(8, 11, 20, 0.99);
+  --theme-ann-head-border: rgba(129, 145, 181, 0.3);
+  --theme-ann-title: #dde5f5;
+  --theme-ann-title-glow: rgba(174, 190, 221, 0.2);
+  --theme-ann-scroll-track: rgba(20, 25, 40, 0.88);
+  --theme-ann-scroll-thumb-top: rgba(178, 193, 224, 0.94);
+  --theme-ann-scroll-thumb-bottom: rgba(121, 137, 170, 0.92);
+  --theme-ann-card-border: rgba(124, 141, 176, 0.34);
+  --theme-ann-card-bg-a: rgba(154, 168, 198, 0.12);
+  --theme-ann-card-bg-b-top: rgba(16, 23, 38, 0.82);
+  --theme-ann-card-bg-b-bottom: rgba(10, 15, 27, 0.9);
+  --theme-ann-card-bg-c: rgba(92, 112, 154, 0.16);
+  --theme-ann-footer-border: rgba(120, 136, 171, 0.24);
+  --theme-ann-author: #d2dceb;
+  --theme-ann-time: rgba(190, 205, 234, 0.9);
+  --theme-settings-border: rgba(126, 141, 174, 0.3);
+  --theme-settings-bg-top: rgba(17, 21, 34, 0.95);
+  --theme-settings-bg-bottom: rgba(10, 13, 22, 0.97);
+  --theme-settings-glow-a: rgba(156, 170, 199, 0.12);
+  --theme-settings-glow-b: rgba(109, 130, 170, 0.1);
+  --theme-settings-grid-a: rgba(165, 181, 215, 0.06);
+  --theme-settings-grid-b: rgba(150, 169, 206, 0.05);
+  --theme-settings-section-border: rgba(122, 139, 174, 0.3);
+  --theme-settings-section-bg-top: rgba(18, 23, 36, 0.86);
+  --theme-settings-section-bg-bottom: rgba(11, 15, 25, 0.92);
+  --theme-settings-section-glow: rgba(127, 148, 186, 0.12);
+  --theme-btn-border: rgba(157, 171, 201, 0.45);
+  --theme-btn-bg-top: rgba(44, 52, 72, 0.94);
+  --theme-btn-bg-bottom: rgba(24, 30, 45, 0.96);
+  --theme-btn-text: #edf2fb;
+  --theme-btn-primary-border: rgba(146, 176, 218, 0.7);
+  --theme-btn-primary-bg-top: rgba(70, 94, 131, 0.92);
+  --theme-btn-primary-bg-bottom: rgba(42, 58, 84, 0.96);
+  --theme-btn-success-border: rgba(120, 188, 164, 0.72);
+  --theme-btn-success-bg-top: rgba(44, 109, 89, 0.92);
+  --theme-btn-success-bg-bottom: rgba(27, 63, 52, 0.95);
+  --theme-btn-accent-border: rgba(197, 185, 150, 0.76);
+  --theme-btn-accent-bg-top: rgba(114, 103, 71, 0.94);
+  --theme-btn-accent-bg-bottom: rgba(67, 58, 38, 0.96);
+  --theme-btn-warning-border: rgba(198, 171, 121, 0.8);
+  --theme-btn-warning-bg-top: rgba(121, 95, 53, 0.95);
+  --theme-btn-warning-bg-bottom: rgba(74, 54, 27, 0.96);
+  --theme-btn-ghost-border: rgba(138, 154, 185, 0.48);
+  --theme-btn-ghost-bg: rgba(40, 49, 68, 0.5);
+  --theme-tab-border: rgba(161, 175, 205, 0.36);
+  --theme-tab-bg: rgba(33, 40, 58, 0.9);
+  --theme-tab-active-bg-top: #c4d0e5;
+  --theme-tab-active-bg-bottom: #a8b5cd;
+  --theme-tab-active-text: #1b2232;
+  --theme-input-border: rgba(145, 161, 193, 0.4);
+  --theme-input-bg: rgba(18, 24, 38, 0.93);
+  --theme-input-text: #eef3fc;
+  --theme-input-placeholder: rgba(197, 210, 236, 0.58);
+  --theme-module-border: rgba(139, 154, 186, 0.34);
+  --theme-module-bg-top: rgba(24, 31, 47, 0.94);
+  --theme-module-bg-bottom: rgba(14, 19, 31, 0.96);
+  --theme-module-glow: rgba(144, 161, 198, 0.1);
+  --theme-module-hover-border: rgba(166, 181, 214, 0.58);
+  --theme-module-active-border: rgba(192, 203, 228, 0.88);
+  --theme-module-active-bg-top: rgba(63, 72, 94, 0.96);
+  --theme-module-active-bg-bottom: rgba(36, 42, 58, 0.98);
+  --theme-module-icon-border: rgba(147, 166, 203, 0.36);
+  --theme-module-icon-bg-top: rgba(29, 38, 58, 0.96);
+  --theme-module-icon-bg-bottom: rgba(18, 25, 40, 0.99);
+  --theme-hero-border: rgba(145, 163, 198, 0.5);
+  --theme-hero-overlay-top: rgba(21, 28, 42, 0.18);
+  --theme-hero-overlay-bottom: rgba(13, 18, 30, 0.34);
+  --theme-rules-border: rgba(138, 155, 190, 0.38);
+  --theme-rules-accent-a: rgba(127, 145, 184, 0.16);
+  --theme-rules-accent-b: rgba(168, 154, 125, 0.1);
+  --theme-rules-bg-top: rgba(16, 22, 36, 0.96);
+  --theme-rules-bg-bottom: rgba(10, 14, 24, 0.98);
+  --theme-market-bg-top: rgba(18, 23, 38, 0.97);
+  --theme-market-bg-mid: rgba(26, 33, 51, 0.95);
+  --theme-market-bg-bottom: rgba(14, 19, 31, 0.98);
+  --theme-market-panel-bg: rgba(30, 39, 58, 0.54);
+  --theme-market-panel-border: rgba(143, 160, 194, 0.18);
+  --theme-market-divider: rgba(143, 160, 194, 0.14);
+  --theme-message-bg-top: rgba(19, 25, 41, 0.76);
+  --theme-message-bg-bottom: rgba(12, 17, 30, 0.84);
+  --theme-message-header-border: rgba(142, 157, 191, 0.2);
+  --theme-message-wallet-bg-top: rgba(28, 36, 55, 0.84);
+  --theme-message-wallet-bg-bottom: rgba(17, 24, 40, 0.9);
+  --theme-message-wallet-border: rgba(142, 157, 191, 0.24);
+  --theme-message-wallet-item-border: rgba(149, 166, 203, 0.3);
+  --theme-message-wallet-item-bg-top: rgba(39, 50, 74, 0.78);
+  --theme-message-wallet-item-bg-bottom: rgba(27, 36, 58, 0.86);
+  --theme-message-title: #d9e3f5;
+  --theme-message-subtitle: #e9effa;
+  --theme-chat-banner-border: rgba(191, 168, 121, 0.34);
+  --theme-chat-banner-bg: rgba(47, 40, 28, 0.68);
+  --theme-chat-banner-strong: #f0e1c1;
+  --theme-chat-banner-text: #e4d6bd;
+  --theme-chat-live-border: rgba(141, 197, 181, 0.5);
+  --theme-chat-live-bg: rgba(36, 78, 69, 0.34);
+  --theme-chat-live-text: #cdeee3;
+  --theme-modal-border: rgba(142, 158, 194, 0.36);
+  --theme-modal-bg-top: rgba(14, 20, 34, 0.95);
+  --theme-modal-bg-bottom: rgba(10, 14, 25, 0.97);
+  --theme-search-border: rgba(170, 184, 214, 0.44);
+  --theme-search-bg-top: rgba(30, 36, 52, 0.94);
+  --theme-search-bg-bottom: rgba(18, 24, 39, 0.96);
+  --theme-search-text: #edf2fb;
+  --theme-search-sub: rgba(214, 224, 242, 0.9);
+  --theme-search-input-border: rgba(166, 180, 212, 0.38);
+  --theme-search-input-bg: rgba(16, 22, 35, 0.64);
+  --theme-search-input-text: #eef3fc;
+  --theme-search-input-placeholder: rgba(205, 217, 240, 0.55);
+}
+
+
+.home-page.nav-theme-ocean {
+  --text: #ebf7ff;
+  --muted: #a9d0e7;
+  --theme-bg-overlay-top: rgba(8, 29, 67, 0.42);
+  --theme-bg-overlay-bottom: rgba(4, 15, 38, 0.74);
+  --theme-bg-base: #061a3f;
+  --theme-before-accent-a: rgba(111, 199, 255, 0.2);
+  --theme-before-accent-b: rgba(72, 177, 255, 0.15);
+  --theme-after-overlay-top: rgba(7, 23, 52, 0.16);
+  --theme-after-overlay-bottom: rgba(3, 13, 30, 0.56);
+  --theme-after-grid: rgba(131, 210, 255, 0.028);
+  --theme-card-border: rgba(102, 180, 247, 0.34);
+  --theme-card-bg-top: rgba(10, 35, 68, 0.94);
+  --theme-card-bg-bottom: rgba(7, 22, 44, 0.97);
+  --theme-card-glow: rgba(78, 192, 255, 0.22);
+  --theme-wallet-border: rgba(101, 183, 252, 0.36);
+  --theme-wallet-bg-top: rgba(9, 33, 66, 0.93);
+  --theme-wallet-bg-bottom: rgba(5, 20, 42, 0.97);
+  --theme-pill-border: rgba(106, 186, 255, 0.36);
+  --theme-pill-bg-top: rgba(13, 45, 82, 0.91);
+  --theme-pill-bg-bottom: rgba(9, 29, 55, 0.95);
+  --theme-pill-gem-border: rgba(127, 219, 255, 0.52);
+  --theme-pill-gem-bg-top: rgba(9, 52, 90, 0.92);
+  --theme-pill-gem-bg-bottom: rgba(6, 34, 60, 0.96);
+  --theme-settings-border: rgba(92, 177, 245, 0.34);
+  --theme-settings-bg-top: rgba(7, 28, 56, 0.95);
+  --theme-settings-bg-bottom: rgba(4, 16, 35, 0.97);
+  --theme-settings-glow-a: rgba(74, 173, 255, 0.16);
+  --theme-settings-glow-b: rgba(30, 191, 255, 0.12);
+  --theme-settings-grid-a: rgba(84, 180, 255, 0.08);
+  --theme-settings-grid-b: rgba(63, 168, 248, 0.06);
+  --theme-settings-section-border: rgba(89, 173, 243, 0.32);
+  --theme-settings-section-bg-top: rgba(8, 32, 62, 0.86);
+  --theme-settings-section-bg-bottom: rgba(5, 20, 42, 0.92);
+  --theme-settings-section-glow: rgba(53, 171, 255, 0.16);
+  --theme-btn-border: rgba(128, 207, 255, 0.5);
+  --theme-btn-bg-top: rgba(25, 67, 112, 0.93);
+  --theme-btn-bg-bottom: rgba(14, 40, 72, 0.96);
+  --theme-btn-text: #f1fbff;
+  --theme-btn-primary-border: rgba(132, 217, 255, 0.76);
+  --theme-btn-primary-bg-top: rgba(32, 119, 175, 0.92);
+  --theme-btn-primary-bg-bottom: rgba(16, 67, 104, 0.96);
+  --theme-btn-success-border: rgba(90, 231, 198, 0.76);
+  --theme-btn-success-bg-top: rgba(24, 151, 118, 0.9);
+  --theme-btn-success-bg-bottom: rgba(11, 80, 64, 0.95);
+  --theme-btn-accent-border: rgba(255, 222, 138, 0.84);
+  --theme-btn-accent-bg-top: rgba(170, 132, 42, 0.95);
+  --theme-btn-accent-bg-bottom: rgba(92, 68, 18, 0.95);
+  --theme-btn-warning-border: rgba(255, 196, 92, 0.88);
+  --theme-btn-warning-bg-top: rgba(189, 129, 36, 0.96);
+  --theme-btn-warning-bg-bottom: rgba(109, 70, 14, 0.95);
+  --theme-btn-ghost-border: rgba(121, 206, 255, 0.5);
+  --theme-btn-ghost-bg: rgba(21, 67, 108, 0.48);
+  --theme-tab-border: rgba(128, 207, 255, 0.38);
+  --theme-tab-bg: rgba(16, 52, 88, 0.86);
+  --theme-tab-active-bg-top: #61c8ff;
+  --theme-tab-active-bg-bottom: #a8e6ff;
+  --theme-tab-active-text: #05233f;
+  --theme-input-border: rgba(128, 206, 255, 0.42);
+  --theme-input-bg: rgba(7, 27, 54, 0.92);
+  --theme-input-text: #ecf8ff;
+  --theme-input-placeholder: rgba(193, 232, 255, 0.6);
+  --theme-module-border: rgba(114, 198, 255, 0.36);
+  --theme-module-bg-top: rgba(10, 41, 76, 0.93);
+  --theme-module-bg-bottom: rgba(7, 24, 49, 0.95);
+  --theme-module-glow: rgba(95, 198, 255, 0.12);
+  --theme-module-hover-border: rgba(133, 216, 255, 0.6);
+  --theme-module-active-border: rgba(183, 234, 255, 0.9);
+  --theme-module-active-bg-top: rgba(24, 101, 154, 0.96);
+  --theme-module-active-bg-bottom: rgba(10, 58, 96, 0.98);
+  --theme-module-icon-border: rgba(123, 211, 255, 0.4);
+  --theme-module-icon-bg-top: rgba(10, 53, 95, 0.96);
+  --theme-module-icon-bg-bottom: rgba(7, 31, 63, 0.99);
+  --theme-hero-border: rgba(124, 212, 255, 0.56);
+  --theme-hero-overlay-top: rgba(9, 45, 87, 0.16);
+  --theme-hero-overlay-bottom: rgba(6, 25, 52, 0.3);
+  --theme-rules-border: rgba(120, 206, 255, 0.4);
+  --theme-rules-accent-a: rgba(58, 167, 255, 0.2);
+  --theme-rules-accent-b: rgba(146, 227, 255, 0.12);
+  --theme-rules-bg-top: rgba(8, 33, 65, 0.96);
+  --theme-rules-bg-bottom: rgba(5, 21, 44, 0.98);
+  --theme-market-bg-top: rgba(8, 34, 66, 0.97);
+  --theme-market-bg-mid: rgba(13, 46, 86, 0.95);
+  --theme-market-bg-bottom: rgba(7, 27, 54, 0.98);
+  --theme-market-panel-bg: rgba(11, 46, 83, 0.52);
+  --theme-market-panel-border: rgba(126, 209, 255, 0.2);
+  --theme-market-divider: rgba(126, 209, 255, 0.14);
+  --theme-message-bg-top: rgba(9, 38, 76, 0.72);
+  --theme-message-bg-bottom: rgba(6, 24, 52, 0.82);
+  --theme-message-header-border: rgba(127, 209, 255, 0.22);
+  --theme-message-wallet-bg-top: rgba(11, 51, 96, 0.82);
+  --theme-message-wallet-bg-bottom: rgba(8, 31, 66, 0.88);
+  --theme-message-wallet-border: rgba(121, 208, 255, 0.24);
+  --theme-message-wallet-item-border: rgba(126, 210, 255, 0.3);
+  --theme-message-wallet-item-bg-top: rgba(19, 68, 115, 0.76);
+  --theme-message-wallet-item-bg-bottom: rgba(12, 45, 82, 0.85);
+  --theme-message-title: #7ad6ff;
+  --theme-message-subtitle: #ecf9ff;
+  --theme-chat-banner-border: rgba(132, 208, 255, 0.38);
+  --theme-chat-banner-bg: rgba(14, 47, 77, 0.68);
+  --theme-chat-banner-strong: #d9f2ff;
+  --theme-chat-banner-text: #c6e9ff;
+  --theme-chat-live-border: rgba(102, 232, 205, 0.54);
+  --theme-chat-live-bg: rgba(18, 103, 90, 0.34);
+  --theme-chat-live-text: #c8fff0;
+  --theme-modal-border: rgba(125, 210, 255, 0.38);
+  --theme-modal-bg-top: rgba(7, 33, 63, 0.95);
+  --theme-modal-bg-bottom: rgba(5, 21, 44, 0.97);
+  --theme-search-border: rgba(126, 211, 255, 0.46);
+  --theme-search-bg-top: rgba(9, 43, 77, 0.94);
+  --theme-search-bg-bottom: rgba(6, 28, 56, 0.96);
+  --theme-search-text: #ebf9ff;
+  --theme-search-sub: rgba(198, 236, 255, 0.9);
+  --theme-search-input-border: rgba(128, 209, 255, 0.4);
+  --theme-search-input-bg: rgba(5, 24, 48, 0.56);
+  --theme-search-input-text: #eefdff;
+  --theme-search-input-placeholder: rgba(189, 232, 255, 0.56);
+}
+
+
+.home-page.nav-theme-fire {
+  --text: #ffe8e0;
+  --muted: #e1b2a8;
+  --theme-bg-overlay-top: rgba(52, 18, 22, 0.52);
+  --theme-bg-overlay-bottom: rgba(20, 9, 12, 0.84);
+  --theme-bg-base: #1a0b0f;
+  --theme-before-accent-a: rgba(255, 134, 111, 0.22);
+  --theme-before-accent-b: rgba(255, 95, 76, 0.17);
+  --theme-after-overlay-top: rgba(48, 15, 19, 0.2);
+  --theme-after-overlay-bottom: rgba(14, 6, 8, 0.6);
+  --theme-after-grid: rgba(255, 128, 108, 0.03);
+  --theme-card-border: rgba(214, 112, 93, 0.38);
+  --theme-card-bg-top: rgba(55, 22, 25, 0.94);
+  --theme-card-bg-bottom: rgba(30, 13, 16, 0.97);
+  --theme-card-glow: rgba(255, 128, 96, 0.2);
+  --theme-wallet-border: rgba(220, 117, 98, 0.38);
+  --theme-wallet-bg-top: rgba(50, 20, 24, 0.93);
+  --theme-wallet-bg-bottom: rgba(27, 11, 14, 0.97);
+  --theme-pill-border: rgba(215, 114, 96, 0.38);
+  --theme-pill-bg-top: rgba(67, 28, 32, 0.91);
+  --theme-pill-bg-bottom: rgba(37, 16, 20, 0.95);
+  --theme-pill-gem-border: rgba(255, 164, 126, 0.52);
+  --theme-pill-gem-bg-top: rgba(85, 34, 35, 0.92);
+  --theme-pill-gem-bg-bottom: rgba(49, 19, 20, 0.96);
+  --theme-ann-board-border: rgba(206, 116, 95, 0.36);
+  --theme-ann-board-bg-a: rgba(255, 132, 108, 0.17);
+  --theme-ann-board-bg-b: rgba(255, 180, 111, 0.11);
+  --theme-ann-board-bg-top: rgba(40, 16, 18, 0.98);
+  --theme-ann-board-bg-bottom: rgba(20, 9, 12, 0.99);
+  --theme-ann-head-border: rgba(205, 120, 102, 0.34);
+  --theme-ann-title: #ffca89;
+  --theme-ann-title-glow: rgba(255, 181, 112, 0.24);
+  --theme-ann-scroll-track: rgba(35, 16, 19, 0.88);
+  --theme-ann-scroll-thumb-top: rgba(255, 180, 121, 0.96);
+  --theme-ann-scroll-thumb-bottom: rgba(210, 104, 67, 0.94);
+  --theme-ann-card-border: rgba(208, 117, 98, 0.36);
+  --theme-ann-card-bg-a: rgba(255, 172, 111, 0.13);
+  --theme-ann-card-bg-b-top: rgba(45, 20, 23, 0.82);
+  --theme-ann-card-bg-b-bottom: rgba(23, 10, 13, 0.9);
+  --theme-ann-card-bg-c: rgba(224, 104, 84, 0.16);
+  --theme-ann-footer-border: rgba(208, 117, 95, 0.24);
+  --theme-ann-author: #ffc88d;
+  --theme-ann-time: rgba(255, 194, 128, 0.93);
+  --theme-settings-border: rgba(214, 112, 93, 0.38);
+  --theme-settings-bg-top: rgba(44, 18, 22, 0.95);
+  --theme-settings-bg-bottom: rgba(21, 9, 12, 0.97);
+  --theme-settings-glow-a: rgba(255, 127, 106, 0.15);
+  --theme-settings-glow-b: rgba(255, 171, 105, 0.12);
+  --theme-settings-grid-a: rgba(255, 128, 106, 0.09);
+  --theme-settings-grid-b: rgba(255, 110, 92, 0.07);
+  --theme-settings-section-border: rgba(214, 114, 96, 0.34);
+  --theme-settings-section-bg-top: rgba(52, 22, 26, 0.86);
+  --theme-settings-section-bg-bottom: rgba(26, 11, 15, 0.92);
+  --theme-settings-section-glow: rgba(233, 109, 85, 0.16);
+  --theme-btn-border: rgba(240, 134, 112, 0.5);
+  --theme-btn-bg-top: rgba(87, 34, 34, 0.94);
+  --theme-btn-bg-bottom: rgba(43, 17, 20, 0.96);
+  --theme-btn-text: #ffece6;
+  --theme-btn-primary-border: rgba(255, 167, 123, 0.78);
+  --theme-btn-primary-bg-top: rgba(169, 72, 40, 0.92);
+  --theme-btn-primary-bg-bottom: rgba(93, 37, 23, 0.96);
+  --theme-btn-success-border: rgba(122, 228, 173, 0.74);
+  --theme-btn-success-bg-top: rgba(39, 135, 90, 0.9);
+  --theme-btn-success-bg-bottom: rgba(20, 70, 47, 0.95);
+  --theme-btn-accent-border: rgba(255, 207, 120, 0.86);
+  --theme-btn-accent-bg-top: rgba(179, 116, 34, 0.95);
+  --theme-btn-accent-bg-bottom: rgba(101, 63, 14, 0.95);
+  --theme-btn-warning-border: rgba(255, 176, 106, 0.88);
+  --theme-btn-warning-bg-top: rgba(196, 102, 39, 0.95);
+  --theme-btn-warning-bg-bottom: rgba(111, 54, 21, 0.95);
+  --theme-btn-danger-border: rgba(255, 137, 132, 0.8);
+  --theme-btn-danger-bg-top: rgba(171, 55, 58, 0.94);
+  --theme-btn-danger-bg-bottom: rgba(88, 26, 30, 0.96);
+  --theme-btn-ghost-border: rgba(222, 120, 104, 0.52);
+  --theme-btn-ghost-bg: rgba(84, 33, 36, 0.48);
+  --theme-tab-border: rgba(230, 130, 110, 0.4);
+  --theme-tab-bg: rgba(76, 31, 34, 0.9);
+  --theme-tab-active-bg-top: #ff9d6a;
+  --theme-tab-active-bg-bottom: #ffd199;
+  --theme-tab-active-text: #3d160a;
+  --theme-input-border: rgba(231, 133, 115, 0.44);
+  --theme-input-bg: rgba(36, 14, 18, 0.92);
+  --theme-input-text: #fff0eb;
+  --theme-input-placeholder: rgba(255, 205, 194, 0.56);
+  --theme-module-border: rgba(224, 126, 105, 0.38);
+  --theme-module-bg-top: rgba(68, 26, 29, 0.94);
+  --theme-module-bg-bottom: rgba(35, 14, 17, 0.96);
+  --theme-module-glow: rgba(255, 128, 98, 0.14);
+  --theme-module-hover-border: rgba(243, 150, 128, 0.62);
+  --theme-module-active-border: rgba(255, 201, 146, 0.9);
+  --theme-module-active-bg-top: rgba(134, 54, 34, 0.96);
+  --theme-module-active-bg-bottom: rgba(72, 27, 18, 0.98);
+  --theme-module-icon-border: rgba(232, 137, 115, 0.4);
+  --theme-module-icon-bg-top: rgba(85, 32, 33, 0.96);
+  --theme-module-icon-bg-bottom: rgba(44, 18, 21, 0.99);
+  --theme-hero-border: rgba(232, 136, 111, 0.54);
+  --theme-hero-overlay-top: rgba(86, 30, 29, 0.2);
+  --theme-hero-overlay-bottom: rgba(44, 16, 19, 0.34);
+  --theme-rules-border: rgba(228, 130, 109, 0.4);
+  --theme-rules-accent-a: rgba(227, 102, 79, 0.2);
+  --theme-rules-accent-b: rgba(255, 176, 107, 0.14);
+  --theme-rules-bg-top: rgba(52, 20, 24, 0.96);
+  --theme-rules-bg-bottom: rgba(26, 11, 15, 0.98);
+  --theme-market-bg-top: rgba(52, 20, 24, 0.97);
+  --theme-market-bg-mid: rgba(78, 28, 30, 0.95);
+  --theme-market-bg-bottom: rgba(34, 14, 16, 0.98);
+  --theme-market-panel-bg: rgba(79, 31, 35, 0.52);
+  --theme-market-panel-border: rgba(233, 133, 110, 0.2);
+  --theme-market-divider: rgba(233, 133, 110, 0.14);
+  --theme-message-bg-top: rgba(55, 22, 28, 0.74);
+  --theme-message-bg-bottom: rgba(30, 13, 18, 0.84);
+  --theme-message-header-border: rgba(231, 130, 110, 0.2);
+  --theme-message-wallet-bg-top: rgba(87, 32, 31, 0.84);
+  --theme-message-wallet-bg-bottom: rgba(52, 20, 22, 0.9);
+  --theme-message-wallet-border: rgba(233, 133, 110, 0.24);
+  --theme-message-wallet-item-border: rgba(238, 142, 119, 0.32);
+  --theme-message-wallet-item-bg-top: rgba(109, 43, 39, 0.76);
+  --theme-message-wallet-item-bg-bottom: rgba(68, 26, 27, 0.86);
+  --theme-message-title: #ffbf86;
+  --theme-message-subtitle: #ffece5;
+  --theme-chat-banner-border: rgba(255, 185, 119, 0.38);
+  --theme-chat-banner-bg: rgba(84, 40, 25, 0.66);
+  --theme-chat-banner-strong: #ffe0be;
+  --theme-chat-banner-text: #ffd4aa;
+  --theme-chat-live-border: rgba(137, 227, 180, 0.52);
+  --theme-chat-live-bg: rgba(28, 96, 68, 0.34);
+  --theme-chat-live-text: #ccffe8;
+  --theme-modal-border: rgba(229, 132, 109, 0.38);
+  --theme-modal-bg-top: rgba(45, 18, 22, 0.95);
+  --theme-modal-bg-bottom: rgba(24, 10, 14, 0.97);
+  --theme-search-border: rgba(255, 187, 123, 0.46);
+  --theme-search-bg-top: rgba(68, 28, 24, 0.94);
+  --theme-search-bg-bottom: rgba(35, 16, 15, 0.96);
+  --theme-search-text: #fff0e9;
+  --theme-search-sub: rgba(255, 216, 200, 0.9);
+  --theme-search-input-border: rgba(255, 182, 125, 0.4);
+  --theme-search-input-bg: rgba(40, 16, 14, 0.56);
+  --theme-search-input-text: #fff2ec;
+  --theme-search-input-placeholder: rgba(255, 215, 198, 0.56);
+}
+
+
+.home-page.nav-theme-gold {
+  --text: #fff2dc;
+  --muted: #dec8a0;
+  --theme-bg-overlay-top: rgba(46, 30, 9, 0.46);
+  --theme-bg-overlay-bottom: rgba(20, 12, 4, 0.82);
+  --theme-bg-base: #1a1206;
+  --theme-before-accent-a: rgba(244, 203, 117, 0.2);
+  --theme-before-accent-b: rgba(236, 173, 66, 0.16);
+  --theme-after-overlay-top: rgba(55, 35, 10, 0.18);
+  --theme-after-overlay-bottom: rgba(14, 9, 4, 0.58);
+  --theme-after-grid: rgba(250, 205, 120, 0.028);
+  --theme-card-border: rgba(225, 187, 106, 0.4);
+  --theme-card-bg-top: rgba(62, 43, 14, 0.93);
+  --theme-card-bg-bottom: rgba(29, 21, 8, 0.97);
+  --theme-card-glow: rgba(242, 197, 103, 0.22);
+  --theme-wallet-border: rgba(229, 190, 109, 0.4);
+  --theme-wallet-bg-top: rgba(58, 41, 14, 0.93);
+  --theme-wallet-bg-bottom: rgba(27, 19, 8, 0.97);
+  --theme-pill-border: rgba(227, 188, 111, 0.4);
+  --theme-pill-bg-top: rgba(74, 52, 18, 0.9);
+  --theme-pill-bg-bottom: rgba(41, 28, 11, 0.94);
+  --theme-pill-gem-border: rgba(255, 219, 138, 0.54);
+  --theme-pill-gem-bg-top: rgba(98, 66, 21, 0.9);
+  --theme-pill-gem-bg-bottom: rgba(56, 36, 12, 0.95);
+  --theme-ann-board-border: rgba(224, 186, 102, 0.42);
+  --theme-ann-board-bg-a: rgba(247, 199, 100, 0.19);
+  --theme-ann-board-bg-b: rgba(248, 174, 76, 0.14);
+  --theme-ann-board-bg-top: rgba(48, 34, 12, 0.98);
+  --theme-ann-board-bg-bottom: rgba(24, 17, 7, 0.99);
+  --theme-ann-head-border: rgba(229, 187, 104, 0.36);
+  --theme-ann-title: #f8d27c;
+  --theme-ann-title-glow: rgba(248, 201, 96, 0.24);
+  --theme-ann-scroll-track: rgba(39, 28, 11, 0.88);
+  --theme-ann-scroll-thumb-top: rgba(255, 224, 149, 0.97);
+  --theme-ann-scroll-thumb-bottom: rgba(225, 164, 64, 0.95);
+  --theme-ann-card-border: rgba(228, 189, 106, 0.38);
+  --theme-ann-card-bg-a: rgba(249, 203, 106, 0.15);
+  --theme-ann-card-bg-b-top: rgba(58, 41, 14, 0.82);
+  --theme-ann-card-bg-b-bottom: rgba(29, 20, 8, 0.9);
+  --theme-ann-card-bg-c: rgba(226, 168, 71, 0.16);
+  --theme-ann-footer-border: rgba(226, 186, 102, 0.24);
+  --theme-ann-author: #ffd98e;
+  --theme-ann-time: rgba(255, 215, 143, 0.94);
+  --theme-settings-border: rgba(226, 188, 105, 0.38);
+  --theme-settings-bg-top: rgba(49, 34, 12, 0.95);
+  --theme-settings-bg-bottom: rgba(23, 16, 7, 0.97);
+  --theme-settings-glow-a: rgba(248, 197, 98, 0.16);
+  --theme-settings-glow-b: rgba(238, 162, 65, 0.12);
+  --theme-settings-grid-a: rgba(247, 200, 102, 0.09);
+  --theme-settings-grid-b: rgba(235, 174, 74, 0.07);
+  --theme-settings-section-border: rgba(225, 187, 105, 0.34);
+  --theme-settings-section-bg-top: rgba(58, 40, 13, 0.86);
+  --theme-settings-section-bg-bottom: rgba(29, 20, 8, 0.92);
+  --theme-settings-section-glow: rgba(241, 180, 78, 0.16);
+  --theme-btn-border: rgba(238, 201, 118, 0.52);
+  --theme-btn-bg-top: rgba(95, 70, 24, 0.94);
+  --theme-btn-bg-bottom: rgba(49, 34, 13, 0.96);
+  --theme-btn-text: #fff4df;
+  --theme-btn-primary-border: rgba(255, 220, 133, 0.78);
+  --theme-btn-primary-bg-top: rgba(172, 125, 34, 0.92);
+  --theme-btn-primary-bg-bottom: rgba(95, 67, 15, 0.96);
+  --theme-btn-success-border: rgba(160, 228, 176, 0.74);
+  --theme-btn-success-bg-top: rgba(58, 136, 77, 0.9);
+  --theme-btn-success-bg-bottom: rgba(30, 72, 43, 0.95);
+  --theme-btn-accent-border: rgba(255, 228, 150, 0.9);
+  --theme-btn-accent-bg-top: rgba(190, 145, 42, 0.95);
+  --theme-btn-accent-bg-bottom: rgba(108, 78, 16, 0.95);
+  --theme-btn-warning-border: rgba(255, 203, 104, 0.9);
+  --theme-btn-warning-bg-top: rgba(201, 133, 35, 0.95);
+  --theme-btn-warning-bg-bottom: rgba(118, 74, 13, 0.95);
+  --theme-btn-danger-border: rgba(255, 154, 132, 0.78);
+  --theme-btn-danger-bg-top: rgba(167, 67, 51, 0.94);
+  --theme-btn-danger-bg-bottom: rgba(88, 34, 27, 0.96);
+  --theme-btn-ghost-border: rgba(228, 190, 107, 0.54);
+  --theme-btn-ghost-bg: rgba(95, 68, 23, 0.48);
+  --theme-tab-border: rgba(232, 192, 108, 0.42);
+  --theme-tab-bg: rgba(78, 58, 22, 0.9);
+  --theme-tab-active-bg-top: #f8d27c;
+  --theme-tab-active-bg-bottom: #ffe7b0;
+  --theme-tab-active-text: #3b2606;
+  --theme-input-border: rgba(231, 192, 106, 0.44);
+  --theme-input-bg: rgba(33, 23, 10, 0.92);
+  --theme-input-text: #fff5e1;
+  --theme-input-placeholder: rgba(243, 222, 169, 0.58);
+  --theme-module-border: rgba(228, 189, 106, 0.38);
+  --theme-module-bg-top: rgba(65, 45, 15, 0.93);
+  --theme-module-bg-bottom: rgba(33, 23, 9, 0.95);
+  --theme-module-glow: rgba(248, 201, 95, 0.14);
+  --theme-module-hover-border: rgba(245, 208, 126, 0.62);
+  --theme-module-active-border: rgba(255, 236, 176, 0.92);
+  --theme-module-active-bg-top: rgba(161, 116, 31, 0.96);
+  --theme-module-active-bg-bottom: rgba(90, 61, 15, 0.98);
+  --theme-module-icon-border: rgba(236, 198, 114, 0.42);
+  --theme-module-icon-bg-top: rgba(88, 62, 19, 0.96);
+  --theme-module-icon-bg-bottom: rgba(46, 32, 11, 0.99);
+  --theme-hero-border: rgba(236, 198, 113, 0.56);
+  --theme-hero-overlay-top: rgba(92, 68, 20, 0.18);
+  --theme-hero-overlay-bottom: rgba(49, 34, 12, 0.32);
+  --theme-rules-border: rgba(234, 194, 110, 0.42);
+  --theme-rules-accent-a: rgba(242, 186, 72, 0.21);
+  --theme-rules-accent-b: rgba(255, 219, 142, 0.14);
+  --theme-rules-bg-top: rgba(57, 40, 12, 0.96);
+  --theme-rules-bg-bottom: rgba(29, 20, 8, 0.98);
+  --theme-market-bg-top: rgba(58, 41, 14, 0.97);
+  --theme-market-bg-mid: rgba(84, 59, 19, 0.95);
+  --theme-market-bg-bottom: rgba(36, 25, 9, 0.98);
+  --theme-market-panel-bg: rgba(90, 64, 20, 0.52);
+  --theme-market-panel-border: rgba(236, 197, 113, 0.2);
+  --theme-market-divider: rgba(236, 197, 113, 0.14);
+  --theme-message-bg-top: rgba(62, 44, 14, 0.74);
+  --theme-message-bg-bottom: rgba(33, 24, 9, 0.84);
+  --theme-message-header-border: rgba(233, 194, 109, 0.2);
+  --theme-message-wallet-bg-top: rgba(96, 69, 21, 0.84);
+  --theme-message-wallet-bg-bottom: rgba(57, 40, 14, 0.9);
+  --theme-message-wallet-border: rgba(235, 194, 108, 0.24);
+  --theme-message-wallet-item-border: rgba(240, 203, 121, 0.32);
+  --theme-message-wallet-item-bg-top: rgba(113, 82, 27, 0.76);
+  --theme-message-wallet-item-bg-bottom: rgba(69, 48, 15, 0.86);
+  --theme-message-title: #f9d584;
+  --theme-message-subtitle: #fff5df;
+  --theme-chat-banner-border: rgba(239, 201, 118, 0.4);
+  --theme-chat-banner-bg: rgba(86, 63, 20, 0.66);
+  --theme-chat-banner-strong: #ffe9bb;
+  --theme-chat-banner-text: #f9ddaa;
+  --theme-chat-live-border: rgba(167, 231, 180, 0.52);
+  --theme-chat-live-bg: rgba(44, 100, 57, 0.34);
+  --theme-chat-live-text: #d9ffe2;
+  --theme-modal-border: rgba(234, 196, 111, 0.4);
+  --theme-modal-bg-top: rgba(53, 38, 13, 0.95);
+  --theme-modal-bg-bottom: rgba(28, 20, 8, 0.97);
+  --theme-search-border: rgba(245, 210, 130, 0.48);
+  --theme-search-bg-top: rgba(77, 55, 16, 0.94);
+  --theme-search-bg-bottom: rgba(40, 28, 11, 0.96);
+  --theme-search-text: #fff5df;
+  --theme-search-sub: rgba(250, 228, 177, 0.92);
+  --theme-search-input-border: rgba(244, 208, 127, 0.42);
+  --theme-search-input-bg: rgba(44, 30, 9, 0.58);
+  --theme-search-input-text: #fff7e6;
+  --theme-search-input-placeholder: rgba(248, 226, 173, 0.58);
+}
+
+
+@media (prefers-contrast: more) {
+  .home-page {
+    --muted: #d4e3fb;
+    --line: rgba(160, 208, 255, 0.58);
+    --line-soft: rgba(171, 214, 255, 0.46);
+  }
+
+  .hud,
+  .card,
+  .foot,
+  .hero-card,
+  .mobile-nav {
+    border-color: rgba(162, 210, 255, 0.62);
+  }
+
+  .feedback.notice,
+  .feedback.error {
+    border-width: 2px;
+  }
+}
+
+
+@keyframes tutorial-target-pulse {
+  0% {
+    box-shadow:
+      0 0 0 0 rgba(125, 211, 252, 0.84),
+      0 0 0 0 rgba(56, 189, 248, 0.24);
+  }
+  45% {
+    box-shadow:
+      0 0 0 2px rgba(125, 211, 252, 0.92),
+      0 0 0 11px rgba(56, 189, 248, 0.2);
+  }
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(125, 211, 252, 0.92),
+      0 0 0 8px rgba(56, 189, 248, 0.24);
+  }
+}
+
+
+/* Duyuru sekmesinde yan bosluklari kaldir: telefon seridi icinde tam doldurur. */
+.home-page.announcements-tab-active {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  overflow-y: hidden !important;
+  scrollbar-gutter: auto !important;
+}
+
+
+.home-page.announcements-tab-active .home-shell.announcements-shell {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto;
+}
+
+
+.home-page.announcements-tab-active .home-shell.announcements-shell .tab-content-layer {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+
+/* Unified mobile layout pass for business, factory, mines, bank, settings */
+.home-page {
+  --mobile-touch-target: 44px;
+}
+
+
+/* Single mobile shell hardening */
+.home-page .panel-stack,
+.home-page .tab-content-layer,
+.home-page .home-sections,
+.home-page .business-screen,
+.home-page .factory-screen,
+.home-page .mines-screen,
+.home-page .bank-screen,
+.home-page .settings-screen-card,
+.home-page .rules-screen,
+.home-page .weekly-events-screen,
+.home-page .announcements-screen,
+.home-page .announcements-board,
+.home-page .announcements-board-scroll,
+.home-page .city-menu-stack,
+.home-page .city-menu-stack .module-card,
+.home-page .city-menu-stack .module-grid,
+.home-page .city-menu-stack .module-btn,
+.home-page .city-menu-stack .module-copy {
+  min-width: 0;
+  max-width: 100%;
+}
+
+
+/* Final mobile density + two-column normalization */
+.home-page {
+  --city-card-min-height: clamp(84px, 23.5vw, 96px);
+  --city-icon-wrap-size: clamp(42px, 11vw, 46px);
+  --city-icon-size: clamp(28px, 7.2vw, 31px);
+  --city-title-size: clamp(12.4px, 3.25vw, 13.8px);
+  --city-desc-size: clamp(9.8px, 2.6vw, 11px);
+  --city-grid-gap: clamp(6px, 1.9vw, 8px);
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+}
+
+
+.home-page::before {
+  background:
+    linear-gradient(180deg, rgba(7, 21, 57, 0.24), rgba(4, 11, 34, 0.44)),
+    radial-gradient(circle at 6% 14%, rgba(120, 179, 255, 0.15), transparent 40%),
+    radial-gradient(circle at 94% 86%, rgba(120, 179, 255, 0.12), transparent 39%);
+}
+
+
+/* Final mobile parity + typography stability pass */
+.home-page {
+  --city-card-min-height: clamp(76px, 21vw, 88px);
+  --city-icon-wrap-size: clamp(38px, 10.2vw, 43px);
+  --city-icon-size: clamp(24px, 6.7vw, 28px);
+  --city-title-size: clamp(12px, 3.05vw, 13.2px);
+  --city-desc-size: clamp(9.6px, 2.5vw, 10.8px);
+  --city-grid-gap: clamp(6px, 1.8vw, 8px);
+}
+
+
+.home-page .chat-community-tabs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+
+.home-page .chat-community-tab {
+  min-height: 42px;
+  font-size: 11px;
+  padding: 0 8px;
+}
+
+
+.home-daily-claim-strip,
+.daily-login-claim-btn {
+  border-color: rgba(255, 214, 120, 0.84) !important;
+  background:
+    linear-gradient(180deg, rgba(228, 170, 50, 0.98), rgba(176, 122, 31, 0.99)) !important;
+  color: #fff7e2 !important;
+}
+
+
+/* --- FINAL: Haberler / Kurallar / DM readability & size pass --- */
+.home-page .chat-community-tab {
+  min-height: 46px !important;
+  font-size: 14px !important;
+  padding: 0 10px !important;
+}

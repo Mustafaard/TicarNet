@@ -1,0 +1,400 @@
+
+.factory-hub-card {
+  border-radius: 16px;
+  border: 1px solid rgba(123, 185, 255, 0.28);
+  background:
+    linear-gradient(165deg, rgba(14, 25, 43, 0.95), rgba(8, 14, 27, 0.96)),
+    radial-gradient(circle at 18% 0, rgba(81, 154, 255, 0.16), transparent 52%);
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  overflow-anchor: none;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+
+.factory-hub-toolbar {
+  border: 1px solid rgba(110, 173, 245, 0.3);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(13, 31, 56, 0.88), rgba(9, 21, 40, 0.92));
+  padding: 12px 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: center;
+  overflow-anchor: none;
+  min-width: 0;
+}
+
+
+.factory-hub-summary {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+
+.factory-hub-summary small {
+  color: #9cb8dc;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+
+
+.factory-hub-summary strong {
+  color: #f2f8ff;
+  font-size: clamp(17px, 3.5vw, 20px);
+  line-height: 1.08;
+}
+
+
+.factory-hub-summary span {
+  color: #b9ceed;
+  font-size: 11px;
+  line-height: 1.28;
+}
+
+
+.factory-build-banner {
+  border: 1px solid rgba(117, 186, 255, 0.34);
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgba(18, 43, 74, 0.9), rgba(11, 28, 52, 0.94));
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  overflow-anchor: none;
+}
+
+
+.factory-build-speedup-btn {
+  white-space: nowrap;
+  font-size: 11px;
+  padding: 4px 8px;
+  min-height: 0;
+  line-height: 1.2;
+}
+
+
+.factory-upgrade-banner {
+  border: 1px solid rgba(255, 206, 128, 0.4);
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgba(70, 48, 18, 0.9), rgba(48, 32, 11, 0.94));
+  padding: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  overflow-anchor: none;
+}
+
+
+.factory-build-banner-copy {
+  display: grid;
+  gap: 3px;
+}
+
+
+.factory-build-banner-copy small {
+  color: #9fc2e9;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.1px;
+}
+
+
+.factory-build-banner-copy strong {
+  color: #eef6ff;
+  font-size: clamp(17px, 3.6vw, 20px);
+  line-height: 1.1;
+}
+
+
+.factory-build-banner-copy span {
+  color: #c6dbf4;
+  font-size: 11.5px;
+  line-height: 1.28;
+}
+
+
+.factory-build-countdown {
+  min-width: 158px;
+  border-radius: 10px;
+  border: 1px solid rgba(116, 188, 255, 0.52);
+  background: rgba(10, 29, 52, 0.9);
+  padding: 7px 10px;
+  display: grid;
+  gap: 3px;
+  justify-items: end;
+}
+
+
+.factory-build-countdown small {
+  color: #9cc4ed;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08px;
+}
+
+
+.factory-build-countdown strong {
+  color: #79dcff;
+  font-size: 16px;
+  line-height: 1;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+
+.factory-build-countdown.is-upgrade {
+  border-color: rgba(247, 203, 119, 0.58);
+  background: rgba(56, 36, 10, 0.88);
+}
+
+
+.factory-build-countdown.is-upgrade small {
+  color: #ffd99b;
+}
+
+
+.factory-build-countdown.is-upgrade strong {
+  color: #ffe4b8;
+}
+
+
+.factory-hub-collect-btn {
+  min-height: 42px;
+  border-radius: 11px;
+  padding-inline: 14px;
+  white-space: nowrap;
+}
+
+
+.factory-upgrade-costs.factory-upgrade-costs-modal {
+  border-color: rgba(232, 191, 111, 0.38);
+  background: linear-gradient(180deg, rgba(16, 28, 45, 0.9), rgba(10, 19, 34, 0.94));
+  overflow: visible;
+  min-width: 0;
+  padding: 10px 12px;
+  margin-top: 4px;
+}
+
+
+.factory-upgrade-costs.factory-upgrade-costs-modal .factory-cost-title {
+  margin-bottom: 6px;
+}
+
+
+.factory-upgrade-costs.factory-upgrade-costs-modal .factory-max-label,
+.factory-upgrade-costs.factory-upgrade-costs-modal .factory-cost-title.factory-cost-title-missing {
+  margin-top: 8px;
+  margin-bottom: 0;
+  display: block;
+}
+
+
+.factory-upgrade-costs {
+  border: 1px solid rgba(101, 162, 234, 0.22);
+  border-radius: 10px;
+  background: rgba(7, 16, 31, 0.46);
+  padding: 8px;
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+
+.factory-upgrade-costs.factory-upgrade-costs-purchase {
+  gap: 8px;
+}
+
+
+.factory-card.is-shop-card .factory-upgrade-costs.factory-upgrade-costs-purchase {
+  border-color: rgba(227, 183, 98, 0.36);
+  background: linear-gradient(180deg, rgba(16, 28, 45, 0.9), rgba(10, 19, 34, 0.94));
+  overflow: visible;
+}
+
+
+.factory-upgrade-modal {
+  width: min(100%, 520px);
+  border: 1px solid rgba(120, 177, 235, 0.34);
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 211, 102, 0.2), transparent 34%),
+    radial-gradient(circle at top left, rgba(57, 127, 214, 0.24), transparent 38%),
+    linear-gradient(180deg, rgba(12, 24, 42, 0.98), rgba(8, 16, 29, 0.95));
+  box-shadow: 0 28px 60px rgba(3, 10, 23, 0.48);
+}
+
+
+.factory-upgrade-modal > h3 {
+  margin: 0 0 8px;
+  font-size: 1.55rem;
+  color: #f7fbff;
+  letter-spacing: 0.01em;
+}
+
+
+.factory-upgrade-modal > p {
+  margin: 0 0 14px;
+  color: #c8d9ec;
+  font-size: 0.98rem;
+}
+
+
+.factory-upgrade-modal .factory-upgrade-modal-preview,
+.factory-upgrade-modal .factory-upgrade-modal-costs {
+  padding: 14px 15px;
+  border-radius: 18px;
+  border: 1px solid rgba(146, 203, 255, 0.22);
+  background:
+    linear-gradient(180deg, rgba(18, 33, 54, 0.94), rgba(10, 20, 35, 0.88));
+  margin-bottom: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+
+.factory-upgrade-modal .factory-upgrade-modal-preview h4,
+.factory-upgrade-modal .factory-upgrade-modal-costs h4 {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #ffd784;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+
+.factory-upgrade-modal .factory-cost-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+
+.factory-upgrade-modal .fleet-summary-line {
+  min-height: 48px;
+  border-radius: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(120, 177, 235, 0.16);
+  background: rgba(7, 15, 27, 0.36);
+}
+
+
+.factory-upgrade-modal .fleet-summary-line img {
+  width: 24px;
+  height: 24px;
+}
+
+
+.factory-upgrade-modal .fleet-summary-line.positive {
+  color: #dff7eb;
+  border-color: rgba(88, 206, 143, 0.22);
+}
+
+
+.factory-upgrade-modal .fleet-summary-line.negative {
+  color: #ffe3ad;
+  border-color: rgba(239, 193, 92, 0.26);
+}
+
+
+.factory-upgrade-modal .fleet-gallery-note-hint {
+  margin-top: 12px;
+  color: #c7d7ea;
+}
+
+
+.factory-upgrade-modal .factory-upgrade-note {
+  margin: 10px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 12px;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+
+.factory-upgrade-modal .factory-upgrade-note.is-missing {
+  border-color: rgba(255, 146, 146, 0.58);
+  background: linear-gradient(180deg, rgba(94, 32, 39, 0.64), rgba(68, 23, 29, 0.72));
+  color: #ffd8d8;
+}
+
+
+.factory-upgrade-modal .factory-upgrade-note.is-ready {
+  border-color: rgba(129, 226, 173, 0.52);
+  background: linear-gradient(180deg, rgba(21, 83, 58, 0.54), rgba(14, 58, 41, 0.62));
+  color: #d7ffeb;
+}
+
+
+.factory-upgrade-modal .fleet-modal-actions {
+  gap: 10px;
+}
+
+
+.factory-upgrade-modal .fleet-modal-actions .btn {
+  min-height: 46px;
+  border-radius: 14px;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+
+.factory-upgrade-modal .fleet-modal-actions .btn-success {
+  background: linear-gradient(180deg, #2ab36d, #1a7b4b);
+  color: #ecfff4;
+  border: 1px solid rgba(128, 223, 168, 0.72);
+  box-shadow: 0 10px 18px rgba(13, 56, 34, 0.32);
+}
+
+
+.factory-upgrade-modal .fleet-modal-actions .btn-danger {
+  background: linear-gradient(180deg, #a13f4f, #6f2532);
+  color: #fff0f3;
+  border: 1px solid rgba(255, 167, 167, 0.64);
+}
+
+
+.factory-build-countdown strong {
+  min-width: 14ch;
+  text-align: right;
+}
+
+
+.factory-purchase-overlay .factory-upgrade-costs.factory-upgrade-costs-modal {
+  max-width: 100%;
+  overflow: visible;
+}
+
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal .factory-upgrade-modal-preview,
+.warehouse-modal.fleet-modal.factory-upgrade-modal .factory-upgrade-modal-costs {
+  flex-shrink: 1;
+  min-height: 0;
+}
+
+
+.factory-upgrade-modal > h3 {
+  font-size: clamp(20px, 5.4vw, 24px);
+}
+
+
+.factory-upgrade-modal > p {
+  font-size: clamp(10.4px, 2.8vw, 11.6px);
+}
+
+
+.factory-upgrade-modal .factory-cost-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+}

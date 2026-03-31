@@ -13,3 +13,6 @@ server/.env
 *.log
 ticarnet-deploy.tgz
 ticarnet-part-*
+
+# Claude AI editor settings
+.claude/

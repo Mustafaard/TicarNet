@@ -1,0 +1,173 @@
+
+/* İlanlarım: ilan kartları + Kaldır */
+.marketplace-listings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+
+.marketplace-listing-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--theme-ann-time);
+  border-radius: 10px;
+}
+
+
+.marketplace-listing-main {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+
+.marketplace-listing-icon {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+
+.marketplace-listing-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+
+.marketplace-listing-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+
+.marketplace-listing-date {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+.marketplace-listing-qty-total {
+  font-size: 13px;
+  color: var(--text);
+}
+
+
+.marketplace-listing-price-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0;
+}
+
+
+.marketplace-listing-unit-price {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+
+.marketplace-listing-price-label {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+
+.marketplace-listing-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(180deg, #dc3545, #c82333);
+  border: 1px solid rgba(200, 35, 51, 0.6);
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+
+.marketplace-listing-remove:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+
+.marketplace-listing-remove:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+.marketplace-listing-remove-icon {
+  font-size: 14px;
+  line-height: 1;
+}
+
+
+.private-listings-screen .fleet-market-list > h4 {
+  margin: 6px 0 2px;
+  font-size: 14px;
+}
+
+
+.private-listings-screen .fleet-market-row {
+  min-height: 88px;
+}
+
+
+.marketplace-listing-card {
+  min-height: 0;
+  padding: 10px;
+}
+
+
+.marketplace-listing-main {
+  grid-template-columns: 44px minmax(0, 1fr);
+  gap: 8px;
+  align-items: start;
+}
+
+
+.marketplace-listing-icon {
+  width: 44px;
+  height: 44px;
+}
+
+
+.marketplace-listing-name {
+  font-size: 13px;
+}
+
+
+.marketplace-listing-date,
+.marketplace-listing-qty-total,
+.marketplace-listing-price-label {
+  font-size: 10px;
+}
+
+
+.marketplace-listing-price-wrap {
+  justify-self: start;
+}
+
+
+.marketplace-listing-remove {
+  width: 100%;
+  min-height: 34px;
+}

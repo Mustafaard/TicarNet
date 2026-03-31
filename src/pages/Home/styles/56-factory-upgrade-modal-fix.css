@@ -1,0 +1,174 @@
+/* Factory Upgrade Modal - Clean Mobile First Layout */
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  width: min(420px, calc(100vw - 14px)) !important;
+  max-width: min(420px, calc(100vw - 14px)) !important;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal > h3 {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(20px, 5.2vw, 24px);
+  line-height: 1.15;
+}
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal > p {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(12px, 3.2vw, 14px);
+  line-height: 1.25;
+  color: #cfe0f5;
+}
+
+.factory-upgrade-modal .factory-upgrade-modal-preview,
+.factory-upgrade-modal .factory-upgrade-modal-costs {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  margin: 0;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.factory-upgrade-modal .factory-upgrade-modal-preview h4,
+.factory-upgrade-modal .factory-upgrade-modal-costs h4 {
+  margin: 0;
+  font-size: clamp(12px, 3.1vw, 14px);
+  line-height: 1.2;
+}
+
+/* Keep each preview row in normal flow to prevent overlap */
+.factory-upgrade-modal .fleet-summary-line {
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  margin: 0 !important;
+  padding: 10px 11px;
+  border-radius: 12px;
+  line-height: 1.25;
+}
+
+.factory-upgrade-modal .fleet-summary-line img {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.factory-upgrade-modal .factory-cost-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.factory-upgrade-modal .factory-cost-chip {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  padding: 6px 9px;
+  font-size: 12px;
+  border-radius: 999px;
+}
+
+.factory-upgrade-modal .factory-cost-chip img {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.factory-upgrade-modal .factory-cost-chip span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.factory-upgrade-modal .factory-cost-chip-status {
+  margin-left: auto;
+  min-height: 18px;
+  padding: 0 7px;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.factory-upgrade-modal .fleet-gallery-note-hint,
+.factory-upgrade-modal .factory-upgrade-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.factory-upgrade-modal .factory-upgrade-note {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+}
+
+/* Stop inherited auto-push that causes action overlap */
+.warehouse-modal.fleet-modal.factory-upgrade-modal .fleet-modal-actions {
+  margin-top: 0 !important;
+  padding-top: 0 !important;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  position: relative;
+  z-index: 3;
+  background: linear-gradient(180deg, rgba(9, 20, 38, 0.96), rgba(7, 16, 31, 0.98));
+  border: 1px solid rgba(122, 181, 244, 0.24);
+  border-radius: 12px;
+  padding: 8px;
+}
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal .fleet-modal-actions .btn {
+  min-height: 40px;
+  font-size: 13px;
+  line-height: 1.1;
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+
+@media (max-width: 390px) {
+  .warehouse-modal.fleet-modal.factory-upgrade-modal {
+    padding: 12px;
+    gap: 9px;
+  }
+
+  .factory-upgrade-modal .factory-upgrade-modal-preview,
+  .factory-upgrade-modal .factory-upgrade-modal-costs {
+    padding: 10px;
+    gap: 7px;
+  }
+
+  .factory-upgrade-modal .fleet-summary-line {
+    min-height: 40px;
+    padding: 8px 9px;
+    font-size: 13px;
+  }
+
+  .factory-upgrade-modal .factory-cost-chip {
+    padding: 5px 8px;
+    font-size: 11px;
+  }
+
+  .factory-upgrade-modal .factory-cost-chip-status {
+    font-size: 9px;
+  }
+
+  .warehouse-modal.fleet-modal.factory-upgrade-modal .fleet-modal-actions .btn {
+    min-height: 38px;
+    font-size: 12px;
+  }
+}

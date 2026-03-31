@@ -1,0 +1,41 @@
+
+.logistics-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+
+.logistics-summary-card {
+  border-radius: 12px;
+  border: 1px solid rgba(116, 183, 255, 0.24);
+  background: rgba(14, 22, 34, 0.86);
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  text-align: center;
+}
+
+
+.logistics-summary-card span {
+  color: #bdd2ee;
+  font-size: 12px;
+}
+
+
+.logistics-summary-card strong {
+  color: #f4fbff;
+  font-size: 22px;
+}
+
+
+.logistics-summary-card small {
+  color: #d7e2f4;
+  font-size: 11px;
+}
+
+
+.logistics-truck-list {
+  margin-bottom: 14px;
+}
