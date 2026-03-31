@@ -85,6 +85,7 @@ import {
   speedupFactoryUpgrade,
   upgradeFactory,
   upgradeBusinessLevel,
+  getPenalizedUsers,
 } from '../../services/game.js'
 import {
   changeCurrentUserUsername,
@@ -2112,6 +2113,16 @@ function remainingMsFromIso(isoValue, nowMs) {
   return Math.max(0, parsed.getTime() - nowMs)
 }
 
+function fmtRemainShort(ms) {
+  const n = Number(ms)
+  if (!Number.isFinite(n) || n <= 0) return ''
+  const min = Math.ceil(n / 60000)
+  if (min < 60) return `${min}dk`
+  const h = Math.floor(min / 60)
+  if (h < 24) return `${h}sa`
+  return `${Math.floor(h / 24)}g`
+}
+
 function formatCountdownTr(valueMs) {
   const safeMs = Math.max(0, Math.trunc(num(valueMs)))
   if (safeMs <= 0) return 'hazır'
@@ -2949,6 +2960,7 @@ function HomePage({ user, onLogout }) {
   const [, setChatSocketState] = useState('offline')
   const [chatRestrictions, setChatRestrictions] = useState(EMPTY_CHAT_RESTRICTIONS)
   const [chatClockMs, setChatClockMs] = useState(() => new Date().getTime())
+  const [penalizedUsers, setPenalizedUsers] = useState([])
   const [chatRecentPlayers, setChatRecentPlayers] = useState([])
   const [chatRecentPlayersLoading, setChatRecentPlayersLoading] = useState(false)
   const [chatNewsExpandedId, setChatNewsExpandedId] = useState('')
@@ -4323,6 +4335,13 @@ function HomePage({ user, onLogout }) {
     }, 0)
     return () => clearTimeout(timer)
   }, [refreshAll])
+
+  useEffect(() => {
+    if (tab !== 'home') return undefined
+    getPenalizedUsers().then((res) => {
+      if (res?.success && Array.isArray(res.users)) setPenalizedUsers(res.users)
+    }).catch(() => {})
+  }, [tab])
 
   useEffect(() => {
     if (tab !== 'market') return undefined
@@ -11740,6 +11759,33 @@ function HomePage({ user, onLogout }) {
           </div>
         )}
       </article>
+
+      {penalizedUsers.length > 0 ? (
+        <article className="card module-card penalized-users-card">
+          <h4 className="menu-section-title">⚠️ Cezalı Kullanıcılar</h4>
+          <div className="penalized-users-list">
+            {penalizedUsers.map((entry) => (
+              <div key={entry.userId} className="penalized-user-row">
+                <span className="penalized-user-avatar">
+                  {entry.avatarUrl ? (
+                    <img src={entry.avatarUrl} alt="" onError={(e) => { e.currentTarget.style.display = 'none' }} />
+                  ) : (
+                    <span className="penalized-user-avatar-fallback" aria-hidden>👤</span>
+                  )}
+                </span>
+                <span className="penalized-user-name">{entry.username}</span>
+                <span className="penalized-user-penalties">
+                  {entry.penalties.map((p, i) => (
+                    <span key={i} className={`penalized-badge penalized-badge-${p.type}`}>
+                      {p.label}{p.remainingMs > 0 ? ` · ${fmtRemainShort(p.remainingMs)}` : ''}
+                    </span>
+                  ))}
+                </span>
+              </div>
+            ))}
+          </div>
+        </article>
+      ) : null}
     </section>
   )
 

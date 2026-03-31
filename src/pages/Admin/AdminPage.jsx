@@ -29,6 +29,8 @@ import {
   updateAdminUserEmail,
   updateAdminUserPassword,
   setAdminUserRole,
+  grantAdminPremium,
+  revokeAdminPremium,
 } from '../../services/admin.js'
 import './AdminPage.css'
 
@@ -166,8 +168,12 @@ function AdminPage({ user, onLogout }) {
   const [chatReason, setChatReason] = useState('')
   const [msgHours, setMsgHours] = useState('2')
   const [msgReason, setMsgReason] = useState('')
+  const [banDays, setBanDays] = useState('')
   const [banHours, setBanHours] = useState('')
+  const [banMinutes, setBanMinutes] = useState('')
   const [banReason, setBanReason] = useState('')
+  const [premiumDays, setPremiumDays] = useState('7')
+  const [premiumReason, setPremiumReason] = useState('')
 
   const [emailNext, setEmailNext] = useState('')
   const [emailReason, setEmailReason] = useState('')
@@ -628,12 +634,15 @@ function AdminPage({ user, onLogout }) {
       busyKey = 'message-block'
       confirmText = `${selected.username} kullanıcısına ${fmtPenaltyDuration(minutes)} DM + sohbet engeli verilsin mi?`
     } else if (type === 'ban' && canTempBan) {
-      minutes = hoursToMinutes(banHours, { allowZero: true })
+      const d = Math.max(0, toInt(banDays, 0))
+      const h = Math.max(0, toInt(banHours, 0))
+      const m = Math.max(0, toInt(banMinutes, 0))
+      minutes = d * 24 * 60 + h * 60 + m
       reason = String(banReason || '').trim()
       fn = setAdminTempBan
       busyKey = 'temp-ban'
       confirmText = minutes > 0
-        ? `${selected.username} kullanıcısına ${fmtPenaltyDuration(minutes)} geçici ban verilsin mi?`
+        ? `${selected.username} kullanıcısına ${fmtPenaltyDuration(minutes)} ban verilsin mi?`
         : `${selected.username} kullanıcısına kalıcı ban verilsin mi?`
     }
 
@@ -886,6 +895,37 @@ function AdminPage({ user, onLogout }) {
     await reloadAll()
   }
 
+  const applyPremium = async (mode) => {
+    if (!selected || busy) return
+    if (roleOf(selected.role) === 'admin') return void setError('Admin hesabına premium işlemi yapılamaz.')
+    clearFeedback()
+    const reason = String(premiumReason || '').trim()
+    if (mode === 'grant') {
+      const days = Math.max(1, toInt(premiumDays, 7))
+      if (!window.confirm(`${selected.username} kullanıcısına ${days} gün premium verilsin mi?`)) return
+      setBusy('premium-grant')
+      const res = await grantAdminPremium(selected.username, selected.id, days, reason)
+      setBusy('')
+      if (!res?.success) {
+        if (!handleAccessLoss(res, 'Premium verilemedi.')) setError(msgText(res, 'Premium verilemedi.'))
+        return
+      }
+      setPremiumReason('')
+      setNotice(res.message || 'Premium verildi.')
+    } else {
+      if (!window.confirm(`${selected.username} kullanıcısının premiumu kaldırılsın mı?`)) return
+      setBusy('premium-revoke')
+      const res = await revokeAdminPremium(selected.username, selected.id, reason)
+      setBusy('')
+      if (!res?.success) {
+        if (!handleAccessLoss(res, 'Premium kaldırılamadı.')) setError(msgText(res, 'Premium kaldırılamadı.'))
+        return
+      }
+      setNotice(res.message || 'Premium kaldırıldı.')
+    }
+    await reloadAll()
+  }
+
   const runQuickAction = async (mode, targetEntry) => {
     const target = targetEntry || selected
     if (!isAdmin || !target || busy) return
@@ -901,9 +941,9 @@ function AdminPage({ user, onLogout }) {
     let response = null
     if (mode === 'mute') {
       const minutes = hoursToMinutes(quickMuteHours, { fallbackHours: 1 })
-      if (!window.confirm(`${targetLookup} kullanıcısı ${fmtPenaltyDuration(minutes)} susturulsun mu?`)) return
+      if (!window.confirm(`${targetLookup} kullanıcısı ${fmtPenaltyDuration(minutes)} susturulsun mu? (Oyun sohbeti + DM)`)) return
       setBusy(`quick:mute:${targetUserId}`)
-      response = await setAdminMute(targetLookup, targetUserId, minutes, reason)
+      response = await setAdminMessageBlock(targetLookup, targetUserId, minutes, reason)
       setBusy('')
     } else if (mode === 'temp-ban') {
       const minutes = hoursToMinutes(quickTempBanHours, { fallbackHours: 4 })
@@ -1167,14 +1207,6 @@ function AdminPage({ user, onLogout }) {
                   </button>
                   <button
                     type="button"
-                    className="btn-secondary"
-                    disabled={busy === `quick:temp-ban:${entry.id}`}
-                    onClick={() => void runQuickAction('temp-ban', entry)}
-                  >
-                    {busy === `quick:temp-ban:${entry.id}` ? 'İşleniyor...' : 'Geçici Ban'}
-                  </button>
-                  <button
-                    type="button"
                     className="btn-danger"
                     disabled={busy === `quick:perm-ban:${entry.id}`}
                     onClick={() => void runQuickAction('perm-ban', entry)}
@@ -1290,6 +1322,18 @@ function AdminPage({ user, onLogout }) {
                 )}
               </article>
             ) : null}
+
+            {canCashGrant ? (
+              <article className="admin-economy-card">
+                <div className="admin-economy-head"><span style={{ fontSize: '20px', lineHeight: 1 }}>⭐</span><h3>Premium</h3></div>
+                <div className="admin-row admin-row-compact">
+                  <input type="number" min="1" max="3650" value={premiumDays} onChange={(e) => setPremiumDays(e.target.value)} placeholder="Gün sayısı" />
+                  <input type="text" className="admin-reason-input" value={premiumReason} onChange={(e) => setPremiumReason(e.target.value)} placeholder="Neden (isteğe bağlı)" maxLength={160} />
+                  <button type="button" disabled={!selected || busy === 'premium-grant' || roleOf(selected?.role) === 'admin'} onClick={() => void applyPremium('grant')}>{busy === 'premium-grant' ? 'İşleniyor...' : 'Premium Ver'}</button>
+                  <button type="button" className="btn-danger" disabled={!selected || busy === 'premium-revoke' || roleOf(selected?.role) === 'admin'} onClick={() => void applyPremium('revoke')}>{busy === 'premium-revoke' ? 'İşleniyor...' : 'Premium Geri Al'}</button>
+                </div>
+              </article>
+            ) : null}
           </div>
         </section>
       ) : null}
@@ -1297,7 +1341,7 @@ function AdminPage({ user, onLogout }) {
       {(canMsgBlock || canChatBlock || canTempBan) ? (
         <section className="admin-card">
           <h2>{isAdmin ? '4) Ceza İşlemleri' : '3) Moderatör Ceza İşlemleri'}</h2>
-          <p className="admin-inline-note">Süreler saat cinsinden girilir; sistem arka planda dakikaya çevirir.</p>
+          <p className="admin-inline-note">Susturma = tüm sohbet + DM engeli. Ban süresi için gün/saat/dakika girin; hepsi 0 = kalıcı ban.</p>
           {isAdmin && canChatBlock ? (
             <div className="admin-row">
               <input type="number" min="1" value={chatHours} onChange={(e) => setChatHours(e.target.value)} placeholder="Sohbet engeli (saat)" />
@@ -1314,10 +1358,15 @@ function AdminPage({ user, onLogout }) {
             </div>
           ) : null}
           {isAdmin && canTempBan ? (
-            <div className="admin-row">
-              <input type="number" min="0" value={banHours} onChange={(e) => setBanHours(e.target.value)} placeholder="Ban (saat, 0=kalıcı)" />
-              <input type="text" value={banReason} onChange={(e) => setBanReason(e.target.value)} placeholder="Ban nedeni" maxLength={160} />
-              <button type="button" className="btn-danger" disabled={!selected || busy === 'temp-ban'} onClick={() => void applyPenalty('ban')}>{busy === 'temp-ban' ? 'Uygulaniyor...' : 'Ban Uygula'}</button>
+            <div className="admin-row admin-ban-row">
+              <span className="admin-ban-label">Ban süresi:</span>
+              <input type="number" min="0" value={banDays} onChange={(e) => setBanDays(e.target.value)} placeholder="Gün" style={{ width: '70px' }} />
+              <input type="number" min="0" max="23" value={banHours} onChange={(e) => setBanHours(e.target.value)} placeholder="Saat" style={{ width: '70px' }} />
+              <input type="number" min="0" max="59" value={banMinutes} onChange={(e) => setBanMinutes(e.target.value)} placeholder="Dakika" style={{ width: '80px' }} />
+              <input type="text" value={banReason} onChange={(e) => setBanReason(e.target.value)} placeholder="Ban nedeni (zorunlu)" maxLength={160} />
+              <button type="button" className="btn-danger" disabled={!selected || busy === 'temp-ban'} onClick={() => void applyPenalty('ban')}>
+                {busy === 'temp-ban' ? 'Uygulanıyor...' : 'Ban Uygula (0+0+0 = Kalıcı)'}
+              </button>
             </div>
           ) : null}
         </section>

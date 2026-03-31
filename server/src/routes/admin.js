@@ -33,6 +33,8 @@ import {
   updateAdminUserEmail,
   updateAdminUserPassword,
   setAdminUserRole,
+  grantAdminPremium,
+  revokeAdminPremium,
 } from '../services/admin.js'
 
 const adminRouter = Router()
@@ -352,6 +354,24 @@ adminRouter.delete('/announcements/:announcementId', async (req, res, next) => {
 adminRouter.post('/announcements/restore', async (req, res, next) => {
   try {
     const result = await restoreAdminAnnouncement(req.auth.userId, req.body || {})
+    sendResult(res, result)
+  } catch (error) {
+    next(error)
+  }
+})
+
+adminRouter.post('/economy/premium/grant', async (req, res, next) => {
+  try {
+    const result = await grantAdminPremium(req.auth.userId, req.body || {})
+    sendResult(res, result)
+  } catch (error) {
+    next(error)
+  }
+})
+
+adminRouter.post('/economy/premium/revoke', async (req, res, next) => {
+  try {
+    const result = await revokeAdminPremium(req.auth.userId, req.body || {})
     sendResult(res, result)
   } catch (error) {
     next(error)

@@ -415,3 +415,30 @@ export async function restoreAdminAnnouncement(deletedAnnouncementId) {
   })
 }
 
+
+export async function grantAdminPremium(targetLookup, targetUserId, days, reason) {
+  return adminRequest('/admin/economy/premium/grant', {
+    method: 'POST',
+    body: {
+      requestId: createRequestId(),
+      targetLookup,
+      targetUsername: targetLookup,
+      targetUserId,
+      days: Number(days) || 7,
+      reason: reason || '',
+    },
+  })
+}
+
+export async function revokeAdminPremium(targetLookup, targetUserId, reason) {
+  return adminRequest('/admin/economy/premium/revoke', {
+    method: 'POST',
+    body: {
+      requestId: createRequestId(),
+      targetLookup,
+      targetUsername: targetLookup,
+      targetUserId,
+      reason: reason || '',
+    },
+  })
+}

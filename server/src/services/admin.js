@@ -3849,3 +3849,183 @@ export async function restoreAdminAnnouncement(actorUserId, payload = {}) {
   return result
 }
 
+
+export async function grantAdminPremium(actorUserId, payload = {}) {
+  const days = Math.max(1, Math.min(3650, asInt(payload?.days, 7)))
+  const reasonCheck = validateOptionalReason(payload?.reason)
+  if (!reasonCheck.ok) return reasonCheck.result
+
+  const targetLookup = String(payload?.targetLookup || payload?.targetIdentifier || payload?.targetUsername || payload?.targetEmail || '').trim()
+  const targetUserId = String(payload?.targetUserId || '').trim()
+  const requestId = String(payload?.requestId || '').trim()
+
+  const preDb = await readDb()
+  const preTarget = resolveTarget(preDb, payload)
+  if (!preTarget.ok) return preTarget.result
+
+  let result
+  await updateDb((db) => {
+    const actor = actorPayload(db, actorUserId)
+    if (!actor.ok) { result = actor.result; return db }
+
+    const action = 'premium_grant'
+    const baseMeta = { requestId, targetLookup, targetUserId, days, reason: reasonCheck.value }
+
+    const permErr = can(actor.role, PERM.CASH_GRANT)
+    if (permErr) {
+      result = permErr
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: permErr.errors.global, meta: baseMeta })
+      return db
+    }
+
+    const req = consumeRequestId(db, actor.actor.id, action, requestId)
+    if (!req.ok) {
+      result = fail(req.reason, req.message)
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: result.errors.global, meta: baseMeta })
+      return db
+    }
+
+    const target = resolveTarget(db, payload)
+    if (!target.ok) {
+      result = target.result
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: result.errors.global, meta: baseMeta })
+      return db
+    }
+
+    const profile = findProfileByUserId(db, target.target.id)
+    if (!profile) {
+      result = fail('not_found', 'Hedef oyuncu profili bulunamadı.')
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: result.errors.global, targetUserId: target.target.id, targetUsername: target.target.username, meta: baseMeta })
+      return db
+    }
+
+    const nowMs = Date.now()
+    const currentUntilMs = createdMs(profile.premiumUntil || '')
+    const baseMs = Math.max(nowMs, currentUntilMs)
+    const newUntilMs = baseMs + days * 24 * 60 * 60 * 1000
+    profile.premiumUntil = new Date(newUntilMs).toISOString()
+    profile.updatedAt = nowIso()
+
+    sendAdminNotice(db, target.target, {
+      title: 'Premium Üyelik',
+      message: `Yönetim tarafından ${days} günlük premium üyelik eklendi.`,
+      refreshReason: 'admin_moderation',
+      meta: { source: 'admin_panel', action, days, actorUserId: actor.actor.id, actorUsername: actor.actor.username },
+    })
+
+    addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'ok', message: `${target.target.username} kullanıcısına ${days} gün premium eklendi.`, targetUserId: target.target.id, targetUsername: target.target.username, targetEmail: target.target.email, meta: baseMeta })
+
+    result = { success: true, message: `${target.target.username} kullanıcısına ${days} gün premium eklendi.`, premiumUntil: profile.premiumUntil }
+    return db
+  })
+
+  return result ?? fail('unknown_error', 'Premium güncelleme işlemi tamamlanamadı.')
+}
+
+export async function revokeAdminPremium(actorUserId, payload = {}) {
+  const reasonCheck = validateOptionalReason(payload?.reason)
+  if (!reasonCheck.ok) return reasonCheck.result
+
+  const targetLookup = String(payload?.targetLookup || payload?.targetIdentifier || payload?.targetUsername || payload?.targetEmail || '').trim()
+  const targetUserId = String(payload?.targetUserId || '').trim()
+  const requestId = String(payload?.requestId || '').trim()
+
+  const preDb = await readDb()
+  const preTarget = resolveTarget(preDb, payload)
+  if (!preTarget.ok) return preTarget.result
+
+  let result
+  await updateDb((db) => {
+    const actor = actorPayload(db, actorUserId)
+    if (!actor.ok) { result = actor.result; return db }
+
+    const action = 'premium_revoke'
+    const baseMeta = { requestId, targetLookup, targetUserId, reason: reasonCheck.value }
+
+    const permErr = can(actor.role, PERM.CASH_GRANT)
+    if (permErr) {
+      result = permErr
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: permErr.errors.global, meta: baseMeta })
+      return db
+    }
+
+    const req = consumeRequestId(db, actor.actor.id, action, requestId)
+    if (!req.ok) {
+      result = fail(req.reason, req.message)
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: result.errors.global, meta: baseMeta })
+      return db
+    }
+
+    const target = resolveTarget(db, payload)
+    if (!target.ok) {
+      result = target.result
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: result.errors.global, meta: baseMeta })
+      return db
+    }
+
+    const profile = findProfileByUserId(db, target.target.id)
+    if (!profile) {
+      result = fail('not_found', 'Hedef oyuncu profili bulunamadı.')
+      addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'failed', message: result.errors.global, targetUserId: target.target.id, meta: baseMeta })
+      return db
+    }
+
+    profile.premiumUntil = ''
+    profile.updatedAt = nowIso()
+
+    sendAdminNotice(db, target.target, {
+      title: 'Premium Üyelik',
+      message: 'Premium üyeliğiniz yönetim tarafından kaldırıldı.',
+      refreshReason: 'admin_moderation',
+      meta: { source: 'admin_panel', action, actorUserId: actor.actor.id },
+    })
+
+    addLog(db, { actorUserId: actor.actor.id, actorUsername: actor.actor.username, actorEmail: actor.actor.email, actorRole: actor.role, action, status: 'ok', message: `${target.target.username} kullanıcısının premiumu kaldırıldı.`, targetUserId: target.target.id, targetUsername: target.target.username, targetEmail: target.target.email, meta: baseMeta })
+
+    result = { success: true, message: `${target.target.username} kullanıcısının premiumu kaldırıldı.` }
+    return db
+  })
+
+  return result ?? fail('unknown_error', 'Premium kaldırma işlemi tamamlanamadı.')
+}
+
+export async function getPenalizedUsers() {
+  const db = await readDb()
+  const nowMs = Date.now()
+  const result = []
+  for (const user of (db.users || []).filter(Boolean)) {
+    const penalties = []
+    const chatBlock = futureDetails(user.chatBlockedUntil, nowMs)
+    const dmBlock = futureDetails(user.dmBlockedUntil, nowMs)
+    const tempBan = futureDetails(user.tempBanUntil, nowMs)
+    const permBan = Boolean(user.adminBlocked)
+    if (chatBlock.active || dmBlock.active) {
+      penalties.push({
+        type: 'mute',
+        label: 'Susturuldu',
+        until: chatBlock.until || dmBlock.until,
+        remainingMs: Math.max(chatBlock.remainingMs || 0, dmBlock.remainingMs || 0),
+      })
+    }
+    if (tempBan.active) {
+      penalties.push({
+        type: 'tempban',
+        label: 'Süreli Ban',
+        until: tempBan.until,
+        remainingMs: tempBan.remainingMs,
+      })
+    }
+    if (permBan) {
+      penalties.push({ type: 'permban', label: 'Kalıcı Ban', until: '', remainingMs: 0 })
+    }
+    if (penalties.length === 0) continue
+    const profile = findProfileByUserId(db, user.id)
+    result.push({
+      userId: user.id,
+      username: String(user.username || '').trim(),
+      avatarUrl: String(profile?.avatarUrl || '').trim(),
+      penalties,
+    })
+  }
+  return { success: true, users: result }
+}

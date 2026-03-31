@@ -104,6 +104,7 @@ import {
   resolveAvatarPathFromPublicUrl,
 } from '../services/avatarUpload.js'
 import { sendSupportRequestEmail } from '../services/mailer.js'
+import { getPenalizedUsers } from '../services/admin.js'
 import { getClientIp } from '../utils.js'
 
 const gameRouter = Router()
@@ -1215,6 +1216,15 @@ gameRouter.post('/contracts/:contractId/respond', async (req, res, next) => {
   try {
     const result = await respondContract(req.auth.userId, req.params.contractId, req.body || {})
     sendResult(res, result)
+  } catch (error) {
+    next(error)
+  }
+})
+
+gameRouter.get('/penalized-users', async (req, res, next) => {
+  try {
+    const result = await getPenalizedUsers()
+    res.json(result)
   } catch (error) {
     next(error)
   }

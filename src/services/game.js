@@ -804,3 +804,7 @@ export async function readPushNotification(pushId) {
     method: 'POST',
   })
 }
+
+export async function getPenalizedUsers() {
+  return gameRequest('/game/penalized-users')
+}
