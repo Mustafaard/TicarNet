@@ -265,6 +265,9 @@ app.use((req, res, next) => {
   if (config.nodeEnv === 'production') {
     res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   }
+  if (req.path.startsWith('/api/')) {
+    res.setHeader('Cache-Control', 'no-store')
+  }
   next()
 })
 

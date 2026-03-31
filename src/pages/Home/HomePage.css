@@ -30936,6 +30936,13 @@ select {
   padding: 10px 12px;
 }
 
+.penalized-users-empty {
+  margin: 6px 0 2px;
+  font-size: 12px;
+  color: #7a9cbf;
+  text-align: center;
+}
+
 .penalized-users-list {
   display: flex;
   flex-direction: column;

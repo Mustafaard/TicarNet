@@ -11760,9 +11760,9 @@ function HomePage({ user, onLogout }) {
         )}
       </article>
 
-      {penalizedUsers.length > 0 ? (
-        <article className="card module-card penalized-users-card">
-          <h4 className="menu-section-title">⚠️ Cezalı Kullanıcılar</h4>
+      <article className="card module-card penalized-users-card">
+        <h4 className="menu-section-title">Cezalı Kullanıcılar</h4>
+        {penalizedUsers.length > 0 ? (
           <div className="penalized-users-list">
             {penalizedUsers.map((entry) => (
               <div key={entry.userId} className="penalized-user-row">
@@ -11784,8 +11784,10 @@ function HomePage({ user, onLogout }) {
               </div>
             ))}
           </div>
-        </article>
-      ) : null}
+        ) : (
+          <p className="penalized-users-empty">Şu an ceza uygulanan kullanıcı yok.</p>
+        )}
+      </article>
     </section>
   )
 
@@ -12703,15 +12705,15 @@ function HomePage({ user, onLogout }) {
                 <h4>Yükseltme tamamlandığında</h4>
                 <p className="fleet-summary-line positive">
                   <img src={factoryUpgradeModal.outputMeta?.icon} alt="" aria-hidden="true" />
-                  Üretim: {fmt(factoryUpgradeModal.outputPerCollect || 0)} → {factoryUpgradeModal.nextUpgradeOutputPerCollect > 0 ? `${fmt(factoryUpgradeModal.nextUpgradeOutputPerCollect)} ${factoryUpgradeModal.outputMeta?.label}` : '—'} / tahsilat
+                  Üretim: {fmt(factoryUpgradeModal.outputPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeOutputPerCollect > 0 ? factoryUpgradeModal.nextUpgradeOutputPerCollect : Math.round((factoryUpgradeModal.outputPerCollect || 0) * 2))} {factoryUpgradeModal.outputMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line negative">
                   <img src={factoryUpgradeModal.energyMeta?.icon} alt="" aria-hidden="true" />
-                  Enerji gideri: {fmt(factoryUpgradeModal.energyCostPerCollect || 0)} → {factoryUpgradeModal.nextUpgradeEnergyCostPerCollect > 0 ? `${fmt(factoryUpgradeModal.nextUpgradeEnergyCostPerCollect)} ${factoryUpgradeModal.energyMeta?.label}` : '—'} / tahsilat
+                  Enerji gideri: {fmt(factoryUpgradeModal.energyCostPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeEnergyCostPerCollect > 0 ? factoryUpgradeModal.nextUpgradeEnergyCostPerCollect : Math.round((factoryUpgradeModal.energyCostPerCollect || 0) * 2))} {factoryUpgradeModal.energyMeta?.label} / tahsilat
                 </p>
                 <p className="fleet-summary-line positive">
                   <img src="/home/ui/hud/xp-icon.webp" alt="" aria-hidden="true" />
-                  XP: {fmt(factoryUpgradeModal.xpPerCollect || 0)} → {factoryUpgradeModal.nextUpgradeXpPerCollect > 0 ? `${fmt(factoryUpgradeModal.nextUpgradeXpPerCollect)} XP` : '—'} / tahsilat
+                  XP: {fmt(factoryUpgradeModal.xpPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeXpPerCollect > 0 ? factoryUpgradeModal.nextUpgradeXpPerCollect : Math.round((factoryUpgradeModal.xpPerCollect || 0) * 2))} XP / tahsilat
                 </p>
               </div>
               <div className="factory-upgrade-modal-costs">
