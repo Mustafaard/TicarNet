@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, startTransition } from 'react'
 import {
   CHAT_ROOM,
   MESSAGES_DISABLED,
@@ -142,7 +142,7 @@ const connectChatSocket = useCallback(() => {
       socket.close(1000, 'stale_socket')
       return
     }
-    setChatSocketState('online')
+    startTransition(() => setChatSocketState('online'))
     socket.send(JSON.stringify({ type: 'join', room: CHAT_ROOM }))
   }
 
@@ -163,49 +163,55 @@ const connectChatSocket = useCallback(() => {
     if (payload?.type === 'chat:init') {
       const room = String(payload.room || 'global')
       const incomingMessages = pruneChatMessages(payload.messages || [])
-      setChat((prev) => ({ ...prev, [room]: incomingMessages }))
-      applyChatRestrictions(payload.chatState)
-      if (chatInitReadyRef.current && activeTabRef.current !== 'chat') {
-        const firstUnread = incomingMessages.find((entry) => entry && !entry.own)?.id || ''
-        setChatFirstUnreadId(firstUnread)
-      }
+      startTransition(() => {
+        setChat((prev) => ({ ...prev, [room]: incomingMessages }))
+        applyChatRestrictions(payload.chatState)
+        if (chatInitReadyRef.current && activeTabRef.current !== 'chat') {
+          const firstUnread = incomingMessages.find((entry) => entry && !entry.own)?.id || ''
+          setChatFirstUnreadId(firstUnread)
+        }
+      })
       chatInitReadyRef.current = true
       return
     }
 
     if (payload?.type === 'chat:message' && payload.message?.id) {
       const room = String(payload.room || payload.message.room || 'global')
-      setChat((prev) => {
-        const current = Array.isArray(prev[room]) ? prev[room] : []
-        if (current.some((entry) => entry.id === payload.message.id)) return prev
-        return { ...prev, [room]: pruneChatMessages([...current, payload.message]) }
+      startTransition(() => {
+        setChat((prev) => {
+          const current = Array.isArray(prev[room]) ? prev[room] : []
+          if (current.some((entry) => entry.id === payload.message.id)) return prev
+          return { ...prev, [room]: pruneChatMessages([...current, payload.message]) }
+        })
+        if (activeTabRef.current !== 'chat' && !payload.message.own) {
+          setChatFirstUnreadId((prev) => prev || payload.message.id)
+        }
       })
-      if (activeTabRef.current !== 'chat' && !payload.message.own) {
-        setChatFirstUnreadId((prev) => prev || payload.message.id)
-      }
       return
     }
 
     if (payload?.type === 'chat:presence') {
-      setChatUsers(Array.isArray(payload.users) ? payload.users : [])
+      startTransition(() => setChatUsers(Array.isArray(payload.users) ? payload.users : []))
       return
     }
 
     if (payload?.type === 'chat:error') {
-      setError(errText(payload.errors, 'Sohbet hatası oluştu.'))
-      applyChatRestrictions(payload.chatState)
+      startTransition(() => {
+        setError(errText(payload.errors, 'Sohbet hatası oluştu.'))
+        applyChatRestrictions(payload.chatState)
+      })
       return
     }
 
     if (payload?.type === 'chat:state') {
-      applyChatRestrictions(payload.chatState)
+      startTransition(() => applyChatRestrictions(payload.chatState))
     }
   }
 
   socket.onclose = (event) => {
     if (chatSocketRef.current !== socket) return
     chatSocketRef.current = null
-    setChatSocketState('offline')
+    startTransition(() => setChatSocketState('offline'))
     if (event?.code === WS_SESSION_REPLACED_CODE) {
       handleForcedLogout(SESSION_REPLACED_NOTICE)
       return
@@ -218,7 +224,7 @@ const connectChatSocket = useCallback(() => {
 
   socket.onerror = () => {
     if (chatSocketRef.current !== socket) return
-    setChatSocketState('offline')
+    startTransition(() => setChatSocketState('offline'))
   }
 }, [
   activeTabRef,
@@ -274,7 +280,7 @@ const connectMessageSocket = useCallback(() => {
       socket.close(1000, 'stale_socket')
       return
     }
-    setMessageSocketState('online')
+    startTransition(() => setMessageSocketState('online'))
     socket.send(JSON.stringify({ type: 'messages:sync' }))
   }
 
@@ -303,14 +309,14 @@ const connectMessageSocket = useCallback(() => {
     }
 
     if (payload?.type === 'messages:error') {
-      setError(errText(payload.errors, 'Mesaj bağlantı hatası oluştu.'))
+      startTransition(() => setError(errText(payload.errors, 'Mesaj bağlantı hatası oluştu.')))
     }
   }
 
   socket.onclose = (event) => {
     if (messageSocketRef.current !== socket) return
     messageSocketRef.current = null
-    setMessageSocketState('offline')
+    startTransition(() => setMessageSocketState('offline'))
     if (event?.code === WS_SESSION_REPLACED_CODE) {
       handleForcedLogout(SESSION_REPLACED_NOTICE)
       return
@@ -323,7 +329,7 @@ const connectMessageSocket = useCallback(() => {
 
   socket.onerror = () => {
     if (messageSocketRef.current !== socket) return
-    setMessageSocketState('offline')
+    startTransition(() => setMessageSocketState('offline'))
   }
 }, [
   enqueueMessageRefresh,

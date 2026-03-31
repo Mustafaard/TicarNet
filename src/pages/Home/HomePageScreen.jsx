@@ -1,4 +1,4 @@
-﻿import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+﻿import { useCallback, useEffect, useMemo, useRef, startTransition, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Capacitor } from '@capacitor/core'
 import {
@@ -841,7 +841,7 @@ function HomePage({ user, onLogout }) {
     })()
 
     const timer = window.setInterval(() => {
-      if (cancelled) return
+      if (cancelled || tab !== 'profile') return
       void reloadProfileModal({ showLoading: false })
     }, 25000)
 
@@ -849,7 +849,7 @@ function HomePage({ user, onLogout }) {
       cancelled = true
       window.clearInterval(timer)
     }
-  }, [profileModalUserId, reloadProfileModal])
+  }, [profileModalUserId, reloadProfileModal, tab])
 
   const profileOverviewDisplayName = overview?.profile?.displayName
   const profileOverviewUsername = overview?.profile?.username
@@ -884,6 +884,7 @@ function HomePage({ user, onLogout }) {
 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
+      if (!isPageVisible()) return
       if (logoutTriggeredRef.current) return
       void (async () => {
         const activeUser = await getStoredUser()
@@ -891,7 +892,7 @@ function HomePage({ user, onLogout }) {
           handleForcedLogout(SESSION_REPLACED_NOTICE)
         }
       })()
-    }, 12000)
+    }, 30000)
 
     return () => window.clearInterval(intervalId)
   }, [handleForcedLogout])
@@ -907,8 +908,10 @@ function HomePage({ user, onLogout }) {
 
   const applyChatRestrictions = useCallback((rawState) => {
     if (!rawState || typeof rawState !== 'object') return
-    setChatRestrictions(normalizeChatRestrictions(rawState))
-    setChatClockMs(Date.now())
+    startTransition(() => {
+      setChatRestrictions(normalizeChatRestrictions(rawState))
+      setChatClockMs(Date.now())
+    })
   }, [])
 
   useEffect(() => {
@@ -1332,8 +1335,10 @@ function HomePage({ user, onLogout }) {
     if (MESSAGES_DISABLED) {
       const safeRoom = String(room || CHAT_ROOM || 'global').trim() || 'global'
       setChat((prev) => ({ ...prev, [safeRoom]: [] }))
-      setChatRestrictions(EMPTY_CHAT_RESTRICTIONS)
-      setChatClockMs(Date.now())
+      startTransition(() => {
+        setChatRestrictions(EMPTY_CHAT_RESTRICTIONS)
+        setChatClockMs(Date.now())
+      })
       return true
     }
     const response = await getChatRoomState(room, CHAT_PRUNE_KEEP_COUNT)
@@ -1542,10 +1547,10 @@ function HomePage({ user, onLogout }) {
   useEffect(() => {
     const FAST_TABS = new Set(['chat', 'messages'])
     const MEDIUM_TABS = new Set(['missions', 'home', 'events', 'businesses', 'factories', 'mines'])
-    const intervalMs = tab === 'bank' ? 9000 : FAST_TABS.has(tab) ? 1000 : MEDIUM_TABS.has(tab) ? 2500 : 5000
+    const intervalMs = tab === 'bank' ? 20000 : FAST_TABS.has(tab) ? 3000 : MEDIUM_TABS.has(tab) ? 10000 : 20000
     const timer = window.setInterval(() => {
       if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return
-      setChatClockMs(Date.now())
+      startTransition(() => setChatClockMs(Date.now()))
     }, intervalMs)
     return () => window.clearInterval(timer)
   }, [tab])
@@ -2920,7 +2925,7 @@ function HomePage({ user, onLogout }) {
           wallet: Math.max(0, Math.trunc(num(response?.wallet || base?.wallet || 0))),
         }
       })
-      setChatClockMs((prev) => prev + 1)
+      startTransition(() => setChatClockMs((prev) => prev + 1))
     }
     setBusinessModal('')
     await Promise.all([loadOverview(), loadBusiness(), loadLogistics(), loadProfile(), loadMissions(), loadMarket()])
@@ -3088,7 +3093,7 @@ function HomePage({ user, onLogout }) {
           collectPreview: response?.collectPreview || base?.collectPreview,
         }
       })
-      setChatClockMs((prev) => prev + 1)
+      startTransition(() => setChatClockMs((prev) => prev + 1))
     }
     await Promise.all([loadLogistics(), loadOverview(), loadProfile(), loadBusiness(), loadMarket()])
   }

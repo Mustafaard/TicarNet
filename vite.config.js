@@ -42,14 +42,18 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (!id.includes('node_modules')) return
-          if (id.includes('react-dom') || id.includes('\\react\\') || id.includes('/react/')) {
-            return 'vendor-react'
+          if (id.includes('node_modules')) {
+            if (id.includes('react-dom') || id.includes('\\react\\') || id.includes('/react/')) {
+              return 'vendor-react'
+            }
+            if (id.includes('@capacitor')) {
+              return 'vendor-capacitor'
+            }
+            return 'vendor'
           }
-          if (id.includes('@capacitor')) {
-            return 'vendor-capacitor'
-          }
-          return 'vendor'
+          if (id.includes('/pages/Home/views/')) return 'home-views'
+          if (id.includes('/pages/Home/modals/')) return 'home-modals'
+          if (id.includes('/pages/Home/hooks/')) return 'home-hooks'
         },
       },
     },

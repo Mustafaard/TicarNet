@@ -40,14 +40,21 @@
 
 .daily-login-hero {
   border-radius: 14px;
-  border: 1px solid rgba(255, 208, 120, 0.35);
+  border: 1px solid rgba(255, 210, 80, 0.65);
   background:
-    radial-gradient(circle at 14% 10%, rgba(255, 188, 98, 0.18), transparent 55%),
-    linear-gradient(155deg, rgba(48, 30, 22, 0.9), rgba(20, 16, 33, 0.94));
+    radial-gradient(ellipse at 15% 0%, rgba(255, 185, 40, 0.38) 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 100%, rgba(220, 80, 10, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(120, 40, 0, 0.18) 0%, transparent 70%),
+    linear-gradient(148deg, rgba(72, 34, 4, 0.98) 0%, rgba(12, 6, 24, 0.99) 100%);
   padding: 10px;
   display: flex;
   align-items: center;
   gap: 9px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 240, 160, 0.18),
+    inset 0 -1px 0 rgba(180, 80, 0, 0.2),
+    0 6px 24px rgba(180, 90, 0, 0.32),
+    0 0 0 1px rgba(255, 220, 100, 0.08);
 }
 
 
@@ -55,12 +62,16 @@
   width: 54px;
   height: 54px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 214, 145, 0.52);
-  background: rgba(31, 19, 25, 0.82);
+  border: 1px solid rgba(255, 215, 80, 0.82);
+  background: radial-gradient(circle at 35% 25%, rgba(255, 180, 40, 0.22), rgba(48, 20, 4, 0.96));
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex: 0 0 54px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 245, 180, 0.22),
+    0 0 20px rgba(255, 170, 30, 0.4),
+    0 0 40px rgba(255, 140, 10, 0.16);
 }
 
 
@@ -79,14 +90,15 @@
 
 
 .daily-login-hero-copy strong {
-  color: #fff1d1;
+  color: #ffe89a;
   font-size: 16px;
+  text-shadow: 0 0 18px rgba(255, 200, 60, 0.5), 0 1px 0 rgba(0,0,0,0.4);
 }
 
 
 .daily-login-hero-copy p {
   margin: 0;
-  color: rgba(248, 227, 195, 0.9);
+  color: rgba(252, 230, 195, 0.92);
   font-size: 12px;
   line-height: 1.38;
 }
@@ -98,12 +110,13 @@
   gap: 6px;
   width: fit-content;
   border-radius: 999px;
-  border: 1px solid rgba(255, 212, 135, 0.55);
-  background: rgba(74, 38, 24, 0.64);
+  border: 1px solid rgba(255, 215, 80, 0.82);
+  background: linear-gradient(135deg, rgba(120, 58, 8, 0.88), rgba(72, 30, 4, 0.92));
   padding: 3px 10px;
-  color: #ffe6b5;
+  color: #ffe566;
   font-size: 12px;
   font-weight: 800;
+  box-shadow: 0 0 14px rgba(255, 185, 30, 0.32), inset 0 1px 0 rgba(255,240,160,0.14);
 }
 
 
@@ -125,29 +138,41 @@
 
 .daily-login-day-card {
   border-radius: 12px;
-  border: 1px solid rgba(148, 163, 184, 0.32);
-  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(100, 130, 180, 0.22);
+  background:
+    linear-gradient(158deg, rgba(14, 22, 46, 0.92), rgba(8, 14, 30, 0.96));
   padding: 7px;
   display: grid;
   gap: 5px;
   min-height: 102px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 
 .daily-login-day-card.is-available {
-  border-color: rgba(255, 200, 109, 0.6);
+  border-color: rgba(255, 210, 60, 0.9);
   background:
-    radial-gradient(circle at 86% 10%, rgba(255, 190, 87, 0.24), transparent 54%),
-    linear-gradient(160deg, rgba(64, 38, 22, 0.9), rgba(31, 18, 28, 0.95));
+    radial-gradient(ellipse at 90% 0%, rgba(255, 195, 45, 0.45) 0%, transparent 55%),
+    radial-gradient(ellipse at 10% 100%, rgba(230, 120, 10, 0.24) 0%, transparent 50%),
+    linear-gradient(155deg, rgba(92, 52, 8, 0.98) 0%, rgba(44, 20, 4, 0.99) 100%);
+  box-shadow:
+    0 0 0 1px rgba(255, 230, 120, 0.28) inset,
+    0 6px 20px rgba(200, 100, 0, 0.36),
+    0 0 30px rgba(255, 180, 20, 0.1);
 }
 
 
 .daily-login-day-card.is-claimed,
 .daily-login-day-card.is-today {
-  border-color: rgba(88, 201, 146, 0.52);
+  border-color: rgba(45, 240, 165, 0.72);
   background:
-    radial-gradient(circle at 86% 10%, rgba(88, 201, 146, 0.2), transparent 52%),
-    linear-gradient(160deg, rgba(19, 52, 35, 0.88), rgba(13, 34, 29, 0.94));
+    radial-gradient(ellipse at 88% 0%, rgba(45, 240, 165, 0.32) 0%, transparent 55%),
+    radial-gradient(ellipse at 6% 100%, rgba(0, 215, 148, 0.16) 0%, transparent 48%),
+    linear-gradient(155deg, rgba(10, 74, 48, 0.98) 0%, rgba(4, 44, 28, 0.99) 100%);
+  box-shadow:
+    0 0 0 1px rgba(60, 255, 180, 0.2) inset,
+    0 6px 20px rgba(0, 160, 90, 0.3),
+    0 0 28px rgba(40, 220, 155, 0.1);
 }
 
 
@@ -168,13 +193,14 @@
 
 .daily-login-day-bonus {
   border-radius: 999px;
-  border: 1px solid rgba(255, 212, 135, 0.58);
-  background: rgba(74, 38, 24, 0.64);
-  color: #ffe6b5;
+  border: 1px solid rgba(255, 215, 70, 0.82);
+  background: linear-gradient(135deg, rgba(120, 60, 8, 0.9), rgba(80, 34, 4, 0.92));
+  color: #ffe566;
   font-size: 10px;
   font-weight: 800;
   letter-spacing: 0.05em;
   padding: 2px 7px;
+  box-shadow: 0 0 10px rgba(255, 185, 20, 0.26), inset 0 1px 0 rgba(255,240,150,0.12);
 }
 
 
@@ -246,19 +272,31 @@
 
 .daily-login-claim-btn {
   min-height: 46px;
-  border: 1px solid rgba(255, 206, 116, 0.68);
-  background: linear-gradient(180deg, #f5cf63, #d89f1b);
-  color: #2f1a08;
+  border: 1px solid rgba(255, 220, 80, 0.92);
+  background: linear-gradient(175deg, #ffe040 0%, #f5a800 55%, #c96800 100%);
+  color: #1a0600;
   font-weight: 900;
   letter-spacing: 0.02em;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 200, 0.52),
+    inset 0 -2px 0 rgba(140, 60, 0, 0.28),
+    0 8px 24px rgba(220, 130, 0, 0.52),
+    0 0 40px rgba(255, 180, 0, 0.18);
+  text-shadow: 0 1px 0 rgba(255, 220, 60, 0.4);
+  transition: background 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 
 .daily-login-claim-btn:hover,
 .daily-login-claim-btn:focus-visible {
-  border-color: rgba(255, 225, 160, 0.9);
-  background: linear-gradient(180deg, #f8da87, #e6b238);
-  color: #2f1a08;
+  border-color: rgba(255, 240, 130, 1);
+  background: linear-gradient(175deg, #ffe860 0%, #f8b820 55%, #dc7c00 100%);
+  color: #1a0600;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 210, 0.58),
+    inset 0 -2px 0 rgba(140, 60, 0, 0.3),
+    0 10px 28px rgba(230, 140, 0, 0.62),
+    0 0 50px rgba(255, 190, 0, 0.24);
 }
 
 
@@ -266,6 +304,8 @@
   border-color: rgba(148, 163, 184, 0.46);
   background: linear-gradient(180deg, rgba(71, 85, 105, 0.82), rgba(51, 65, 85, 0.86));
   color: rgba(226, 232, 240, 0.86);
+  box-shadow: none;
+  text-shadow: none;
 }
 
 
@@ -276,11 +316,16 @@
   gap: 11px;
   text-align: center;
   border-radius: 18px;
-  border: 1px solid rgba(255, 214, 145, 0.35);
+  border: 1px solid rgba(255, 210, 80, 0.58);
   background:
-    radial-gradient(circle at 50% -15%, rgba(255, 189, 98, 0.16), transparent 55%),
-    linear-gradient(170deg, rgba(8, 15, 31, 0.95), rgba(10, 23, 43, 0.96));
-  box-shadow: 0 14px 34px rgba(2, 6, 16, 0.62);
+    radial-gradient(ellipse at 50% -10%, rgba(255, 190, 50, 0.3) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 95%, rgba(220, 80, 10, 0.16) 0%, transparent 48%),
+    radial-gradient(ellipse at 10% 80%, rgba(160, 40, 220, 0.1) 0%, transparent 44%),
+    linear-gradient(168deg, rgba(28, 14, 4, 0.98) 0%, rgba(8, 14, 36, 0.99) 100%);
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.72),
+    inset 0 1px 0 rgba(255, 240, 170, 0.14),
+    0 0 60px rgba(200, 120, 0, 0.12);
 }
 
 
@@ -293,11 +338,12 @@
   width: 64px;
   height: 64px;
   border-radius: 999px;
-  border: 1px solid rgba(255, 210, 128, 0.62);
-  background: linear-gradient(160deg, rgba(57, 31, 24, 0.85), rgba(33, 20, 36, 0.88));
+  border: 1px solid rgba(255, 200, 64, 0.76);
+  background: linear-gradient(145deg, rgba(66, 28, 8, 0.94), rgba(28, 12, 38, 0.96));
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 0 22px rgba(255, 170, 30, 0.32);
   margin: 2px auto 2px;
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.12),
@@ -314,9 +360,10 @@
 
 .daily-login-result-modal h3 {
   margin: 0;
-  color: #fff1d1;
+  color: #ffe890;
   font-size: 28px;
   line-height: 1.12;
+  text-shadow: 0 0 28px rgba(255, 195, 40, 0.6), 0 2px 4px rgba(0,0,0,0.5);
 }
 
 
