@@ -975,7 +975,7 @@ function factoryUpgradeDurationMs(template, targetLevel) {
   const baseMinutes = Math.max(1, asInt(template?.upgrade?.baseDurationMinutes, 30))
   const safeTargetLevel = Math.max(FACTORY_MIN_LEVEL + 1, asInt(targetLevel, FACTORY_MIN_LEVEL + 1))
   const levelStep = Math.max(0, safeTargetLevel - (FACTORY_MIN_LEVEL + 1))
-  const growth = 1.3
+  const growth = 1.7
   return Math.max(1, Math.round(baseMinutes * Math.pow(growth, levelStep))) * MS_MINUTE
 }
 
