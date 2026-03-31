@@ -165,6 +165,7 @@ const MESSAGE_ICONS = {
 const CHAT_COMMUNITY_TAB_ITEMS = [
   { id: 'sohbet', label: 'Sohbet', icon: '💬', iconSrc: '/home/icons/sohbet.png', type: 'panel' },
   { id: 'haberler', label: 'Haberler', icon: '📰', iconSrc: '/home/icons/messages/bildirim.webp', type: 'panel' },
+  { id: 'kurallar', label: 'Kurallar', icon: '📜', iconSrc: '/home/icons/custom/kurallarim.webp', type: 'panel' },
 ]
 const CHAT_NEWS_MAX_ITEMS = 70
 const MARKETPLACE_SYSTEM_STOCK_CAP = 5000
@@ -15518,7 +15519,7 @@ function HomePage({ user, onLogout }) {
     }
   }, [chatNewsExpandedId, chatNewsFeed])
 
-  const chatCommunityTitle = chatCommunityTab === 'haberler' ? 'Haberler' : 'Sohbet'
+  const chatCommunityTitle = chatCommunityTab === 'haberler' ? 'Haberler' : chatCommunityTab === 'kurallar' ? 'Kurallar' : 'Sohbet'
   const isSohbetCommunityTab = chatCommunityTab === 'sohbet'
 
   const chatView = (
@@ -15757,6 +15758,54 @@ function HomePage({ user, onLogout }) {
               </form>
             ) : null}
           </>
+        ) : null}
+        {chatCommunityTab === 'kurallar' ? (
+          <section className="chat-side-panel chat-rules-panel" aria-label="Oyun kuralları">
+            <div className="chat-rules-scroll">
+              <div className="rules-intro-icon" aria-hidden>📜</div>
+              <h3 className="rules-intro-title">{CITY_RULES_GUIDE.title}</h3>
+              <div className="rules-intro-text-wrap">
+                {CITY_RULES_GUIDE.subtitleLines.map((line) => (
+                  <p key={line} className="rules-intro-text">{line}</p>
+                ))}
+              </div>
+              {CITY_RULES_GUIDE.groups.map((group) => (
+                <article key={group.id} className="card module-card rules-group-card" aria-labelledby={`chat-rules-group-${group.id}`}>
+                  <header className="rules-group-head">
+                    <h4 id={`chat-rules-group-${group.id}`} className="rules-group-title">
+                      <span className="rules-group-emoji" aria-hidden>{group.icon}</span>
+                      <span>{group.title}</span>
+                    </h4>
+                    <p className="rules-group-subtitle">{group.description}</p>
+                  </header>
+                  <div className="rules-group-divider" />
+                  <div className="rules-group-list" role="list">
+                    {group.rules.map((entry, ruleIndex) => (
+                      <article
+                        key={`chat-${group.id}-rule-${ruleIndex + 1}`}
+                        className={`rules-penalty-card tone-${entry.tone || 'red'}`}
+                        role="listitem"
+                      >
+                        <div className="rules-penalty-topline">
+                          <span className="rules-penalty-index">{`Kural ${ruleIndex + 1}`}</span>
+                        </div>
+                        <p className="rules-penalty-text">{entry.text}</p>
+                        <p className="rules-penalty-chip">
+                          <span className="rules-penalty-chip-icon" aria-hidden>⏱️</span>
+                          <span>{entry.penalty}</span>
+                        </p>
+                        {entry.note ? <p className="rules-penalty-note">{entry.note}</p> : null}
+                      </article>
+                    ))}
+                  </div>
+                </article>
+              ))}
+              <div className="card module-card rules-final-card">
+                <div className="rules-final-icon" aria-hidden>⚖️</div>
+                <p className="rules-final-text">{CITY_RULES_GUIDE.finalNote}</p>
+              </div>
+            </div>
+          </section>
         ) : null}
         {chatCommunityTab === 'haberler' ? (
           <section className="chat-side-panel chat-news-panel" aria-label="Oyun haberleri">

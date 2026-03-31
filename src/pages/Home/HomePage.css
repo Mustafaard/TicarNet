@@ -25476,7 +25476,7 @@ select {
 
 .chat-community-tabs {
   display: grid !important;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 6px;
   margin: 0 0 8px;
   padding: 4px;
@@ -25570,6 +25570,43 @@ select {
   box-shadow: none !important;
   padding: 2px 0 0;
   gap: 0;
+}
+
+.chat-rules-panel {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 2px 0 0;
+  gap: 0;
+}
+
+.chat-rules-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 8px;
+}
+
+.chat-rules-scroll .rules-intro-icon {
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 2px;
+}
+
+.chat-rules-scroll .rules-intro-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #f4f8ff;
+  text-align: center;
+  margin: 0;
+}
+
+.chat-rules-scroll .rules-group-card {
+  padding: 10px;
+}
+
+.chat-rules-scroll .rules-final-card {
+  padding: 10px;
 }
 
 .chat-side-panel-head {
@@ -29822,7 +29859,7 @@ select {
 }
 
 .home-page .chat-community-tabs {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 7px;
 }
 
