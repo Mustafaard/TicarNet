@@ -12,12 +12,14 @@ function getConnectionMessage(progress) {
   return 'Başlangıç tamamlandı'
 }
 
-function SplashPage({ onComplete }) {
-  const [progress, setProgress] = useState(0)
+function SplashPage({ onComplete, initialProgress = 0 }) {
+  const [progress, setProgress] = useState(initialProgress)
   const [logoLoadError, setLogoLoadError] = useState(false)
   const connectionMessage = getConnectionMessage(progress)
 
   useEffect(() => {
+    if (initialProgress >= 100) return
+
     let cancelled = false
     let frameId = 0
     let completed = false
@@ -48,7 +50,7 @@ function SplashPage({ onComplete }) {
       cancelled = true
       if (frameId) cancelAnimationFrame(frameId)
     }
-  }, [onComplete])
+  }, [onComplete, initialProgress])
 
   return (
     <main className="splash-page">

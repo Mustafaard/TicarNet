@@ -295,7 +295,20 @@ ensure_nginx_html_no_cache() {
     perl -0777 -i -pe '
       unless (/location = \/index\.html/s) {
         s@\n  location / \{\n@
-  location = /index.html {\n
+  # Hashed Vite bundles: cache 1 year immutable
+  location ~* ^/assets/.*\.(js|css|woff2?|ttf|otf|eot)$ {
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    try_files \$uri =404;
+  }
+
+  # Static images and icons: cache 7 days
+  location ~* \.(webp|png|jpg|jpeg|gif|ico|svg)$ {
+    add_header Cache-Control "public, max-age=604800" always;
+    try_files \$uri =404;
+  }
+
+  # HTML: never cache
+  location = /index.html {
     add_header Cache-Control "no-store, no-cache, must-revalidate" always;\n
     add_header Pragma "no-cache" always;\n
     add_header Expires "0" always;\n
@@ -310,9 +323,6 @@ ensure_nginx_html_no_cache() {
   }\n
 \n
   location / {\n
-    add_header Cache-Control "no-store, no-cache, must-revalidate" always;\n
-    add_header Pragma "no-cache" always;\n
-    add_header Expires "0" always;\n
 @s;
       }
     ' "$conf"

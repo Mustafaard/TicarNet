@@ -1,5 +1,16 @@
 {
   "appId": "com.ticarnet.app",
   "appName": "TicarNet Online",
-  "webDir": "dist"
+  "webDir": "dist",
+  "backgroundColor": "#060912",
+  "android": {
+    "backgroundColor": "#060912",
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "backgroundColor": "#060912"
+    }
+  }
 }

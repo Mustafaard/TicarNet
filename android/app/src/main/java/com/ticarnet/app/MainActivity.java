@@ -10,30 +10,24 @@ public class MainActivity extends BridgeActivity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-    enforceFreshWebContent();
+    applyWebViewSettings();
   }
 
-  @Override
-  public void onResume() {
-    super.onResume();
-    enforceFreshWebContent();
-  }
-
-  private void enforceFreshWebContent() {
+  private void applyWebViewSettings() {
     if (getBridge() == null) return;
 
     WebView webView = getBridge().getWebView();
     if (webView == null) return;
 
     try {
-      webView.clearCache(true);
-      webView.clearHistory();
       WebSettings settings = webView.getSettings();
       if (settings != null) {
-        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        // LOAD_DEFAULT: use HTTP cache headers properly.
+        // Static assets (JS/CSS/images) are cached; API fetch() calls bypass this.
+        settings.setCacheMode(WebSettings.LOAD_DEFAULT);
       }
     } catch (Throwable ignored) {
-      // WebView cache ayari best-effort calisir; hata olursa uygulama akisini bozma.
+      // best-effort
     }
   }
 }

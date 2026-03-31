@@ -22,7 +22,7 @@ const APP_PAGE = {
 let heavyScreensPrewarmed = false
 
 function PageLoader() {
-  return <SplashPage onComplete={() => {}} />
+  return <SplashPage onComplete={() => {}} initialProgress={100} />
 }
 
 function canPrewarmHeavyScreens() {

@@ -165,7 +165,6 @@ const MESSAGE_ICONS = {
 const CHAT_COMMUNITY_TAB_ITEMS = [
   { id: 'sohbet', label: 'Sohbet', icon: '💬', iconSrc: '/home/icons/sohbet.png', type: 'panel' },
   { id: 'haberler', label: 'Haberler', icon: '📰', iconSrc: '/home/icons/messages/bildirim.webp', type: 'panel' },
-  { id: 'kurallar', label: 'Kurallar', icon: '📜', iconSrc: '/home/icons/custom/kurallarim.webp', type: 'panel' },
 ]
 const CHAT_NEWS_MAX_ITEMS = 70
 const MARKETPLACE_SYSTEM_STOCK_CAP = 5000
@@ -3123,6 +3122,7 @@ function HomePage({ user, onLogout }) {
   const logoutTriggeredRef = useRef(false)
   const missionSlotRefreshInFlightRef = useRef(false)
   const dailyLoginResetSyncKeyRef = useRef('')
+  const overviewLoadInFlightRef = useRef(false)
   const bankLoadInFlightRef = useRef(false)
   const bankLastLoadedAtRef = useRef(0)
   const bankStateRef = useRef(null)
@@ -3542,22 +3542,28 @@ function HomePage({ user, onLogout }) {
   }, [tab, mines?.mines?.length])
 
   const loadOverview = useCallback(async () => {
-    const response = await getGameOverview()
-    if (!response?.success) return fail(response, 'Ana sayfa verileri alınamadı.')
-    const oldLv = overviewLevelRef.current
-    const newLv = response?.profile?.levelInfo?.level || 0
-    if (newLv > oldLv) {
-      setLevelFx(true)
-      clearTimeout(fxTimer.current)
-      fxTimer.current = window.setTimeout(() => setLevelFx(false), 520)
+    if (overviewLoadInFlightRef.current) return
+    overviewLoadInFlightRef.current = true
+    try {
+      const response = await getGameOverview()
+      if (!response?.success) return fail(response, 'Ana sayfa verileri alınamadı.')
+      const oldLv = overviewLevelRef.current
+      const newLv = response?.profile?.levelInfo?.level || 0
+      if (newLv > oldLv) {
+        setLevelFx(true)
+        clearTimeout(fxTimer.current)
+        fxTimer.current = window.setTimeout(() => setLevelFx(false), 520)
+      }
+      overviewLevelRef.current = newLv
+      setOverview(response)
+      setMessageCenter((prev) => ({
+        ...prev,
+        moderation: normalizeUserModeration(response?.profile?.moderation),
+      }))
+      return true
+    } finally {
+      overviewLoadInFlightRef.current = false
     }
-    overviewLevelRef.current = newLv
-    setOverview(response)
-    setMessageCenter((prev) => ({
-      ...prev,
-      moderation: normalizeUserModeration(response?.profile?.moderation),
-    }))
-    return true
   }, [fail])
 
   const loadMarket = useCallback(async () => {
@@ -4638,7 +4644,7 @@ function HomePage({ user, onLogout }) {
       if (tab === 'profile' && profileTab === 'leaderboard') {
         void _loadLeague()
       }
-    }, 9000)
+    }, 15000)
     return () => window.clearInterval(intervalId)
   }, [_loadLeague, profileTab, tab, triggerLiveStateRefresh])
 
@@ -11877,10 +11883,14 @@ function HomePage({ user, onLogout }) {
     const busyUpgradeKey = `factory-upgrade:${factory.id}`
     const busySpeedupKey = `factory-speedup:${factory.id}`
     const canSpeedupNow = factory.isUpgrading && premiumDiamond >= factory.speedupDiamondCost
+    const _collectBase = factory.outputPerCollect || 0
+    const _collectWith2x = premiumBoostActive && _collectBase > 0 ? _collectBase * premiumMultiplier : 0
     const collectButtonLabel = busy === busyCollectKey
       ? 'Tahsilat...'
       : factory.canCollectNow
-        ? 'Tahsilat Yap'
+        ? premiumBoostActive && _collectWith2x > 0
+          ? `+${fmt(_collectWith2x)} (2x)`
+          : `+${fmt(_collectBase)} ${factory.outputMeta?.label || ''}`
         : factory.collectRemainingMs > 0
           ? `Kalan ${formatCollectionCountdown(factory.collectRemainingMs)}`
           : factory.collectEnergyMissing > 0
@@ -12646,15 +12656,15 @@ function HomePage({ user, onLogout }) {
                 <h4>Yükseltme tamamlandığında</h4>
                 <p className="fleet-summary-line positive">
                   <img src={factoryUpgradeModal.outputMeta?.icon} alt="" aria-hidden="true" />
-                  Üretim: {fmt(factoryUpgradeModal.outputPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeOutputPerCollect || 0)} {factoryUpgradeModal.outputMeta?.label} / tahsilat
+                  Üretim: {fmt(factoryUpgradeModal.outputPerCollect || 0)} → {factoryUpgradeModal.nextUpgradeOutputPerCollect > 0 ? `${fmt(factoryUpgradeModal.nextUpgradeOutputPerCollect)} ${factoryUpgradeModal.outputMeta?.label}` : '—'} / tahsilat
                 </p>
                 <p className="fleet-summary-line negative">
                   <img src={factoryUpgradeModal.energyMeta?.icon} alt="" aria-hidden="true" />
-                  Enerji gideri: {fmt(factoryUpgradeModal.energyCostPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeEnergyCostPerCollect || 0)} {factoryUpgradeModal.energyMeta?.label} / tahsilat
+                  Enerji gideri: {fmt(factoryUpgradeModal.energyCostPerCollect || 0)} → {factoryUpgradeModal.nextUpgradeEnergyCostPerCollect > 0 ? `${fmt(factoryUpgradeModal.nextUpgradeEnergyCostPerCollect)} ${factoryUpgradeModal.energyMeta?.label}` : '—'} / tahsilat
                 </p>
                 <p className="fleet-summary-line positive">
                   <img src="/home/ui/hud/xp-icon.webp" alt="" aria-hidden="true" />
-                  XP: {fmt(factoryUpgradeModal.xpPerCollect || 0)} → {fmt(factoryUpgradeModal.nextUpgradeXpPerCollect || 0)} XP / tahsilat
+                  XP: {fmt(factoryUpgradeModal.xpPerCollect || 0)} → {factoryUpgradeModal.nextUpgradeXpPerCollect > 0 ? `${fmt(factoryUpgradeModal.nextUpgradeXpPerCollect)} XP` : '—'} / tahsilat
                 </p>
               </div>
               <div className="factory-upgrade-modal-costs">
@@ -15508,11 +15518,7 @@ function HomePage({ user, onLogout }) {
     }
   }, [chatNewsExpandedId, chatNewsFeed])
 
-  const chatCommunityTitle = chatCommunityTab === 'haberler'
-    ? 'Haberler'
-    : chatCommunityTab === 'kurallar'
-      ? 'Kurallar'
-      : 'Sohbet'
+  const chatCommunityTitle = chatCommunityTab === 'haberler' ? 'Haberler' : 'Sohbet'
   const isSohbetCommunityTab = chatCommunityTab === 'sohbet'
 
   const chatView = (
@@ -15832,41 +15838,6 @@ function HomePage({ user, onLogout }) {
                   )
                 })
               )}
-            </div>
-          </section>
-        ) : null}
-        {chatCommunityTab === 'kurallar' ? (
-          <section className="chat-side-panel chat-rules-panel" aria-label="Kurallar özeti">
-            <div className="chat-side-panel-head">
-              <h4 className="chat-side-panel-title">Kurallar</h4>
-              <p className="chat-side-panel-sub">
-                Şehir ekranındaki kurallar menüsünün özet sürümü.
-              </p>
-            </div>
-            <div className="chat-rules-list">
-              {(CITY_RULES_GUIDE.groups || []).map((group) => (
-                <article key={group.id} className="chat-rules-group">
-                  <header className="chat-rules-group-head">
-                    <span className="chat-rules-group-icon" aria-hidden>{group.icon || '📌'}</span>
-                    <div>
-                      <strong className="chat-rules-group-title">{group.title}</strong>
-                      <p className="chat-rules-group-sub">{group.description}</p>
-                    </div>
-                  </header>
-                  <div className="chat-rules-items">
-                    {(group.rules || []).slice(0, 3).map((rule, index) => (
-                      <p key={`${group.id}:${index}`} className="chat-rules-item">
-                        {rule.text}
-                        <span className="chat-rules-penalty">{rule.penalty}</span>
-                        {rule.note ? <span className="chat-rules-note">{rule.note}</span> : null}
-                      </p>
-                    ))}
-                  </div>
-                </article>
-              ))}
-              <article className="chat-rules-group chat-rules-group-final">
-                <p className="chat-rules-final-text">{CITY_RULES_GUIDE.finalNote}</p>
-              </article>
             </div>
           </section>
         ) : null}

@@ -25476,7 +25476,7 @@ select {
 
 .chat-community-tabs {
   display: grid !important;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 6px;
   margin: 0 0 8px;
   padding: 4px;
@@ -26143,6 +26143,18 @@ select {
   border: 1px solid rgba(112, 176, 247, 0.38);
   border-radius: 11px;
   background: rgba(8, 30, 56, 0.72);
+  height: 40px;
+  min-height: 0 !important;
+  padding: 6px 12px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.chat-send-btn-clean {
+  height: 40px;
+  min-height: 0 !important;
+  padding: 0 14px;
+  line-height: 40px;
 }
 
 .chat-send-btn-clean {
@@ -28732,7 +28744,6 @@ select {
 .warehouse-modal.fleet-modal.fleet-upgrade-modal,
 .warehouse-modal.fleet-modal.fleet-setup-modal,
 .warehouse-modal.fleet-modal.fleet-accountant-modal,
-.warehouse-modal.fleet-modal.factory-upgrade-modal,
 .warehouse-modal.fleet-modal.factory-collect-modal,
 .factory-purchase-overlay .factory-purchase-modal {
   width: min(340px, calc(100vw - 24px)) !important;
@@ -28743,6 +28754,17 @@ select {
   border-radius: 14px !important;
   padding: 10px !important;
   overflow: auto;
+}
+
+.warehouse-modal.fleet-modal.factory-upgrade-modal {
+  width: min(360px, calc(100vw - 24px)) !important;
+  max-width: min(360px, calc(100vw - 24px)) !important;
+  max-height: min(95dvh, 800px);
+  margin-inline: auto !important;
+  place-self: center;
+  border-radius: 14px !important;
+  padding: 12px !important;
+  overflow: hidden;
 }
 
 .fleet-upgrade-modal > h3,
@@ -29800,7 +29822,7 @@ select {
 }
 
 .home-page .chat-community-tabs {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 7px;
 }
 
