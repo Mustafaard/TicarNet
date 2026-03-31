@@ -15524,7 +15524,7 @@ function HomePage({ user, onLogout }) {
 
   const chatView = (
     <section className="panel-stack chat-screen chat-screen-pro">
-      <article className={`card chat-card chat-card-pro chat-card-clean chat-community-surface ${isSohbetCommunityTab ? 'is-sohbet' : ''}`.trim()}>
+      <article className={`card chat-card chat-card-pro chat-card-clean chat-community-surface ${isSohbetCommunityTab ? 'is-sohbet' : 'is-content-tab'}`.trim()}>
         <header className="chat-community-topbar">
           <button
             type="button"

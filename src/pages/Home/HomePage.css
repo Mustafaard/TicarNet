@@ -26218,7 +26218,49 @@ select {
   box-shadow: none;
 }
 
-.chat-community-surface.is-sohbet .chat-send-form-clean.is-sohbet {
+/* Haberler and Kurallar tabs: full-screen, no card chrome */
+.home-page.chat-tab-active .chat-screen-pro .chat-card.chat-card-pro.chat-card-clean.chat-community-surface.is-content-tab {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0 !important;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.chat-community-surface.is-content-tab .chat-community-topbar {
+  padding: 8px 12px 6px;
+}
+
+.chat-community-surface.is-content-tab .chat-community-tabs {
+  margin: 0 10px 8px;
+}
+
+.chat-community-surface.is-content-tab .chat-side-panel {
+  flex: 1 !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  border-radius: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.chat-community-surface.is-content-tab .chat-news-panel,
+.chat-community-surface.is-content-tab .chat-rules-panel {
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.chat-community-surface.is-content-tab .chat-rules-scroll {
+  padding: 0 10px calc(12px + env(safe-area-inset-bottom, 0px));
+}
+
+.chat-send-form-clean.is-sohbet {
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -29874,6 +29916,15 @@ select {
   max-width: min(338px, calc(100vw - 16px)) !important;
   max-height: min(calc(100dvh - 16px - env(safe-area-inset-top) - env(safe-area-inset-bottom)), 640px) !important;
   overflow-y: auto;
+}
+
+/* Full-screen override for haberler/kurallar tabs inside community surface */
+.chat-community-surface.is-content-tab .chat-side-panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: none !important;
+  flex: 1 !important;
+  min-height: 0 !important;
 }
 
 .settings-screen-card {
